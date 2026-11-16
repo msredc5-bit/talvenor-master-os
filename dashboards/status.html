@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Talvenor Master OS — Status (Phase 4)</title>
+<style>
+  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: #FFFBF5; color: #0B1D33; margin: 0; padding: 24px; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  h1 { color: #EA580C; margin-bottom: 4px; }
+  .sub { color: #555; margin-top: 0; }
+  .card { background: #fff; border: 1px solid #e5ddd2; border-radius: 12px; padding: 18px 20px; margin: 14px 0; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+  .built { background: #d1fae5; color: #065f46; }
+  .stub { background: #fef3c7; color: #92400e; }
+  .pending { background: #e0e7ff; color: #3730a3; }
+  .paused { background: #fee2e2; color: #991b1b; }
+  table { width: 100%; border-collapse: collapse; }
+  td, th { text-align: left; padding: 8px 6px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .gate-on { color: #065f46; font-weight: 700; }
+  .note { font-size: 13px; color: #666; }
+  footer { font-size: 13px; color: #888; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎬 Talvenor Master OS</h1>
+  <p class="sub">Status dashboard — Phase 4 (এই page scripts/sync_status.py দিয়ে বানানো — সংখ্যা আসল ফাইল থেকে আসে, হাতে লেখা নয়)</p>
+
+  <div class="card">
+    <h2>৩ ব্যবসা — শুধু এই ৩টাই (১৩৬ নয়)</h2>
+    <table>
+      <tr><th>ব্যবসা</th><th>অবস্থা</th><th>সত্য কথা</th></tr>
+      <tr><td><strong>1. Agency</strong> — Talvenor AI Receptionist</td><td><span class="badge built">MAIN · Phase 1 REAL</span></td><td>প্রথম মেইল 162, paying client 0 · Chief সত্যিই 15 worker ডাকে (mock brain, DRAFT ONLY) · Email PAUSED</td></tr>
+      <tr><td><strong>2. Digital Product</strong> — Vet No-Show Recovery Kit ($49)</td><td><span class="badge built">Phase 2 REAL*</span></td><td><strong>Gate 0 NOT PASSED</strong> — Lemon Squeezy test Boss-এর step, হয়নি · Kit blueprint আছে (kit নিজে নয়) · PA list 39 / 100 (যাচাই করা) · Sale 0 · *Gate 0-তে আটকে</td></tr>
+      <tr><td><strong>3. Content Engine</strong> — Creator OS / ToolPilot</td><td><span class="badge built">Phase 3 REAL</span></td><td>Chief সত্যিই 6 worker ডাকে (mock brain, DRAFT ONLY) · 13 stage: REAL 0 / MOCK 10 / BLOCKED 3 · Upload OFF · VOICE.md DRAFT · GPU নাম বাকি · ToolPilot video 0 (subs 0)</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Phase</h2>
+    <table>
+      <tr><td><strong>Phase 0</strong> — folder + CEO Core + approval gateway + dashboard</td><td><span class="badge built">BUILT</span></td></tr>
+      <tr><td><strong>Phase 1</strong> — Agency department (boss-ceo worker জোড়া, draft-only, gate ধরে)</td><td><span class="badge built">BUILT</span></td></tr>
+      <tr><td><strong>Phase 2</strong> — Digital Product (Chief REAL, kit blueprint, PA list 39/100 — launch/sale Gate 0-তে আটকে)</td><td><span class="badge built">BUILT</span></td></tr>
+      <tr><td><strong>Phase 3</strong> — Creator OS department (Chief REAL, 6 worker wired, 13 stage REAL 0 / MOCK 10 / BLOCKED 3, upload OFF)</td><td><span class="badge built">BUILT</span></td></tr>
+      <tr><td><strong>Phase 4</strong> — n8n wiring (Gmail, Vapi, Sheets — workflows READY, NOT LIVE)</td><td><span class="badge built">BUILT</span></td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>n8n Wiring — বাইরের দুনিয়ার সাথে সংযোগ</h2>
+    <table>
+      <tr><th>Workflow</th><th>অবস্থা</th><th>সত্য কথা</th></tr>
+      <tr><td><strong>Auto-send</strong> — Talvenor Tier 2 — Daily auto-send 18:00 Dhaka (8 nodes)</td><td><span class="badge pending">READY · NOT LIVE</span></td><td>Schedule 18:00 Dhaka → Google Sheet Queue → Gmail send → Sheet-এ sent লেখা · Import + Gmail/Sheets connect + 1-mail test Boss-এর step · Email PAUSED থাকায় চালানো যাবে না</td></tr>
+      <tr><td><strong>Callback</strong> — Talvenor Callback - Website form to Vapi (3 nodes)</td><td><span class="badge pending">READY · NOT LIVE</span></td><td>Website form → n8n webhook → Vapi POST /call → Sophia callback · Twilio number (~$1.15/mo) import + workflow import + Vapi credential + webhook URL Boss-এর step</td></tr>
+    </table>
+    <p class="note">Host: Muse runtime + 10-min bridge cron ($0) — ২৪/৭ always-on server নেই, ওটা পরে টাকা দিয়ে করতে হবে। কোনো workflow-ই LIVE নয় — LIVE দাবি করা হয় না। দুই send system একসাথে চলবে না (double mail যাবে)।</p>
+  </div>
+
+  <div class="card">
+    <h2>Gate ও সীমা</h2>
+    <p>Gates: <span class="gate-on">ON</span> — send / publish / spend / delete, কোনোটাই Boss-এর gate word ছাড়া হয় না। Auto-approve নেই।</p>
+    <p>Spend cap: <strong>$0</strong></p>
+    <p>Email: <span class="badge paused">PAUSED</span> 2026-11-14 থেকে — SPF/DMARC DNS fix Boss-এর হাতে বাকি।</p>
+    <p>Paying clients: <strong>0</strong> · Kit sales: <strong>0</strong> (Gate 0 NOT PASSED) · ToolPilot videos: <strong>0</strong> · Upload: <span class="badge paused">OFF</span> (stage 9, Boss-এর "upload it" + credential লাগে)</p>
+    <p>Gate 0: <span class="badge paused">NOT PASSED</span> — Lemon Squeezy signup test (~15 min) Boss-এর step। পাস হলে PA list 100-এ পূর্ণ হবে, তারপর kit বানানো।</p>
+    <p>Store: tasks 0 · approvals pending 0 / approved 0</p>
+  </div>
+
+  <div class="card">
+    <h2>REAL vs STUB vs REUSED</h2>
+    <table>
+      <tr><td><strong>REAL</strong></td><td>Approval gateway (approve/reject সত্যিই record করে), Main CEO Bot router, config.json, এই dashboard (sync দিয়ে বানানো), <strong>Agency Chief of Staff (15 worker routing, draft-only, gated কাজ PENDING-এ আটকায়)</strong>, <strong>Products Chief of Staff (kit blueprint, PA list 39/100, launch/sale Gate 0-তে আটকায়)</strong>, <strong>Content Chief of Staff (6 Creator OS worker routing, draft-only, upload OFF-এ আটকায়, video file বানায় না)</strong></td></tr>
+      <tr><td><strong>READY (NOT LIVE)</strong></td><td>n8n auto-send workflow + callback workflow — import file তৈরি, Boss-এর import + connect + test বাকি, কোনোটাই LIVE নয়</td></tr>
+      <tr><td><strong>STUB</strong></td><td>Jarvis voice (mic যুক্ত নয়)</td></tr>
+      <tr><td><strong>REUSED</strong></td><td>boss-ceo engine (15 worker), talvenor-office, creator-os-combined, jarvis-ceo-os-concept — duplicate করা হয়নি</td></tr>
+    </table>
+    <p class="note">Gemini-র map-এর ৪ ভুল এখানে ঠিক করা হয়েছে: (1) Jarvis ≠ Main CEO Bot, আলাদা; (2) approval/gate layer আছে; (3) store/Vault আছে; (4) digital product = Vet Kit $49, generic "Notion Kits" নয়।</p>
+  </div>
+
+  <div class="card">
+    <h2>যোগাযোগ (আসল)</h2>
+    <p>Booking: https://calendar.app.google/WLoxBfnLGTdjK3LB8 (15 min, New York Time)<br>
+    ফোন: +1 (947) 223-0244<br>
+    ইমেইল: hello@talvenorai.agency (outreach) · contact@talvenorai.agency (main)</p>
+  </div>
+
+  <footer>Built: 2026-11-16 (Phase 0 + Phase 1 Agency + Phase 2 Digital Product* + Phase 3 Creator OS + Phase 4 n8n wiring) · Folder: ~/workspace/talvenor-master-os/ · Version 0.5.0 · *Phase 2 Gate 0-তে আটকে — kit blueprint + PA list 39/100 শুধু। Content: 13 stage REAL 0 / MOCK 10 / BLOCKED 3, upload OFF। n8n workflows READY, NOT LIVE। কোনো সংখ্যা বানানো নয় — সব আসল ফাইল থেকে sync করা।</footer>
+</div>
+</body>
+</html>

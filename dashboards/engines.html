@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Talvenor Master OS — Engines (Phase 5)</title>
+<style>
+body { font-family: system-ui, sans-serif; background: #FFFBF5; color: #1a1a1a; margin: 0; padding: 24px; }
+h1 { color: #0B1D33; } h2 { color: #0B1D33; margin-top: 32px; }
+table { border-collapse: collapse; width: 100%; background: #fff; }
+th, td { border: 1px solid #ddd; padding: 10px; text-align: left; vertical-align: top; }
+th { background: #0B1D33; color: #fff; }
+.note { background: #FFF3CD; border: 1px solid #E6A817; padding: 12px; }
+code { background: #eee; padding: 2px 5px; }
+footer { margin-top: 32px; color: #666; font-size: 13px; }
+</style>
+</head>
+<body>
+<h1>⚙️ Talvenor Master OS — Three Engines (Phase 5)</h1>
+<p>Boss → Jarvis (voice) → Main CEO Bot (second brain) → ৩ Engine / Office System।
+প্রতিটা engine-র নিজের Staff, নিজের Tool Calling System, নিজের Skills।</p>
+<p>এই page <code>scripts/sync_engines.py</code> দিয়ে আসল engine file থেকে বানানো —
+হাতে সংখ্যা বদলালে sync-এ ফিরে যাবে।</p>
+
+<h2>Engine-গুলো</h2>
+<table>
+<tr><th>Engine</th><th>Staff</th><th>Tools</th><th>Mock</th><th>Gated</th><th>Skills</th><th>Gated tool (কখনো execute হয় না)</th></tr>
+<tr><td><b>Agency Office</b><br><small>Talvenor AI Receptionist Agency</small></td><td>15</td><td>8</td><td>5</td><td>3</td><td>15</td><td><small>send_email, publish_post, spend</small></td></tr>
+<tr><td><b>Digital Product Business Office</b><br><small>Vet No-Show Recovery Kit — $49 one-time</small></td><td>5</td><td>8</td><td>6</td><td>2</td><td>5</td><td><small>launch_kit, sell_kit</small></td></tr>
+<tr><td><b>Creator OS / Content Machine and Engine</b><br><small>Creator OS — ToolPilot @ToolPilotai69</small></td><td>8</td><td>8</td><td>5</td><td>3</td><td>8</td><td><small>publish_post, upload_video, spend</small></td></tr>
+</table>
+
+<h2>সত্য অবস্থা (আসল file থেকে)</h2>
+<ul>
+<li><b>Paying clients:</b> 0 &nbsp;|&nbsp; <b>প্রথম মেইল:</b> 162</li>
+<li><b>Email:</b> PAUSED since 2026-11-14 - SPF/DMARC DNS fix pending from Boss</li>
+<li><b>Vet Kit Gate 0:</b> NOT PASSED (2026-11-16)</li>
+<li><b>Creator OS 13 stage:</b> REAL 0 / MOCK 10 / STUB 0 / BLOCKED 3</li>
+<li><b>Shared core handlers:</b> draft_caption, draft_email, draft_only, draft_script, kit_outline_read, research_notes, status_read</li>
+</ul>
+
+<div class="note"><b>Gate (আইন):</b> <code>ok</code> / <code>post it</code> / <code>upload it</code> /
+<code>send</code> / <code>go</code> — Boss-এর exact word ছাড়া send / publish /
+spend / delete হবে না। Gated tool call করলে ApprovalGateway-এ PENDING লেখা হয়,
+কিছু execute হয় না। Spend cap <b>$0</b>। Jarvis voice STUB (mic যুক্ত নয়)।</div>
+
+<footer>Built 2026-11-16 (Phase 5) — folder <code>~/workspace/talvenor-master-os/</code> |
+Host: Muse runtime + bridge cron ($0) — ২৪/৭ server নেই।</footer>
+</body>
+</html>
