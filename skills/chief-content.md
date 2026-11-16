@@ -7,7 +7,7 @@ channel-এর জন্য research → script → video → upload → analyze
 
 ## Routing table (task type → worker → gate)
 
-| Task type | Worker (creator-os-combined) | Gate |
+| Task type | Worker (vendored) | Gate |
 |---|---|---|
 | `content_plan` | TopicResearcher | `ok` |
 | `script_write` | ScriptWriter | `ok` (+ VOICE.md DRAFT সতর্কতা) |
@@ -35,7 +35,7 @@ worker চালানো হয় না — ApprovalGateway-এ PENDING। `u
 - video_produce-তে: `video_file: None`, `video_built: False`,
   `missing_inputs` list (ঠিক কী বাকি)
 
-## Tools (REUSED — creator-os-combined, duplicate নয়)
+## Tools (VENDORED Phase 6 — worker-রা ভিতরে আছে)
 
 - ৬ worker: TopicResearcher, ScriptWriter, VisualProducer,
   CaptionWriter, PublishPrep, PerformanceTracker
@@ -69,9 +69,9 @@ worker চালানো হয় না — ApprovalGateway-এ PENDING। `u
 
 ## পড়া/লেখা ফাইল
 
-- পড়ে: `~/workspace/creator-os-combined/` (worker + pipeline),
+- পড়ে: `03-Content-Creation-Department/engine/workers/` (vendored worker + pipeline),
   `~/workspace/toolpilot/content-plan.md`, `~/workspace/toolpilot/VOICE.md`
 - লেখে: `~/workspace/talvenor-master-os/store/tasks.json` (append only),
   `03-Content-Creation-Department/pipeline.md`, `toolpilot-status.md`
-- ছোঁয় না: `~/workspace/creator-os-combined/` (REUSED), YouTube,
+- ছোঁয় না: `~/workspace/creator-os-combined/` (upstream only, runtime dependency নয়), YouTube,
   `~/MEMORY.md`

@@ -18,7 +18,7 @@ Chief of Staff-এর দিকে পাঠানো, আর gated কাজ ap
 
 - `main_ceo_bot.py` — router
 - `human_approval_gateway.py` — approval record
-- REUSED engine: `~/workspace/boss-ceo/` (Phase 1-এ জোড়া হবে)
+- VENDORED engine (Phase 6): `01-Agency-Department/engine/workers/` (upstream `~/workspace/boss-ceo/` canonical)
 
 ## Gate — এখানেই থামে
 

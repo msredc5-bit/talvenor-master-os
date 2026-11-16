@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Talvenor Master OS — Status (Phase 4)</title>
+<title>Talvenor Master OS — Status (Phase 6)</title>
 <style>
   body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: #FFFBF5; color: #0B1D33; margin: 0; padding: 24px; }
   .wrap { max-width: 860px; margin: 0 auto; }
@@ -25,7 +25,7 @@
 <body>
 <div class="wrap">
   <h1>🎬 Talvenor Master OS</h1>
-  <p class="sub">Status dashboard — Phase 4 (এই page scripts/sync_status.py দিয়ে বানানো — সংখ্যা আসল ফাইল থেকে আসে, হাতে লেখা নয়)</p>
+  <p class="sub">Status dashboard — Phase 6 (এই page scripts/sync_status.py দিয়ে বানানো — সংখ্যা আসল ফাইল থেকে আসে, হাতে লেখা নয়)</p>
 
   <div class="card">
     <h2>৩ ব্যবসা — শুধু এই ৩টাই (১৩৬ নয়)</h2>
@@ -41,7 +41,7 @@
     <h2>Phase</h2>
     <table>
       <tr><td><strong>Phase 0</strong> — folder + CEO Core + approval gateway + dashboard</td><td><span class="badge built">BUILT</span></td></tr>
-      <tr><td><strong>Phase 1</strong> — Agency department (boss-ceo worker জোড়া, draft-only, gate ধরে)</td><td><span class="badge built">BUILT</span></td></tr>
+      <tr><td><strong>Phase 1</strong> — Agency department (vendored worker, draft-only, gate ধরে)</td><td><span class="badge built">BUILT</span></td></tr>
       <tr><td><strong>Phase 2</strong> — Digital Product (Chief REAL, kit blueprint, PA list 39/100 — launch/sale Gate 0-তে আটকে)</td><td><span class="badge built">BUILT</span></td></tr>
       <tr><td><strong>Phase 3</strong> — Creator OS department (Chief REAL, 6 worker wired, 13 stage REAL 0 / MOCK 10 / BLOCKED 3, upload OFF)</td><td><span class="badge built">BUILT</span></td></tr>
       <tr><td><strong>Phase 4</strong> — n8n wiring (Gmail, Vapi, Sheets — workflows READY, NOT LIVE)</td><td><span class="badge built">BUILT</span></td></tr>
@@ -74,7 +74,7 @@
       <tr><td><strong>REAL</strong></td><td>Approval gateway (approve/reject সত্যিই record করে), Main CEO Bot router, config.json, এই dashboard (sync দিয়ে বানানো), <strong>Agency Chief of Staff (15 worker routing, draft-only, gated কাজ PENDING-এ আটকায়)</strong>, <strong>Products Chief of Staff (kit blueprint, PA list 39/100, launch/sale Gate 0-তে আটকায়)</strong>, <strong>Content Chief of Staff (6 Creator OS worker routing, draft-only, upload OFF-এ আটকায়, video file বানায় না)</strong></td></tr>
       <tr><td><strong>READY (NOT LIVE)</strong></td><td>n8n auto-send workflow + callback workflow — import file তৈরি, Boss-এর import + connect + test বাকি, কোনোটাই LIVE নয়</td></tr>
       <tr><td><strong>STUB</strong></td><td>Jarvis voice (mic যুক্ত নয়)</td></tr>
-      <tr><td><strong>REUSED</strong></td><td>boss-ceo engine (15 worker), talvenor-office, creator-os-combined, jarvis-ceo-os-concept — duplicate করা হয়নি</td></tr>
+      <tr><td><strong>VENDORED (Phase 6)</strong></td><td>boss-ceo engine (15 worker) + Creator OS (6 worker) — copy এখন repo-র ভিতরে; talvenor-office, jarvis-ceo-os-concept — reference only</td></tr>
     </table>
     <p class="note">Gemini-র map-এর ৪ ভুল এখানে ঠিক করা হয়েছে: (1) Jarvis ≠ Main CEO Bot, আলাদা; (2) approval/gate layer আছে; (3) store/Vault আছে; (4) digital product = Vet Kit $49, generic "Notion Kits" নয়।</p>
   </div>
@@ -86,7 +86,7 @@
     ইমেইল: hello@talvenorai.agency (outreach) · contact@talvenorai.agency (main)</p>
   </div>
 
-  <footer>Built: 2026-11-16 (Phase 0 + Phase 1 Agency + Phase 2 Digital Product* + Phase 3 Creator OS + Phase 4 n8n wiring) · Folder: ~/workspace/talvenor-master-os/ · Version 0.5.0 · *Phase 2 Gate 0-তে আটকে — kit blueprint + PA list 39/100 শুধু। Content: 13 stage REAL 0 / MOCK 10 / BLOCKED 3, upload OFF। n8n workflows READY, NOT LIVE। কোনো সংখ্যা বানানো নয় — সব আসল ফাইল থেকে sync করা।</footer>
+  <footer>Built: 2026-11-16 (Phase 0 + Phase 1 Agency + Phase 2 Digital Product* + Phase 3 Creator OS + Phase 4 n8n wiring) · Folder: ~/workspace/talvenor-master-os/ · Version 0.6.0 · *Phase 2 Gate 0-তে আটকে — kit blueprint + PA list 39/100 শুধু। Content: 13 stage REAL 0 / MOCK 10 / BLOCKED 3, upload OFF। n8n workflows READY, NOT LIVE। কোনো সংখ্যা বানানো নয় — সব আসল ফাইল থেকে sync করা।</footer>
 </div>
 </body>
 </html>

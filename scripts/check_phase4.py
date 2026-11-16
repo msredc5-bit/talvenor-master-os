@@ -6,7 +6,7 @@
      বাকি step + email-pause gate + দুই system একসাথে না-চলার নিয়ম +
      $0 host-এর সত্য কথা (Muse runtime + bridge cron, ২৪/৭ server নেই)
   2. sync_status.py import হয় + collect_status() আসল মান দেয়
-     (phase 4, clients 0, first mails 162, email PAUSED, Gate 0
+     (phase >= 4, clients 0, first mails 162, email PAUSED, Gate 0
      NOT PASSED, PA list 39, pipeline REAL 0 / MOCK 10 / BLOCKED 3,
      subs 0, ২ workflow-ই NOT LIVE, store খালি)
   3. sync deterministic — ২ বার চালালে byte-সমান HTML; HTML-এর
@@ -15,7 +15,9 @@
      HTML-এ LIVE badge নেই, wiring doc-এ ২টাতেই NOT LIVE
   5. Jarvis এখনো STUB (NotImplementedError + STUB_NOTICE; HTML-এ STUB)
   6. Dashboard-এ Phase 4 BUILT + n8n READY + host Muse runtime আছে
-  7. config.json phase 4 + version 0.5.0 + gates ON + $0 cap
+  7. config.json phase >= 4 + version >= 0.5.0 + gates ON + $0 cap
+     (Phase 6 bumped phase to 6 / v0.6.0 — the check follows the
+     check_phase2/3 precedent of >= instead of pinning the old phase)
   8. আসল store/tasks.json + approvals.json এখনো খালি (0 record)
   9. check_phase0 + check_phase1 + check_phase2 + check_phase3 এখনো PASS
 
@@ -74,7 +76,7 @@ def main():
         import sync_status  # noqa: PLC0415
 
         s = sync_status.collect_status()
-        ok = (s["phase"] == 4 and s["paying_clients"] == 0
+        ok = (s["phase"] >= 4 and s["paying_clients"] == 0
               and s["first_mails"] == 162 and s["email"] == "PAUSED"
               and s["gate0"] == "NOT PASSED" and s["pa_list"] == 39
               and s["pipeline"] == {"real": 0, "mock": 10, "stub": 0, "blocked": 3}
@@ -87,7 +89,7 @@ def main():
               and s["approvals_pending"] == 0
               and s["approvals_approved"] == 0
               and s["spend_cap_usd"] == 0)
-        check("sync collect_status: real values (phase 4, 0 clients, 162 mails, "
+        check("sync collect_status: real values (phase >= 4, 0 clients, 162 mails, "
               "Gate 0 NOT PASSED, PA 39, pipeline 0/10/3, NOT LIVE x2)", ok,
               f"phase={s['phase']}, gate0={s['gate0']}, pa={s['pa_list']}")
     except Exception as e:  # noqa: BLE001
@@ -173,11 +175,11 @@ def main():
         with open(os.path.join(BASE, "00-CEO-Core", "config.json"),
                   encoding="utf-8") as f:
             cfg = json.load(f)
-        ok = (cfg.get("phase") == 4 and cfg.get("version") == "0.5.0"
+        ok = (cfg.get("phase", 0) >= 4 and cfg.get("version", "") >= "0.5.0"
               and cfg.get("spend_cap_usd") == 0
               and cfg.get("gates", {}).get("enabled") is True
               and "BUILT" in cfg["honest_status"]["phases"]["phase_4_n8n_wiring"])
-        check("config.json phase 4 + v0.5.0 + gates ON + $0 cap", ok)
+        check("config.json phase >= 4 + v>=0.5.0 + gates ON + $0 cap", ok)
     except Exception as e:  # noqa: BLE001
         check("config.json phase 4 + v0.5.0 + gates ON + $0 cap", False, str(e))
 

@@ -4,8 +4,7 @@
 (MAIN)। ACQ / DEL / MKT / OPS worker-দের কাজ ভাগ করে দেওয়া, ফলাফল
 জমা নেওয়া, gate-এর কাজ Boss-এর কাছে পাঠানো।
 
-**Status: REAL (Phase 1)** — `chief_of_staff_agency.py` সত্যিই boss-ceo
-engine-এর worker ডাকে (mock brain, $0)। ফলাফল শুধু DRAFT।
+**Status: REAL (Phase 1, vendored Phase 6)** — `chief_of_staff_agency.py` সত্যিই vendored engine-এর worker ডাকে (mock brain, $0)। ফলাফল শুধু DRAFT।
 
 ## Inputs (যা পড়ে)
 
@@ -21,7 +20,7 @@ engine-এর worker ডাকে (mock brain, $0)। ফলাফল শুধ�
 - Booking: https://calendar.app.google/WLoxBfnLGTdjK3LB8
 - ফোন: +1 (947) 223-0244 · Demo video (60-sec): https://facebook.com/reel/2947321012290705/
 
-## Routing table — task type → worker (আসল নাম, boss-ceo engine থেকে)
+## Routing table — task type → worker (আসল নাম, vendored engine থেকে)
 
 | Task type | Worker | Division | Gate |
 |---|---|---|---|
@@ -45,7 +44,7 @@ engine-এর worker ডাকে (mock brain, $0)। ফলাফল শুধ�
 
 ## Files (যা পড়ে / লেখে)
 
-- পড়ে: `00-CEO-Core/config.json`, `01-Agency-Department/pipeline.md`, boss-ceo engine (`~/workspace/boss-ceo/src/workers/`)
+- পড়ে: `00-CEO-Core/config.json`, `01-Agency-Department/pipeline.md`, vendored engine (`01-Agency-Department/engine/workers/src/workers/`)
 - লেখে: `store/tasks.json` — প্রতিটা routed task append হয় (অন্য department-এর entry মোছা হয় না)
 - লেখে: `store/approvals.json` — gated action-এর PENDING request (gateway দিয়ে)
 - লেখে না: কোনো মেইল, কোনো Sent folder, কোনো publish, কোনো খরচ

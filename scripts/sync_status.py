@@ -245,7 +245,7 @@ def render_html(s):
     <h2>Phase</h2>
     <table>
       <tr><td><strong>Phase 0</strong> — folder + CEO Core + approval gateway + dashboard</td><td>{phase_badge(ph["phase_0"])}</td></tr>
-      <tr><td><strong>Phase 1</strong> — Agency department (boss-ceo worker জোড়া, draft-only, gate ধরে)</td><td>{phase_badge(ph["phase_1_agency"])}</td></tr>
+      <tr><td><strong>Phase 1</strong> — Agency department (vendored worker, draft-only, gate ধরে)</td><td>{phase_badge(ph["phase_1_agency"])}</td></tr>
       <tr><td><strong>Phase 2</strong> — Digital Product (Chief REAL, kit blueprint, PA list {pa}/100 — launch/sale Gate 0-তে আটকে)</td><td>{phase_badge(ph["phase_2_digital_product"])}</td></tr>
       <tr><td><strong>Phase 3</strong> — Creator OS department (Chief REAL, 6 worker wired, 13 stage REAL {pipe["real"]} / MOCK {pipe["mock"]} / BLOCKED {pipe["blocked"]}, upload OFF)</td><td>{phase_badge(ph["phase_3_creator_os"])}</td></tr>
       <tr><td><strong>Phase 4</strong> — n8n wiring (Gmail, Vapi, Sheets — workflows READY, NOT LIVE)</td><td>{phase_badge(ph["phase_4_n8n_wiring"])}</td></tr>
@@ -278,7 +278,7 @@ def render_html(s):
       <tr><td><strong>REAL</strong></td><td>Approval gateway (approve/reject সত্যিই record করে), Main CEO Bot router, config.json, এই dashboard (sync দিয়ে বানানো), <strong>Agency Chief of Staff (15 worker routing, draft-only, gated কাজ PENDING-এ আটকায়)</strong>, <strong>Products Chief of Staff (kit blueprint, PA list {pa}/100, launch/sale Gate 0-তে আটকায়)</strong>, <strong>Content Chief of Staff (6 Creator OS worker routing, draft-only, upload OFF-এ আটকায়, video file বানায় না)</strong></td></tr>
       <tr><td><strong>READY (NOT LIVE)</strong></td><td>n8n auto-send workflow + callback workflow — import file তৈরি, Boss-এর import + connect + test বাকি, কোনোটাই LIVE নয়</td></tr>
       <tr><td><strong>STUB</strong></td><td>Jarvis voice (mic যুক্ত নয়)</td></tr>
-      <tr><td><strong>REUSED</strong></td><td>boss-ceo engine (15 worker), talvenor-office, creator-os-combined, jarvis-ceo-os-concept — duplicate করা হয়নি</td></tr>
+      <tr><td><strong>VENDORED (Phase 6)</strong></td><td>boss-ceo engine (15 worker) + Creator OS (6 worker) — copy এখন repo-র ভিতরে; talvenor-office, jarvis-ceo-os-concept — reference only</td></tr>
     </table>
     <p class="note">Gemini-র map-এর ৪ ভুল এখানে ঠিক করা হয়েছে: (1) Jarvis ≠ Main CEO Bot, আলাদা; (2) approval/gate layer আছে; (3) store/Vault আছে; (4) digital product = Vet Kit $49, generic "Notion Kits" নয়।</p>
   </div>
