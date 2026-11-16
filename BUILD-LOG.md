@@ -479,3 +479,58 @@ Runner smoke (TEMP store, check_phase7-এর ভেতরে): agency `client_i
 | Paying client / প্রথম মেইল / Email / Vet Kit sale / ToolPilot video | **0 / 162 / PAUSED / 0 / 0** |
 | Host | **Muse runtime + bridge cron ($0)** — ২৪/৭ server নেই |
 | GitHub push | **Phase 7 NOT PUSHED** (নতুন/বদলানো file local-এ; Boss-এর "push koro" আলাদা gate — remote head এখনো bf11423d, Phase 6) |
+
+## Voice loop — Jarvis-এর কান + মুখ (BUILT 2026-11-17, Boss: "দুটোই করো" — part 1 of 2; Antigravity guide আলাদা)
+
+Boss-এর নির্দেশ 2026-11-17: FREE OFFLINE Jarvis voice চাই (Piper TTS + Vosk STT) Master OS-এর ভিতরে, $0, local only। PC: Windows HP, Ryzen 3 5300U, 8 GB DDR4 (~1.4 GB free — RAM টাইট), Radeon integrated 496 MB VRAM (voice-এ GPU লাগে না — Piper/Vosk CPU-only)।
+
+### যা বানানো হলো
+- **`00-CEO-Core/voice/` (NEW, 4 file):** `speak.py` — Piper TTS, `speak(text, lang="bn"|"en")` → WAV লেখে, Windows-এ player থাকলে বাজায়, সবসময় WAV path ফেরত দেয়; piper-tts না থাকলে exact `pip install` command-সহ error, চুপচাপ নয়। `listen.py` — Vosk (en) + sherpa-onnx (bn), `listen(seconds=8, lang)` mic থেকে + `transcribe_file(wav)` headless; Piper-এর 22,050 Hz → 16,000 Hz resample stdlib-এ। `loop.py` — শোনা → BrainFactory mock reply → বলা; gated action word থাকলে ApprovalGateway-এ PENDING, কখনো execute নয়। `__init__.py` — VERIFIED ids + sources এক জায়গায়।
+- **`00-CEO-Core/jarvis_voice.py` (STUB → REAL):** একই 3 public function (`listen`/`speak`/`handle_voice_command`), এখন `voice/` package-কে delegate করে। Docstring: STUB → REAL (Piper+Vosk, offline, $0) + সৎ সীমা।
+- **`scripts/voice_test.py` (NEW):** headless self-test, mic/speaker ছাড়া — Piper import, upstream voices.json যাচাই, voice download (md5), en+bn synth, en Vosk transcribe, bn sherpa transcribe। Exit 0 = সব PASS।
+- **`scripts/check_voice.py` (NEW):** 14 check, `check_phase*.py`-র style (numbered, PASS/FAIL, "N/N PASS", exit code) — file আছে, import OK, stdlib-only top-level, piper/vosk/sherpa import probe, config voice block, secrets grep, gate test (TEMP approvals), voice_test result, real store untouched, check_phase0 এখনো PASS।
+- **`scripts/jarvis_voice_loop.py` (NEW):** Boss-এর PC-র entry — repo root থেকে `python scripts\jarvis_voice_loop.py` (`--lang bn|en`, `--seconds`, `--turns`, `--business`)।
+- **`00-CEO-Core/VOICE-SETUP.md` (NEW):** Windows setup guide, সহজ Bengali + copy-paste command (Python check, pip install, voice/model download, test + loop চালানো, সমস্যা হলে কী করবে, সৎ সীমা)।
+- **`00-CEO-Core/config.json`:** শুধু "voice" block যোগ (engines piper/vosk/sherpa-onnx, VERIFIED voice ids + model নাম + source + WER + notes)। brain mock, phase 7, v0.7.0 — কিছু বদলায়নি। JSON parse যাচাই করা।
+- **`.gitignore`:** `00-CEO-Core/voice/models/` + `00-CEO-Core/voice/output/` যোগ (model ~370 MB + WAV git-এ যায় না)।
+- **`README.md`:** folder tree + সৎ টেবিল-এ Jarvis voice STUB → REAL, নতুন "Jarvis voice" section, সত্য অবস্থা bullet।
+
+### VERIFIED ids (অনুমান নয় — upstream থেকে পড়া)
+- **Bengali বলা:** `bn_BD-google-medium` — Piper catalog-এর একমাত্র Bengali voice (bn_BD, 16 speaker, medium, 22,050 Hz, openSLR 37, CC-BY-SA-4.0)। Source: piper-tts package-এর নিজের `voices.json` (183 voice; bn 1টাই)। onnx 76,782,515 B, md5 যাচাই করা।
+- **English বলা:** `en_US-lessac-medium` (1 speaker, medium; Lessac licence — personal use OK, commercial-এর আগে licence দেখুন)।
+- **English শোনা:** `vosk-model-small-en-us-0.15` (40 MB, Apache-2.0) — official list https://alphacephei.com/vosk/models.html।
+- **Bengali শোনা:** `vosk-model-small-streaming-bn` (HF repo `alphacep/vosk-model-small-streaming-bn`, ~96 MB, Apache-2.0, WER self-reported: Common Voice 17.9, Fleurs 20.6, Banspeech 32.9)। **সত্য:** classic Vosk-এর official models.html list-এ কোনো Bengali model নেই; যেটা আছে সেটা Zipformer2 streaming model — `vosk.Model()` লোড করতে পারে না, sherpa-onnx-ই পথ।
+
+### Verification — আসল run (এই VM, 2026-11-17)
+- **Model download:** Piper bn+en (md5 OK) + Vosk en zip (41,205,931 B, unzip OK) + sherpa bn (encoder 90,994,145 B, decoder 2,093,080 B, joiner 1,026,462 B, tokens/bpe/vocab/decode.py)। HF LFS CDN এই VM থেকে timeout করে — resume-capable urllib downloader লেখা হয়েছে (`/tmp/download_voice_models.py`, Range resume + md5); মাঝে HTTP 416 ধরা পড়ে ঠিক করা হয়েছে (seed করা .part file আসলে complete ছিল — Content-Range থেকে total পড়ে rename)।
+- **voice_test.py: 7/7 PASS, exit 0** — en synth 71,724 B (22,050 Hz, 35,840 frames) → Vosk transcript "hello i am jarvis" (exact, 4/4 word মিল); bn synth 82,988 B (41,472 frames) → sherpa transcript "আমি জার্ফিস শুনছি" (Bengali অক্ষর আছে; "জার্ভিস"→"জার্ফিস" এক phoneme ভুল — WER 17-33%-এর মধ্যেই, pipeline কাজ করে)।
+- **check_voice.py: 13/14** — শুধু sounddevice FAIL: এই VM-এ PortAudio নেই (apt-এ candidate নেই) — VM-only সীমা; Windows wheel-এ PortAudio বান্ডেল থাকে, Boss-এর PC-তে mic চলে। Fake pass দেওয়া হয়নি।
+- **check_phase0 8/8, check_phase1 11/11, check_phase2 14/14, check_phase3 19/19, check_phase4 9/9, check_phase6 14/14, check_engines 45/45, check_phase7 18/18 — মোট 138/138 PASS, কোনো regression নেই।**
+- **Loop end-to-end (headless, mock brain):** `handle_voice_text('আমার আজকের কাজ কী?')` → MOCK-PLAN reply + Bengali WAV লেখা; `handle_voice_text('Day 4 batch send করো')` → gated_action `send`, approval PENDING, reply "Sent for approval — it will only move on Boss's word, not by voice" — কিছু execute হয়নি।
+- **Secrets grep:** নতুন file-গুলো clean (শুধু `pip install` command-লাইন আর check-এর নিজের pattern literal — credential নয়)।
+- **Store:** tasks 0, approvals 0, `tool_calls.json` নেই — আসল store ছোঁয়া হয়নি (একবার direct test-এ ভুলে 1 pending approval লেখা হয়েছিল — সাথে সাথে মুছে original state-এ ফেরানো হয়েছে; check re-run করে নিশ্চিত করা)।
+- **Git:** এই directory-তে `.git` নেই (`git status` → "not a git repository") — push করা হয়নি, করা যায়ও না এখান থেকে; push-এর পথ parent/Boss-কে ঠিক করতে হবে।
+
+### Verification-এ ধরা পড়ে ঠিক করা হয়েছে
+1. **sherpa OfflineRecognizer crash:** Zipformer2 model `OfflineRecognizer.from_transducer` দিয়ে লোড হয় না (encoder input int32/int64 চেক-এ C++ abort, process মরে, exit 255) — model-এর নিজের `decode.py`-র মতো `OnlineRecognizer` ব্যবহার করা হয়েছে (model_type="zipformer2", modified_beam_search, max_active_paths=10) — `_transcribe_sherpa_file` + `listen()` দুই জায়গায়।
+2. **check_phase0/4-এর STUB assertion stale:** jarvis_voice REAL হওয়ার পর check_phase0-র "loud STUB" (NotImplementedError চায়) আর check_phase4-র "Jarvis still STUB (mic not connected)" fail করত — দুই check-ই নতুন সত্যে আপডেট করা হয়েছে (REAL + একই 3 function + loop.py আছে)। এটা regression নয় — task-এরই নির্দেশ ছিল STUB → REAL।
+3. **check_phase6-র scope check false positive:** Piper voice `.onnx.json`-এ scope-সংখ্যাটা আছে (voice config value, scope নয়) — check এখন `models/` dir skip করে (upstream model data, repo doc নয়)।
+4. **check_voice secrets check false positive:** "secret" শব্দটা check file-এর নিজের pattern literal + docstring-এ ছিল — scanner file নিজে scan থেকে বাদ দেওয়া হয়েছে (অন্য সব নতুন file clean)।
+5. **check_voice STUB শব্দ check:** "STUB" শব্দটা jarvis_voice.py-র docstring-এ ইতিহাস হিসেবে থাকে ("আগে ছিল STUB") — check এখন `STUB_NOTICE`/`NotImplementedError` নেই + "REAL" আছে যাচাই করে।
+
+### সৎ হিসাব (voice — 2026-11-17)
+| জিনিস | অবস্থা |
+|---|---|
+| Piper TTS (bn + en) + Vosk (en) + sherpa-onnx (bn) | **REAL** — offline, $0; voice_test 7/7 PASS |
+| Jarvis voice loop (শোনা → brain → বলা) | **REAL** — mock brain, gated PENDING only |
+| Bengali voice-এর মান | **UNJUDGED** — কেউ শোনেনি; Boss-ই প্রথম শুনবেন (WAV: `voice/output/voice-test-bn.wav`) |
+| Bengali STT নির্ভুলতা | **UNKNOWN** — WER 17-33% (self-reported); Boss কথা বলে যাচাই করবে |
+| Live mic test | **NOT DONE** — এই VM-এ PortAudio নেই; প্রথম আসল mic test Boss-এর PC-তে |
+| Brain | **mock** — voice Jarvis-কে বুদ্ধিমান বানায় না; উত্তর MOCK-PLAN draft |
+| sounddevice (এই VM) | **FAIL** — PortAudio নেই; Windows-এ চলে (wheel-এ বান্ডেল) |
+| GitHub push | **NOT PUSHED** — এই directory-তে `.git` নেই; push parent-এর কাজ |
+| Dashboard `status.html` | **STALE** — এখনো "STUB / mic যুক্ত নয়" লেখা (line 79); dashboard refresh আলাদা কাজ — এই task-এ ছোঁয়া হয়নি |
+| Phase 7 table-এর STUB লাইন (উপরে) | **পুরনো** — voice এখন REAL (এই entry দেখুন) |
+
+## Dashboard sync fix (2026-11-17, parent follow-up to voice loop)
+- scripts/sync_status.py: added read_voice_status() — dashboard voice row now derived from 00-CEO-Core/jarvis_voice.py (REAL if Piper present + no NotImplementedError), no longer hardcoded STUB. Content Engine row: "GPU নাম বাকি" -> "GPU AMD Radeon integrated 496 MB VRAM (FramePack/WanGP চলবে না)" (answered 2026-11-17). scripts/check_phase4.py header comment updated to match. Re-verified: sync deterministic (2 runs identical), check_phase4 9/9 PASS, check_phase0 8/8 PASS. dashboards/status.html line 79 now reads REAL — Jarvis voice, Piper TTS + Vosk/sherpa STT, offline, $0.

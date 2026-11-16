@@ -130,17 +130,23 @@ def main():
     except Exception as e:  # noqa: BLE001
         check("main_ceo_bot routes non-gated task", False, str(e))
 
-    # 6. Jarvis is a STUB that says so loudly
+    # 6. Jarvis voice REAL (2026-11-17 voice loop — STUB ছিল, এখন
+    # Piper+Vosk/sherpa, offline, $0; একই 3 public function)
     try:
         import jarvis_voice  # noqa: PLC0415
 
-        try:
-            jarvis_voice.listen()
-            check("jarvis_voice is a loud STUB", False, "listen() did not raise")
-        except NotImplementedError:
-            check("jarvis_voice is a loud STUB", True)
+        with open(os.path.join(BASE, "00-CEO-Core", "jarvis_voice.py"),
+                  encoding="utf-8") as f:
+            jv_src = f.read()
+        no_stub = ("NotImplementedError" not in jv_src
+                   and "REAL" in jv_src)
+        fns_ok = all(callable(getattr(jarvis_voice, fn, None)) for fn in
+                     ("listen", "speak", "handle_voice_command"))
+        check("jarvis_voice is REAL (Piper+Vosk, offline)",
+              no_stub and fns_ok,
+              f"fns={fns_ok}, no-NotImplementedError={'NotImplementedError' not in jv_src}")
     except Exception as e:  # noqa: BLE001
-        check("jarvis_voice is a loud STUB", False, str(e))
+        check("jarvis_voice is REAL (Piper+Vosk, offline)", False, str(e))
 
     # 7. Dashboard exists + honest content
     try:

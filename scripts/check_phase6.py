@@ -318,7 +318,10 @@ def main():
         needles = ("136", "1189", "1,189")
         bad_lines = []
         for root, dirs, files in os.walk(BASE):
-            dirs[:] = [d for d in dirs if d not in ("__pycache__", ".git")]
+            # models/ বাদ: upstream voice/model data file (Piper
+            # .onnx.json-এ "136" সংখ্যা আছে — voice config value, scope নয়)
+            dirs[:] = [d for d in dirs
+                       if d not in ("__pycache__", ".git", "models")]
             for name in files:
                 if not name.endswith((".md", ".json", ".html", ".py")):
                     continue

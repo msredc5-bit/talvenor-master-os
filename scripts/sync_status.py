@@ -14,6 +14,8 @@ dashboards/status.html-এর সংখ্যাগুলো আসল ফাই
   - 02-Digital-Product-Department/pa-vet-list/pa-vet-clinics.csv — PA list row
   - 03-Content-Creation-Department/pipeline.md — ১৩ stage-এর গণনা লাইন
   - 03-Content-Creation-Department/toolpilot-status.md — Subscribers লাইন
+  - 00-CEO-Core/jarvis_voice.py — voice REAL না STUB (NotImplementedError
+    আছে কিনা + Piper আছে কিনা)
   - n8n workflow JSON (২টা, বাইরের folder) — "active" flag পড়ে
     (false = NOT LIVE, true = LIVE — যেটা সত্য সেটাই লেখা হয়)
 
@@ -106,6 +108,18 @@ def read_toolpilot_subs():
     return int(m.group(1)) if m else UNKNOWN
 
 
+def read_voice_status():
+    """jarvis_voice.py থেকে voice REAL না STUB — STUB হলে NotImplementedError থাকে।"""
+    text = _read_text(os.path.join(BASE, "00-CEO-Core", "jarvis_voice.py"))
+    if text is None:
+        return {"label": UNKNOWN, "detail": UNKNOWN}
+    if "NotImplementedError" not in text and "Piper" in text:
+        return {"label": "REAL",
+                "detail": "Jarvis voice — Piper TTS + Vosk/sherpa STT, offline, $0 "
+                          "(mic test Boss-এর PC-তে বাকি)"}
+    return {"label": "STUB", "detail": "Jarvis voice (mic যুক্ত নয়)"}
+
+
 def read_workflow_status(path):
     """n8n workflow JSON-এর active flag — false = NOT LIVE।"""
     data = _read_json(path)
@@ -165,6 +179,7 @@ def collect_status():
             "phase_6_brain_runner": phases.get("phase_6_brain_runner", UNKNOWN),
             "phase_7_sections": phases.get("phase_7_sections", UNKNOWN),
         },
+        "voice": read_voice_status(),
         "workflow_auto_send": read_workflow_status(AUTO_SEND_PATH),
         "workflow_callback": read_workflow_status(CALLBACK_PATH),
     }
@@ -183,6 +198,7 @@ def render_html(s):
     subs = s["toolpilot_subs"]
     wf_a = s["workflow_auto_send"]
     wf_c = s["workflow_callback"]
+    voice = s["voice"]
     phase = s["phase"]
 
     def phase_badge(status_text):
@@ -240,7 +256,7 @@ def render_html(s):
       <tr><th>ব্যবসা</th><th>অবস্থা</th><th>সত্য কথা</th></tr>
       <tr><td><strong>1. Agency</strong> — Talvenor AI Receptionist</td><td><span class="badge built">MAIN · Phase 1 REAL</span></td><td>প্রথম মেইল {s["first_mails"]}, paying client {s["paying_clients"]} · Chief সত্যিই 15 worker ডাকে (mock brain, DRAFT ONLY) · Email {s["email"]}</td></tr>
       <tr><td><strong>2. Digital Product</strong> — Vet No-Show Recovery Kit ($49)</td><td><span class="badge built">Phase 2 REAL*</span></td><td><strong>Gate 0 {gate0}</strong> — Lemon Squeezy test Boss-এর step, হয়নি · Kit blueprint আছে (kit নিজে নয়) · PA list {pa} / 100 (যাচাই করা) · Sale 0 · *Gate 0-তে আটকে</td></tr>
-      <tr><td><strong>3. Content Engine</strong> — Creator OS / ToolPilot</td><td><span class="badge built">Phase 3 REAL</span></td><td>Chief সত্যিই 6 worker ডাকে (mock brain, DRAFT ONLY) · 13 stage: REAL {pipe["real"]} / MOCK {pipe["mock"]} / BLOCKED {pipe["blocked"]} · Upload OFF · VOICE.md DRAFT · GPU নাম বাকি · ToolPilot video 0 (subs {subs})</td></tr>
+      <tr><td><strong>3. Content Engine</strong> — Creator OS / ToolPilot</td><td><span class="badge built">Phase 3 REAL</span></td><td>Chief সত্যিই 6 worker ডাকে (mock brain, DRAFT ONLY) · 13 stage: REAL {pipe["real"]} / MOCK {pipe["mock"]} / BLOCKED {pipe["blocked"]} · Upload OFF · VOICE.md DRAFT · GPU AMD Radeon integrated 496 MB VRAM (FramePack/WanGP চলবে না) · ToolPilot video 0 (subs {subs})</td></tr>
     </table>
   </div>
 
@@ -283,7 +299,7 @@ def render_html(s):
     <table>
       <tr><td><strong>REAL</strong></td><td>Approval gateway (approve/reject সত্যিই record করে), Main CEO Bot router, config.json, এই dashboard (sync দিয়ে বানানো), <strong>Agency Chief of Staff (15 worker routing, draft-only, gated কাজ PENDING-এ আটকায়)</strong>, <strong>Products Chief of Staff (kit blueprint, PA list {pa}/100, launch/sale Gate 0-তে আটকায়)</strong>, <strong>Content Chief of Staff (6 Creator OS worker routing, draft-only, upload OFF-এ আটকায়, video file বানায় না)</strong></td></tr>
       <tr><td><strong>READY (NOT LIVE)</strong></td><td>n8n auto-send workflow + callback workflow — import file তৈরি, Boss-এর import + connect + test বাকি, কোনোটাই LIVE নয়</td></tr>
-      <tr><td><strong>STUB</strong></td><td>Jarvis voice (mic যুক্ত নয়)</td></tr>
+      <tr><td><strong>{voice["label"]}</strong></td><td>{voice["detail"]}</td></tr>
       <tr><td><strong>VENDORED (Phase 6)</strong></td><td>boss-ceo engine (15 worker) + Creator OS (6 worker) — copy এখন repo-র ভিতরে; talvenor-office, jarvis-ceo-os-concept — reference only</td></tr>
     </table>
     <p class="note">Gemini-র map-এর ৪ ভুল এখানে ঠিক করা হয়েছে: (1) Jarvis ≠ Main CEO Bot, আলাদা; (2) approval/gate layer আছে; (3) store/Vault আছে; (4) digital product = Vet Kit $49, generic "Notion Kits" নয়।</p>

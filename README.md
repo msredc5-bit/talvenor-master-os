@@ -34,8 +34,10 @@ talvenor-master-os/
 │   ├── human_approval_gateway.py  # REAL (approve/reject)
 │   ├── brain.py                # REAL (Phase 6 — BrainFactory: mock default / live unwired-until-flipped)
 │   ├── tool_calling.py         # REAL (Phase 5 — ToolRegistry + dispatcher, 6 mock handler)
-│   ├── jarvis_voice.py         # STUB (mic যুক্ত নয়)
-│   ├── config.json             # REAL (locked facts; brain: mock, phase 6, v0.6.0)
+│   ├── jarvis_voice.py         # REAL (2026-11-17 — Piper+Vosk/sherpa, offline, $0; একই 3 function)
+│   ├── voice/                  # REAL (2026-11-17) — speak.py (Piper TTS), listen.py (Vosk en + sherpa-onnx bn), loop.py (শোনা → brain → বলা + gate); models/ + output/ git-এ যায় না
+│   ├── VOICE-SETUP.md          # Windows setup guide (Bengali)
+│   ├── config.json             # REAL (locked facts; brain: mock, phase 7, v0.7.0 + voice block)
 │   └── CEO-README.md
 ├── 01-Agency-Department/   # REAL (Phase 1) — Chief 15 worker ডাকে, draft-only; worker-রা এখন ভিতরে vendored (Phase 6)
 │   ├── engine/             # REAL (Phase 5) — 15 staff, 8 tool (5 mock / 3 gated), 15 skill
@@ -49,7 +51,7 @@ talvenor-master-os/
 ├── store/                  # tasks.json, approvals.json, vault/
 ├── dashboards/             # status.html (sync_status.py দিয়ে বানানো — সংখ্যা আসল ফাইল থেকে) + engines.html (sync_engines.py দিয়ে বানানো) + n8n-wiring.md (২ workflow-র map, READY NOT LIVE)
 ├── skills/                 # ৪টা skill manual (CEO + ৩ Chief)
-├── scripts/                # check_phase0..4.py + check_engines.py + check_phase6.py + check_phase7.py + run_office.py (runner) + sync_status.py + sync_engines.py
+├── scripts/                # check_phase0..4.py + check_engines.py + check_phase6.py + check_phase7.py + run_office.py (runner) + sync_status.py + sync_engines.py + voice_test.py + check_voice.py + jarvis_voice_loop.py
 ├── README.md               # এই ফাইল
 └── BUILD-LOG.md
 ```
@@ -78,7 +80,7 @@ python3 ~/workspace/talvenor-master-os/scripts/check_phase0.py
 | config.json | **REAL** — locked facts |
 | Dashboard status.html | **REAL** — sync_status.py দিয়ে বানানো, সংখ্যা আসল ফাইল থেকে |
 | n8n workflows (auto-send + callback) | **READY · NOT LIVE** — import file তৈরি, Boss-এর import + connect + test বাকি |
-| Jarvis voice | **STUB** — mic যুক্ত নয় |
+| Jarvis voice | **REAL (2026-11-17)** — Piper TTS + Vosk (en) + sherpa-onnx (bn), offline, $0; mic যুক্ত; brain mock (voice Jarvis-কে বুদ্ধিমান বানায় না); gated কাজ voice-এ শুধু PENDING, execute নয় |
 | Agency Chief of Staff | **REAL (Phase 1)** — 15 worker routing, draft-only, gated কাজ PENDING-এ আটকায় |
 | Products Chief of Staff | **REAL* (Phase 2)** — ৪ task type routing, Gate 0 fail-closed, launch/sale আটকায় |
 | Content Chief of Staff | **REAL (Phase 3)** — 6 Creator OS worker routing, draft-only, upload OFF-এ আটকায়, video file বানায় না |
@@ -88,6 +90,15 @@ python3 ~/workspace/talvenor-master-os/scripts/check_phase0.py
 | Jarvis concept/code | **REUSED** — `~/workspace/jarvis-ceo-os-concept/`, jarvis-os repo |
 | 136 ব্যবসা / 1,189 worker | **DROPPED (Boss 2026-11-16)** — scope = 3 ব্যবসা only |
 
+## Jarvis voice (REAL — 2026-11-17, phase নয়, voice addition)
+
+- **বলা (TTS):** Piper, offline, $0। Bengali voice `bn_BD-google-medium` (Piper catalog-এর একমাত্র Bengali voice, CC-BY-SA-4.0) + English `en_US-lessac-medium` (Lessac licence — personal use OK, commercial-এর আগে licence দেখুন)।
+- **শোনা (STT):** English Vosk `vosk-model-small-en-us-0.15` (40 MB, Apache-2.0); Bengali sherpa-onnx `vosk-model-small-streaming-bn` (~96 MB, Zipformer2, Apache-2.0, WER self-reported 17.9–32.9)। সত্য: classic Vosk-এর official list-এ কোনো Bengali model নেই — Bengali শোনে sherpa-onnx, Vosk নয়।
+- **চালানো (Boss-এর PC, Windows):** `python scripts\jarvis_voice_loop.py` (default Bengali; `--lang en` English-এ)। Test: `python scripts\voice_test.py` (mic ছাড়া) + `python scripts\check_voice.py`। Setup: `00-CEO-Core/VOICE-SETUP.md`।
+- **Verification (এই VM, 2026-11-17):** voice_test 7/7 PASS (en synth 71,724 B → Vosk "hello i am jarvis" exact; bn synth 82,988 B → sherpa "আমি জার্ফিস শুনছি" — "জার্ভিস"→"জার্ফিস" এক phoneme ভুল, WER-এর মধ্যেই); check_voice 13/14 (শুধু sounddevice FAIL — এই VM-এ PortAudio নেই, VM-only; Windows wheel-এ বান্ডেল থাকে)। Phase 0 8/8, Phase 7 18/18, মোট 138/138 — কোনো regression নেই।
+- **সৎ সীমা:** Bengali voice-এর মান কেউ শোনেনি (Boss-ই প্রথম শুনবেন); Bengali STT-তে ভুল হবেই (ছোট model); brain mock — উত্তর MOCK-PLAN draft; live mic test শুধু Boss-এর PC-তে হবে (এই VM-এ PortAudio নেই); RAM টাইট (8 GB, ~1.4 GB free) — voice চালানোর সময় Chrome বন্ধ রাখুন।
+- **Gate:** voice-এ "send"/"post it" বললে শুধু ApprovalGateway-এ PENDING লেখা হয়; execute হয় না। "upload it"/খরচ/delete voice-এ request করা যায় না।
+
 ## Gate (আইন)
 
 `ok` / `post it` / `upload it` / `send` / `go` — Boss-এর exact
@@ -96,6 +107,7 @@ word ছাড়া send/publish/spend/delete হবে না। Spend cap **$
 ## সত্য অবস্থা (2026-11-16)
 
 - Paying client: **0**
+- Jarvis voice: **REAL (2026-11-17)** — Piper+Vosk/sherpa, offline, $0; প্রথম live mic test Boss-এর PC-তে বাকি
 - Email: **PAUSED** (2026-11-14 থেকে) — SPF/DMARC DNS fix Boss-এর হাতে বাকি
 - প্রথম মেইল: 162
 - Vet Kit Gate 0: **NOT PASSED** — Lemon Squeezy test Boss-এর step

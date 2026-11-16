@@ -100,5 +100,34 @@
   "spend_cap_usd": 0,
   "system": "Talvenor Master OS",
   "timezone": "Asia/Dhaka",
-  "version": "0.7.0"
+  "version": "0.7.0",
+  "voice": {
+    "engines": {
+      "stt_bn": "sherpa-onnx",
+      "stt_en": "vosk",
+      "tts": "piper"
+    },
+    "models": {
+      "sherpa_bn": "vosk-model-small-streaming-bn",
+      "sherpa_bn_repo": "alphacep/vosk-model-small-streaming-bn",
+      "sherpa_bn_source": "https://huggingface.co/alphacep/vosk-model-small-streaming-bn",
+      "sherpa_bn_wer_self_reported": {
+        "Banspeech": 32.9,
+        "Common Voice": 17.9,
+        "Fleurs": 20.6
+      },
+      "vosk_en": "vosk-model-small-en-us-0.15",
+      "vosk_en_source": "https://alphacephei.com/vosk/models.html"
+    },
+    "notes": [
+      "Voice loop BUILT 2026-11-17 (Piper TTS + Vosk en + sherpa-onnx bn), offline, $0.",
+      "Bengali STT is sherpa-onnx, NOT classic Vosk: the official Vosk models.html list has NO Bengali model; vosk-model-small-streaming-bn is a Zipformer2 streaming model that vosk.Model() cannot load.",
+      "Bengali Piper voice quality unjudged (no native listener heard it yet); Bengali STT accuracy unknown until Boss speaks to it.",
+      "Voice does not make Jarvis smart: brain stays mock by default. Gated actions by voice only become PENDING in ApprovalGateway, never execute."
+    ],
+    "voices": {
+      "bn": "bn_BD-google-medium",
+      "en": "en_US-lessac-medium"
+    }
+  }
 }

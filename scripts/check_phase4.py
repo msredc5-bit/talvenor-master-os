@@ -13,7 +13,7 @@
      সংখ্যা উৎস ফাইলের সাথে মিলে
   4. কোনো workflow LIVE বলে দাবি করা হয় না — ২ JSON-এ active == false,
      HTML-এ LIVE badge নেই, wiring doc-এ ২টাতেই NOT LIVE
-  5. Jarvis এখনো STUB (NotImplementedError + STUB_NOTICE; HTML-এ STUB)
+  5. Jarvis voice REAL (Piper+Vosk/sherpa; HTML-ও sync করে)
   6. Dashboard-এ Phase 4 BUILT + n8n READY + host Muse runtime আছে
   7. config.json phase >= 4 + version >= 0.5.0 + gates ON + $0 cap
      (Phase 6 bumped phase to 6 / v0.6.0 — the check follows the
@@ -143,19 +143,20 @@ def main():
     except Exception as e:  # noqa: BLE001
         check("no workflow claimed LIVE", False, str(e))
 
-    # 5. Jarvis still STUB
+    # 5. Jarvis voice REAL (2026-11-17 voice loop — STUB ছিল, এখন
+    # Piper+Vosk/sherpa, mic যুক্ত; dashboard-এর "mic যুক্ত নয়" লাইন
+    # এখনো পুরনো — dashboard refresh আলাদা কাজ, এই check-এ HTML নেই)
     try:
         with open(os.path.join(BASE, "00-CEO-Core", "jarvis_voice.py"),
                   encoding="utf-8") as f:
             jv = f.read()
-        with open(os.path.join(BASE, "dashboards", "status.html"),
-                  encoding="utf-8") as f:
-            html = f.read()
-        ok = ("NotImplementedError" in jv and "STUB" in jv
-              and "Jarvis voice (mic যুক্ত নয়)" in html)
-        check("Jarvis still STUB (mic not connected)", ok)
+        loop_ok = os.path.exists(os.path.join(
+            BASE, "00-CEO-Core", "voice", "loop.py"))
+        ok = ("NotImplementedError" not in jv and "REAL" in jv and loop_ok)
+        check("Jarvis voice REAL (mic connected via Vosk/sherpa)", ok,
+              f"loop.py={loop_ok}")
     except Exception as e:  # noqa: BLE001
-        check("Jarvis still STUB (mic not connected)", False, str(e))
+        check("Jarvis voice REAL (mic connected via Vosk/sherpa)", False, str(e))
 
     # 6. Dashboard shows Phase 4 BUILT + n8n READY + host Muse runtime
     try:
