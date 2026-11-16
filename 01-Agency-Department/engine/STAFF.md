@@ -142,3 +142,44 @@ None = draft নিজেই নিরাপদ, কোনো gate নেই।
 (task_kind / default_payload / requires_gate) · `../chief_of_staff_agency.py` (ROUTING)
 · `../pipeline.md` · `~/workspace/agency-os/SOP/prospect-qualification-talvenor.md`
 · agency-os SKILL 02, 03, 06, 15, 16, 17, 18, 20।
+
+---
+
+## Phase 7 — Section map (2026-11-17)
+
+১৫টা mapped staff (উপরের তালিকা) + ৬টা NEW section agent = **২১ staff**।
+Mapped staff-দের worker code engine-এ vendored থাকে
+(`engine/workers/src/workers/`), duplicate করা হয়নি — এখানে শুধু map।
+NEW agent-রা `sections/<section>/agents/`-এ আসল `.py` file + নিজের skill
+(`sections/<section>/skills/`)। Chief-এর `SECTION_ROUTING`-এ ৬টা নতুন
+task type চলে (ROUTING-এর ১৫টা অপরিবর্তিত)।
+
+| Section | Staff | Task type | Agent file / vendored worker | Skill file | Gate | Status |
+|---|---|---|---|---|---|---|
+| receive | ClientIntakeReceiver | `client_intake` | `sections/receive/agents/client_intake_receiver.py` | `sections/receive/skills/client-intake-receiver.md` | `send` | NEW |
+| receive | InboxTriager | `inbox_triage` | `engine/workers/src/workers/admin.py` | `engine/skills/inbox-triager.md` | None | MAPPED |
+| receive | ProspectResearcher | `prospect_research` | `engine/workers/src/workers/acquisition.py` | `engine/skills/prospect-researcher.md` | None | MAPPED |
+| receive | SchedulerAssistant | `schedule_help` | `engine/workers/src/workers/admin.py` | `engine/skills/scheduler.md` | None | MAPPED |
+| sell | OutreachDrafter | `outreach_draft` | `engine/workers/src/workers/acquisition.py` | `engine/skills/outreach-drafter.md` | `send` | MAPPED |
+| sell | ReplyHandler | `reply_triage` | `engine/workers/src/workers/acquisition.py` | `engine/skills/reply-triager.md` | `send` | MAPPED |
+| sell | NegotiationCoach | `negotiation_prep` | `engine/workers/src/workers/acquisition.py` | `engine/skills/negotiation-coach.md` | `ok` | MAPPED |
+| sell | ObjectionSimulator | `objection_sim` | `engine/workers/src/workers/marketing.py` | `engine/skills/objection-simulator.md` | `ok` | MAPPED |
+| sell | SalesCloser | `sales_close` | `sections/sell/agents/sales_closer.py` | `sections/sell/skills/sales-closer.md` | `ok` | NEW |
+| sell | FollowUpAgent | `followup_draft` | `sections/sell/agents/followup_agent.py` | `sections/sell/skills/followup-agent.md` | `send` | NEW |
+| delivery | RetellBuilder | `receptionist_build` | `engine/workers/src/workers/delivery.py` | `engine/skills/receptionist-builder.md` | `ok` | MAPPED |
+| delivery | QAEngineer | `receptionist_qa` | `engine/workers/src/workers/delivery.py` | `engine/skills/qa-engineer.md` | None | MAPPED |
+| delivery | OnboardingAgent | `onboarding_draft` | `engine/workers/src/workers/delivery.py` | `engine/skills/onboarding-agent.md` | `ok` | MAPPED |
+| delivery | ServiceDeliveryManager | `delivery_manage` | `sections/delivery/agents/service_delivery_manager.py` | `sections/delivery/skills/service-delivery-manager.md` | `ok` | NEW |
+| delivery | ClientSuccessAgent | `client_success` | `sections/delivery/agents/client_success_agent.py` | `sections/delivery/skills/client-success-agent.md` | `send` | NEW |
+| marketing | ContentPlanner | `content_plan` | `engine/workers/src/workers/marketing.py` | `engine/skills/content-planner.md` | `ok` | MAPPED |
+| marketing | VideoProducer | `video_produce` | `engine/workers/src/workers/marketing.py` | `engine/skills/video-producer.md` | `ok` | MAPPED |
+| marketing | CaptionWriter | `caption_write` | `engine/workers/src/workers/marketing.py` | `engine/skills/caption-writer.md` | None | MAPPED |
+| marketing | PublishPrep | `publish_prep` | `engine/workers/src/workers/marketing.py` | `engine/skills/publish-prep.md` | `post it` | MAPPED |
+| ops | ReportCompiler | `report_compile` | `engine/workers/src/workers/admin.py` | `engine/skills/report-compiler.md` | None | MAPPED |
+| ops | BillingInvoiceAgent | `billing_invoice` | `sections/ops/agents/billing_invoice_agent.py` | `sections/ops/skills/billing-invoice-agent.md` | `ok` | NEW |
+
+**সত্য অবস্থা (2026-11-17, Phase 7):** Email PAUSED (2026-11-14 থেকে) —
+draft-ই শেষ কথা। Paying client 0। প্রথম মেইল 162 — কোনো state 100-তে নেই,
+কোনো follow-up due নয় (100-mail নিয়ম)। LOCKED pricing শুধু invoice-এর
+জন্য (Starter $547/mo + $597 build; Growth $1,109/mo + $1,297 build;
+Scale $1,672/mo + $1,997 build) — prospect-কে কখনো দাম quote নয়।

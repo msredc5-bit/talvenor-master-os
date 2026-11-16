@@ -28,6 +28,7 @@ vendored (engine/workers/) — বাইরের কোনো checkout-এর �
 Routing table: TASK_TYPE -> (worker class, division, gate word)
 """
 
+import importlib.util
 import json
 import os
 import sys
@@ -114,6 +115,21 @@ STORE_DIR = os.path.join(MASTER_OS_DIR, "store")
 DEFAULT_TASKS_PATH = os.path.join(STORE_DIR, "tasks.json")
 DEFAULT_APPROVALS_PATH = os.path.join(STORE_DIR, "approvals.json")
 
+# --- Phase 7 sections -------------------------------------------------------
+SECTIONS_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "sections")
+
+# task type -> (agent module file, relative to sections/, class name, gate word)
+# Phase 7 NEW staff — ROUTING-এর ১৫টা অপরিবর্তিত; এই ৬টা শুধু যোগ করা।
+SECTION_ROUTING = {
+    "client_intake": ("receive/agents/client_intake_receiver.py", "ClientIntakeReceiverAgent", "send"),
+    "sales_close": ("sell/agents/sales_closer.py", "SalesCloserAgent", "ok"),
+    "followup_draft": ("sell/agents/followup_agent.py", "FollowUpAgent", "send"),
+    "delivery_manage": ("delivery/agents/service_delivery_manager.py", "ServiceDeliveryManagerAgent", "ok"),
+    "client_success": ("delivery/agents/client_success_agent.py", "ClientSuccessAgent", "send"),
+    "billing_invoice": ("ops/agents/billing_invoice_agent.py", "BillingInvoiceAgent", "ok"),
+}
+
 
 def _now_iso():
     return datetime.now(timezone.utc).isoformat()
@@ -194,6 +210,68 @@ def handle_task(task, tasks_path=None, approvals_path=None):
             "status": result["status"],
             "gated_action": gated_action,
             "approval_id": result.get("approval", {}).get("id") or approval_id,
+            "logged_at": _now_iso(),
+        }, tasks_path=tasks_path)
+        return result
+
+    # 1b. Phase 7 section agents — ROUTING-এর পাশাপাশি, gated block-এর পরে।
+    # Gated action থাকলে উপরের block-ই ফিরেছে, তাই এখানে task-এ
+    # gated_action নেই — agent শুধু DRAFT বানায়।
+    if task_type in SECTION_ROUTING:
+        module_file, class_name, gate_word = SECTION_ROUTING[task_type]
+        agent_path = os.path.join(SECTIONS_DIR, module_file)
+        spec = importlib.util.spec_from_file_location(
+            f"section_agent_{task_type}", agent_path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        agent_cls = getattr(mod, class_name)
+        agent = agent_cls()
+        gw = ApprovalGateway(approvals_path=approvals_path) if approvals_path else ApprovalGateway()
+        agent_result = agent.run(
+            task, BrainFactory.get_brain("agency"), gw, approvals_path)
+        if agent_result.get("status") == "pending-approval":
+            result = {
+                "status": "pending-approval",
+                "department": DEPARTMENT,
+                "task": title,
+                "type": task_type,
+                "worker": class_name,
+                "section": agent.section,
+                "gated_action": gated_action,
+                "approval": agent_result.get("approval"),
+                "note": "Gated action refused — PENDING approval recorded. Nothing was sent/published/spent/deleted.",
+                "draft_only": True,
+                "mock_brain": True,
+                "gate": gate_word,
+            }
+        else:
+            note = "DRAFT ONLY — mock brain ($0). "
+            if gate_word:
+                note += f"Output পাঠাতে/ব্যবহার করতে Boss-এর gate word লাগবে: '{gate_word}'."
+            else:
+                note += "এই draft-এ কোনো gate নেই।"
+            result = {
+                "status": "draft-ready",
+                "department": DEPARTMENT,
+                "business": BUSINESS,
+                "task": title,
+                "type": task_type,
+                "worker": class_name,
+                "section": agent.section,
+                "output": agent_result.get("output"),
+                "notes": agent_result.get("notes"),
+                "mock_brain": True,
+                "draft_only": True,
+                "gate": gate_word,
+                "note": note,
+            }
+        _log_task({
+            "id": uuid.uuid4().hex[:12],
+            "department": DEPARTMENT,
+            "title": title,
+            "type": task_type,
+            "worker": class_name,
+            "status": result["status"],
             "logged_at": _now_iso(),
         }, tasks_path=tasks_path)
         return result

@@ -33,6 +33,7 @@ Wedge (UNTESTED): ২০ জন kit buyer-এর ১ জন receptionist নি�
 """
 
 import csv
+import importlib.util
 import json
 import os
 import sys
@@ -47,6 +48,7 @@ DEPT_DIR = os.path.join(MASTER_OS_DIR, "02-Digital-Product-Department")
 sys.path.insert(0, CEO_CORE_DIR)
 
 from human_approval_gateway import ApprovalGateway  # noqa: E402
+from brain import BrainFactory  # noqa: E402
 
 DEPARTMENT = "digital-product"
 BUSINESS = "Vet No-Show Recovery Kit"
@@ -78,6 +80,15 @@ ROUTING = {
     "clinic_research": ("pa-list", None),
     "gate0_check": ("gate0-status", None),
     "launch_prep": ("launch-checklist-draft", "go"),
+}
+
+# Phase 7 — NEW task types only (section agents, sections/<section>/agents/).
+# task type -> (agent file, agent class, gate word for the OUTPUT's onward use)
+# Existing 4 ROUTING types unchanged — these 3 are checked alongside them.
+SECTION_ROUTING = {
+    "kit_sales": ("sections/sales/agents/kit_sales.py", "KitSalesAgent", "send"),
+    "kit_qa": ("sections/product/agents/kit_qa.py", "KitQAAgent", "ok"),
+    "support_draft": ("sections/support/agents/support_drafter.py", "SupportDrafterAgent", "send"),
 }
 
 
@@ -258,6 +269,68 @@ def handle_task(task, tasks_path=None, approvals_path=None):
             "type": None,
             "worker": None,
             "status": "route-only",
+            "logged_at": _now_iso(),
+        }, tasks_path=tasks_path)
+        return result
+
+    # 3b. Phase 7 section agents — NEW task types only (kit_sales, kit_qa,
+    #     support_draft). Existing 4 ROUTING types unchanged; gated_action /
+    #     mark_launched / mark_sold blocks above already ran first.
+    if task_type in SECTION_ROUTING:
+        rel_path, agent_class_name, gate_word = SECTION_ROUTING[task_type]
+        agent_path = os.path.join(DEPT_DIR, rel_path)
+        gate0 = read_gate0_status()
+        try:
+            spec = importlib.util.spec_from_file_location(
+                "products_section_%s" % task_type, agent_path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            agent = getattr(module, agent_class_name)()
+            brain = BrainFactory.get_brain("agency")
+            agent_result = agent.run(task, brain=brain, approvals_path=approvals_path)
+        except Exception as exc:  # noqa: BLE001
+            result = {
+                "status": "error",
+                "department": DEPARTMENT,
+                "task": title,
+                "type": task_type,
+                "handler": agent_class_name,
+                "error": "%s: %s" % (type(exc).__name__, exc),
+                "draft_only": True,
+            }
+            _log_task({
+                "id": uuid.uuid4().hex[:12],
+                "department": DEPARTMENT,
+                "title": title,
+                "type": task_type,
+                "worker": agent_class_name,
+                "status": "error",
+                "logged_at": _now_iso(),
+            }, tasks_path=tasks_path)
+            return result
+        result = {
+            "status": agent_result.get("status", "error"),
+            "department": DEPARTMENT,
+            "business": BUSINESS,
+            "task": title,
+            "type": task_type,
+            "handler": agent_class_name,
+            "worker": agent_class_name,
+            "output": agent_result.get("output", ""),
+            "notes": agent_result.get("notes", ""),
+            "mock_brain": agent_result.get("mock_brain", True),
+            "gate0": gate0,
+            "draft_only": True,
+            "gate": gate_word,
+            "note": agent_result.get("notes", ""),
+        }
+        _log_task({
+            "id": uuid.uuid4().hex[:12],
+            "department": DEPARTMENT,
+            "title": title,
+            "type": task_type,
+            "worker": agent_class_name,
+            "status": result["status"],
             "logged_at": _now_iso(),
         }, tasks_path=tasks_path)
         return result

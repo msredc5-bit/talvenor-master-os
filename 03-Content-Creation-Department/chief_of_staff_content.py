@@ -37,6 +37,7 @@ mock brain, $0), ফলাফল DRAFT হিসেবে ফেরত দেও
 Routing table: TASK_TYPE -> (worker class, gate word)
 """
 
+import importlib.util
 import json
 import os
 import sys
@@ -97,6 +98,16 @@ ROUTING = {
     "caption_write": (CaptionWriter, "ok"),
     "publish_prep": (PublishPrep, "post it"),
     "performance_track": (PerformanceTracker, "ok"),
+}
+
+# Phase 7 section agents — task type -> (agent file rel. to this dept dir,
+# agent class name). Chief-level + NEW role-গুলো এখানে যায় (ROUTING-এর ৬টা
+# বদলানো হয়নি)। Agent-রা file path দিয়ে importlib দিয়ে load হয়।
+SECTION_ROUTING = {
+    "plan_weekly": ("sections/plan/agents/content_planner.py", "ContentPlannerAgent"),
+    "performance_analyze": ("sections/analyze/agents/performance_analyst.py", "PerformanceAnalystAgent"),
+    "growth_research": ("sections/growth/agents/growth_agent.py", "GrowthAgent"),
+    "repurpose_plan": ("sections/growth/agents/repurpose_agent.py", "RepurposeAgent"),
 }
 
 STORE_DIR = os.path.join(MASTER_OS_DIR, "store")
@@ -259,6 +270,41 @@ def handle_task(task, tasks_path=None, approvals_path=None):
             "type": None,
             "worker": None,
             "status": "route-only",
+            "logged_at": _now_iso(),
+        }, tasks_path=tasks_path)
+        return result
+
+    # 3b. Phase 7 section agents — plan_weekly / performance_analyze /
+    #     growth_research / repurpose_plan — sections/<section>/agents/-এর
+    #     agent file load করে চালানো (importlib, file path দিয়ে)। Gated
+    #     action থাকলে উপরের block-এ আগেই আটকে গেছে, তাই এখানে শুধু draft।
+    if task_type in SECTION_ROUTING:
+        agent_rel_path, agent_cls_name = SECTION_ROUTING[task_type]
+        agent_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), agent_rel_path)
+        spec = importlib.util.spec_from_file_location(
+            f"content_section_{task_type}", agent_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        agent = getattr(module, agent_cls_name)()
+        llm = BrainFactory.get_brain("content")
+        agent_result = agent.run(task, brain=llm, approvals_path=approvals_path)
+        result = {
+            **agent_result,
+            "department": DEPARTMENT,
+            "business": BUSINESS,
+            "channel": CHANNEL,
+            "task": title,
+            "type": task_type,
+            "agent": agent_cls_name,
+        }
+        _log_task({
+            "id": uuid.uuid4().hex[:12],
+            "department": DEPARTMENT,
+            "title": title,
+            "type": task_type,
+            "worker": agent_cls_name,
+            "status": agent_result.get("status"),
             "logged_at": _now_iso(),
         }, tasks_path=tasks_path)
         return result

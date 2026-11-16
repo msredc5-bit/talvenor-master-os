@@ -98,3 +98,35 @@
 | Performance Analyst | — (Chief-level) | no worker |
 
 **Staff সংখ্যা: ৮।** Worker আছে ৬ জনের, Chief-level role ২টি (Content Planner, Performance Analyst)।
+
+---
+
+## Phase 7 — Section map (2026-11-17)
+
+Phase 7-এ ৮ staff-এর প্রত্যেকের জন্য একটা section agent + একটা section skill
+বানানো হয়েছে — `03-Content-Creation-Department/sections/<section>/`। Chief-এর
+৬ worker routing বদলানো হয়নি; ৪টা নতুন task type (`plan_weekly`,
+`performance_analyze`, `growth_research`, `repurpose_plan`) Chief-এর
+`SECTION_ROUTING` দিয়ে section agent-এর দিকে যায়। ১৩ stage-এর সত্য একই আছে:
+REAL **0** / MOCK **10** / BLOCKED **3**; upload OFF; VOICE.md DRAFT; metrics 0।
+
+| Section | Staff | Agent file | Wrapped worker / Standalone | Skill file | Gate | Status |
+|---|---|---|---|---|---|---|
+| plan | Topic Researcher | `sections/plan/agents/topic_researcher.py` | `TopicResearcher` | `sections/plan/skills/topic-researcher.md` | ok | WRAPPED |
+| plan | Content Planner | `sections/plan/agents/content_planner.py` | Standalone (Chief-level) | `sections/plan/skills/content-planner.md` | ok | WRAPPED* |
+| produce | Script Writer | `sections/produce/agents/script_writer.py` | `ScriptWriter` | `sections/produce/skills/script-writer.md` | ok | WRAPPED |
+| produce | Visual Producer | `sections/produce/agents/visual_producer.py` | `VisualProducer` | `sections/produce/skills/visual-producer.md` | ok | WRAPPED |
+| publish | Caption Writer | `sections/publish/agents/caption_writer.py` | `CaptionWriter` | `sections/publish/skills/caption-writer.md` | ok | WRAPPED |
+| publish | Publish Prep | `sections/publish/agents/publish_prep.py` | `PublishPrep` | `sections/publish/skills/publish-prep.md` | post it | WRAPPED |
+| analyze | Performance Tracker | `sections/analyze/agents/performance_tracker.py` | `PerformanceTracker` | `sections/analyze/skills/performance-tracker.md` | ok | WRAPPED |
+| analyze | Performance Analyst | `sections/analyze/agents/performance_analyst.py` | Standalone (Chief-level) | `sections/analyze/skills/performance-analyst.md` | ok | WRAPPED* |
+| growth | Growth Agent | `sections/growth/agents/growth_agent.py` | Standalone (NEW) | `sections/growth/skills/growth-agent.md` | send | NEW |
+| growth | Repurpose Agent | `sections/growth/agents/repurpose_agent.py` | Standalone (NEW) | `sections/growth/skills/repurpose-agent.md` | ok | NEW |
+
+\* Content Planner আর Performance Analyst-এর কোনো vendored worker নেই — Chief-level
+role, তাই Phase 7-এ standalone agent হিসেবে বানানো হয়েছে। Growth Agent আর Repurpose
+Agent সম্পূর্ণ NEW role — আগে engine-এ এদের কোনো staff/worker/skill ছিল না।
+
+**Section count: ৫** (plan, produce, publish, analyze, growth) — **agent ১০, skill ১০।**
+সব agent DRAFT ONLY (mock brain, $0), কোনো file লেখে না, network ছোঁয় না, কিছু
+publish/upload/send/spend/delete করে না।

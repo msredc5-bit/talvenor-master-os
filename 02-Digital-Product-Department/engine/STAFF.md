@@ -138,3 +138,36 @@ testimonial/statistic বানায় না। Policy template-কে legal 
 `kit-outline.md`, `gate0-status.md`, `pa-vet-list/README.md` +
 `pa-vet-clinics.csv`, `skills/chief-products.md`, `00-CEO-Core/config.json`,
 `~/workspace/research_notes/digital-product-final-20261112/report.md`।
+
+---
+
+## Phase 7 — Section map (2026-11-17)
+
+Phase 7-এ 5 staff-এর কাজ ৬টা section-এ সাজানো হয়েছে
+(`02-Digital-Product-Department/sections/<section>/` — প্রতিটায়
+`agents/` + `skills/` + `SECTION.md`)। নতুন staff **২ জন** (Kit QA,
+Kit Sales) — মোট staff এখন **৭ জন**। Section agent-রা কোনো file লেখে
+না, network ছোঁয় না, মেইল পাঠায় না, sale/launch চিহ্নিত করে না।
+
+| Section | Staff | Agent file | Skill file | Gate | NEW / existing |
+|---|---|---|---|---|---|
+| product | Kit Builder | `sections/product/agents/kit_builder.py` | `sections/product/skills/kit-builder.md` | `ok` | existing role |
+| product | Kit QA | `sections/product/agents/kit_qa.py` | `sections/product/skills/kit-qa.md` | `ok` | **NEW** |
+| research | Clinic Researcher | `sections/research/agents/clinic_researcher.py` | `sections/research/skills/clinic-researcher.md` | — | existing role |
+| launch | Launch Manager | `sections/launch/agents/launch_manager.py` | `sections/launch/skills/launch-manager.md` | `go` | existing role |
+| sales | Kit Sales | `sections/sales/agents/kit_sales.py` | `sections/sales/skills/kit-sales.md` | `send` | **NEW** |
+| support | Support Drafter | `sections/support/agents/support_drafter.py` | `sections/support/skills/support-drafter.md` | `send` | existing role |
+| finance | Payment-Rails Checker | `sections/finance/agents/payment_rails_checker.py` | `sections/finance/skills/payment-rails-checker.md` | — | existing role |
+
+Chief routing (Phase 7): আগের ৪ task type (`kit_build`,
+`clinic_research`, `gate0_check`, `launch_prep`) আগের মতোই `ROUTING`-এ
+চলে — কিছু বদলায়নি। ৩ নতুন type (`kit_sales`, `kit_qa`,
+`support_draft`) Chief-এর `SECTION_ROUTING`-এ চলে — section agent
+`importlib.util.spec_from_file_location` দিয়ে load করে, mock brain
+(`BrainFactory.get_brain("agency")`) দিয়ে `run()` চালায়, `tasks.json`-এ
+আগের মতো log করে।
+
+**সত্য অবস্থা Phase 7-এর পরেও একই:** Gate 0 **NOT PASSED**, kit **0/6**
+built, PA list **39/100**, sale **0**, email **PAUSED**। Section map
+কোনো সত্য বদলায় না — শুধু কাজের সাজানো।
+
