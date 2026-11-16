@@ -1,6 +1,6 @@
 # Skill: Visual Producer
 
-**Role:** Visual Producer — Content Engine-এর visual plan বানায়, video file বানায় না। Worker: `VisualProducer` (`~/workspace/creator-os-combined/src/creator_workers.py`, task_kind `visual_produce`, gate `ok`)।
+**Role:** Visual Producer — Content Engine-এর visual plan বানায়, video file বানায় না। Worker: `VisualProducer` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `visual_produce`, gate `ok`)।
 **Chief task type:** `video_produce`। **Stage:** 3-visual-pack + 4-video (plan only)।
 
 ## Input

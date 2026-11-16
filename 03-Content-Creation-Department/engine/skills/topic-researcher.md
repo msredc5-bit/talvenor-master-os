@@ -1,6 +1,6 @@
 # Skill: Topic Researcher
 
-**Role:** Topic Researcher — Content Engine-এর researcher। Worker: `TopicResearcher` (`~/workspace/creator-os-combined/src/creator_workers.py`, task_kind `topic_research`, gate `ok`)।
+**Role:** Topic Researcher — Content Engine-এর researcher। Worker: `TopicResearcher` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `topic_research`, gate `ok`)।
 **Chief task type:** `content_plan`। **Stage:** 1-research (+ 0a-niche, 2a-concept)।
 
 ## Input

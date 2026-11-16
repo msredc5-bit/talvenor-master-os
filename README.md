@@ -1,4 +1,4 @@
-# Talvenor Master OS — আসল সিস্টেম (Phase 5 — COMPLETE: Three Engines)
+# Talvenor Master OS — আসল সিস্টেম (Phase 6 — COMPLETE: Full Complete Agent Offices)
 
 **এটা কী:** Boss-এর ৩ ব্যবসার আসল operating system-এর folder। এটা
 কোনো ছবি বা mock নয় — Phase 0-র skeleton + CEO Core + approval
@@ -32,20 +32,21 @@ talvenor-master-os/
 ├── 00-CEO-Core/            # brain + gate + config + shared tool-calling core
 │   ├── main_ceo_bot.py         # REAL (router)
 │   ├── human_approval_gateway.py  # REAL (approve/reject)
+│   ├── brain.py                # REAL (Phase 6 — BrainFactory: mock default / live unwired-until-flipped)
 │   ├── tool_calling.py         # REAL (Phase 5 — ToolRegistry + dispatcher, 6 mock handler)
 │   ├── jarvis_voice.py         # STUB (mic যুক্ত নয়)
-│   ├── config.json             # REAL (locked facts)
+│   ├── config.json             # REAL (locked facts; brain: mock, phase 6, v0.6.0)
 │   └── CEO-README.md
-├── 01-Agency-Department/   # REAL (Phase 1) — Chief 15 worker ডাকে, draft-only
+├── 01-Agency-Department/   # REAL (Phase 1) — Chief 15 worker ডাকে, draft-only; worker-রা এখন ভিতরে vendored (Phase 6)
 │   └── engine/             # REAL (Phase 5) — 15 staff, 8 tool (5 mock / 3 gated), 15 skill
 ├── 02-Digital-Product-Department/  # REAL* (Phase 2) — Chief আসল কাজ করে, kit blueprint + PA list 39/100; launch/sale Gate 0-তে আটকে
 │   └── engine/             # REAL* (Phase 5) — 5 staff, 8 tool (6 mock / 2 gated), 5 skill
-├── 03-Content-Creation-Department/ # REAL (Phase 3) — Chief 6 Creator OS worker ডাকে, draft-only; 13 stage REAL 0 / MOCK 10 / BLOCKED 3; upload OFF
+├── 03-Content-Creation-Department/ # REAL (Phase 3) — Chief 6 Creator OS worker ডাকে, draft-only; 13 stage REAL 0 / MOCK 10 / BLOCKED 3; upload OFF; worker-রা এখন ভিতরে vendored (Phase 6)
 │   └── engine/             # REAL (Phase 5) — 8 staff, 8 tool (5 mock / 3 gated), 8 skill
 ├── store/                  # tasks.json, approvals.json, vault/
 ├── dashboards/             # status.html (sync_status.py দিয়ে বানানো — সংখ্যা আসল ফাইল থেকে) + engines.html (sync_engines.py দিয়ে বানানো) + n8n-wiring.md (২ workflow-র map, READY NOT LIVE)
 ├── skills/                 # ৪টা skill manual (CEO + ৩ Chief)
-├── scripts/                # check_phase0..4.py + check_engines.py + sync_status.py + sync_engines.py
+├── scripts/                # check_phase0..4.py + check_engines.py + check_phase6.py + run_office.py (runner) + sync_status.py + sync_engines.py
 ├── README.md               # এই ফাইল
 └── BUILD-LOG.md
 ```
@@ -63,6 +64,8 @@ python3 ~/workspace/talvenor-master-os/scripts/check_phase0.py
 | জিনিস | অবস্থা |
 |---|---|
 | Approval gateway (approve/reject) | **REAL** — সত্যিই record করে, auto-approve নেই |
+| BrainFactory (`brain.py`) | **REAL (Phase 6)** — config flag `brain: mock` (default, $0, draft-only) / `live` (unwired-until-flipped; live verification 2026-11-06-এ TIMEOUT, key path UNPROVEN, কোনো live call নেই) |
+| Runner (`scripts/run_office.py`) | **REAL (Phase 6)** — এক command-এ office চালায় (Main CEO Bot → Chief → worker); gated কাজ PENDING-এ আটকায়; `--drain-queue --max 2` |
 | Shared tool-calling core (`tool_calling.py`) | **REAL (Phase 5)** — registry + dispatcher; mock tool DRAFT ফেরত দেয়, gated tool PENDING-এ আটকায়, সব call log করে |
 | Agency Engine (15 staff, 8 tool, 15 skill) | **REAL (Phase 5)** — draft-only, email PAUSED; send/publish/spend gated |
 | Products Engine (5 staff, 8 tool, 5 skill) | **REAL* (Phase 5)** — launch/sale Gate 0-তে আটকে |
@@ -75,10 +78,11 @@ python3 ~/workspace/talvenor-master-os/scripts/check_phase0.py
 | Agency Chief of Staff | **REAL (Phase 1)** — 15 worker routing, draft-only, gated কাজ PENDING-এ আটকায় |
 | Products Chief of Staff | **REAL* (Phase 2)** — ৪ task type routing, Gate 0 fail-closed, launch/sale আটকায় |
 | Content Chief of Staff | **REAL (Phase 3)** — 6 Creator OS worker routing, draft-only, upload OFF-এ আটকায়, video file বানায় না |
-| boss-ceo engine (15 worker) | **REUSED** — `~/workspace/boss-ceo/`, duplicate নয় |
-| talvenor-office | **REUSED** — `~/workspace/talvenor-office/` |
-| Creator OS (6 worker) | **REUSED** — `~/workspace/creator-os-combined/` |
+| boss-ceo engine (15 worker) | **VENDORED (Phase 6)** — copy এখন `01-Agency-Department/engine/workers/`-এ ভিতরে; upstream `~/workspace/boss-ceo/` canonical থাকে, runtime dependency নয় |
+| talvenor-office | **REUSED** — `~/workspace/talvenor-office/` (reference only) |
+| Creator OS (6 worker) | **VENDORED (Phase 6)** — copy এখন `03-Content-Creation-Department/engine/workers/`-এ ভিতরে; upstream `~/workspace/creator-os-combined/` canonical থাকে, runtime dependency নয় |
 | Jarvis concept/code | **REUSED** — `~/workspace/jarvis-ceo-os-concept/`, jarvis-os repo |
+| 136 ব্যবসা / 1,189 worker | **DROPPED (Boss 2026-11-16)** — scope = 3 ব্যবসা only |
 
 ## Gate (আইন)
 
@@ -100,7 +104,25 @@ word ছাড়া send/publish/spend/delete হবে না। Spend cap **$
 - **Phase 2 — Digital Product:** ✅ BUILT 2026-11-16 *যতদূর Gate 0 যেতে দেয়* (Chief REAL, kit blueprint, PA list 39/100, check PASS) — kit build/sale/launch Gate 0-তে আটকে।
 - **Phase 3 — Creator OS:** ✅ BUILT 2026-11-16 (Chief REAL, 6 worker wired, 13 stage REAL 0 / MOCK 10 / BLOCKED 3, upload OFF, check PASS)।
 - **Phase 4 — n8n wiring:** ✅ BUILT 2026-11-16 (wiring doc + sync_status.py, ২ workflow READY NOT LIVE, dashboard sync-এ চলে, check 9/9 PASS)।
-- **Phase 5 — Three Engines:** ✅ BUILT 2026-11-16 (shared tool-calling core + ৩ engine — Agency 15 staff / 8 tool / 15 skill, Products 5 / 8 / 5, Content 8 / 8 / 8; engines dashboard sync-এ চলে, check 45/45 PASS) — **সব Phase শেষ।**
+- **Phase 5 — Three Engines:** ✅ BUILT 2026-11-16 (shared tool-calling core + ৩ engine — Agency 15 staff / 8 tool / 15 skill, Products 5 / 8 / 5, Content 8 / 8 / 8; engines dashboard sync-এ চলে, check 45/45 PASS)।
+- **Phase 6 — Full Complete Agent Offices:** ✅ BUILT 2026-11-16 (worker-রা ভিতরে vendored — Agency 18 file + Content 4 file + SOURCE.md; BrainFactory mock default / live unwired; `run_office.py` runner — এক command-এ office চলে, `--drain-queue --max 2`; 136 DROPPED, scope 3 ব্যবসা only; config phase 6 / v0.6.0; check 14/14 PASS) — **সব Phase শেষ। মোট 120/120 PASS।**
+
+## Office চালানো (Phase 6 runner)
+
+```bash
+# একটা task (mock brain, draft-only) — আসল store-এ লেখে
+python3 ~/workspace/talvenor-master-os/scripts/run_office.py --business agency --task caption_write --input '{"title": "Caption pack", "platform": "instagram"}'
+
+# Queue খালি করা (এক run-এ সর্বোচ্চ 2)
+python3 ~/workspace/talvenor-master-os/scripts/run_office.py --drain-queue --max 2
+
+# Test — TEMP store-এ (আসল store ছোঁয় না)
+python3 ~/workspace/talvenor-master-os/scripts/run_office.py --business content --task script_write --input '{}' --store-dir /tmp/store-test
+```
+
+Gated কাজ (send/publish/spend/delete) runner দিয়ে চলবে না — PENDING-এ
+আটকাবে, Boss-এর gate word লাগবে। Brain `live` করতে হলে config.json-এ
+`"brain": "live"` — শুধু Boss-এর কথায়, live verification-এর পরে।
 
 ## Dashboard sync চালানো
 

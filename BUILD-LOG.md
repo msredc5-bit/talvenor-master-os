@@ -310,7 +310,7 @@ engine — folder system `~/workspace/talvenor-master-os/`-এ, dashboard
 | n8n callback workflow (3 node) | **READY · NOT LIVE** | JSON `active: false`, phoneNumberId `FILL_AFTER_TWILIO_IMPORT` |
 | Creator OS 13 stage | **REAL 0 / MOCK 10 / BLOCKED 3** | pipeline.md গণনা লাইন |
 | Jarvis voice | **STUB** | mic যুক্ত নয়, NotImplementedError |
-| 136 ব্যবসা / 1,189 worker | **MAP ONLY** | বানানো হয়নি — শুধু এই ৩ ব্যবসা আসল |
+| 136 ব্যবসা / 1,189 worker | **DROPPED (Boss 2026-11-16)** | scope = 3 ব্যবসা only |
 | Paying client | **0** | — |
 | প্রথম মেইল | **162** | config.json honest_status |
 | Email | **PAUSED** (2026-11-14 থেকে) | DNS fix Boss-এর হাতে |
@@ -390,7 +390,52 @@ GitHub push-এর জন্য ready (repo `talvenor-master-os` এখনো �
 | Products Engine 5 staff / 8 tool / 5 skill | **REAL\*** — launch/sale Gate 0-তে আটকে |
 | Content Engine 8 staff / 8 tool / 8 skill | **REAL** — upload OFF, VOICE.md DRAFT, GPU নাম বাকি |
 | Jarvis voice | **STUB** (mic নয়) |
-| 136 ব্যবসা / 1,189 worker | **MAP ONLY** — বানানো হয়নি |
+| 136 ব্যবসা / 1,189 worker | **DROPPED (Boss 2026-11-16)** — scope = 3 ব্যবসা only |
 | Paying client / প্রথম মেইল / Email / Vet Kit sale / ToolPilot video | **0 / 162 / PAUSED / 0 / 0** |
 | Host | **Muse runtime + bridge cron ($0)** — ২৪/৭ server নেই |
 | GitHub push | **READY, NOT PUSHED** — repo `talvenor-master-os` বানানো হয়নি (404, 2026-11-16 যাচাই করা); manifest `/tmp/master-os-manifest.txt`-এ ready; Boss repo বানালে এক command-এ push |
+
+## Phase 6 — Full Complete Agent Offices (BUILT 2026-11-16, Boss: "full complete office বানাও")
+
+**Boss-এর scope (2026-11-16 ~20:15, তাঁর নিজের কথা):** ৩ machine একসাথে ৩ business চালাবে (Agency, Digital Product, Content); প্রত্যেক business-এর নিজের office + নিজের worker আলাদা আলাদা; আগের বানানো GitHub worker-দের office-র ভিতরে ADD করা; 136 business DROPPED (আপাতত বাদ)।
+
+**সৎ gap যা বন্ধ করা হলো:** Phase 5 পর্যন্ত Chief-রা worker import করত repo-র বাইরে থেকে (`~/workspace/boss-ceo`, `~/workspace/creator-os-combined` via sys.path) — push করা repo একা চলতে পারত না। Phase 6-এ worker-রা ভিতরে vendored।
+
+### যা বানানো হলো
+- **Agency vendored** — `01-Agency-Department/engine/workers/`: 18 file (24,621 bytes), byte-identical to upstream (`diff -r` exit 0): `src/workers/` 5 file (15 worker), `src/contracts/` 6 file, `src/mock/provider.py`, `src/live/meta_provider.py` + `__init__.py`। `src/mock/scenarios.py`, `src/ceo/`, `src/divisions/`, `src/store/db.py` copy করা হয়নি — copy করা কোনো file ওদের import করে না। `SOURCE.md` (origin, file table, upstream-canonical note)। Chief rewired: `ENGINE_WORKERS_DIR` এখন vendored dir; Chief-এ `boss-ceo` string 0।
+- **Content vendored** — `03-Content-Creation-Department/engine/workers/`: 4 file: `src/creator_workers.py` (4,828 bytes, 6 worker), `src/workers/base.py` (7,931 bytes), 2× `__init__.py` + `SOURCE.md`। আর কোনো module লাগেনি — `creator_workers.py` শুধু `src.workers.base` import করে, `base.py` শুধু stdlib। `VOICE.md` repo-র ভিতরে আনা হয়েছে (`03-Content-Creation-Department/VOICE.md`)। Chief rewired: `creator-os-combined` string 0।
+- **Products office** — কিছু vendor করার নেই (5 staff আগেই repo-র ভিতরে); verify করা হয়েছে self-contained (শুধু `00-CEO-Core` import)। Gate 0 NOT PASSED — কোনো sale লেখা হয়নি।
+- **BrainFactory** — `00-CEO-Core/brain.py` (stdlib only): config flag `brain` (`mock` DEFAULT / `live`)। দুই department-এর mock আলাদা shape (agency `MockLLMProvider.complete(prompt, *, max_tokens=500)`, content `MockLLM.complete(prompt)`) — factory প্রত্যেক department-কে তার নিজের mock দেয়, Chief-দের call site বদলায়নি। `live` = vendored `MetaSparkProvider`; key শুধু connector Secure Vault surrogate (`dynamic_credentials`, `/opt/muse/skills/custom-connector-setup/bin/`) দিয়ে — কোনো file-এ key নেই। Live-এর প্রথম verification 2026-11-06-এ TIMEOUT হয়েছিল, key path UNPROVEN — Phase 6-এ কোনো live call নেই।
+- **Runner** — `scripts/run_office.py` (stdlib only): `python3 scripts/run_office.py --business agency|products|content --task <type> --input <json>` → Main CEO Bot → Chief → worker → result (stdout JSON + `store/tasks.json`-এ append)। `--drain-queue --max 2` (এক run-এ সর্বোচ্চ 2 queued task; প্রতিটা আলাদা subprocess-এ চলে)। `--store-dir` দিয়ে TEMP store-এ test করা যায়। Gated action → PENDING, execute হয় না।
+- **Config** — phase 4 → **6**, version 0.5.0 → **0.6.0**, `"brain": "mock"` যোগ; `reused_systems` এখন বলে worker-রা VENDORED, upstream শুধু canonical।
+- **136 DROPPED** — repo-র ২টা 136/1,189 লাইন (এই file-এ) এখন `DROPPED (Boss 2026-11-16) — scope = 3 ব্যবসা only`। `ceo-os` repo বা অন্য কোনো folder ছোঁয়া হয়নি — drop শুধু Master OS scope।
+- **Docs sync** — root README (Phase 6 accounting + runner usage), CEO-README, department README/pipeline/STAFF, engine README, 21 skill file-র path reference, `skills/chief-*.md`, `skills/main-ceo-bot.md`, `scripts/sync_status.py` template — সব এখন vendored সত্য বলে। BUILD-LOG-এর পুরনো Phase 0–5 entry history হিসেবে রাখা হয়েছে, বদলানো হয়নি।
+
+### Verification-এ ধরা পড়ে ঠিক করা হয়েছে
+1. **`src` package collision (pre-existing, Phase 6-এ ধরা):** দুই vendored tree-ই top-level `src` package দেয় — এক process-এ দুই Chief import করলে `ModuleNotFoundError: No module named 'src.creator_workers'`। BrainFactory-র `_load_module()` এখন stale `src` evict করে আর চাওয়া workers dir-কে `sys.path`-এ position 0-তে বসায়। একই কারণে runner-এর drain প্রতিটা task আলাদা subprocess-এ চালায়।
+2. **Live branch ভুল tree ধরছিল:** content mock load-এর পর live brain `src` খুঁজে content tree পাচ্ছিল — position-0 fix-এ ঠিক হয়েছে। Factory-র clean-error path ডিজাইন মতো কাজ করেছে (network attempt নয়, পরিষ্কার `RuntimeError`)।
+3. **check_phase4 fail (config bump-এর পর):** phase `== 4` / version `== "0.5.0"` pin করা ছিল — check_phase2/3-এর precedent মতো `>=` করা হয়েছে (আর কিছু বদলানো হয়নি)।
+4. **Dead constant সরানো হয়েছে:** `main_ceo_bot.py:28`-এর `BOSS_CEO_ENGINE_PATH` (define করা ছিল, কোথাও ব্যবহার হতো না) — সরানো হয়েছে; check_phase0 এখনো 8/8।
+5. **Test contamination শূন্য:** সব test TEMP store-এ; আসল store শেষ পর্যন্ত tasks 0, approvals 0।
+
+### Check — সব coordinator নিজে re-run করেছে
+| check_phase0 | 8/8 | check_phase1 | 11/11 | check_phase2 | 14/14 | check_phase3 | 19/19 |
+| check_phase4 | 9/9 | check_engines | 45/45 | check_phase6 | 14/14 | **মোট** | **120/120 PASS** |
+
+Self-containment proof (coordinator নিজে, `python3 -I` clean env, শুধু repo path): agency import OK (`boss-ceo` sys.path-এ নেই, mock `complete()` → `MOCK-PLAN…`, `cost_usd: 0.0`); content import OK (`creator-os-combined` sys.path-এ নেই, mock → `[MOCK DRAFT…`, `spend_usd: 0.0`); BrainFactory mode `mock`, agency → `MockLLMProvider`, content → `MockLLM`. Runner smoke (TEMP store): agency `caption_write` → `draft-ready`; `outreach_draft` + `gated_action: send` → `pending-approval` (1 approval record TEMP-এ); আসল store 0/0।
+
+### সৎ হিসাব (built-vs-map — Phase 6)
+| জিনিস | অবস্থা |
+|---|---|
+| Phase 0 / 1 / 2* / 3 / 4 / 5 / 6 | **BUILT** (120 checks PASS) |
+| Worker ভিতরে vendored | **Agency 18 file + Content 4 file** — repo একা চলতে পারে (mock brain) |
+| BrainFactory + runner | **REAL** — mock default, live unwired-until-flipped; runner এক command-এ office চালায় |
+| Shared tool-calling core + 3 engine | **REAL** (mock brain, draft-only; gated কখনো execute হয় না) |
+| Agency Engine 15 staff / 8 tool / 15 skill | **REAL** — email PAUSED |
+| Products Engine 5 staff / 8 tool / 5 skill | **REAL\*** — launch/sale Gate 0-তে আটকে |
+| Content Engine 8 staff / 8 tool / 8 skill | **REAL** — upload OFF, VOICE.md DRAFT, GPU নাম বাকি |
+| Jarvis voice | **STUB** (mic নয়) |
+| 136 ব্যবসা / 1,189 worker | **DROPPED (Boss 2026-11-16)** — scope = 3 ব্যবসা only |
+| Paying client / প্রথম মেইল / Email / Vet Kit sale / ToolPilot video | **0 / 162 / PAUSED / 0 / 0** |
+| Host | **Muse runtime + bridge cron ($0)** — ২৪/৭ server নেই |
+| GitHub push | **Phase 0–5 PUSHED 2026-11-16 ~20:03** (commit `94cfc69d`, 81 file) — **Phase 6 NOT PUSHED** (28 নতুন file local-এ; Boss-এর "push koro" আলাদা gate) |

@@ -1,6 +1,6 @@
 # Content Creation — Pipeline (১৩ stage, সৎ map)
 
-**Engine:** Creator OS — `~/workspace/creator-os-combined/` (REUSED, duplicate নয়)
+**Engine:** Creator OS — vendored copy `03-Content-Creation-Department/engine/workers/` (Phase 6; upstream `~/workspace/creator-os-combined/`)
 **Channel:** ToolPilot @ToolPilotai69 (faceless, AI Tools & Tutorials)
 **Chief:** `chief_of_staff_content.py` — REAL (Phase 3), ৬ worker ডাকে (mock brain, $0)
 
@@ -32,7 +32,7 @@ mock scaffold। Chief-এর কাজ: draft বানানো + gate-এ আ
 - **Live-LLM brain unwired** — standalone runner-এ MockLLM-ই চলে; live
   provider deliberate ভাবে unwired (কোনো key ফাইলে নেই, কোনো network
   call নেই)। Agent (Elora/Muse) নিজেই brain — আসল লেখা agent লেখে।
-- **VOICE.md DRAFT** — `~/workspace/creator-os-combined/youtube-skills/VOICE.md`।
+- **VOICE.md DRAFT** — `03-Content-Creation-Department/VOICE.md`।
 - **True AI video motion** — Boss-এর PC GPU (নাম জানা যায়নি) বা paid
   key ছাড়া হয় না। AI video generation এখানে REGION-BLOCKED — retry
   করা হয় না। Default stills + Ken Burns motion = সত্যিকারের motion নয়।
