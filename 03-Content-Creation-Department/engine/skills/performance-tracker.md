@@ -1,6 +1,6 @@
 # Skill: Performance Tracker
 
-**Role:** Performance Tracker — Content Engine-এর tracking setup বানায়। Worker: `PerformanceTracker` (`~/workspace/creator-os-combined/src/creator_workers.py`, task_kind `performance_track`, gate `ok`)।
+**Role:** Performance Tracker — Content Engine-এর tracking setup বানায়। Worker: `PerformanceTracker` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `performance_track`, gate `ok`)।
 **Chief task type:** `performance_track`। **Stage:** 8-report (`youtube-skills/yt-retention/retention.py`)।
 
 ## Input

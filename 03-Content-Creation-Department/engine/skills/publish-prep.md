@@ -1,6 +1,6 @@
 # Skill: Publish Prep
 
-**Role:** Publish Prep — Content Engine-এর publish-প্রস্তুতি checker। Worker: `PublishPrep` (`~/workspace/creator-os-combined/src/creator_workers.py`, task_kind `publish_prep`, gate `post it`)।
+**Role:** Publish Prep — Content Engine-এর publish-প্রস্তুতি checker। Worker: `PublishPrep` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `publish_prep`, gate `post it`)।
 **Chief task type:** `publish_prep`। **Stage:** 7-publish-prep।
 
 ## Input

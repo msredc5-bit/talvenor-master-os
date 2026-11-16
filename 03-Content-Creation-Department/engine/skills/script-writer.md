@@ -1,11 +1,11 @@
 # Skill: Script Writer
 
-**Role:** Script Writer — Content Engine-এর script লেখক। Worker: `ScriptWriter` (`~/workspace/creator-os-combined/src/creator_workers.py`, task_kind `script_write`, gate `ok`)।
+**Role:** Script Writer — Content Engine-এর script লেখক। Worker: `ScriptWriter` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `script_write`, gate `ok`)।
 **Chief task type:** `script_write`। **Stage:** 2b-script (`youtube-skills/yt-script/` + `hookscore.py`)।
 
 ## ⚠️ VOICE.md DRAFT — আগে পড়ো
 
-`~/workspace/creator-os-combined/youtube-skills/VOICE.md` এখনো **DRAFT** — Boss ঠিক না করা পর্যন্ত কোনো script-ই "final" নয়। প্রতিটা script output-এ এই সতর্কতা লিখতে হবে। Boss-এর কোনো YouTube video এখনো নেই, তাই copy করার মতো আসল transcript নেই। VOICE.md-এর নিয়ম: plain direct practical US English, ছোট বাক্য; নিষিদ্ধ শব্দ — "Unlock", "game-changer", "dive in", "let's get into it", "crush it", "secret hack", "guaranteed", "#1 / best in the US" (অর্জন না করা superlative); ব্যবহারের line — "Never miss a call. Never lose a job." / "You run the jobs. We run the phone."। Boss live English বলেন না — read-aloud script-এ প্রতিটা English line-এর নিচে Bengali transliteration লাগে।
+`03-Content-Creation-Department/VOICE.md` এখনো **DRAFT** — Boss ঠিক না করা পর্যন্ত কোনো script-ই "final" নয়। প্রতিটা script output-এ এই সতর্কতা লিখতে হবে। Boss-এর কোনো YouTube video এখনো নেই, তাই copy করার মতো আসল transcript নেই। VOICE.md-এর নিয়ম: plain direct practical US English, ছোট বাক্য; নিষিদ্ধ শব্দ — "Unlock", "game-changer", "dive in", "let's get into it", "crush it", "secret hack", "guaranteed", "#1 / best in the US" (অর্জন না করা superlative); ব্যবহারের line — "Never miss a call. Never lose a job." / "You run the jobs. We run the phone."। Boss live English বলেন না — read-aloud script-এ প্রতিটা English line-এর নিচে Bengali transliteration লাগে।
 
 ## Input
 

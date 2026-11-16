@@ -9,7 +9,7 @@
 
 | জিনিস | অবস্থা |
 |---|---|
-| Creator Studio 6 worker | BUILT, mock-tested, Chief-এর সাথে জোড়া (REUSED — `~/workspace/creator-os-combined/`) |
+| Creator Studio 6 worker | BUILT, mock-tested, Chief-এর সাথে জোড়া (VENDORED Phase 6 — `03-Content-Creation-Department/engine/workers/`) |
 | ১৩ stage | REAL 0 · MOCK 10 · STUB 0 · BLOCKED 3 (video / edit / upload) — দেখুন `pipeline.md` |
 | ToolPilot channel | আছে, video 0, monetization 0, art 0 — দেখুন `toolpilot-status.md` |
 | প্রথম content (Nano Banana 2) | READY TO RECORD — Boss-এর OBS recording বাকি, verdict [FILL AFTER TEST] |
@@ -32,7 +32,7 @@ Track 3 = ToolPilot, নাকি brand-new channel? উত্তর এলে �
 
 ## Phase 3-এ যা হয়েছে (2026-11-16)
 
-Chief of Staff module creator-os-combined-র ৬ worker-এর সাথে জোড়া
-হয়েছে (REAL)। কোনো video "live" বলে দাবি করা হবে না যতক্ষণ আসল
+Chief of Staff module vendored ৬ worker-এর সাথে জোড়া
+হয়েছে (REAL, Phase 6)। কোনো video "live" বলে দাবি করা হবে না যতক্ষণ আসল
 upload verify না হয়। video_produce video file বানায় না — শুধু
 production plan + missing-inputs list দেয়।

@@ -1,6 +1,6 @@
 # Skill: Caption Writer
 
-**Role:** Caption Writer — Content Engine-এর caption + hashtag লেখক। Worker: `CaptionWriter` (`~/workspace/creator-os-combined/src/creator_workers.py`, task_kind `caption_write`, gate `ok`)।
+**Role:** Caption Writer — Content Engine-এর caption + hashtag লেখক। Worker: `CaptionWriter` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `caption_write`, gate `ok`)।
 **Chief task type:** `caption_write`। **Stage:** 6-caption-seo (`youtube-skills/yt-seo/`)।
 
 ## Input

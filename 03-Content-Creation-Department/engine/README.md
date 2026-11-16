@@ -3,7 +3,7 @@
 **Engine:** Content Creation Engine (Creator OS) — ToolPilot @ToolPilotai69
 **Channel:** AI Tools & Tutorials, faceless, US viewers
 **Chief:** `../chief_of_staff_content.py` — REAL (Phase 3), ৬ task type → ৬ Creator OS worker (mock brain, $0)
-**Source:** `~/workspace/creator-os-combined/` (REUSED — copy/move করা হয়নি)
+**Source:** `03-Content-Creation-Department/engine/workers/` (VENDORED Phase 6; upstream `~/workspace/creator-os-combined/` canonical থাকে)
 
 ## Staff — ৮ জন
 

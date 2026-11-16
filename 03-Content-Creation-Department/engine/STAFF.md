@@ -12,7 +12,7 @@
 
 ## 1. Topic Researcher (TopicResearcher)
 
-- **Worker:** `TopicResearcher` — `~/workspace/creator-os-combined/src/creator_workers.py` (task_kind `topic_research`, gate `ok`)
+- **Worker:** `TopicResearcher` — `03-Content-Creation-Department/engine/workers/src/creator_workers.py` (task_kind `topic_research`, gate `ok`)
 - **কী করে:** CEO-র সিদ্ধান্ত নিয়ে niche + audience-এর জন্য ৩টি content topic বাছে — প্রতিটার angle, কেন fit করে, আর পরের research step কী। Stage 1-research + 0a-niche (`tools/niche_score.py`, ৪ axis-এ ১–১০ score) + 2a-concept (`tools/concept_score.py`, ৩–৫ concept, ১–১০ score)।
 - **Input:** niche (যেমন "AI Tools & Tutorials"), audience (US viewers), Boss-এর দেওয়া trend/topic থাকলে সেটা।
 - **Output:** ৩টি topic draft — angle + fit + next-research-step সহ, `[MOCK DRAFT]` লেবেল।
@@ -21,16 +21,16 @@
 
 ## 2. Script Writer (ScriptWriter)
 
-- **Worker:** `ScriptWriter` — `~/workspace/creator-os-combined/src/creator_workers.py` (task_kind `script_write`, gate `ok`)
+- **Worker:** `ScriptWriter` — `03-Content-Creation-Department/engine/workers/src/creator_workers.py` (task_kind `script_write`, gate `ok`)
 - **কী করে:** বাছা topic-কে script বানায় — প্রথম ২ সেকেন্ডে hook, একটা পরিষ্কার idea, simple CTA। Method: `youtube-skills/yt-script/` — ২১ formula থেকে ৫টি hook লেখা, `hookscore.py` দিয়ে score করা, সেরা ২টি দেখানো; প্রথম ১৫ সেকেন্ডে title-এর promise confirm + একটা খোলা প্রশ্ন + payoff-এর প্রমাণ।
 - **Input:** topic, format (short video / long video), VOICE.md।
 - **Output:** Script draft — hook options (score সহ) + full spoken script, `[MOCK DRAFT]`।
 - **Gate:** `ok` — Boss-এর "ok" ছাড়া script ব্যবহার করা যাবে না।
-- **⚠️ সৎ সীমা — VOICE.md DRAFT:** `~/workspace/creator-os-combined/youtube-skills/VOICE.md` এখনো DRAFT — Boss ঠিক না করা পর্যন্ত কোনো script-ই "final" নয়। Boss-এর কোনো YouTube video এখনো নেই, তাই copy করার মতো আসল transcript-ও নেই। Boss live English বলেন না — read-aloud script-এ প্রতিটা English line-এর নিচে Bengali transliteration লাগে। Week 1 long video ("Google's Nano Banana 2 Is Free - But Is It Good?") READY TO RECORD, কিন্তু verdict **[FILL AFTER TEST]** — Boss-এর OBS recording-এর ৫ test না দেখে verdict লেখা হবে না।
+- **⚠️ সৎ সীমা — VOICE.md DRAFT:** `03-Content-Creation-Department/VOICE.md` এখনো DRAFT — Boss ঠিক না করা পর্যন্ত কোনো script-ই "final" নয়। Boss-এর কোনো YouTube video এখনো নেই, তাই copy করার মতো আসল transcript-ও নেই। Boss live English বলেন না — read-aloud script-এ প্রতিটা English line-এর নিচে Bengali transliteration লাগে। Week 1 long video ("Google's Nano Banana 2 Is Free - But Is It Good?") READY TO RECORD, কিন্তু verdict **[FILL AFTER TEST]** — Boss-এর OBS recording-এর ৫ test না দেখে verdict লেখা হবে না।
 
 ## 3. Visual Producer (VisualProducer)
 
-- **Worker:** `VisualProducer` — `~/workspace/creator-os-combined/src/creator_workers.py` (task_kind `visual_produce`, gate `ok`)
+- **Worker:** `VisualProducer` — `03-Content-Creation-Department/engine/workers/src/creator_workers.py` (task_kind `visual_produce`, gate `ok`)
 - **কী করে:** Visual plan বানায় — shot list, thumbnail idea, on-screen text (verbatim, ছোট, readable)। Stage 3-visual-pack (`youtube-skills/yt-package/title.py` — title + thumbnail একসাথে lint করা) আর stage 4-video-র production plan + missing-inputs checklist।
 - **Input:** topic, format, script (থাকলে), footage / voiceover line / GPU নাম (থাকলে)।
 - **Output:** Visual plan draft + stage 4-এর missing-inputs list। `video_file` সবসময় **None** — এই role video file বানায় না।
@@ -39,7 +39,7 @@
 
 ## 4. Caption Writer (CaptionWriter)
 
-- **Worker:** `CaptionWriter` — `~/workspace/creator-os-combined/src/creator_workers.py` (task_kind `caption_write`, gate `ok`)
+- **Worker:** `CaptionWriter` — `03-Content-Creation-Department/engine/workers/src/creator_workers.py` (task_kind `caption_write`, gate `ok`)
 - **কী করে:** Platform অনুযায়ী caption + hashtag pack লেখে — প্রথম line-এ hook, একটা CTA, hashtag (Instagram ৫–৮, LinkedIn ৩, Facebook ০–২)। Stage 6-caption-seo (`youtube-skills/yt-seo/` — description + tags, আসল search query-এর জন্য)।
 - **Input:** topic, platform (YouTube / Facebook / Instagram / LinkedIn), video/post-এর draft।
 - **Output:** Caption pack draft — platform-wise caption + hashtag + CTA, `[MOCK DRAFT]`।
@@ -48,7 +48,7 @@
 
 ## 5. Publish Prep (PublishPrep)
 
-- **Worker:** `PublishPrep` — `~/workspace/creator-os-combined/src/creator_workers.py` (task_kind `publish_prep`, gate `post it`)
+- **Worker:** `PublishPrep` — `03-Content-Creation-Department/engine/workers/src/creator_workers.py` (task_kind `publish_prep`, gate `post it`)
 - **কী করে:** Post-টা publish-এর জন্য তৈরি করে — final checklist: hook, readable text, কোনো invented claim নেই, platform, best posting time। Stage 7-publish-prep। Publish করে না — শুধু checklist draft দেয়।
 - **Input:** finished post/video draft, caption pack, platform, posting time।
 - **Output:** Publish-prep checklist draft, `ready_to_publish: False`।
@@ -57,7 +57,7 @@
 
 ## 6. Performance Tracker (PerformanceTracker)
 
-- **Worker:** `PerformanceTracker` — `~/workspace/creator-os-combined/src/creator_workers.py` (task_kind `performance_track`, gate `ok`)
+- **Worker:** `PerformanceTracker` — `03-Content-Creation-Department/engine/workers/src/creator_workers.py` (task_kind `performance_track`, gate `ok`)
 - **কী করে:** Performance report-এর **template/setup** বানায় — কোন metric কোথা থেকে নিতে হবে, best/worst comparison, পরের সপ্তাহে একটা change। Stage 8-report (`youtube-skills/yt-retention/retention.py` — retention CSV পড়ে hook leak খোঁজা)।
 - **Input:** topic/video, Boss-এর পাঠানো আসল platform সংখ্যা (থাকলে)।
 - **Output:** Report template draft — metric-এর list + comparison format + একটা change, `[MOCK DRAFT]`।

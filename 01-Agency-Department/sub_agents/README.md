@@ -1,9 +1,6 @@
 # Agency — sub_agents
 
-এই folder-এ Agency-র worker-রা থাকবে। আসল worker-রা আগেই বানানো আছে
-`~/workspace/boss-ceo/`-তে — duplicate বানানো হয়নি। **Phase 1 থেকে
-`chief_of_staff_agency.py` ওদের সত্যিই ডাকে** (mock brain, $0) —
-task type অনুযায়ী routing নিচে।
+এই folder-এ Agency-র worker-রা থাকবে। আসল worker-রা আগেই বানানো ছিল `~/workspace/boss-ceo/`-তে — Phase 6-এ ওদের copy এই repo-র `01-Agency-Department/engine/workers/`-এ আনা হয়েছে। **Phase 1 থেকে `chief_of_staff_agency.py` ওদের সত্যিই ডাকে** (mock brain, $0) — task type অনুযায়ী routing নিচে।
 
 ## আসল worker — WIRED (Phase 1, REUSED engine)
 
@@ -45,6 +42,6 @@ Task type → worker → gate। Gate = output পাঠাতে/ব্যব�
 মোট: ১৫ worker — সব mock-tested, ১টা live run হয়েছে (OutreachDrafter,
 ৫টা real draft, DRAFT ONLY)। Full live day এখনো Boss approve করেননি।
 
-সূত্র: `~/workspace/boss-ceo/src/workers/` (acquisition.py, delivery.py,
+সূত্র: `01-Agency-Department/engine/workers/src/workers/` (vendored copy; upstream `~/workspace/boss-ceo/src/workers/`) (acquisition.py, delivery.py,
 marketing.py, admin.py) + `~/workspace/ceo-os-summary/CEO-OS-A-to-Z-summary.md` §3।
 Routing কোড: `chief_of_staff_agency.py` — `ROUTING` table।
