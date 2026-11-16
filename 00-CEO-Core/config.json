@@ -1,4 +1,5 @@
 {
+  "brain": "mock",
   "brand": {
     "headline": "Never miss a call. Never lose a job.",
     "line": "You run the jobs. We run the phone."
@@ -82,19 +83,20 @@
       "phase_1_agency": "BUILT 2026-11-16 - Agency Chief REAL, 15 workers wired, draft-only",
       "phase_2_digital_product": "BUILT as far as Gate 0 allows 2026-11-16 - Products Chief REAL, kit blueprint, PA list 39/100, launch/sale BLOCKED on Gate 0",
       "phase_3_creator_os": "BUILT 2026-11-16 - Content Chief REAL, 6 Creator OS workers wired (mock brain, draft-only), 13 stages REAL 0 / MOCK 10 / BLOCKED 3, upload OFF, VOICE.md DRAFT, GPU name missing, ToolPilot video 0",
-      "phase_4_n8n_wiring": "BUILT 2026-11-16 - n8n wiring doc + sync_status.py, both workflows READY NOT LIVE, host = Muse runtime + bridge cron ($0)"
+      "phase_4_n8n_wiring": "BUILT 2026-11-16 - n8n wiring doc + sync_status.py, both workflows READY NOT LIVE, host = Muse runtime + bridge cron ($0)",
+      "phase_6_brain_runner": "BUILT 2026-11-16 - BrainFactory (mock default $0, live MetaSpark unwired-until-flipped, no live calls) + run_office.py runner (routes via Main CEO Bot, gates via ApprovalGateway, TEMP store supported) + check_phase6"
     }
   },
   "owner": "Md Mainuddin (Boss)",
-  "phase": 4,
+  "phase": 6,
   "reused_systems": {
     "agency_office": "~/workspace/talvenor-office/",
-    "creator_os": "~/workspace/creator-os-combined/",
-    "engine_15_workers": "~/workspace/boss-ceo/",
+    "creator_os": "VENDORED in 03-Content-Creation-Department/engine/workers/ - ~/workspace/creator-os-combined/ stays the canonical upstream, no longer a runtime dependency",
+    "engine_15_workers": "VENDORED in 01-Agency-Department/engine/workers/ - ~/workspace/boss-ceo/ stays the canonical upstream, no longer a runtime dependency",
     "jarvis_concept": "~/workspace/jarvis-ceo-os-concept/"
   },
   "spend_cap_usd": 0,
   "system": "Talvenor Master OS",
   "timezone": "Asia/Dhaka",
-  "version": "0.5.0"
+  "version": "0.6.0"
 }

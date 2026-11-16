@@ -3,10 +3,12 @@
 কাজ: Boss-এর (বা Jarvis-এর) দেওয়া task-টা পড়ে ঠিক Chief of Staff-এর
 দিকে পাঠানো, আর gated কাজ হলে ApprovalGateway দিয়ে আটকে রাখা।
 
-এই ফাইল ইঞ্জিন নয় — আসল worker engine ~/workspace/boss-ceo/ তে আছে
-(15 worker, mock-tested + 1 live run)। এখানে engine-কে duplicate করা
-হয়নি; Phase 1 থেকে Agency Chief (01-Agency-Department/
-chief_of_staff_agency.py) engine-কে import করে ডাকে।
+এই ফাইল ইঞ্জিন নয় — আসল worker engine এখন এই repo-র ভেতরে
+vendored (01-Agency-Department/engine/workers/, 15 worker;
+03-Content-Creation-Department/engine/workers/, 6 Creator OS
+worker)। বাইরের checkout (~/workspace/boss-ceo, ~/workspace/
+creator-os-combined) আর runtime dependency নয় — শুধু canonical
+upstream। Phase 1 থেকে Agency Chief engine-কে import করে ডাকে।
 
 Jarvis (voice) আর Main CEO Bot (brain) আলাদা module — jarvis_voice.py
 দেখুন। Gemini-র map-এ ওরা একসাথে মিশে গিয়েছিল, সেটা এখানে ঠিক করা
@@ -23,9 +25,6 @@ from human_approval_gateway import ApprovalGateway, GATED_ACTIONS  # noqa: E402
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(BASE_DIR, "00-CEO-Core", "config.json")
-
-# REUSED engine — duplicate নয়, শুধু path reference (Phase 1-এ import হবে)
-BOSS_CEO_ENGINE_PATH = os.path.expanduser("~/workspace/boss-ceo")
 
 # business key -> Chief of Staff module (Phase 0: stub module-গুলো)
 CHIEF_MODULES = {

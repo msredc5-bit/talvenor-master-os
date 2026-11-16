@@ -2,10 +2,12 @@
 
 Talvenor AI Receptionist Agency — Boss-এর প্রথম ব্যবসা, MAIN।
 
-কাজ: Main CEO Bot থেকে আসা task-টা পড়ে ~/workspace/boss-ceo/
+কাজ: Main CEO Bot থেকে আসা task-টা পড়ে এই office-এর ভেতরে vendored
 engine-এর আসল worker-এর দিকে পাঠানো, ফলাফল DRAFT হিসেবে ফেরত
 দেওয়া, আর gated কাজ (send / publish / spend / delete) হলে
-ApprovalGateway দিয়ে আটকে রাখা।
+ApprovalGateway দিয়ে আটকে রাখা। Workers এখন office-এর ভেতরে
+vendored (engine/workers/) — বাইরের কোনো checkout-এর ওপর
+আর কোনো নির্ভরতা নেই (দেখুন engine/workers/SOURCE.md)।
 
 নিয়ম (কোডে লেখা):
   - এই Chief কখনো মেইল/মেসেজ পাঠায় না, publish করে না, খরচ করে
@@ -13,9 +15,11 @@ ApprovalGateway দিয়ে আটকে রাখা।
     আর সেটাও Boss নিজে করেন (এই সিস্টেম শুধু DRAFT বানায়)।
   - Email পাঠানো PAUSED (Boss-এর নির্দেশ 2026-11-14) — draft-ই শেষ
     কথা, send-এর চেষ্টাও করা হয় না।
-  - Worker-রা MockLLMProvider (mock brain, $0) দিয়ে চলে — ফলাফল
-    DRAFT / MOCK হিসেবে লেবেল করা থাকে। Live brain (Muse Spark)
-    শুধু Boss-এর আলাদা অনুমোদনে, এখানে নয়।
+  - Worker-রা BrainFactory-র brain দিয়ে চলে — config.json-এর
+    "brain" flag "mock" (DEFAULT, $0) হলে vendored MockLLMProvider,
+    "live" হলে vendored MetaSparkProvider। ফলাফল DRAFT / MOCK হিসেবে
+    লেবেল করা থাকে। Live brain শুধু Boss-এর আলাদা অনুমোদনে, এখানে নয়;
+    Phase 6 কোনো live call করে না (দেখুন 00-CEO-Core/brain.py)।
   - RetellBuilder: engine-এর DEL worker-এর আসল নাম। কিন্তু
     Talvenor-এর live stack Vapi/Sophia (Boss Retell-এর জন্য টাকা
     দেবেন না) — তাই RetellBuilder-এর output শুধু DRAFT build plan,
@@ -30,17 +34,18 @@ import sys
 import uuid
 from datetime import datetime, timezone
 
-# --- paths (REUSED systems — duplicate নয়, শুধু import) ------------------
+# --- paths (VENDORED engine — এই office-এর ভেতরে, বাইরের checkout নয়) --
 MASTER_OS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CEO_CORE_DIR = os.path.join(MASTER_OS_DIR, "00-CEO-Core")
-BOSS_CEO_DIR = os.path.expanduser("~/workspace/boss-ceo")
+ENGINE_WORKERS_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "engine", "workers")
 
 sys.path.insert(0, CEO_CORE_DIR)
-sys.path.insert(0, BOSS_CEO_DIR)
+sys.path.insert(0, ENGINE_WORKERS_DIR)
 
 from human_approval_gateway import ApprovalGateway  # noqa: E402
+from brain import BrainFactory  # noqa: E402
 from src.contracts.models import Task as EngineTask  # noqa: E402
-from src.mock.provider import MockLLMProvider  # noqa: E402
 from src.workers.acquisition import (  # noqa: E402
     NegotiationCoach,
     OutreachDrafter,
@@ -67,7 +72,7 @@ from src.workers.marketing import (  # noqa: E402
 
 DEPARTMENT = "agency"
 BUSINESS = "Talvenor AI Receptionist Agency"
-ENGINE_PATH = "~/workspace/boss-ceo/"
+ENGINE_PATH = ENGINE_WORKERS_DIR  # vendored engine, এই office-এর ভেতরে
 AGENCY_OFFICE_PATH = "~/workspace/talvenor-office/"
 BOOKING_LINK = "https://calendar.app.google/WLoxBfnLGTdjK3LB8"
 TALVENOR_PHONE = "+1 (947) 223-0244"
@@ -234,9 +239,9 @@ def handle_task(task, tasks_path=None, approvals_path=None):
         }, tasks_path=tasks_path)
         return result
 
-    # 4. আসল routing — real boss-ceo worker, mock brain ($0)।
+    # 4. আসল routing — vendored worker, BrainFactory-র brain ($0 mock default)।
     worker_cls, division, gate_word = ROUTING[task_type]
-    llm = MockLLMProvider(seed="master-os-phase1")
+    llm = BrainFactory.get_brain("agency")
     worker = worker_cls(
         f"agency-{worker_cls.__name__}",
         "talvenor-agency",

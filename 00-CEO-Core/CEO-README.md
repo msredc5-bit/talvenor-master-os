@@ -37,6 +37,4 @@ Main CEO Bot। Gemini-র map-এ ওরা একসাথে ছিল, স�
 
 ## আসল ইঞ্জিন কোথায়
 
-১৫ worker-এর আসল engine `~/workspace/boss-ceo/`-তে আছে (mock-tested +
-১টা live worker run)। এখানে সেটা duplicate করা হয়নি — Phase 1-এ
-এই router সেখান থেকে worker ডাকবে।
+১৫ worker-এর আসল engine-এর copy এখন এই repo-র ভিতরে আছে (`01-Agency-Department/engine/workers/`, Phase 6-এ vendor করা; upstream `~/workspace/boss-ceo/` canonical থাকে)। এই router ভিতরের copy থেকে worker ডাকে।

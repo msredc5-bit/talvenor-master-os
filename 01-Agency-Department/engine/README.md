@@ -9,7 +9,7 @@ Dental / medical / patient-health — কখনো target নয়।
 
 | জিনিস | সংখ্যা |
 |---|---|
-| Staff (role) | **15** — boss-ceo-র 15 worker, একটাও বানানো নয় |
+| Staff (role) | **15** — vendored boss-ceo worker (Phase 6), ভিতরে আছে |
 | Tools | **8** — mock 5, gated (stub) 3 |
 | Skills | **15** — প্রতি role-এ একটা করে |
 | Chief | `../chief_of_staff_agency.py` (REAL, Phase 1) — routing-ই সত্যের উৎস |
@@ -48,7 +48,7 @@ output, gate word।
 
 | অংশ | Status |
 |---|---|
-| Chief routing (15 worker) | **REAL** — boss-ceo engine ডাকে |
+| Chief routing (15 worker) | **REAL** — vendored engine ডাকে |
 | Worker brain | **MOCK** — MockLLMProvider, $0; সব output DRAFT |
 | Draft লেখা (email/DM/caption/script/plan) | **MOCK** — draft-ready |
 | Receptionist build | **DRAFT plan only** — RetellBuilder plan লেখে, live build Vapi/Sophia-তে Boss-এর কাজ |
@@ -86,5 +86,5 @@ output, gate word।
 - `STAFF.md` · `tools.json` · `tool_calling.py` · `README.md` (এই ফাইল)
 - `skills/` — 15টা skill `.md`
 - Source (reference only, copy করা হয়নি): `../chief_of_staff_agency.py`,
-  `../pipeline.md`, `~/workspace/boss-ceo/src/workers/`,
+  `../pipeline.md`, `01-Agency-Department/engine/workers/src/workers/` (vendored; upstream `~/workspace/boss-ceo/src/workers/`),
   `~/workspace/agency-os/` (20 skill + SOP)।
