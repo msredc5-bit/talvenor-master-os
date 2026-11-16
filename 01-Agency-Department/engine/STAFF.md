@@ -1,7 +1,7 @@
 # STAFF.md — Agency Engine-র কর্মী তালিকা (Phase 5)
 
 Talvenor AI Receptionist Agency — Boss-এর প্রথম ব্যবসা, MAIN।
-এই তালিকার ১৫টা role = `~/workspace/boss-ceo/src/workers/`-এর ১৫টা আসল
+এই তালিকার ১৫টা role = `01-Agency-Department/engine/workers/src/workers/`-এর ১৫টা আসল (vendored copy; upstream `~/workspace/boss-ceo/src/workers/`)
 worker, একটাও বানানো নয়। নাম, division, gate — Chief-এর ROUTING
 (`../chief_of_staff_agency.py`) থেকে হুবহু নেওয়া।
 
@@ -138,7 +138,7 @@ None = draft নিজেই নিরাপদ, কোনো gate নেই।
 
 ---
 
-**Source:** `~/workspace/boss-ceo/src/workers/{acquisition,delivery,marketing,admin}.py`
+**Source:** `01-Agency-Department/engine/workers/src/workers/{acquisition,delivery,marketing,admin}.py` (vendored; upstream `~/workspace/boss-ceo/src/workers/`)
 (task_kind / default_payload / requires_gate) · `../chief_of_staff_agency.py` (ROUTING)
 · `../pipeline.md` · `~/workspace/agency-os/SOP/prospect-qualification-talvenor.md`
 · agency-os SKILL 02, 03, 06, 15, 16, 17, 18, 20।
