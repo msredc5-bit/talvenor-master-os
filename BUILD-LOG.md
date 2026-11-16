@@ -439,3 +439,43 @@ Self-containment proof (coordinator নিজে, `python3 -I` clean env, শু
 | Paying client / প্রথম মেইল / Email / Vet Kit sale / ToolPilot video | **0 / 162 / PAUSED / 0 / 0** |
 | Host | **Muse runtime + bridge cron ($0)** — ২৪/৭ server নেই |
 | GitHub push | **Phase 0–5 PUSHED 2026-11-16 ~20:03** (commit `94cfc69d`, 81 file) — **Phase 6 NOT PUSHED** (28 নতুন file local-এ; Boss-এর "push koro" আলাদা gate) |
+
+## Phase 7 — Full Offices (Sections) (BUILT 2026-11-17, Boss: "agency-র receive / finish service / sell করার যতগুলো section আর staff প্রয়োজন... folder up করো")
+
+Boss-এর নির্দেশ 2026-11-17: agency-র receive / finish service / sell চালাতে যত section আর staff লাগে, প্রত্যেক staff-এর একটা করে AI agent + skill — তারপর digital product business-এর office, তারপর content creation-এর full agent + skill system। ৩ department-এ ৩ builder (coordinator-এর অধীনে), coordinator নিজে সব check re-run করেছে।
+
+### যা বানানো হলো
+- **Agency — 5 section, 6 নতুন agent + 6 skill, 15 mapped staff** (`01-Agency-Department/sections/`): receive (ClientIntakeReceiver — `client_intake`, gate send; mapped: InboxTriager, ProspectResearcher, SchedulerAssistant), sell (SalesCloser — `sales_close`, ok; FollowUpAgent — `followup_draft`, send, 100-mail rule code-এ; mapped: OutreachDrafter, ReplyHandler, NegotiationCoach, ObjectionSimulator), delivery (ServiceDeliveryManager — `delivery_manage`, ok; ClientSuccessAgent — `client_success`, send; mapped: RetellBuilder DRAFT plan only, QAEngineer, OnboardingAgent), marketing (mapped-only: ContentPlanner, VideoProducer, CaptionWriter, PublishPrep), ops (BillingInvoiceAgent — `billing_invoice`, ok, LOCKED pricing $547/$1,109/$1,672 + build $597/$1,297/$1,997, invoice শুধু paying client-এ Boss-এর কথায়; mapped: ReportCompiler)। 15 worker-এর code duplicate করা হয়নি — vendored worker + engine skill-এ map করা।
+- **Digital Product — 6 section, 7 agent + 7 skill** (`02-Digital-Product-Department/sections/`): product (KitBuilder — `kit_build`, ok; KitQA — `kit_qa`, ok, NEW), research (ClinicResearcher), launch (LaunchManager — `launch_prep`, go), sales (KitSales — `kit_sales`, send, NEW), support (SupportDrafter — `support_draft`, send), finance (PaymentRailsChecker — `gate0_check`)। **Gate 0 fail-closed:** kit_build / launch_prep → `blocked-gate0` (mark_sold / mark_launched payload-ও); KitSales draft-এ "Gate 0 NOT passed" warning; কোনো sale/launch কখনো লেখা হয় না।
+- **Content — 5 section, 10 agent + 10 skill** (`03-Content-Creation-Department/sections/`): plan (TopicResearcher wrapper, ContentPlanner chief-level standalone — `plan_weekly`), produce (ScriptWriter wrapper — VOICE.md DRAFT warning প্রতি output-এ; VisualProducer wrapper — stage 4 BLOCKED, `video_file` None + missing-inputs), publish (CaptionWriter wrapper, PublishPrep wrapper — `ready_to_publish` False, gate "post it"), analyze (PerformanceTracker wrapper — metric 0, কখনো estimate নয়; PerformanceAnalyst chief-level standalone — metric না থাকলে `waiting-for-metrics`), growth (GrowthAgent — `growth_research`, send, NEW; RepurposeAgent — `repurpose_plan`, ok, NEW, `shorts_made: 0`)। Upload OFF — কোনো section file-এ upload code path নেই।
+- **Chief routing:** ৩ Chief-এ `SECTION_ROUTING` + একটা branch (importlib file load → agent `run()` → tasks.json-এ log, আগের branch-গুলোর মতো)। নতুন task type: agency 6, products 3, content 4। পুরনো ROUTING key/behavior বদলায়নি; `engine/tools.json` ছোঁয়া হয়নি।
+- **Agent contract (সব 23):** stdlib only (import time), Bengali docstring, class attrs `task_kind`/`gate`/`section`/`role`, `run(task, brain, gateway, approvals_path)` — gated action → ApprovalGateway PENDING, কখনো execute নয়; output `[MOCK DRAFT]` লেবেল, `draft_only: True`, `mock_brain: True`। কোনো agent file লেখে না, network ছোঁয় না।
+- **Docs:** ৩ `engine/STAFF.md`-এর শেষে "Phase 7 — Section map" যোগ (আগের content বদলায়নি); root README (Phase 7 accounting + sections tree); config phase 7 / v0.7.0 + `honest_status.phases`-এ `phase_5_three_engines` + `phase_7_sections`; dashboard `status.html`-এ Phase 5/6/7 row যোগ (sync_status.py template + collect_status keys)।
+- **136 DROPPED** — নতুন কোনো file-এ 136/1,189 scope নেই; scope = 3 ব্যবসা only (আগের মতোই)।
+
+### Verification-এ ধরা পড়ে ঠিক করা হয়েছে
+1. **Products Chief branch nested shape:** প্রথমে `output`-এ পুরো agent result dict বসত (mock_brain top-level-এ ছিল না) — agency/content Chief-এর মতো flatten করা হয়েছে (`worker`, `output` str, `notes`, `mock_brain`, `draft_only`, `gate`)। এখন ৩ Chief-এর section branch এক shape।
+2. **sync_status.py KeyError:** template-এ Phase 5/6/7 row যোগ করা হয়েছিল, কিন্তু `collect_status()`-এর `phase_status` dict-এ ওই key ছিল না — ৩ key যোগ করা হয়েছে। check_phase4-এর sync test এতে fail করছিল।
+3. **check_phase6 pin:** config phase 7 হওয়ার পর check_phase6-এর check 11 (`phase == 6`, `version == "0.6.0"`) fail করত — Phase 6-এর precedent মতো `>= 6` / `>= "0.6.0"` করা হয়েছে (আর কিছু বদলায়নি)।
+4. **check_phase7-এর ২টা ভুল (check-এর, build-এর নয়):** skill filename-এ underscore vs hyphen (file-গুলো hyphen-এ ঠিক ছিল) + upload grep-এ docstring-এর prose ("YOUTUBE_UPLOAD_ENABLED=1 লাগে") ধরা পড়ছিল — check এখন শুধু আসল code path খোঁজে (`os.getenv`/`os.environ` read, `upload_youtube(` call)।
+5. **Content wrapper `src` path bug (builder ঠিক করেছে):** department dir 3× `dirname`-এ ভুল হচ্ছিল (`sections/`-এ নামছিল) — 4× `dirname`-এ ঠিক; Chief-routed path-এ ধরা পড়েনি কারণ ৪ নতুন type-ই standalone agent।
+
+### Check — সব coordinator নিজে re-run করেছে
+| check_phase0 | 8/8 | check_phase1 | 11/11 | check_phase2 | 14/14 | check_phase3 | 19/19 |
+| check_phase4 | 9/9 | check_engines | 45/45 | check_phase6 | 14/14 | check_phase7 | 18/18 | **মোট** | **138/138 PASS** |
+
+Runner smoke (TEMP store, check_phase7-এর ভেতরে): agency `client_intake` → `draft-ready`; products `kit_qa` → `draft-ready`; content `plan_weekly` → `draft-ready`; gated `followup_draft` / `kit_sales` / `growth_research` + `send` → প্রতিটা `pending-approval`, ঠিক ১ pending approval, কিছু execute হয়নি। আসল store শেষ পর্যন্ত tasks 0, approvals 0, `tool_calls.json` নেই।
+
+### সৎ হিসাব (built-vs-map — Phase 7)
+| জিনিস | অবস্থা |
+|---|---|
+| Phase 0 / 1 / 2* / 3 / 4 / 5 / 6 / 7 | **BUILT** (138 checks PASS) |
+| Section (16) / agent (23) / skill (23) | **REAL** — mock brain, draft-only, gated PENDING |
+| Agency office (receive/sell/delivery/marketing/ops) | **REAL** — 21 staff (15 mapped worker + 6 নতুন agent); email PAUSED; follow-up 100-mail rule-এ PARKED |
+| Products office (product/research/launch/sales/support/finance) | **REAL\*** — Gate 0 NOT PASSED; kit 0/6, PA 39/100, sale 0 |
+| Content office (plan/produce/publish/analyze/growth) | **REAL** — upload OFF, VOICE.md DRAFT, metric 0, GPU নাম বাকি |
+| Jarvis voice | **STUB** (mic নয়) |
+| 136 ব্যবসা / 1,189 worker | **DROPPED (Boss 2026-11-16)** — scope = 3 ব্যবসা only |
+| Paying client / প্রথম মেইল / Email / Vet Kit sale / ToolPilot video | **0 / 162 / PAUSED / 0 / 0** |
+| Host | **Muse runtime + bridge cron ($0)** — ২৪/৭ server নেই |
+| GitHub push | **Phase 7 NOT PUSHED** (নতুন/বদলানো file local-এ; Boss-এর "push koro" আলাদা gate — remote head এখনো bf11423d, Phase 6) |

@@ -161,6 +161,9 @@ def collect_status():
             "phase_2_digital_product": phases.get("phase_2_digital_product", UNKNOWN),
             "phase_3_creator_os": phases.get("phase_3_creator_os", UNKNOWN),
             "phase_4_n8n_wiring": phases.get("phase_4_n8n_wiring", UNKNOWN),
+            "phase_5_three_engines": phases.get("phase_5_three_engines", UNKNOWN),
+            "phase_6_brain_runner": phases.get("phase_6_brain_runner", UNKNOWN),
+            "phase_7_sections": phases.get("phase_7_sections", UNKNOWN),
         },
         "workflow_auto_send": read_workflow_status(AUTO_SEND_PATH),
         "workflow_callback": read_workflow_status(CALLBACK_PATH),
@@ -249,6 +252,9 @@ def render_html(s):
       <tr><td><strong>Phase 2</strong> — Digital Product (Chief REAL, kit blueprint, PA list {pa}/100 — launch/sale Gate 0-তে আটকে)</td><td>{phase_badge(ph["phase_2_digital_product"])}</td></tr>
       <tr><td><strong>Phase 3</strong> — Creator OS department (Chief REAL, 6 worker wired, 13 stage REAL {pipe["real"]} / MOCK {pipe["mock"]} / BLOCKED {pipe["blocked"]}, upload OFF)</td><td>{phase_badge(ph["phase_3_creator_os"])}</td></tr>
       <tr><td><strong>Phase 4</strong> — n8n wiring (Gmail, Vapi, Sheets — workflows READY, NOT LIVE)</td><td>{phase_badge(ph["phase_4_n8n_wiring"])}</td></tr>
+      <tr><td><strong>Phase 5</strong> — Three Engines (shared tool-calling core + 3 engines: Agency 15 / Products 5 / Content 8 staff)</td><td>{phase_badge(ph["phase_5_three_engines"])}</td></tr>
+      <tr><td><strong>Phase 6</strong> — Brain + Runner (BrainFactory mock default, run_office.py — workers vendored)</td><td>{phase_badge(ph["phase_6_brain_runner"])}</td></tr>
+      <tr><td><strong>Phase 7</strong> — Full Offices: 16 sections, 23 section agents, 23 section skills (Agency 5 / Products 6 / Content 5 sections)</td><td>{phase_badge(ph["phase_7_sections"])}</td></tr>
     </table>
   </div>
 

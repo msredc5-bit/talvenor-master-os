@@ -295,7 +295,7 @@ def main():
             cfg = json.load(f)
         phases = cfg.get("honest_status", {}).get("phases", {})
         reused = cfg.get("reused_systems", {})
-        ok = (cfg.get("phase") == 6 and cfg.get("version") == "0.6.0"
+        ok = (cfg.get("phase", 0) >= 6 and cfg.get("version", "") >= "0.6.0"
               and cfg.get("brain") == "mock"
               and len(cfg.get("businesses", [])) == 3
               and "phase_6_brain_runner" in phases
