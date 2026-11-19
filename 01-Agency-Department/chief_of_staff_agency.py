@@ -24,6 +24,14 @@ vendored (engine/workers/) — বাইরের কোনো checkout-এর �
     Talvenor-এর live stack Vapi/Sophia (Boss Retell-এর জন্য টাকা
     দেবেন না) — তাই RetellBuilder-এর output শুধু DRAFT build plan,
     কখনো live build নয়।
+  - Phase 2 wiring (2026-11-19): DEPARTMENT_ROUTING — ৮ department
+    manager-কে Chief এখন call করে (dept_sales / dept_marketing /
+    dept_engineering / dept_operations / dept_strategy / dept_finance /
+    dept_quality / dept_innovation)। Manager-রা শুধু delegation plan-এর
+    DRAFT বানায়; কোনো worker execute করে না। Manager-এর task_kind
+    payload-এ থাকলে তা top-level-এ বসানো হয় (manager task.get
+    ("task_kind") পড়ে); না থাকলে M1–M4 overview দেয়, M5–M8
+    "unknown-task" ফেরত দেয় (known kind-গুলোর তালিকা সহ)।
 
 Routing table: TASK_TYPE -> (worker class, division, gate word)
 """
@@ -130,6 +138,24 @@ SECTION_ROUTING = {
     "billing_invoice": ("ops/agents/billing_invoice_agent.py", "BillingInvoiceAgent", "ok"),
 }
 
+# --- Phase 2 departments ----------------------------------------------------
+DEPARTMENTS_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "departments")
+
+# task type -> (manager module file, relative to departments/, class name, gate word)
+# Phase 2 wiring — ROUTING (১৫) ও SECTION_ROUTING (৬) অপরিবর্তিত; এই ৮টা শুধু যোগ করা।
+# Manager-রা delegation plan-এর DRAFT বানায়; কোনো worker execute করে না।
+DEPARTMENT_ROUTING = {
+    "dept_sales": ("01-sales-growth/manager/chief_growth_agent.py", "ChiefGrowthAgent", "ok"),
+    "dept_marketing": ("02-marketing/manager/marketing_director_agent.py", "MarketingDirectorAgent", "ok"),
+    "dept_engineering": ("03-ai-engineering/manager/cto_ai_engineering_agent.py", "CTOAIEngineeringAgent", "ok"),
+    "dept_operations": ("04-client-operations/manager/coo_client_operations_agent.py", "COOClientOperationsAgent", "ok"),
+    "dept_strategy": ("05-research-strategy/manager/chief_strategy_agent.py", "ChiefStrategyAgent", "ok"),
+    "dept_finance": ("06-finance-admin/manager/cfo_finance_agent.py", "CFOFinanceAgent", "ok"),
+    "dept_quality": ("07-quality-security/manager/chief_quality_security_agent.py", "ChiefQualitySecurityAgent", "ok"),
+    "dept_innovation": ("08-product-innovation/manager/chief_innovation_agent.py", "ChiefInnovationAgent", "ok"),
+}
+
 
 def _now_iso():
     return datetime.now(timezone.utc).isoformat()
@@ -156,7 +182,9 @@ def handle_task(task, tasks_path=None, approvals_path=None):
     """Main CEO Bot থেকে আসা একটা agency task চালানো।
 
     task = {
-      "type": "outreach_draft" | "prospect_research" | ... (ROUTING keys),
+      "type": "outreach_draft" | "prospect_research" | ... (ROUTING keys)
+             | "client_intake" | ... (SECTION_ROUTING keys)
+             | "dept_sales" | ... (DEPARTMENT_ROUTING keys),
       "title": "...",
       "payload": {...},           # worker-কে দেওয়া input
       "gated_action": "send" | "publish" | "spend" | "delete" (optional),
@@ -276,6 +304,90 @@ def handle_task(task, tasks_path=None, approvals_path=None):
         }, tasks_path=tasks_path)
         return result
 
+    # 1c. Phase 2 department managers — SECTION_ROUTING-এর মতোই, gated block-এর পরে।
+    # Gated action থাকলে উপরের block-ই ফিরেছে, তাই এখানে task-এ
+    # gated_action নেই — manager শুধু delegation plan-এর DRAFT বানায়।
+    # run_office.py input-এর payload-এ task_kind থাকলে তা manager-এর
+    # top-level task_kind-এ বসানো হয় (manager task.get("task_kind") পড়ে)।
+    if task_type in DEPARTMENT_ROUTING:
+        module_file, class_name, gate_word = DEPARTMENT_ROUTING[task_type]
+        manager_path = os.path.join(DEPARTMENTS_DIR, module_file)
+        spec = importlib.util.spec_from_file_location(
+            f"department_manager_{task_type}", manager_path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        manager_cls = getattr(mod, class_name)
+        manager = manager_cls()
+        gw = ApprovalGateway(approvals_path=approvals_path) if approvals_path else ApprovalGateway()
+        manager_task = dict(task)
+        payload_kind = (task.get("payload") or {}).get("task_kind")
+        if payload_kind and not manager_task.get("task_kind"):
+            manager_task["task_kind"] = payload_kind
+        manager_result = manager.run(
+            manager_task, BrainFactory.get_brain("agency"), gw, approvals_path)
+        department_folder = module_file.split("/")[0]
+        if manager_result.get("status") == "pending-approval":
+            result = {
+                "status": "pending-approval",
+                "department": DEPARTMENT,
+                "task": title,
+                "type": task_type,
+                "worker": class_name,
+                "manager_department": department_folder,
+                "gated_action": gated_action,
+                "approval": manager_result.get("approval"),
+                "note": "Gated action refused — PENDING approval recorded. Nothing was sent/published/spent/deleted.",
+                "draft_only": True,
+                "mock_brain": True,
+                "gate": gate_word,
+            }
+        elif manager_result.get("status") == "unknown-task":
+            result = {
+                "status": "unknown-task",
+                "department": DEPARTMENT,
+                "task": title,
+                "type": task_type,
+                "worker": class_name,
+                "manager_department": department_folder,
+                "output": manager_result.get("output"),
+                "notes": manager_result.get("notes"),
+                "mock_brain": True,
+                "draft_only": True,
+                "gate": gate_word,
+                "note": "Unknown department task kind — no delegation plan made. Known kinds are listed in the manager output.",
+            }
+        else:
+            note = "DRAFT ONLY — mock brain ($0). "
+            if gate_word:
+                note += f"Output পাঠাতে/ব্যবহার করতে Boss-এর gate word লাগবে: '{gate_word}'."
+            else:
+                note += "এই draft-এ কোনো gate নেই।"
+            result = {
+                "status": "draft-ready",
+                "department": DEPARTMENT,
+                "business": BUSINESS,
+                "task": title,
+                "type": task_type,
+                "worker": class_name,
+                "manager_department": department_folder,
+                "output": manager_result.get("output"),
+                "notes": manager_result.get("notes"),
+                "mock_brain": True,
+                "draft_only": True,
+                "gate": gate_word,
+                "note": note,
+            }
+        _log_task({
+            "id": uuid.uuid4().hex[:12],
+            "department": DEPARTMENT,
+            "title": title,
+            "type": task_type,
+            "worker": class_name,
+            "status": result["status"],
+            "logged_at": _now_iso(),
+        }, tasks_path=tasks_path)
+        return result
+
     # 2. Type ছাড়া task — শুধু routing probe, worker চলে না।
     if not task_type:
         result = {
@@ -377,5 +489,6 @@ def handle_task(task, tasks_path=None, approvals_path=None):
 if __name__ == "__main__":
     print("Agency Chief of Staff — REAL (Phase 1). Pipeline:", " -> ".join(PIPELINE_STAGES))
     print("Routed task types:", ", ".join(sorted(ROUTING)))
+    print("Department task types:", ", ".join(sorted(DEPARTMENT_ROUTING)))
     print("Engine:", ENGINE_PATH, "| Office:", AGENCY_OFFICE_PATH)
     print("Email: PAUSED — this Chief only drafts, never sends.")

@@ -10,6 +10,26 @@ gateway সত্যিই কাজ করে।
 2. **Digital Product** — Vet No-Show Recovery Kit, $49 one-time (Gate 0 বাকি)
 3. **Content Creation Engine** — Creator OS / ToolPilot @ToolPilotai69
 
+## Unified OS layer — Central HQ (2026-11-19)
+
+একটাই HQ (00-CEO-Core: Main CEO Bot + Jarvis voice + Approval Gate + ONE mock
+brain), তার নিচে ৩টা Business OS — আলাদা Chief, আলাদা department, আলাদা
+data, কিন্তু CEO/Dashboard/Finance/Governance একটাই। নাম "TALVENOR UNIFIED OS"
+শুধু architecture-layer-এর নাম (docs-এ) — repo-র নাম বদলায়নি, নতুন repo নয়।
+- **CENTRAL-HQ/** — unified-os.md (master map + audit) + shared-services.md
+  (১০ shared department → আসল জিনিস) + data-isolation.md (DATA policy:
+  agency/commerce/media আলাদা, cross-read Boss-এর অনুমতি ছাড়া নয়) +
+  cross-business.md (internal project নিয়ম) + BUSINESS-01-AGENCY.md +
+  BUSINESS-02-COMMERCE.md + BUSINESS-03-MEDIA.md (wrapper docs, code নয়)
+- **Commerce সত্য:** Amazon GATED (৫ client + $5K MRR না হওয়া পর্যন্ত), Etsy
+  CLOSED (Bangladesh), Shopify PARKED (Boss-এর direct project), Dropshipping
+  RESEARCH-ONLY, আসল digital product = Vet Kit $49 (Gate 0 NOT PASSED)
+- **Dashboard:** status.html-এ নতুন "Unified OS — 3 Business OS" card
+  (sync_status.py থেকে, সংখ্যা আসল ফাইল থেকে) — dashboard-3d.html ছোঁয়া হয়নি
+- **বাকি:** Phase 2 Chief→manager wiring DONE 2026-11-19 (নিচে "Agentic Agency
+  Office Phase 2" দেখুন); Commerce/Media OS-এর specialist build বাকি —
+  Gate 0 / upload OFF / $0 cap যেমন আছে তেমনই
+
 ## Hierarchy (Boss-এর সংজ্ঞা, 2026-11-16)
 
 1. **Conversation starts: Jarvis** — Boss Jarvis-এর সাথে কথা বলে।
@@ -48,6 +68,7 @@ talvenor-master-os/
 ├── 03-Content-Creation-Department/ # REAL (Phase 3) — Chief 6 Creator OS worker ডাকে, draft-only; 13 stage REAL 0 / MOCK 10 / BLOCKED 3; upload OFF; worker-রা এখন ভিতরে vendored (Phase 6)
 │   ├── engine/             # REAL (Phase 5) — 8 staff, 8 tool (5 mock / 3 gated), 8 skill
 │   └── sections/           # REAL (Phase 7) — 5 section (plan/produce/publish/analyze/growth), 10 agent + 10 skill; upload OFF
+├── CENTRAL-HQ/             # NEW (2026-11-19) — Unified OS layer, docs only (কোনো code নয়): unified-os.md + shared-services.md + data-isolation.md + cross-business.md + BUSINESS-01-AGENCY.md + BUSINESS-02-COMMERCE.md + BUSINESS-03-MEDIA.md
 ├── store/                  # tasks.json, approvals.json, vault/
 ├── dashboards/             # status.html (sync_status.py দিয়ে বানানো — সংখ্যা আসল ফাইল থেকে) + engines.html (sync_engines.py দিয়ে বানানো) + n8n-wiring.md (২ workflow-র map, READY NOT LIVE)
 ├── skills/                 # ৪টা skill manual (CEO + ৩ Chief)
@@ -81,7 +102,7 @@ python3 ~/workspace/talvenor-master-os/scripts/check_phase0.py
 | Dashboard status.html | **REAL** — sync_status.py দিয়ে বানানো, সংখ্যা আসল ফাইল থেকে |
 | n8n workflows (auto-send + callback) | **READY · NOT LIVE** — import file তৈরি, Boss-এর import + connect + test বাকি |
 | Jarvis voice | **REAL (2026-11-17)** — Piper TTS + Vosk (en) + sherpa-onnx (bn), offline, $0; mic যুক্ত; brain mock (voice Jarvis-কে বুদ্ধিমান বানায় না); gated কাজ voice-এ শুধু PENDING, execute নয় |
-| Agency Chief of Staff | **REAL (Phase 1)** — 15 worker routing, draft-only, gated কাজ PENDING-এ আটকায় |
+| Agency Chief of Staff | **REAL (Phase 1 + Agentic Phase 2)** — 15 worker + 8 department manager routing (DEPARTMENT_ROUTING), draft-only, gated কাজ PENDING-এ আটকায় |
 | Products Chief of Staff | **REAL* (Phase 2)** — ৪ task type routing, Gate 0 fail-closed, launch/sale আটকায় |
 | Content Chief of Staff | **REAL (Phase 3)** — 6 Creator OS worker routing, draft-only, upload OFF-এ আটকায়, video file বানায় না |
 | boss-ceo engine (15 worker) | **VENDORED (Phase 6)** — copy এখন `01-Agency-Department/engine/workers/`-এ ভিতরে; upstream `~/workspace/boss-ceo/` canonical থাকে, runtime dependency নয় |
@@ -123,6 +144,8 @@ word ছাড়া send/publish/spend/delete হবে না। Spend cap **$
 - **Phase 5 — Three Engines:** ✅ BUILT 2026-11-16 (shared tool-calling core + ৩ engine — Agency 15 staff / 8 tool / 15 skill, Products 5 / 8 / 5, Content 8 / 8 / 8; engines dashboard sync-এ চলে, check 45/45 PASS)।
 - **Phase 6 — Full Complete Agent Offices:** ✅ BUILT 2026-11-16 (worker-রা ভিতরে vendored — Agency 18 file + Content 4 file + SOURCE.md; BrainFactory mock default / live unwired; `run_office.py` runner — এক command-এ office চলে, `--drain-queue --max 2`; 136 DROPPED, scope 3 ব্যবসা only; config phase 6 / v0.6.0; check 14/14 PASS)।
 - **Phase 7 — Full Offices (Sections):** ✅ BUILT 2026-11-17 (১৬ section — Agency 5, Products 6, Content 5; ২৩ section agent + ২৩ section skill; Agency-র ১৫ worker mapped + ৬ নতুন agent, Products-এর ৭ agent (Gate 0 fail-closed — kit/sale কখনো লেখা হয় না), Content-এর ১০ agent (৬ wrapper + ২ chief-level + ২ নতুন; upload OFF); ৩ Chief-এ SECTION_ROUTING; config phase 7 / v0.7.0; check 18/18 PASS) — **সব Phase শেষ। মোট 138/138 PASS।**
+- **Agentic Agency Office Phase 1 — Foundation:** ✅ BUILT 2026-11-19 (Boss-এর order — আরেক AI-এর blueprint audit করে Agency office-এর সাথে combine; নতুন repo নয়, 01-Agency-Department-এর ভেতরেই): governance/ (charter, permissions, approval policy, security policy — ৪ file), departments/ (৮ department — Sales & Growth, Marketing, AI Engineering, Client Operations, Research & Strategy, Finance & Admin, Quality & Security, Product & Innovation; প্রতিটায় SECTION.md + manager .py + skill .md — ২৪ file), agents/agent-registry/ (registry.md + registry.json — ৬৯ entry: EXISTING ২২ role-entry = ২১ distinct worker, ROLE-ONLY ৪৩, GAP ৪; ৮ manager আলাদা তালিকায় EXISTING), workflows/ (৫ pipeline doc — lead-generation, sales-outreach, client-onboarding, receptionist-deployment, client-support)। ২১ existing staff map: Sales ৮, Marketing ৪, AI Eng ১, Client Ops ৫, Research ০ (GAP dept), Finance ২, Quality ১, Innovation ০ (GAP dept)। Audit সংশোধন: Retell production নয় — Vapi live (Sophia +19472230244); DB JSON store, PostgreSQL নয়; CRM n8n planned not live; Sophia live receptionist, demo নয়। ৮ manager live test PASS (TEMP store — draft-ready + unknown-task + pending-approval); সব check 138/138 + voice 13/14 PASS; sync byte-identical; store pristine। Agency Chief wiring **Phase 2 DONE 2026-11-19** — Chief এখন ৮ manager-কে DEPARTMENT_ROUTING দিয়ে ডাকে (নিচে "Agentic Agency Office Phase 2" দেখুন)। NOT PUSHED — push Boss-এর "push koro"-তে।
+- **Agentic Agency Office Phase 2 — Executive wiring:** ✅ BUILT 2026-11-19 (Boss-এর order "যা বাকি আছে, সব কাজ শেষ করো" — Phase 1-এর ৮ manager-কে Agency Chief-এর সাথে যুক্ত করা): chief_of_staff_agency.py-তে নতুন DEPARTMENT_ROUTING — ৮ task type (dept_sales, dept_marketing, dept_engineering, dept_operations, dept_strategy, dept_finance, dept_quality, dept_innovation) → ৮ manager (ChiefGrowthAgent / MarketingDirectorAgent / CTOAIEngineeringAgent / COOClientOperationsAgent / ChiefStrategyAgent / CFOFinanceAgent / ChiefQualitySecurityAgent / ChiefInnovationAgent), gate সব `ok`, payload-এর task_kind → top-level translate (manager-রা task.get("task_kind") পড়ে), SECTION_ROUTING pattern-ই (importlib load + mock brain + tasks.json log), gated action → ApprovalGateway PENDING, unknown kind → "unknown-task"। ROUTING (১৫) ও SECTION_ROUTING (৬) অপরিবর্তিত। নতুন check script scripts/check_departments.py — ২১/২১ PASS (৮ manager load + ৮ route draft-ready [MOCK DRAFT] + ২ gated PENDING + ১ unknown-task + stale-claim grep clean + পুরনো check 138/138 + voice 13/14)। ২৫ file-এ stale wiring note ঠিক করা হয়েছে (৭৬ replacement + ৩ extra variant fix — "Chief এখনো call করে না" → "Chief এখন DEPARTMENT_ROUTING দিয়ে call করে")। NOT PUSHED — push Boss-এর "push koro"-তে।
 
 ## Office চালানো (Phase 6 runner)
 
