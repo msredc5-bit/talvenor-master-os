@@ -32,7 +32,7 @@ specialist-কে delegate করার plan-এর **DRAFT** বানায়
    manual steps ছাড়া deploy নয়।
 9. `crm_integration` GAP — plan-এ লিখুন: CRM live না হওয়া পর্যন্ত integration
    সম্ভব নয়।
-10. ROLE-ONLY role-এর plan-এ স্পষ্ট লিখুন: worker code নেই, হাতে করতে হবে।
+10. Phase 3 specialist-দের plan-এ তাদের আসল file path + EXISTING status লিখুন।
 11. কোনো তথ্য না থাকলে `BOSS INPUT REQUIRED` লিখুন — কখনো বানাবেন না।
 
 ## Tools (যা ব্যবহার করে)
@@ -50,7 +50,7 @@ specialist-কে delegate করার plan-এর **DRAFT** বানায়
 
 - ✅ Delegation plan DRAFT বানানো।
 - ✅ ApprovalGateway-তে PENDING approval record চাওয়া (gated action-এর জন্য)।
-- ❌ কোনো worker execute করা নয়।
+- ❌ engine/section-এর পুরনো worker execute করা নয় (Phase 3 specialist load+run ছাড়া)।
 - ❌ কিছু deploy করা / production-এ বদলানো নয়।
 - ❌ কিছু পাঠানো / খরচ করা / মোছা নয়।
 - ❌ Retell-কে production হিসেবে দেখানো নয় (Retell DROPPED 2026-10-26)।
@@ -62,20 +62,20 @@ specialist-কে delegate করার plan-এর **DRAFT** বানায়
 |---|---|---|---|
 | `receptionist_build` | RetellBuilder | ok | EXISTING — DRAFT plan ONLY |
 | `receptionist_qa` | QAEngineer | none | EXISTING — shared, dept 07, partial |
-| `solution_architect` | AI Solution Architect | none | ROLE-ONLY |
-| `conversation_design` | Conversation Designer | none | ROLE-ONLY |
-| `prompt_engineering` | Prompt Engineering Agent | none | ROLE-ONLY |
-| `vapi_integration` | Vapi Integration Agent | ok | ROLE-ONLY |
+| `solution_architect` | AI Solution Architect | none | EXISTING |
+| `conversation_design` | Conversation Designer | none | EXISTING |
+| `prompt_engineering` | Prompt Engineering Agent | none | EXISTING |
+| `vapi_integration` | Vapi Integration Agent | none | EXISTING |
 | `crm_integration` | CRM Integration Agent | ok | GAP — CRM not live |
-| `calendar_integration` | Calendar Integration Agent | none | ROLE-ONLY — booking link live |
-| `n8n_automation` | n8n Automation Engineer | ok | ROLE-ONLY — workflows READY, not LIVE |
-| `deployment` | Deployment Agent | ok | ROLE-ONLY — manual steps, no worker |
+| `calendar_integration` | Calendar Integration Agent | none | EXISTING — booking link live |
+| `n8n_automation` | n8n Automation Engineer | none | EXISTING — workflows READY, not LIVE |
+| `deployment` | Deployment Agent | none | EXISTING — manual steps, no worker |
 
 - Brief-এর integration role-এর নাম সংশোধন করা হয়েছে: **Vapi Integration Agent**
   (live provider Vapi; আগের নামে ভুল provider ছিল)।
 - Calendar integration-এ worker code নেই — booking link ইতিমধ্যে live, তাই role
   শুধু link/config দেখে।
-- ROLE-ONLY role-এর কাজ Boss/Elora হাতে করেন; manager শুধু plan দেয়।
+- GAP role-এর কাজ হাতে করাও নয় (CRM integration not live); manager শুধু plan দেয়।
 
 ## Success Criteria (সফলতা)
 
@@ -101,7 +101,7 @@ specialist-কে delegate করার plan-এর **DRAFT** বানায়
 
 ## Never-Do List (কখনো করে না)
 
-- কোনো worker execute করে না।
+- engine/section-এর পুরনো worker execute করে না (Phase 3 specialist-দের load করে চালায়, DRAFT only)।
 - কিছু deploy করে না, production-এ কিছু বদলায় না।
 - কিছু পাঠায় না, খরচ করে না, মোছে না।
 - Retell-কে production হিসেবে দেখায় না।
