@@ -1,0 +1,81 @@
+{
+  "approvals_approved": 0,
+  "approvals_pending": 0,
+  "business_os": {
+    "agency": {
+      "dept_count": 8,
+      "manager_count": 8,
+      "registry_entries": 69,
+      "registry_existing": 22,
+      "staff_note": "21 staff (15 workers + 6 section agents)"
+    },
+    "commerce": {
+      "divisions": {
+        "amazon": "GATED",
+        "digital_products": "BLOCKED-GATE0",
+        "dropshipping": "RESEARCH-ONLY",
+        "etsy": "CLOSED",
+        "shopify": "PARKED"
+      },
+      "gate0": "NOT PASSED",
+      "kit_parts": 0,
+      "kit_sales": 0,
+      "kit_total": 6,
+      "pa_list": 39
+    },
+    "media": {
+      "agents": 10,
+      "pipeline": {
+        "blocked": 3,
+        "mock": 10,
+        "real": 0,
+        "stub": 0
+      },
+      "sections": 5,
+      "toolpilot_subs": 0,
+      "toolpilot_videos": 0,
+      "upload": "OFF"
+    }
+  },
+  "email": "PAUSED",
+  "first_mails": 162,
+  "gate0": "NOT PASSED",
+  "gates_enabled": true,
+  "pa_list": 39,
+  "paying_clients": 0,
+  "phase": 7,
+  "phase_status": {
+    "phase_0": "BUILT (this folder)",
+    "phase_1_agency": "BUILT 2026-11-16 - Agency Chief REAL, 15 workers wired, draft-only",
+    "phase_2_digital_product": "BUILT as far as Gate 0 allows 2026-11-16 - Products Chief REAL, kit blueprint, PA list 39/100, launch/sale BLOCKED on Gate 0",
+    "phase_3_creator_os": "BUILT 2026-11-16 - Content Chief REAL, 6 Creator OS workers wired (mock brain, draft-only), 13 stages REAL 0 / MOCK 10 / BLOCKED 3, upload OFF, VOICE.md DRAFT, GPU name missing, ToolPilot video 0",
+    "phase_4_n8n_wiring": "BUILT 2026-11-16 - n8n wiring doc + sync_status.py, both workflows READY NOT LIVE, host = Muse runtime + bridge cron ($0)",
+    "phase_5_three_engines": "BUILT 2026-11-16 - shared tool-calling core + 3 engines (Agency 15 staff / 8 tools / 15 skills, Products 5 / 8 / 5, Content 8 / 8 / 8)",
+    "phase_6_brain_runner": "BUILT 2026-11-16 - BrainFactory (mock default $0, live MetaSpark unwired-until-flipped, no live calls) + run_office.py runner (routes via Main CEO Bot, gates via ApprovalGateway, TEMP store supported) + check_phase6",
+    "phase_7_sections": "BUILT 2026-11-17 - 16 sections, 23 section agents, 23 section skills (Agency 5 sections / 6 new agents, Products 6 / 7, Content 5 / 10); Agency 15 workers mapped, Content 6 workers wrapped; Gate 0 still NOT passed, upload still OFF"
+  },
+  "pipeline": {
+    "blocked": 3,
+    "mock": 10,
+    "real": 0,
+    "stub": 0
+  },
+  "spend_cap_usd": 0,
+  "tasks_count": 0,
+  "toolpilot_subs": 0,
+  "version": "0.7.0",
+  "voice": {
+    "detail": "Jarvis voice — Piper TTS + Vosk/sherpa STT, offline, $0 (mic test Boss-এর PC-তে বাকি)",
+    "label": "REAL"
+  },
+  "workflow_auto_send": {
+    "name": "Talvenor Tier 2 — Daily auto-send 18:00 Dhaka",
+    "nodes": 8,
+    "status": "NOT LIVE"
+  },
+  "workflow_callback": {
+    "name": "Talvenor Callback - Website form to Vapi",
+    "nodes": 3,
+    "status": "NOT LIVE"
+  }
+}

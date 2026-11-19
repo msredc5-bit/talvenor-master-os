@@ -14,6 +14,12 @@ dashboards/status.html-এর সংখ্যাগুলো আসল ফাই
   - 02-Digital-Product-Department/pa-vet-list/pa-vet-clinics.csv — PA list row
   - 03-Content-Creation-Department/pipeline.md — ১৩ stage-এর গণনা লাইন
   - 03-Content-Creation-Department/toolpilot-status.md — Subscribers লাইন
+    + Videos লাইন
+  - 01-Agency-Department/departments/ — subdir + manager/*.py গণনা;
+    agents/agent-registry/registry.json — entry + EXISTING গণনা
+  - 02-Digital-Product-Department/kit-outline.md — kit-এর অংশের তালিকা
+    (blueprint); built kit dir না থাকলে kit_parts 0
+  - 03-Content-Creation-Department/sections/ — subdir + agents/*.py গণনা
   - 00-CEO-Core/jarvis_voice.py — voice REAL না STUB (NotImplementedError
     আছে কিনা + Piper আছে কিনা)
   - n8n workflow JSON (২টা, বাইরের folder) — "active" flag পড়ে
@@ -134,6 +140,135 @@ def read_workflow_status(path):
     }
 
 
+def _count_subdirs(path):
+    """sorted subdir-এর সংখ্যা — পড়া না গেলে unknown।"""
+    try:
+        return len([d for d in sorted(os.listdir(path))
+                    if os.path.isdir(os.path.join(path, d))])
+    except OSError:
+        return UNKNOWN
+
+
+def _count_py_in_subdirs(parent, sub):
+    """parent-এর প্রতিটা sorted subdir-এর sub/ folder-এ *.py ফাইলের সংখ্যা।"""
+    try:
+        total = 0
+        for name in sorted(os.listdir(parent)):
+            d = os.path.join(parent, name, sub)
+            if not os.path.isdir(d):
+                continue
+            total += len([f for f in sorted(os.listdir(d))
+                          if f.endswith(".py")])
+        return total
+    except OSError:
+        return UNKNOWN
+
+
+def read_toolpilot_videos():
+    """toolpilot-status.md-এর Videos লাইন — subs-এর মতোই pattern।"""
+    text = _read_text(os.path.join(
+        BASE, "03-Content-Creation-Department", "toolpilot-status.md"))
+    if text is None:
+        return UNKNOWN
+    m = re.search(r"Videos: \*\*(\d+)\*\*", text)
+    return int(m.group(1)) if m else UNKNOWN
+
+
+def _read_kit_total():
+    """kit-outline.md-এর 'Kit-এর ৬ অংশ' section-এ ### heading-এর সংখ্যা।"""
+    text = _read_text(os.path.join(
+        BASE, "02-Digital-Product-Department", "kit-outline.md"))
+    if text is None:
+        return UNKNOWN
+    in_section = False
+    total = 0
+    for line in text.splitlines():
+        if line.startswith("## Kit-এর"):
+            in_section = True
+            continue
+        if in_section:
+            if line.startswith("## "):
+                break
+            if line.startswith("### "):
+                total += 1
+    return total if total else UNKNOWN
+
+
+def read_business_os():
+    """3 Business OS-এর আসল অবস্থা — সব ফাইল থেকে, হাতে লেখা সংখ্যা নয়।"""
+    # --- Agency: departments/ + registry.json থেকে গণনা ---
+    dept_dir = os.path.join(BASE, "01-Agency-Department", "departments")
+    reg = _read_json(os.path.join(
+        BASE, "01-Agency-Department", "agents", "agent-registry",
+        "registry.json"))
+    if isinstance(reg, list):
+        registry_entries = len(reg)
+        registry_existing = len([e for e in reg
+                                 if isinstance(e, dict)
+                                 and e.get("status") == "EXISTING"])
+    else:
+        registry_entries = UNKNOWN
+        registry_existing = UNKNOWN
+    agency = {
+        "dept_count": _count_subdirs(dept_dir),
+        "manager_count": _count_py_in_subdirs(dept_dir, "manager"),
+        "registry_entries": registry_entries,
+        "registry_existing": registry_existing,
+        # registry.md লাইন ২৭-এর durable fact: 21 staff
+        # (15 worker + 6 section agent)।
+        "staff_note": "21 staff (15 workers + 6 section agents)",
+    }
+
+    # --- Commerce: Gate 0 + PA list reuse; kit blueprint থেকে গণনা ---
+    gate0 = read_gate0_status()
+    kit_dir = os.path.join(BASE, "02-Digital-Product-Department", "kit")
+    kit_total = _read_kit_total()
+    if kit_total == UNKNOWN:
+        kit_parts = UNKNOWN
+    elif not os.path.isdir(kit_dir):
+        # blueprint আছে, built kit dir নেই → কোনো part-ই বানানো হয়নি।
+        kit_parts = 0
+    else:
+        kit_parts = len([f for f in sorted(os.listdir(kit_dir))
+                         if os.path.isfile(os.path.join(kit_dir, f))])
+    commerce = {
+        "gate0": gate0,
+        "pa_list": read_pa_list_count(),
+        "kit_parts": kit_parts,
+        "kit_total": kit_total,
+        # Gate 0 না পাস করলে kit বানানো/বেচা শুরুই হয়নি → sale 0
+        # (entailed, invented নয়)।
+        "kit_sales": 0 if gate0 == "NOT PASSED" else UNKNOWN,
+        # নিচের division status-গুলো durable policy fact — উৎস MEMORY.md
+        # (Boss decisions 2026-11-12/11-19): Amazon GATED (5 live client +
+        # $5K MRR না হওয়া পর্যন্ত), Etsy CLOSED (Bangladesh), Shopify
+        # PARKED (Boss-এর direct project), Dropshipping RESEARCH-ONLY,
+        # Digital Products BLOCKED-GATE0 (Vet Kit $49)।
+        "divisions": {
+            "amazon": "GATED",
+            "etsy": "CLOSED",
+            "shopify": "PARKED",
+            "dropshipping": "RESEARCH-ONLY",
+            "digital_products": "BLOCKED-GATE0",
+        },
+    }
+
+    # --- Media: pipeline + ToolPilot reuse; sections/ থেকে গণনা ---
+    media = {
+        "pipeline": read_pipeline_counts(),
+        "toolpilot_subs": read_toolpilot_subs(),
+        "toolpilot_videos": read_toolpilot_videos(),
+        # pipeline.md-এর durable fact: Upload OFF — কোনো real YouTube
+        # upload এখনো verify হয়নি।
+        "upload": "OFF",
+        "sections": _count_subdirs(os.path.join(
+            BASE, "03-Content-Creation-Department", "sections")),
+        "agents": _count_py_in_subdirs(os.path.join(
+            BASE, "03-Content-Creation-Department", "sections"), "agents"),
+    }
+    return {"agency": agency, "commerce": commerce, "media": media}
+
+
 def collect_status():
     """সব উৎস থেকে সত্য অবস্থা এক জায়গায় করে। কোনো মান না পেলে unknown।"""
     cfg = _read_json(os.path.join(BASE, "00-CEO-Core", "config.json")) or {}
@@ -180,6 +315,7 @@ def collect_status():
             "phase_7_sections": phases.get("phase_7_sections", UNKNOWN),
         },
         "voice": read_voice_status(),
+        "business_os": read_business_os(),
         "workflow_auto_send": read_workflow_status(AUTO_SEND_PATH),
         "workflow_callback": read_workflow_status(CALLBACK_PATH),
     }
@@ -200,6 +336,15 @@ def render_html(s):
     wf_c = s["workflow_callback"]
     voice = s["voice"]
     phase = s["phase"]
+    bo = s["business_os"]
+    a = bo["agency"]
+    c = bo["commerce"]
+    d = c["divisions"]
+    m = bo["media"]
+    stages_total = (pipe["real"] + pipe["mock"] + pipe["stub"] + pipe["blocked"]
+                    if all(isinstance(pipe[k], int)
+                           for k in ("real", "mock", "stub", "blocked"))
+                    else UNKNOWN)
 
     def phase_badge(status_text):
         if isinstance(status_text, str) and status_text.startswith("BUILT"):
@@ -257,6 +402,16 @@ def render_html(s):
       <tr><td><strong>1. Agency</strong> — Talvenor AI Receptionist</td><td><span class="badge built">MAIN · Phase 1 REAL</span></td><td>প্রথম মেইল {s["first_mails"]}, paying client {s["paying_clients"]} · Chief সত্যিই 15 worker ডাকে (mock brain, DRAFT ONLY) · Email {s["email"]}</td></tr>
       <tr><td><strong>2. Digital Product</strong> — Vet No-Show Recovery Kit ($49)</td><td><span class="badge built">Phase 2 REAL*</span></td><td><strong>Gate 0 {gate0}</strong> — Lemon Squeezy test Boss-এর step, হয়নি · Kit blueprint আছে (kit নিজে নয়) · PA list {pa} / 100 (যাচাই করা) · Sale 0 · *Gate 0-তে আটকে</td></tr>
       <tr><td><strong>3. Content Engine</strong> — Creator OS / ToolPilot</td><td><span class="badge built">Phase 3 REAL</span></td><td>Chief সত্যিই 6 worker ডাকে (mock brain, DRAFT ONLY) · 13 stage: REAL {pipe["real"]} / MOCK {pipe["mock"]} / BLOCKED {pipe["blocked"]} · Upload OFF · VOICE.md DRAFT · GPU AMD Radeon integrated 496 MB VRAM (FramePack/WanGP চলবে না) · ToolPilot video 0 (subs {subs})</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Unified OS — 3 Business OS</h2>
+    <table>
+      <tr><th>Business OS</th><th>অবস্থা</th><th>আসল সংখ্যা</th></tr>
+      <tr><td><strong>Agency</strong> — AI Receptionist</td><td><span class="badge paused">email PAUSED</span></td><td>{a["dept_count"]} departments · {a["manager_count"]} managers · {a["registry_entries"]} registry entries · {a["staff_note"]} · email {s["email"]} · clients {s["paying_clients"]}</td></tr>
+      <tr><td><strong>Commerce</strong> — Vet Kit ($49)</td><td><span class="badge paused">Gate 0 NOT PASSED</span></td><td>Vet Kit Gate 0 {c["gate0"]} · kit {c["kit_parts"]}/{c["kit_total"]} · PA {c["pa_list"]}/100 · sale {c["kit_sales"]} · Amazon {d["amazon"]} · Etsy {d["etsy"]} · Shopify {d["shopify"]} (Boss direct) · Dropshipping {d["dropshipping"]}</td></tr>
+      <tr><td><strong>Media</strong> — Content Engine / ToolPilot</td><td><span class="badge stub">upload OFF</span></td><td>{m["sections"]} sections · {m["agents"]} agents · {stages_total} stages REAL {pipe["real"]} / MOCK {pipe["mock"]} / BLOCKED {pipe["blocked"]} · upload {m["upload"]} · ToolPilot subs {m["toolpilot_subs"]} · videos {m["toolpilot_videos"]}</td></tr>
     </table>
   </div>
 
@@ -319,19 +474,42 @@ def render_html(s):
 """
 
 
+def write_status_json(status):
+    """collect_status()-এর পুরো dict dashboards/status.json-এ লেখে।
+
+    dashboard-3d.html এই JSON পড়ে — তাই 3D dashboard-এর সংখ্যা সবসময়
+    আসল ফাইল থেকে আসে, হাতে লেখা নয়। sync_status.py চালালেই JSON
+    তাজা হয়। deterministic (sort_keys) — দুই run-এ byte-identical।"""
+    out = os.path.join(BASE, "dashboards", "status.json")
+    with open(out, "w", encoding="utf-8") as f:
+        json.dump(status, f, indent=2, ensure_ascii=False, sort_keys=True)
+    return out
+
+
 def main():
     status = collect_status()
     html = render_html(status)
     out = os.path.join(BASE, "dashboards", "status.html")
     with open(out, "w", encoding="utf-8") as f:
         f.write(html)
+    json_out = write_status_json(status)
     print("sync done ->", out)
+    print("sync done ->", json_out)
+    bo = status["business_os"]
     print(f"phase={status['phase']} clients={status['paying_clients']} "
           f"first_mails={status['first_mails']} email={status['email']} "
           f"gate0={status['gate0']} pa_list={status['pa_list']} "
           f"pipeline={status['pipeline']} subs={status['toolpilot_subs']} "
           f"auto_send={status['workflow_auto_send']['status']} "
-          f"callback={status['workflow_callback']['status']}")
+          f"callback={status['workflow_callback']['status']} "
+          f"business_os=agency {bo['agency']['dept_count']} dept / "
+          f"{bo['agency']['manager_count']} mgr / "
+          f"{bo['agency']['registry_entries']} registry "
+          f"({bo['agency']['registry_existing']} EXISTING) "
+          f"commerce kit {bo['commerce']['kit_parts']}/"
+          f"{bo['commerce']['kit_total']} "
+          f"media {bo['media']['sections']} sections / "
+          f"{bo['media']['agents']} agents")
     return 0
 
 

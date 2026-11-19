@@ -67,10 +67,11 @@ def main():
     if core_ok:
         check("shared core imports", True, "tool_calling.py")
         check(
-            "core has 6 handlers",
+            "core has 7 handlers",
             set(tool_calling.HANDLERS) == {
                 "draft_email", "research_notes", "draft_caption",
                 "draft_script", "kit_outline_read", "status_read",
+                "booking_reply",
             },
             ", ".join(sorted(tool_calling.HANDLERS)),
         )

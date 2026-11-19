@@ -18,13 +18,15 @@ Gate নিয়ম (Boss-এর সিদ্ধান্ত, কোডে ল�
     Upload OFF। কোনো বানানো client / সংখ্যা / testimonial / দাম নেই।
     Dental / medical নয়। Brand শুধু Talvenor।
 
-৬টা mock handler (সব DRAFT ONLY — কিছু পাঠানো / পাবলিশ / খরচ হয় না):
+৭টা mock handler (সব DRAFT ONLY — কিছু পাঠানো / পাবলিশ / খরচ হয় না):
   1. draft_email      — cold-email draft (Talvenor brand line + booking link)
   2. research_notes   — research-notes template, সব field "TO VERIFY"
   3. draft_caption    — social caption draft, প্রথম লাইন hook
   4. draft_script     — ছোট ভিডিও script outline (hook, problem, solution, CTA)
   5. kit_outline_read — আসল kit-outline.md ফাইল পড়ে (বানানো content নয়)
   6. status_read      — আসল config.json পড়ে (honest status, phase, spend cap)
+  7. booking_reply    — lead-এর নাম দিলে booking link সহ এক লাইনের reply draft
+                        (Boss-এর 2026-11-17 প্রশ্নের উদাহরণ tool — DRAFT ONLY)
 
 ব্যবহার:
   import tool_calling
@@ -167,6 +169,40 @@ def draft_script(args, context=None):
     return {"output": output, "notes": notes}
 
 
+def booking_reply(args, context=None):
+    """Lead-এর নাম দিলে booking link সহ এক লাইনের reply DRAFT।
+
+    Boss-এর উদাহরণ tool (2026-11-17, 02:43 Dhaka — "GitHub দিয়ে tool
+    কিভাবে create করে?"): input শুধু lead-এর নাম, output এক লাইন reply
+    + booking link। DRAFT ONLY — কখনো পাঠায় না; পাঠাতে হলে gated
+    send_email tool + Boss-এর exact gate word লাগে। কোনো দাম নেই,
+    কোনো বানানো client / সংখ্যা / testimonial নেই।
+    """
+    lead_name = (args.get("lead_name") or "").strip()
+    channel = (args.get("channel") or "email").strip().lower()
+    if not lead_name:
+        return {
+            "output": "",
+            "notes": ["DRAFT ONLY — lead-এর নাম দেওয়া হয়নি।"],
+            "error": "booking_reply needs a lead_name.",
+        }
+    if channel == "instagram":
+        cta = "Book a call with Talvenor. Link in bio."
+    else:
+        cta = f"Book a 15-minute demo call here: {BOOKING_LINK}"
+    output = (
+        f"Hi {lead_name} — {BRAND_LINE} "
+        "Talvenor's AI receptionist answers every call, 24/7, and books "
+        f"the job while you're still on the last one. {cta}"
+    )
+    notes = [
+        "DRAFT ONLY — never sent.",
+        f"Channel: {channel}. One line, booking link included.",
+        "No prices, no invented statistics, no invented client claims.",
+    ]
+    return {"output": output, "notes": notes}
+
+
 def kit_outline_read(args, context=None):
     """আসল kit-outline.md ফাইলের প্রথম ~1500 অক্ষর পড়ে। ফাইল না থাকলে error।"""
     try:
@@ -217,6 +253,7 @@ HANDLERS = {
     "draft_script": draft_script,
     "kit_outline_read": kit_outline_read,
     "status_read": status_read,
+    "booking_reply": booking_reply,
 }
 
 

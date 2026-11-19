@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Talvenor OS — Dashboard (Local)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.149.0/three.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: #0a0a0b; color: #e8ecf1; }
+  body.light { background: #f5f2ec; color: #1a2027; }
+  a { color: inherit; }
+  /* ---------- Sidebar (Founders OS style) ---------- */
+  #sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 232px; background: #0e0e10; border-right: 1px solid #1e1e22; padding: 18px 14px 14px; display: flex; flex-direction: column; z-index: 10; overflow-y: auto; }
+  body.light #sidebar { background: #fff; border-right-color: #e5ddd2; }
+  #logo { font-size: 20px; font-weight: 800; color: #fff; padding: 2px 8px 14px; letter-spacing: .2px; }
+  body.light #logo { color: #0B1D33; }
+  #logo span { color: #14B8A6; }
+  .nav-sec { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #6b7280; padding: 14px 10px 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: 0; color: #cbd5e1; font-size: 14px; padding: 8px 10px; border-radius: 8px; cursor: pointer; }
+  .nav-item:hover { background: #1a1a1e; }
+  body.light .nav-item { color: #374151; }
+  body.light .nav-item:hover { background: #f0ebe2; }
+  .nav-item.active { background: #1e1e24; color: #fff; font-weight: 600; }
+  body.light .nav-item.active { background: #e8e2d6; color: #0B1D33; }
+  .nav-item .ic { width: 18px; text-align: center; }
+  .nav-badge { margin-left: auto; background: #26262c; color: #d1d5db; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 8px; }
+  body.light .nav-badge { background: #e5e0d5; color: #4b5563; }
+  #side-foot { margin-top: auto; padding-top: 14px; border-top: 1px solid #1e1e22; }
+  body.light #side-foot { border-top-color: #e5ddd2; }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: #9ca3af; padding: 8px 10px; }
+  .switch { position: relative; width: 38px; height: 22px; background: #26262c; border-radius: 999px; border: 0; cursor: pointer; }
+  .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: left .15s; }
+  body.light .switch { background: #14B8A6; }
+  body.light .switch::after { left: 19px; }
+  #user-card { display: flex; gap: 10px; align-items: center; padding: 10px 8px 2px; }
+  #user-card .av { width: 34px; height: 34px; border-radius: 50%; background: #14B8A6; color: #042f2e; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  #user-card .nm { font-size: 13px; font-weight: 700; color: #fff; }
+  body.light #user-card .nm { color: #0B1D33; }
+  #user-card .ws { font-size: 11px; color: #6b7280; }
+  /* ---------- Main ---------- */
+  #main { margin-left: 232px; min-height: 100vh; }
+  #topbar { display: flex; align-items: center; gap: 12px; padding: 14px 22px; border-bottom: 1px solid #1e1e22; position: sticky; top: 0; background: #0a0a0b; z-index: 5; }
+  body.light #topbar { background: #f5f2ec; border-bottom-color: #e5ddd2; }
+  #search { flex: 1; max-width: 520px; display: flex; align-items: center; gap: 8px; background: #141416; border: 1px solid #26262c; border-radius: 10px; padding: 8px 12px; }
+  body.light #search { background: #fff; border-color: #ddd5c6; }
+  #search input { flex: 1; background: none; border: 0; outline: 0; color: #fff; font-size: 14px; }
+  body.light #search input { color: #111; }
+  #search input::placeholder { color: #6b7280; }
+  .top-chip { font-size: 12px; color: #9ca3af; background: #141416; border: 1px solid #26262c; border-radius: 999px; padding: 5px 11px; white-space: nowrap; }
+  body.light .top-chip { background: #fff; border-color: #ddd5c6; color: #4b5563; }
+  .top-chip b { color: #fff; }
+  body.light .top-chip b { color: #0B1D33; }
+  #content { padding: 22px 26px 30px; max-width: 1180px; }
+  #greet { font-size: 34px; font-weight: 800; margin: 6px 0 4px; color: #fff; letter-spacing: -.01em; }
+  body.light #greet { color: #0B1D33; }
+  #greet-sub { font-size: 14px; color: #9ca3af; margin: 0 0 14px; }
+  #greet-sub b { color: #e5e7eb; }
+  body.light #greet-sub b { color: #111827; }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .btn { border: 1px solid #2a2a30; background: #17171a; color: #fff; border-radius: 10px; padding: 9px 16px; font-size: 14px; cursor: pointer; }
+  body.light .btn { background: #fff; color: #0B1D33; border-color: #ddd5c6; }
+  .btn.primary { background: #fff; color: #111; border-color: #fff; font-weight: 700; }
+  body.light .btn.primary { background: #0B1D33; color: #fff; border-color: #0B1D33; }
+  .btn.teal { background: #14B8A6; border-color: #14B8A6; color: #042f2e; font-weight: 700; }
+  #strip { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .pill { background: #141416; border: 1px solid #26262c; border-radius: 999px; padding: 5px 12px; font-size: 13px; color: #d1d5db; }
+  body.light .pill { background: #fff; border-color: #ddd5c6; color: #374151; }
+  .pill b { color: #fff; }
+  body.light .pill b { color: #0B1D33; }
+  .pill.ok b { color: #34d399; }
+  .pill.warn b { color: #f87171; }
+  .pill.hold b { color: #fbbf24; }
+  .honest { font-size: 13px; color: #f0b429; margin: 0 0 14px; }
+  /* ---------- JARVIS CORE panel ---------- */
+  #core-panel { background: #101013; border: 1px solid #232328; border-radius: 16px; overflow: hidden; margin-bottom: 18px; }
+  body.light #core-panel { background: #111827; border-color: #111827; }
+  #core-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 16px 0; }
+  #core-head .t { font-size: 11px; letter-spacing: .14em; color: #8b8b93; font-weight: 700; }
+  #core-head .st { font-size: 12px; color: #fbbf24; font-weight: 700; }
+  #core-head .st .dot { color: #f59e0b; }
+  .fit-btn { background: #1b1b20; border: 1px solid #2c2c33; color: #d1d5db; border-radius: 8px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
+  .fit-btn:hover { border-color: #14B8A6; }
+  #scene-wrap { position: relative; }
+  #scene { width: 100%; height: 520px; display: block; touch-action: none; cursor: grab; }
+  #scene:active { cursor: grabbing; }
+  #scene-hint { position: absolute; left: 14px; bottom: 12px; font-size: 12px; color: #9ca3af; background: rgba(10,10,11,.72); padding: 4px 9px; border-radius: 6px; }
+  #core-foot { display: flex; justify-content: space-between; padding: 0 16px 12px; font-size: 11px; letter-spacing: .12em; color: #8b8b93; font-weight: 700; }
+  #node-chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px 14px; }
+  .chip { background: #1b1b20; border: 1px solid #2c2c33; color: #d1d5db; border-radius: 999px; padding: 6px 13px; font-size: 13px; cursor: pointer; }
+  body.light .chip { background: #1f2937; border-color: #1f2937; color: #e5e7eb; }
+  .chip:hover { border-color: #14B8A6; }
+  .chip.sel { background: #14B8A6; border-color: #14B8A6; color: #042f2e; font-weight: 700; }
+  #ask-bar { display: flex; align-items: center; gap: 10px; padding: 2px 16px 16px; flex-wrap: wrap; }
+  .ask-mic { width: 38px; height: 38px; border-radius: 50%; border: 1px solid #2c2c33; background: #1b1b20; font-size: 17px; cursor: pointer; flex-shrink: 0; }
+  .ask-mic:hover { border-color: #14B8A6; }
+  .ask-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .ask-chips button { background: #1b1b20; border: 1px solid #2c2c33; color: #d1d5db; border-radius: 999px; padding: 6px 13px; font-size: 13px; cursor: pointer; }
+  .ask-chips button:hover { border-color: #14B8A6; }
+  body.light .ask-chips button, body.light .ask-mic { background: #1f2937; border-color: #1f2937; color: #e5e7eb; }
+  .ask-hint { font-size: 12px; color: #6b7280; }
+  #lib-warn { display: none; margin: 12px 16px 0; padding: 10px 14px; background: #450a0a; border: 1px solid #7f1d1d; border-radius: 10px; font-size: 13px; color: #fecaca; }
+  /* ---------- Detail ---------- */
+  #detail { background: #101013; border: 1px solid #232328; border-radius: 16px; padding: 18px 20px; margin-bottom: 18px; }
+  body.light #detail { background: #fff; border-color: #e5ddd2; }
+  #detail h2 { margin: 2px 0 8px; font-size: 19px; color: #fff; }
+  body.light #detail h2 { color: #0B1D33; }
+  #detail p, #detail li { font-size: 14px; line-height: 1.6; color: #cbd5e1; }
+  body.light #detail p, body.light #detail li { color: #374151; }
+  #detail ul { padding-left: 18px; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; margin-right: 6px; background: #1f2937; color: #9ca3af; }
+  code { background: #1b1b20; border: 1px solid #2c2c33; border-radius: 6px; padding: 2px 6px; font-size: 13px; color: #a5f3fc; }
+  body.light code { background: #f0ebe2; border-color: #ddd5c6; color: #0e7490; }
+  footer { font-size: 12px; color: #64748b; padding: 4px 2px 10px; }
+  @media (max-width: 900px) {
+    #sidebar { position: static; width: 100%; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 10px; border-right: 0; border-bottom: 1px solid #1e1e22; }
+    #logo { padding: 6px 10px; }
+    .nav-sec, #side-foot { display: none; }
+    .nav-item { width: auto; }
+    #main { margin-left: 0; }
+    #greet { font-size: 26px; }
+    #scene { height: 420px; }
+  }
+</style>
+</head>
+<body>
+<nav id="sidebar">
+  <div id="logo">✦ Talvenor <span>OS</span></div>
+  <div class="nav-sec">Command</div>
+  <button class="nav-item active" data-key="jarvis"><span class="ic">◎</span> Jarvis</button>
+  <button class="nav-item" data-key="ceo"><span class="ic">🧠</span> Main CEO Bot</button>
+  <button class="nav-item" data-key="goals"><span class="ic">◉</span> Goals</button>
+  <button class="nav-item" data-key="ai_chat"><span class="ic">💬</span> AI Chat</button>
+  <button class="nav-item" data-key="team"><span class="ic">∴</span> AI Team</button>
+  <div class="nav-sec">Content</div>
+  <button class="nav-item" data-key="content"><span class="ic">▦</span> Content</button>
+  <button class="nav-item" data-key="research"><span class="ic">🔍</span> Research</button>
+  <button class="nav-item" data-key="content"><span class="ic">👥</span> Creators</button>
+  <button class="nav-item" data-key="approvals"><span class="ic">✓</span> Approvals <span class="nav-badge" id="appr-badge">0</span></button>
+  <button class="nav-item" data-key="posts"><span class="ic">🗎</span> Posts</button>
+  <button class="nav-item" data-key="emails"><span class="ic">✉</span> Emails</button>
+  <button class="nav-item" data-key="graphics"><span class="ic">🖼</span> Graphics</button>
+  <button class="nav-item" data-key="video"><span class="ic">▶</span> Video editor</button>
+  <div class="nav-sec">System</div>
+  <button class="nav-item" data-key="playbook"><span class="ic">📖</span> Playbook</button>
+  <button class="nav-item" data-key="settings"><span class="ic">⚙</span> Settings</button>
+  <div id="side-foot">
+    <div class="toggle-row"><span>Light mode</span><button class="switch" id="light-toggle" aria-label="Light mode"></button></div>
+    <div id="user-card"><div class="av">MB</div><div><div class="nm">Boss — Md Mainuddin</div><div class="ws">Private workspace · MAINUDDIN LLC</div></div></div>
+  </div>
+</nav>
+
+<div id="main">
+  <div id="topbar">
+    <div id="search"><span>🔍</span><input id="search-input" placeholder="Ask your workspace — worker, node বা topic লিখুন…" autocomplete="off"><span id="search-count" style="font-size:12px;color:#6b7280"></span></div>
+    <span class="top-chip">Phase <b id="chip-phase">7 · v0.7.0</b></span>
+    <span class="top-chip">Brain: <b>mock</b></span>
+    <span class="top-chip">Gates: <b>ON</b></span>
+  </div>
+
+  <div id="content">
+    <h1 id="greet">Good evening, Boss.</h1>
+    <p id="greet-sub">লোড হচ্ছে…</p>
+    <div class="btn-row">
+      <button class="btn primary" id="btn-talk">🎙️ Talk to Jarvis</button>
+      <button class="btn" id="btn-ask">Ask a question</button>
+      <button class="btn" id="btn-refresh">Refresh</button>
+    </div>
+    <p class="honest">⚠️ <b>Visualization — এই page অফিস চালায় না।</b> আসল কাজ করে <code>run_office.py</code>। Brain এখনো <b>mock</b> — ভাবনা DRAFT। Live দাবি করা হয় না।</p>
+    <div id="strip">লোড হচ্ছে…</div>
+
+    <div id="core-panel">
+      <div id="core-head"><span class="t">JARVIS CORE</span><span class="st"><span class="dot">●</span> CORE — mock brain · voice REAL</span><button class="fit-btn" id="fit-btn">◎ Fit</button></div>
+      <div id="lib-warn">3D লাইব্রেরি (Three.js) লোড হয়নি — ইন্টারনেট লাগবে। নিচের node বাটন আর বিস্তারিত তবুও কাজ করবে।</div>
+      <div id="scene-wrap">
+        <canvas id="scene"></canvas>
+        <div id="scene-hint">ড্র্যাগ = গোল করে ঘোরান · যেদিকে ঘোরাবেন, সেই side দেখা যাবে · স্ক্রল = জুম</div>
+      </div>
+      <div id="core-foot"><span>● JARVIS — LISTENING (mic test Boss-এর PC-তে বাকি)</span><span>TAP TO TALK → নিচের Talk to Jarvis</span></div>
+      <div id="node-chips"></div>
+      <div id="ask-bar">
+        <button class="ask-mic" id="ask-mic" title="Talk to Jarvis">🎙️</button>
+        <div class="ask-chips">
+          <button data-ask="agency">show agency</button>
+          <button data-ask="gate0">Gate 0</button>
+          <button data-ask="leads">leads</button>
+          <button data-ask="jarvis">Jarvis</button>
+          <button data-ask="revenue">revenue</button>
+        </div>
+        <span class="ask-hint">Ask "show…" · "Gate 0" · "leads" — node-এ ক্লিক = বিস্তারিত</span>
+      </div>
+    </div>
+
+    <div id="detail"><h2>👆 একটা node-এ ক্লিক করুন</h2><p>এটা এখন একটা <b>গোলক (sphere)</b> — মাঝখানে Main CEO Bot core, উপরে Jarvis, তিন দিকে তিনটা office — Agency, Vet Kit, Content। গোল করে ঘোরান: যেদিকে ঘোরাবেন, সেই side-টাই সামনে আসবে। কোনো node-এ ক্লিক করলে এখানে তার আসল অবস্থা দেখাবে।</p></div>
+
+    <footer id="foot">Talvenor Master OS · LOCAL dashboard · repo: talvenor-master-os · status: —</footer>
+  </div>
+</div>
+
+<script>
+// ---------- Fallback snapshot (fetch না হলে এটা দেখাবে; 2026-11-19-এর আসল সংখ্যা) ----------
+const FALLBACK = {
+  phase: 7, version: "0.7.0", gates_enabled: true, spend_cap_usd: 0,
+  first_mails: 162, paying_clients: 0, email: "PAUSED", gate0: "NOT PASSED",
+  pa_list: 39, pipeline: { real: 0, mock: 10, stub: 0, blocked: 3 },
+  toolpilot_subs: 0, tasks_count: 0, approvals_pending: 0, approvals_approved: 0,
+  voice: { label: "REAL", detail: "Jarvis voice — Piper TTS + Vosk/sherpa STT, offline, $0 (mic test Boss-এর PC-তে বাকি)" },
+  workflow_auto_send: { status: "NOT LIVE", nodes: 8, name: "Talvenor Tier 2 Auto-Send" },
+  workflow_callback: { status: "NOT LIVE", nodes: 3, name: "Talvenor Callback" }
+};
+
+const DETAILS = {
+  jarvis: { title: "🎙️ Jarvis — Voice", tag: "REAL · offline · $0",
+    body: "<p><b>Boss-এর কণ্ঠ।</b> বাংলায় শুনে, বাংলায় বলে। Piper TTS (bn_BD-google-medium) + sherpa-onnx বাংলা শোনা। Mic test Boss-এর PC-তে বাকি — এই VM-এ mic নেই।</p><p>Voice brain-কে চালাক করে না — brain এখনো <b>mock</b>। মুখে 'send করো' বললেও কাজ হয় না, শুধু <b>PENDING</b> হয় Approval Gate-এ।</p><p>চালাতে: <code>python scripts\\jarvis_voice_loop.py</code> — পুরো নির্দেশনা আলাদা page-এ (Local Run Guide)।</p>" },
+  ceo: { title: "🧠 Main CEO Bot — Brain", tag: "mock · $0",
+    body: "<p><b>সুপার-ইন্টেলিজেন্ট সেকেন্ড ব্রেন</b> — এখনো mock। ভাবনা DRAFT লেবেল নিয়ে আসে। Live brain (MetaSpark) ফ্লিপ করা হয়নি — প্রথম live test 2026-11-06-এ timeout হয়েছিল, key path এখনো UNPROVEN।</p><p>কাজের ধারা: Boss → Jarvis → Main CEO Bot → ৩ Chief → worker → ফল Main CEO Bot-এ → Boss-এর approval যেখানে দরকার।</p><p>৩টা office: Agency (MAIN) · Digital Product (Vet Kit) · Content Engine (Creator OS)। ৩১ worker/agent, ২৩ section skill।</p>" },
+  ai_chat: { title: "💬 AI Chat — Main CEO Bot-এর সাথে কথা", tag: "২ রাস্তা · brain mock",
+    body: "<p><b>১) Jarvis voice</b> — বাংলায় বলুন, Jarvis শুনে CEO Bot-কে দেয়। <b>২) run_office.py</b> দিয়ে লিখে কাজ দেওয়া।</p><p>Brain এখনো <b>mock</b> — উত্তর DRAFT আসে, সত্যিকারের ভাবনা নয়। Live brain ফ্লিপ করা হয়নি।</p>" },
+  gate: { title: "🛡️ Approval Gate — ON", tag: "gated: send · publish · spend · delete",
+    body: "<p><b>Gate words:</b> <code>ok</code> = plan/asset approval · <code>go</code> = build phase এগোনো · <code>post it</code> = publish · <code>send</code> = পাঠানো · <code>upload it</code> = video upload।</p><p>Auto-approve-এর কোনো রাস্তা নেই। Gated কাজ gate word ছাড়া <b>PENDING</b>-এ আটকে যায় — কখনো নিজে থেকে চলে না।</p><p>Spend cap: <b>$0</b>।</p>" },
+  agency: { title: "🏢 Agency — Talvenor AI Receptionist", tag: "MAIN · 5 section · 15 worker + 6 agent",
+    body: "<p><b>৫ section:</b> receive · sell · delivery · marketing · ops।</p><p><b>১৫ worker:</b> ProspectResearcher, OutreachDrafter, ReplyHandler, NegotiationCoach, RetellBuilder, QAEngineer, OnboardingAgent, ContentPlanner, VideoProducer, CaptionWriter, PublishPrep, ObjectionSimulator, InboxTriager, ReportCompiler, SchedulerAssistant।</p><p><b>৬ section agent:</b> ClientIntakeReceiver, SalesCloser, FollowUpAgent, ServiceDeliveryManager, ClientSuccessAgent, BillingInvoiceAgent।</p><p>Chief সত্যিই worker ডাকে — mock brain, DRAFT ONLY। প্রথম মেইল <b>১৬২</b> · paying client <b>০</b> · Email <b>PAUSED</b>।</p><p>নিশ: US home-service (plumbing, HVAC, roofing…) · dental/medical বাদ।</p>" },
+  products: { title: "📦 Digital Product — Vet No-Show Recovery Kit", tag: "Gate 0 NOT PASSED · 6 section · 7 agent",
+    body: "<p><b>৬ section:</b> product · research · launch · sales · support · finance।</p><p><b>৭ agent:</b> KitBuilder, KitQA, ClinicResearcher, LaunchManager, KitSales, SupportDrafter, PaymentRailsChecker।</p><p>Kit-এর blueprint আছে — kit নিজে নয়। <b>Gate 0 NOT PASSED</b> — Lemon Squeezy signup test (~১৫ মিনিট) Boss-এর step। পাস না হলে kit বানানো/বেচা যাবে না — code fail-closed।</p><p>PA vet list <b>৩৯/১০০</b> (যাচাই করা) · দাম $49 one-time · বিক্রি ০।</p>" },
+  content: { title: "🎬 Content Engine — Creator OS / ToolPilot", tag: "13 stage: REAL 0 · MOCK 10 · BLOCKED 3",
+    body: "<p><b>৫ section:</b> plan · produce · publish · analyze · growth।</p><p><b>৬ worker:</b> TopicResearcher, ScriptWriter, VisualProducer, CaptionWriter, PublishPrep, PerformanceTracker।</p><p><b>১০ section agent:</b> ContentPlanner, PerformanceAnalyst, Growth, Repurpose + ৬ wrapper (TopicResearcher, ScriptWriter, VisualProducer, CaptionWriter, PublishPrep, PerformanceTracker)।</p><p>Upload <b>OFF</b> (stage 9) — Boss-এর 'upload it' + credential লাগে। Video file বানায় না — footage/GPU নেই।</p><p>ToolPilot: video ০ · subs ০ · VOICE.md DRAFT · GPU AMD Radeon integrated 496 MB VRAM (FramePack/WanGP চলবে না)।</p>" },
+  team: { title: "∴ AI Team — ৩ Chief, ৩১ worker/agent", tag: "পুরো roster · brain mock · DRAFT ONLY",
+    body: "<p><b>Agency Chief:</b> ১৫ worker — ProspectResearcher, OutreachDrafter, ReplyHandler, NegotiationCoach, RetellBuilder, QAEngineer, OnboardingAgent, ContentPlanner, VideoProducer, CaptionWriter, PublishPrep, ObjectionSimulator, InboxTriager, ReportCompiler, SchedulerAssistant — + ৬ section agent — ClientIntakeReceiver, SalesCloser, FollowUpAgent, ServiceDeliveryManager, ClientSuccessAgent, BillingInvoiceAgent।</p><p><b>Products Chief:</b> ৭ agent — KitBuilder, KitQA, ClinicResearcher, LaunchManager, KitSales, SupportDrafter, PaymentRailsChecker।</p><p><b>Content Chief:</b> ৬ worker — TopicResearcher, ScriptWriter, VisualProducer, CaptionWriter, PublishPrep, PerformanceTracker — + ১০ section agent — ContentPlanner, PerformanceAnalyst, Growth, Repurpose + ৬ wrapper।</p><p>সব output DRAFT লেবেল নিয়ে আসে — brain mock বলে।</p>" },
+  leads: { title: "🎯 Leads — প্রথম মেইল ১৬২", tag: "উত্তর ০ · বাকি ৩৭৪",
+    body: "<p>প্রথম মেইল <b>১৬২</b> পাঠানো হয়েছে, উত্তর <b>০</b>। Pool-এ আরও <b>৩৭৪</b>টি not-emailed row বাকি। hello@-এর উত্তর Zoho-তে যায় — Boss নিজে চেক করেন।</p><p>Follow-up নিয়ম: কোনো state-এ ১০০টা প্রথম মেইল না হলে follow-up নয়। কোনো state-ই ১০০-তে নেই।</p>" },
+  calls: { title: "📞 Calls — Sophia", tag: "+1 (947) 223-0244",
+    body: "<p>Sophia (AI receptionist) এই নম্বরে ধরে: <b>+1 (947) 223-0244</b>। ৬০ সেকেন্ডের live demo আছে। Booking: ১৫ মিনিটের demo call — <code>https://calendar.app.google/WLoxBfnLGTdjK3LB8</code></p><p>Cold calling পুরোপুরি বন্ধ — US নম্বর ছাড়া করা যায় না।</p>" },
+  emails: { title: "✉️ Emails — PAUSED", tag: "2026-11-14 থেকে বন্ধ",
+    body: "<p>Email পাঠানো <b>PAUSED</b> — Boss-এর নির্দেশ। কারণ: SPF-এ Gmail include নেই, DMARC record নেই, DKIM align নয়। Bounce ৬/১৮৬ ≈ ৩.২%।</p><p>DNS fix Boss-এর হাতে বাকি — ২টা record বসালেই 'check koro' বলে যাচাই, তারপর seed test, তারপর restart।</p>" },
+  approvals: { title: "✓ Approvals — pending ০", tag: "Gate ON · auto-approve নেই",
+    body: "<p>Pending approval: <b>০</b>। Gate words: <code>ok</code> / <code>go</code> / <code>post it</code> / <code>send</code> / <code>upload it</code> — আপনার exact word ছাড়া send/publish/spend/delete কিছুই হয় না।</p>" },
+  revenue: { title: "💰 Revenue — $0", tag: "paying client ০",
+    body: "<p>Paying client: <b>০</b>। Revenue <b>$0</b>। Kit বিক্রি ০ (Gate 0)।</p><p>Pricing LOCKED: Starter $547 / Growth $1,109 / Scale $1,672 প্রতি মাসে — prospect-কে কখনো দাম বলা হয় না, Boss-এর word ছাড়া।</p>" },
+  gate0: { title: "🚩 Gate 0 — NOT PASSED", tag: "Vet Kit আটকে আছে",
+    body: "<p><b>Gate 0 NOT PASSED</b> — Lemon Squeezy signup test (~১৫ মিনিট) Boss-এর step। পাস না হলে kit বানানো/বেচা যাবে না — code fail-closed।</p><p>PA vet list <b>৩৯/১০০</b> (যাচাই করা)। Fail হলে Polar, তারপর Gumroad — এটাই পরের ধাপ।</p>" },
+  goals: { title: "🎯 Goals — তিনটা track একসাথে", tag: "2026-11-12 FINAL",
+    body: "<p>(1) <b>Receptionist agency — MAIN</b> · (2) <b>Digital product</b> — Vet Kit $49 · (3) <b>YouTube channel</b> — ToolPilot (@ToolPilotai69, ready, OBS recording বাকি) নাকি নতুন চ্যানেল — আপনার উত্তর বাকি।</p>" },
+  research: { title: "🔍 Research — PA vet list ৩৯/১০০", tag: "যাচাই করা",
+    body: "<p>PA-র ৩৯টি independent vet clinic যাচাই করা — ৮টার public email পাওয়া গেছে, বাকি ৩১টা 'Not publicly listed'। Chain (Banfield, VCA) বাদ।</p><p>Prospect research নিয়ম: website + need signal দেখে, email/phone/address কখনো আন্দাজে লেখা হয় না।</p>" },
+  posts: { title: "🗎 Posts — এই সপ্তাহ (Nov 16–22)", tag: "Mon ✅ Thu ✅",
+    body: "<p>Mon Reel <b>POSTED</b> (FB+IG) · Thu carousel <b>POSTED</b> (FB+IG) · Tue/Wed ready, পোস্ট হয়নি · Fri LinkedIn — Boss নিজে পোস্ট করেন (text দেওয়া হয়েছে)।</p><p>নিয়ম: 'post it' ছাড়া কিছু পোস্ট হয় না।</p>" },
+  graphics: { title: "🖼️ Graphics — Brand kit", tag: "navy + teal",
+    body: "<p>Brand: navy #0B1D33 + teal #14B8A6 + white। FINAL logo: gradient V + WAVE 'Talvenor' wordmark — <b>কখনো regenerate/redraw নয়</b>।</p><p>এক image-এ একটাই symbol — lockup-এ V already আছে।</p>" },
+  video: { title: "▶ Video editor — Reel Factory", tag: "real footage only",
+    body: "<p>Real footage + TTS voiceover + karaoke caption + end card। AI video generation region-blocked (403) — retry নয়। GPU video বন্ধ (496 MB VRAM)।</p><p>UGC demo v2 (২৮.১s) Mon-এ FB+IG-তে পোস্ট হয়েছে।</p>" },
+  playbook: { title: "📖 Playbook — SOP + Office", tag: "Content Standard LOCKED",
+    body: "<p>অফিস system: <code>~/workspace/talvenor-office/</code> · Agency Skill OS: <code>~/workspace/agency-os/</code> · Content Production Standard LOCKED (2026-10-05)।</p><p>Approval gate: 'ok' = plan/asset · 'post it' = publish · exact word ছাড়া send/schedule/spend/delete নয়।</p>" },
+  settings: { title: "⚙️ Settings — config", tag: "Phase 7 · v0.7.0",
+    body: "<p>Brain: <b>mock</b> · Gates: <b>ON</b> · Spend cap: <b>$0</b> · Timezone: Asia/Dhaka · Booking: 15 min, New York Time।</p><p>Live brain ফ্লিপ করা হয়নি — প্রথম live test 2026-11-06-এ timeout হয়েছিল, key path UNPROVEN।</p><p>PC-তে চালানোর পুরো নির্দেশনা আলাদা page-এ (Local Run Guide)।</p>" }
+};
+
+let S = FALLBACK;
+let graphApi = null;
+
+function pill(label, val, cls) {
+  return `<span class="pill ${cls || ""}">${label}: <b>${val}</b></span>`;
+}
+function greeting() {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return "Good morning, Boss.";
+  if (h >= 12 && h < 17) return "Good afternoon, Boss.";
+  if (h >= 17 && h < 21) return "Good evening, Boss.";
+  return "Good night, Boss.";
+}
+function renderAll() {
+  const p = S.pipeline || {};
+  document.getElementById("greet").textContent = greeting();
+  document.getElementById("greet-sub").innerHTML =
+    "No paying clients yet · <b>" + S.first_mails + " first mails sent</b> · Email <b>" + S.email + "</b> · Gate 0 <b>" + S.gate0 + "</b> · PA vet list <b>" + S.pa_list + "/100</b>";
+  document.getElementById("chip-phase").textContent = S.phase + " · v" + S.version;
+  document.getElementById("appr-badge").textContent = (S.approvals_pending == null ? "?" : S.approvals_pending);
+  document.getElementById("strip").innerHTML =
+    pill("Phase", S.phase + " · v" + S.version, "ok") +
+    pill("Brain", "mock", "hold") +
+    pill("Gates", S.gates_enabled === true ? "ON" : S.gates_enabled, "ok") +
+    pill("Spend cap", "$" + S.spend_cap_usd, "ok") +
+    pill("Paying clients", S.paying_clients, S.paying_clients === 0 ? "warn" : "ok") +
+    pill("First mails", S.first_mails) +
+    pill("Email", S.email, S.email === "PAUSED" ? "warn" : "") +
+    pill("Gate 0", S.gate0, S.gate0 === "NOT PASSED" ? "warn" : "ok") +
+    pill("PA vet list", S.pa_list + "/100") +
+    pill("Pipeline", "REAL " + p.real + " · MOCK " + p.mock + " · BLOCKED " + p.blocked) +
+    pill("Upload", "OFF", "warn") +
+    pill("Jarvis voice", (S.voice && S.voice.label) || "?", (S.voice && S.voice.label === "REAL") ? "ok" : "hold") +
+    pill("n8n auto-send", (S.workflow_auto_send && S.workflow_auto_send.status) || "?", "hold") +
+    pill("n8n callback", (S.workflow_callback && S.workflow_callback.status) || "?", "hold");
+  document.getElementById("foot").textContent =
+    "Talvenor Master OS · LOCAL dashboard · repo: talvenor-master-os · Phase " + S.phase + " · v" + S.version +
+    " · sync: " + (window.__statusSource || "fallback snapshot 2026-11-19") + " · সংখ্যা আসল ফাইল থেকে আসে (sync_status.py)। PC-তে চালানোর নির্দেশনা আলাদা page-এ (Local Run Guide)।";
+}
+function showDetail(key) {
+  const o = DETAILS[key];
+  if (!o) return;
+  document.getElementById("detail").innerHTML = "<h2>" + o.title + "</h2><p><span class='tag'>" + o.tag + "</span></p>" + o.body;
+  document.querySelectorAll(".chip").forEach(c => c.classList.toggle("sel", c.dataset.key === key));
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.toggle("active", n.dataset.key === key));
+  if (graphApi) graphApi.select(key);
+}
+async function loadStatus() {
+  try {
+    const r = await fetch("status.json", { cache: "no-store" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const j = await r.json();
+    S = Object.assign({}, FALLBACK, j);
+    window.__statusSource = "status.json (live, " + new Date().toLocaleString("bn-BD") + ")";
+  } catch (e) {
+    S = FALLBACK;
+    window.__statusSource = "fallback snapshot 2026-11-19 — status.json পড়া যায়নি (run_local.bat দিয়ে খুলুন, বা python scripts\\sync_status.py চালান)";
+  }
+  renderAll();
+}
+
+// ---------- Node chips ----------
+const CHIP_KEYS = ["jarvis", "ceo", "gate", "agency", "products", "content", "leads", "calls", "emails", "approvals", "gate0", "revenue"];
+const CHIP_LABELS = { jarvis: "🎙️ Jarvis", ceo: "🧠 CEO Bot", gate: "🛡️ Gate", agency: "🏢 Agency", products: "📦 Vet Kit", content: "🎬 Content", leads: "🎯 Leads", calls: "📞 Calls", emails: "✉️ Emails", approvals: "✓ Approvals", gate0: "🚩 Gate 0", revenue: "💰 Revenue" };
+document.getElementById("node-chips").innerHTML = CHIP_KEYS.map(k =>
+  `<button class="chip" data-key="${k}">${CHIP_LABELS[k]}</button>`).join("");
+document.getElementById("node-chips").addEventListener("click", e => {
+  const b = e.target.closest(".chip");
+  if (b) showDetail(b.dataset.key);
+});
+document.querySelectorAll(".nav-item").forEach(n => n.addEventListener("click", () => showDetail(n.dataset.key)));
+document.getElementById("btn-talk").addEventListener("click", () => showDetail("jarvis"));
+document.getElementById("btn-ask").addEventListener("click", () => document.getElementById("search-input").focus());
+document.getElementById("btn-refresh").addEventListener("click", loadStatus);
+document.getElementById("light-toggle").addEventListener("click", () => document.body.classList.toggle("light"));
+document.getElementById("fit-btn").addEventListener("click", () => { if (graphApi) graphApi.resetView(); });
+document.getElementById("ask-mic").addEventListener("click", () => showDetail("jarvis"));
+document.querySelectorAll(".ask-chips button").forEach(b => b.addEventListener("click", () => {
+  document.getElementById("search-input").value = "";
+  if (graphApi) graphApi.highlight("");
+  showDetail(b.dataset.ask);
+}));
+
+// ---------- Search: highlight matching nodes ----------
+document.getElementById("search-input").addEventListener("input", e => {
+  const q = e.target.value.trim().toLowerCase();
+  if (graphApi) {
+    const n = graphApi.highlight(q);
+    document.getElementById("search-count").textContent = q ? (n + " node") : "";
+  }
+});
+
+// ---------- 3D sphere graph (গোলক: CEO মাঝখানে, Jarvis উপরে, তিন office তিন দিকে) ----------
+const AGENCY_WORKERS = ["ProspectResearcher", "OutreachDrafter", "ReplyHandler", "NegotiationCoach", "RetellBuilder", "QAEngineer", "OnboardingAgent", "ContentPlanner", "VideoProducer", "CaptionWriter", "PublishPrep", "ObjectionSimulator", "InboxTriager", "ReportCompiler", "SchedulerAssistant"];
+const AGENCY_AGENTS = ["ClientIntakeReceiver", "SalesCloser", "FollowUpAgent", "ServiceDeliveryManager", "ClientSuccessAgent", "BillingInvoiceAgent"];
+const PRODUCT_STAFF = ["KitBuilder", "KitQA", "ClinicResearcher", "LaunchManager", "KitSales", "SupportDrafter", "PaymentRailsChecker"];
+const CONTENT_WORKERS = ["TopicResearcher", "ScriptWriter", "VisualProducer", "CaptionWriter", "PublishPrep", "PerformanceTracker"];
+const CONTENT_AGENTS = ["ContentPlanner", "PerformanceAnalyst", "Growth", "Repurpose", "TopicResearcher", "ScriptWriter", "VisualProducer", "CaptionWriter", "PublishPrep", "PerformanceTracker"];
+const DOT_COLORS = [0x60a5fa, 0x4ade80, 0xfacc15, 0xfb923c, 0xf472b6, 0xe5e7eb, 0x9ca3af];
+
+function seededRand(seed) {
+  let s = seed;
+  return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+}
+
+function makeLabel(text, color) {
+  const c = document.createElement("canvas");
+  c.width = 512; c.height = 112;
+  const g = c.getContext("2d");
+  g.fillStyle = "rgba(7,9,13,0.72)";
+  g.beginPath(); g.roundRect(6, 14, 500, 84, 16); g.fill();
+  g.fillStyle = color || "#ffffff";
+  g.font = "bold 40px system-ui, sans-serif";
+  g.textAlign = "center"; g.textBaseline = "middle";
+  g.fillText(text, 256, 58);
+  const tex = new THREE.CanvasTexture(c);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+  sp.scale.set(4.2, 0.92, 1);
+  return sp;
+}
+
+function initGraph() {
+  if (typeof THREE === "undefined") {
+    document.getElementById("lib-warn").style.display = "block";
+    document.getElementById("scene-wrap").style.display = "none";
+    return;
+  }
+  const canvas = document.getElementById("scene");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x07090d);
+  scene.fog = new THREE.Fog(0x07090d, 26, 60);
+  const camera = new THREE.PerspectiveCamera(50, 2, 0.1, 150);
+  camera.position.set(0, 7, 21);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+  const dl = new THREE.DirectionalLight(0xffffff, 0.9);
+  dl.position.set(6, 12, 8); scene.add(dl);
+  const pl = new THREE.PointLight(0x14b8a6, 1.4, 40);
+  pl.position.set(0, 4, 0); scene.add(pl);
+
+  const CENTER = new THREE.Vector3(0, 0.6, 0);
+  const world = new THREE.Group();
+  scene.add(world);
+  const pickables = [];
+  const nodeMeshes = [];
+  const labelSprites = [];
+  const edges = [];
+
+  function node(key, name, color, r, x, y, z, label, labelColor, seg) {
+    const m = new THREE.Mesh(
+      new THREE.SphereGeometry(r, seg || 24, seg || 24),
+      new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.3, emissive: color, emissiveIntensity: 0.55, transparent: true })
+    );
+    m.position.set(x, y, z);
+    m.userData = { key, name, baseY: y };
+    world.add(m); pickables.push(m);
+    nodeMeshes.push({ mesh: m, key, name: name.toLowerCase() });
+    if (label) {
+      const sp = makeLabel(label, labelColor || "#ffffff");
+      sp.position.set(x, y + r + 0.9, z);
+      world.add(sp);
+      labelSprites.push({ sprite: sp, mesh: m });
+    }
+    return m;
+  }
+  function star(x, y, z, r, color, opacity) {
+    const m = new THREE.Mesh(
+      new THREE.SphereGeometry(r, 8, 8),
+      new THREE.MeshStandardMaterial({ color, roughness: 0.5, metalness: 0.1, emissive: color, emissiveIntensity: 0.4, transparent: true, opacity })
+    );
+    m.position.set(x, y, z);
+    m.userData = { key: "", name: "", baseY: y };
+    world.add(m);
+    return m;
+  }
+  function edge(a, b) { edges.push(a.position.x, a.position.y, a.position.z, b.position.x, b.position.y, b.position.z); }
+
+  function dirFromAngles(azDeg, elDeg) {
+    const az = azDeg * Math.PI / 180, el = elDeg * Math.PI / 180;
+    return new THREE.Vector3(Math.cos(el) * Math.cos(az), Math.sin(el), Math.cos(el) * Math.sin(az));
+  }
+  function inCone(d, coneDeg, rand) {
+    const cone = coneDeg * Math.PI / 180;
+    const up = Math.abs(d.y) < 0.9 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(1, 0, 0);
+    const u = new THREE.Vector3().crossVectors(d, up).normalize();
+    const v = new THREE.Vector3().crossVectors(d, u).normalize();
+    const a = rand() * Math.PI * 2;
+    const t = (0.25 + rand() * 0.75) * cone;
+    const off = new THREE.Vector3().addScaledVector(u, Math.cos(a) * Math.sin(t)).addScaledVector(v, Math.sin(a) * Math.sin(t));
+    return new THREE.Vector3().copy(d).multiplyScalar(Math.cos(t)).add(off).normalize();
+  }
+
+  // Core: CEO Bot মাঝখানে, Jarvis উপরে (উত্তর মেরু), Gate ring বিষুবরেখায়
+  const jarvis = node("jarvis", "Jarvis", 0xf0b429, 0.85, 0, 6.4, 0, "Jarvis — voice · REAL", "#fde68a");
+  const ceo = node("ceo", "Main CEO Bot", 0x14b8a6, 1.25, 0, 0.6, 0, "Main CEO Bot — mock", "#5eead4");
+  edge(jarvis, ceo);
+  const gate = new THREE.Mesh(
+    new THREE.TorusGeometry(2.7, 0.09, 16, 90),
+    new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.3, metalness: 0.4, emissive: 0x38bdf8, emissiveIntensity: 0.55, transparent: true })
+  );
+  gate.rotation.x = Math.PI / 2; gate.position.copy(CENTER);
+  gate.userData = { key: "gate", name: "Approval Gate", baseY: 0.6 };
+  world.add(gate); pickables.push(gate);
+  nodeMeshes.push({ mesh: gate, key: "gate", name: "approval gate" });
+  const gLabel = makeLabel("Approval Gate — ON", "#7dd3fc");
+  gLabel.position.set(0, -1.6, 3.6); world.add(gLabel);
+  labelSprites.push({ sprite: gLabel, mesh: gate });
+
+  // তিন office তিন দিকে (azimuth ১২০° করে)
+  function cluster(chiefKey, chiefName, chiefColor, azDeg, elDeg, members, memberColor, memberR, label, labelColor) {
+    const d = dirFromAngles(azDeg, elDeg);
+    const chiefPos = d.clone().multiplyScalar(6.5).add(CENTER);
+    const chief = node(chiefKey, chiefName, chiefColor, 0.55, chiefPos.x, chiefPos.y, chiefPos.z, label, labelColor);
+    edge(ceo, chief);
+    const rand = seededRand(azDeg * 7 + 13);
+    const mems = [];
+    members.forEach((mName) => {
+      const md = inCone(d, 42, rand);
+      const rr = 8.3 + rand() * 1.4;
+      const p = md.multiplyScalar(rr).add(CENTER);
+      const m = node(chiefKey, mName, memberColor, memberR, p.x, p.y, p.z, null);
+      edge(chief, m);
+      mems.push(m);
+    });
+    return { chief, members: mems, dir: d };
+  }
+  const agency = cluster("agency", "Agency Chief", 0x3b82f6, 10, 8, AGENCY_WORKERS.concat(AGENCY_AGENTS), 0x60a5fa, 0.2, "Agency · MAIN", "#93c5fd");
+  const products = cluster("products", "Products Chief", 0xea580c, 130, 5, PRODUCT_STAFF, 0xfb923c, 0.2, "Vet Kit · Gate 0 ✕", "#fdba74");
+  const content = cluster("content", "Content Chief", 0x22c55e, 250, 10, CONTENT_WORKERS.concat(CONTENT_AGENTS), 0x4ade80, 0.2, "Content · upload OFF", "#86efac");
+
+  // Cross-cluster chord (গোলকের ভেতর দিয়ে লাইন)
+  edge(agency.chief, products.chief);
+  edge(agency.chief, content.chief);
+  edge(products.chief, content.chief);
+  edge(agency.members[1], content.members[1]);
+  edge(agency.members[3], products.members[2]);
+  edge(content.members[0], products.members[0]);
+  edge(agency.members[8], content.members[4]);
+
+  // Task dots: প্রতিটা worker-এর চারপাশে ৩টা ছোট node (গোলকের গায়ে)
+  const rand = seededRand(42);
+  const allMembers = agency.members.concat(products.members, content.members);
+  allMembers.forEach((m, i) => {
+    for (let d = 0; d < 3; d++) {
+      const off = new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).normalize().multiplyScalar(0.7 + rand() * 0.5);
+      const p = m.position.clone().add(off);
+      const dot = node(m.userData.key, m.userData.name + " task",
+        DOT_COLORS[(i + d) % DOT_COLORS.length],
+        0.08 + rand() * 0.05, p.x, p.y, p.z, null, null, 10);
+      edge(m, dot);
+    }
+  });
+
+  // Background stars — দূরের গোলক shell
+  const rand2 = seededRand(7);
+  for (let i = 0; i < 42; i++) {
+    const a = rand2() * Math.PI * 2;
+    const b = Math.acos(rand2() * 2 - 1);
+    const rr = 17 + rand2() * 6;
+    star(Math.sin(b) * Math.cos(a) * rr, Math.cos(b) * rr * 0.7 + 0.6, Math.sin(b) * Math.sin(a) * rr,
+      0.04 + rand2() * 0.04, rand2() > 0.5 ? 0xe5e7eb : 0x9ca3af, 0.35 + rand2() * 0.25);
+  }
+
+  // Satellites — গোলকের গায়ে নানা দিকে
+  function satellite(key, name, color, azDeg, elDeg, r, label, labelColor) {
+    const d = dirFromAngles(azDeg, elDeg);
+    const p = d.multiplyScalar(10.6).add(CENTER);
+    return node(key, name, color, r, p.x, p.y, p.z, label, labelColor);
+  }
+  const leads = satellite("leads", "Leads", 0xeab308, 55, 18, 0.5, "Leads · 162", "#fde047"); edge(agency.chief, leads);
+  const calls = satellite("calls", "Calls", 0x34d399, 310, 20, 0.5, "Calls · Sophia", "#6ee7b7"); edge(agency.chief, calls);
+  const emails = satellite("emails", "Emails", 0xe5e7eb, 175, -14, 0.45, "Emails · PAUSED", "#f3f4f6"); edge(agency.chief, emails);
+  const approvals = satellite("approvals", "Approvals", 0xec4899, 205, -10, 0.45, "Approvals · 0", "#f9a8d4"); edge(gate, approvals);
+  const gate0 = satellite("gate0", "Gate 0", 0xef4444, 90, -42, 0.5, "Gate 0 ✕", "#fca5a5"); edge(products.chief, gate0);
+  const revenue = satellite("revenue", "Revenue", 0x8b5cf6, 285, 48, 0.5, "Revenue · $0", "#c4b5fd"); edge(products.chief, revenue);
+
+  // Edges as one line set
+  const edgeGeo = new THREE.BufferGeometry();
+  edgeGeo.setAttribute("position", new THREE.Float32BufferAttribute(edges, 3));
+  const edgeLines = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: 0x33507a, transparent: true, opacity: 0.5 }));
+  world.add(edgeLines);
+
+  // Selection ring — scene-এ, camera-র দিকে মুখ করে
+  const selRing = new THREE.Mesh(
+    new THREE.TorusGeometry(1, 0.05, 12, 60),
+    new THREE.MeshBasicMaterial({ color: 0x14b8a6 })
+  );
+  selRing.visible = false; scene.add(selRing);
+  let selected = null;
+  const tmpV = new THREE.Vector3();
+
+  graphApi = {
+    select(key) {
+      const hit = nodeMeshes.find(n => n.key === key);
+      if (!hit) { selRing.visible = false; selected = null; return; }
+      selected = hit;
+      selRing.visible = true;
+      hit.mesh.getWorldPosition(tmpV);
+      selRing.position.copy(tmpV);
+      const r = hit.mesh.geometry && hit.mesh.geometry.parameters ? hit.mesh.geometry.parameters.radius || 0.5 : 0.5;
+      selRing.scale.setScalar(Math.max(1, r + 0.45));
+      selRing.lookAt(camera.position);
+    },
+    highlight(q) {
+      if (!q) { nodeMeshes.forEach(n => { n.mesh.material.opacity = 1; }); return nodeMeshes.length; }
+      let count = 0;
+      nodeMeshes.forEach(n => {
+        const match = n.name.includes(q) || n.key.includes(q);
+        n.mesh.material.opacity = match ? 1 : 0.12;
+        if (match) count++;
+      });
+      return count;
+    },
+    resetView() { targetRotY = 0.4; targetRotX = 0.15; targetDist = 21; }
+  };
+
+  // Orbit: drag rotates, wheel zooms
+  let targetRotY = 0.4, targetRotX = 0.15, targetDist = 21;
+  let rotY = targetRotY, rotX = targetRotX, dist = targetDist;
+  let dragging = false, px = 0, py = 0;
+  canvas.addEventListener("pointerdown", e => { dragging = true; px = e.clientX; py = e.clientY; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointerup", () => { dragging = false; });
+  canvas.addEventListener("pointermove", e => {
+    if (!dragging) return;
+    targetRotY += (e.clientX - px) * 0.006;
+    targetRotX = Math.max(-0.1, Math.min(0.85, targetRotX + (e.clientY - py) * 0.004));
+    px = e.clientX; py = e.clientY;
+  });
+  canvas.addEventListener("wheel", e => { e.preventDefault(); targetDist = Math.max(12, Math.min(36, targetDist + e.deltaY * 0.01)); }, { passive: false });
+
+  // Click select (raycast)
+  const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+  let downAt = 0;
+  canvas.addEventListener("pointerdown", () => { downAt = Date.now(); });
+  canvas.addEventListener("pointerup", e => {
+    if (Date.now() - downAt > 250) return;
+    const r = canvas.getBoundingClientRect();
+    mouse.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+    mouse.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+    ray.setFromCamera(mouse, camera);
+    const hits = ray.intersectObjects(pickables);
+    if (hits.length) showDetail(hits[0].object.userData.key);
+  });
+
+  function resize() {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (canvas.width !== w || canvas.height !== h) {
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+    }
+  }
+  let t = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    t += 0.008;
+    rotY += (targetRotY - rotY) * 0.08;
+    rotX += (targetRotX - rotX) * 0.08;
+    dist += (targetDist - dist) * 0.08;
+    world.rotation.y = rotY + Math.sin(t * 0.2) * 0.02;
+    camera.position.set(0, 5 + rotX * 10, dist);
+    camera.lookAt(0, 0.8, 0);
+    ceo.scale.setScalar(1 + Math.sin(t * 2) * 0.04);
+    jarvis.position.y = 6.4 + Math.sin(t * 1.5) * 0.12;
+    gate.rotation.z = t * 0.3;
+    gate0.material.emissiveIntensity = 1 + Math.sin(t * 4) * 0.8;
+    // পেছনের দিকের label লুকাও — সামনের side-টাই শুধু দেখা যাবে
+    labelSprites.forEach(o => {
+      o.mesh.getWorldPosition(tmpV);
+      const toNode = tmpV.clone().sub(CENTER).normalize();
+      const toCam = camera.position.clone().sub(CENTER).normalize();
+      o.sprite.visible = toNode.dot(toCam) > -0.05;
+    });
+    if (selected) {
+      selected.mesh.getWorldPosition(tmpV);
+      selRing.position.copy(tmpV);
+      selRing.lookAt(camera.position);
+    }
+    resize();
+    renderer.render(scene, camera);
+  }
+  animate();
+  graphApi.select("agency");
+}
+
+loadStatus();
+initGraph();
+showDetail("agency");
+</script>
+</body>
+</html>
