@@ -24,8 +24,8 @@
      upload_youtube( call নেই (upload OFF)
   9. নতুন section file-এ ~/workspace/boss-ceo /
      ~/workspace/creator-os-combined reference নেই
- 10. config.json phase 7 + v0.7.0 + brain mock + 3 business +
-     phase_7_sections entry
+ 10. config.json phase 8 + v0.8.0 + brain mock + 3 business +
+     phase_7_sections + agentic_phase_3 + unified_os entry
  11. Real store untouched (tasks 0, approvals 0, tool_calls.json নেই)
  12. পুরনো check (phase0/1/2/3/4 + engines + phase6) এখনো PASS
 
@@ -518,23 +518,25 @@ def main():
         check("section files: no boss-ceo / creator-os-combined refs",
               False, str(e))
 
-    # 10. Config: phase 7 + v0.7.0 + brain mock + 3 businesses + phase_7
+    # 10. Config: phase 8 + v0.8.0 + brain mock + 3 businesses + phase_7
     try:
         with open(os.path.join(BASE, "00-CEO-Core", "config.json"),
                   encoding="utf-8") as f:
             cfg = json.load(f)
         phases = cfg.get("honest_status", {}).get("phases", {})
-        ok = (cfg.get("phase") == 7 and cfg.get("version") == "0.7.0"
+        ok = (cfg.get("phase") == 8 and cfg.get("version") == "0.8.0"
               and cfg.get("brain") == "mock"
               and len(cfg.get("businesses", [])) == 3
               and "phase_7_sections" in phases
               and "BUILT" in phases.get("phase_7_sections", "")
-              and "phase_5_three_engines" in phases)
-        check("config.json phase 7 + v0.7.0 + brain mock + 3 biz + phase_7",
+              and "phase_5_three_engines" in phases
+              and "agentic_phase_3" in phases
+              and "unified_os" in phases)
+        check("config.json phase 8 + v0.8.0 + brain mock + 3 biz + phase_7 + agentic 1-3 + unified",
               ok, f"phase={cfg.get('phase')}, version={cfg.get('version')}, "
               f"brain={cfg.get('brain')}")
     except Exception as e:  # noqa: BLE001
-        check("config.json phase 7 + v0.7.0 + brain mock + 3 biz + phase_7",
+        check("config.json phase 8 + v0.8.0 + brain mock + 3 biz + phase_7 + agentic 1-3 + unified",
               False, str(e))
 
     # 11. Real store untouched

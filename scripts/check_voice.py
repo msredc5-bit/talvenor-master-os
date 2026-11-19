@@ -12,7 +12,7 @@
   6. sounddevice importable — এই VM-এ PortAudio নেই বলে FAIL হবে
      (Windows wheel-এ PortAudio বান্ডেল থাকে — VM-only সীমা, ভান নয়)
   7. config.json-এর voice block = VERIFIED id-গুলো + brain mock +
-     phase 7 + v0.7.0
+     phase 8 + v0.8.0
   8. নতুন file-এ secret নেই (api key / password / secret / bearer)
   9. Gate test (TEMP approvals): voice-এ "send" বললে PENDING হয়,
      execute হয় না; আসল store ছোঁয় না
@@ -173,13 +173,13 @@ def main():
               and v.get("models", {}).get("sherpa_bn")
               == EXPECTED_MODELS["sherpa_bn"]
               and cfg.get("brain") == "mock"
-              and cfg.get("phase") == 7
-              and cfg.get("version") == "0.7.0")
-        check("config voice block = VERIFIED ids + brain mock + phase 7",
+              and cfg.get("phase") == 8
+              and cfg.get("version") == "0.8.0")
+        check("config voice block = VERIFIED ids + brain mock + phase 8",
               ok, f"voices={v.get('voices')}, brain={cfg.get('brain')}, "
               f"phase={cfg.get('phase')}, version={cfg.get('version')}")
     except Exception as e:  # noqa: BLE001
-        check("config voice block = VERIFIED ids + brain mock + phase 7",
+        check("config voice block = VERIFIED ids + brain mock + phase 8",
               False, str(e))
 
     # 9. no secrets in new files
