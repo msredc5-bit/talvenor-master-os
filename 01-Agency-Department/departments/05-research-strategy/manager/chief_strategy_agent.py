@@ -1,20 +1,23 @@
 """Chief Strategy Agent — research & strategy department manager (Phase 1).
 
 ভূমিকা (role): 05-research-strategy department-এর manager — strategy-level
-research task এলে কোন specialist-এর কাজ, তা ঠিক করে DELEGATION PLAN-এর
-DRAFT বানানো। নিজে কোনো research করে না, কোনো worker চালায় না।
-Gate: ok — delegation plan ব্যবহার করতে Boss-এর "ok" লাগে।
+research task এলে কোন specialist-এর কাজ, তা ঠিক করে specialist-কে
+load করে তার DRAFT ফেরত দেওয়া। নিজে কোনো research করে না।
+Gate: ok — manager-এর output ব্যবহার করতে Boss-এর "ok" লাগে।
 অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
 Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।
+Phase 3 DONE (2026-11-19) — ৭ specialist-ই EXISTING, manager এখন
+importlib দিয়ে specialist load করে চালায়।
 
-এই department-এ mapped existing staff নেই — GAP department।
-Prospect-level research করে ProspectResearcher (dept 01 Sales);
-strategy-level research-এর কোনো worker এখনো নেই।
-এই manager কখনো করে না: worker execute করে না, কিছু পাঠায় না,
-খরচ করে না, client-এর তথ্য/দাম/পরিসংখ্যান বানায় না, কোনো guarantee
-দেয় না, dental/medical বা patient-health ব্যবসা নেয় না।
+এই department-এ ৭ specialist EXISTING — competitor, industry, pricing,
+niche, offer, market opportunity, business intelligence।
+Prospect-level research করে ProspectResearcher (dept 01 Sales)।
+এই manager কখনো করে না: কিছু পাঠায় না, খরচ করে না, client-এর
+তথ্য/দাম/পরিসংখ্যান বানায় না, কোনো guarantee দেয় না, dental/medical
+বা patient-health ব্যবসা নেয় না।
 """
 
+import importlib.util
 import os
 import sys
 
@@ -24,57 +27,64 @@ TALVENOR_PHONE = "+1 (947) 223-0244"
 _GATE_ACTION_MAP = {"post it": "publish", "upload it": "publish"}
 _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
-# Department task kinds — সব ROLE-ONLY: role definition আছে, worker নেই।
-# file field: "ROLE-ONLY — skill: <planned path>" (skill .md registry-তে
-# এখনো বানানো হয়নি — এই file-এর scope-এর বাইরে)।
+# Department task kinds — ৭টাই EXISTING (Phase 3, 2026-11-19):
+# প্রতিটার worker + skill ফাইল disk-এ আছে; manager importlib দিয়ে
+# specialist load করে চালায়। Gate: none — specialist draft নিজেই নিরাপদ।
 DEPARTMENT_TASKS = {
     "competitor_research": {
         "specialist": "Competitor Research Agent",
-        "file": "ROLE-ONLY — skill: departments/05-research-strategy/skills/competitor-research-agent.md (planned, not built)",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "class": "CompetitorResearchAgent",
+        "file": "departments/05-research-strategy/specialists/competitor_research_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
     "industry_research": {
         "specialist": "Industry Research Agent",
-        "file": "ROLE-ONLY — skill: departments/05-research-strategy/skills/industry-research-agent.md (planned, not built)",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "class": "IndustryResearchAgent",
+        "file": "departments/05-research-strategy/specialists/industry_research_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
     "pricing_research": {
         "specialist": "Pricing Research Agent",
-        "file": "ROLE-ONLY — skill: departments/05-research-strategy/skills/pricing-research-agent.md (planned, not built)",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "class": "PricingResearchAgent",
+        "file": "departments/05-research-strategy/specialists/pricing_research_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
     "niche_selection": {
         "specialist": "Niche Selection Agent",
-        "file": "ROLE-ONLY — skill: departments/05-research-strategy/skills/niche-selection-agent.md (planned, not built)",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "class": "NicheSelectionAgent",
+        "file": "departments/05-research-strategy/specialists/niche_selection_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
     "offer_development": {
         "specialist": "Offer Development Agent",
-        "file": "ROLE-ONLY — skill: departments/05-research-strategy/skills/offer-development-agent.md (planned, not built)",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "class": "OfferDevelopmentAgent",
+        "file": "departments/05-research-strategy/specialists/offer_development_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
     "market_opportunity": {
         "specialist": "Market Opportunity Agent",
-        "file": "ROLE-ONLY — skill: departments/05-research-strategy/skills/market-opportunity-agent.md (planned, not built)",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "class": "MarketOpportunityAgent",
+        "file": "departments/05-research-strategy/specialists/market_opportunity_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
     "business_intelligence": {
         "specialist": "Business Intelligence Agent",
-        "file": "ROLE-ONLY — skill: departments/05-research-strategy/skills/business-intelligence-agent.md (planned, not built)",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "class": "BusinessIntelligenceAgent",
+        "file": "departments/05-research-strategy/specialists/business_intelligence_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
 }
 
 
 class ChiefStrategyAgent:
-    """Strategy research task-এর delegation plan DRAFT বানায়। Worker চালায় না।"""
+    """Strategy research task specialist-এর কাছে delegate করে তার DRAFT ফেরত দেয়।"""
 
     task_kind = "manage_research_strategy"
     gate = "ok"
@@ -122,17 +132,27 @@ class ChiefStrategyAgent:
             "Delegation plan draft for a Talvenor research & strategy task. "
             f"Task kind: {task.get('task_kind')}. Topic: {topic}. "
             f"Specialist: {entry['specialist']}. "
-            f"File/skill: {entry['file']}. "
+            f"File: {entry['file']}. "
             f"Gate: {entry['gate']}. Status: {entry['status']}. "
-            "Produce a short delegation plan: specialist, their file/skill, "
-            "gate needed, honest status. This department has no worker yet — "
-            "the plan routes only, it never executes a worker. "
-            "Do not invent any client fact, price, or statistic. "
+            "The manager loads the specialist worker (importlib) and returns "
+            "its draft. Do not invent any client fact, price, or statistic. "
             "No dental/medical."
         )
 
+    def _load_specialist(self, entry):
+        """Specialist worker importlib দিয়ে load করা — Chief-এর loader-এর মতো।"""
+        here = os.path.dirname(os.path.abspath(__file__))
+        dept_dir = os.path.normpath(os.path.join(here, ".."))
+        rel = entry["file"].split("departments/05-research-strategy/", 1)[-1]
+        path = os.path.join(dept_dir, rel)
+        spec = importlib.util.spec_from_file_location(
+            f"dept05_{entry['class']}", path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return getattr(mod, entry["class"])()
+
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Delegation plan DRAFT বানানো। কোনো worker চালায় না, file লেখে না, network ছোঁয় না।"""
+        """Specialist-কে delegate করে তার DRAFT ফেরত দেওয়া। কোনো file লেখে না, network ছোঁয় না।"""
         task = task or {}
         title = task.get("title") or "Research & strategy delegation"
         gated_action = task.get("gated_action")
@@ -158,8 +178,49 @@ class ChiefStrategyAgent:
                     "gate": self.gate,
                 }
 
-        task_kind = task.get("task_kind")
+        task_kind = task.get("task_kind") or self.task_kind
         entry = DEPARTMENT_TASKS.get(task_kind)
+
+        # Overview — task_kind না থাকলে (manager-এর নিজের kind) ৭ specialist-এর
+        # তালিকা সহ overview draft (dept 01-এর pattern)।
+        if task_kind == self.task_kind:
+            if brain is not None:
+                try:
+                    brain_text = brain.complete(self._prompt(task))
+                except TypeError:
+                    brain_text = brain.complete(self._prompt(task), max_tokens=500)
+            else:
+                brain_text = "No brain passed — overview built from DEPARTMENT_TASKS only."
+            lines = [
+                "[MOCK DRAFT] Research & Strategy — department overview (DRAFT ONLY)",
+                "Manager: Chief Strategy Agent | task_kind: manage_research_strategy | gate: ok",
+                "Specialists (7 EXISTING):",
+            ]
+            for kind in sorted(DEPARTMENT_TASKS.keys()):
+                e = DEPARTMENT_TASKS[kind]
+                lines.append(
+                    f"- {kind}: {e['specialist']} | {e['file']} | "
+                    f"gate: {e['gate'] or 'none'} | {e['status']}"
+                )
+            lines.append(
+                "Note: সব specialist DRAFT ONLY — mock brain ($0)। "
+                "Pricing research INTERNAL ONLY; dental/medical সবসময় DQ; "
+                "legal 4th client পর্যন্ত gated। Email PAUSED since 2026-11-14."
+            )
+            lines.append(f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}")
+            lines.append(f"Brain note: {brain_text}")
+            return {
+                "status": "draft-ready",
+                "output": "\n".join(lines),
+                "notes": (
+                    "DRAFT ONLY — mock brain ($0). Overview, কোনো specialist "
+                    "execute নয়। Chief wiring Phase 2 DONE — Agency Chief এখন "
+                    "এই manager-কে DEPARTMENT_ROUTING দিয়ে ডাকে।"
+                ),
+                "draft_only": True,
+                "mock_brain": True,
+                "gate": self.gate,
+            }
 
         if entry is None:
             kinds = ", ".join(sorted(DEPARTMENT_TASKS))
@@ -185,6 +246,13 @@ class ChiefStrategyAgent:
                 "gate": self.gate,
             }
 
+        # EXISTING specialist — importlib দিয়ে load করে চালানো, তার result ফেরত।
+        if entry["status"] == "EXISTING" and entry["file"].endswith(".py"):
+            specialist = self._load_specialist(entry)
+            return specialist.run(task, brain=brain, gateway=gateway,
+                                  approvals_path=approvals_path)
+
+        # Fallback — file না থাকলে পুরনো delegation plan draft (unchanged behavior)।
         if brain is not None:
             try:
                 brain_text = brain.complete(self._prompt(task, entry))
@@ -206,15 +274,14 @@ class ChiefStrategyAgent:
             f"Specialist: {entry['specialist']}\n"
             f"File/skill: {entry['file']}\n"
             f"{gate_line}\n"
-            f"Status: {entry['status']} — role definition only, no worker yet. "
-            "This plan routes only; it never executes a worker.\n"
+            f"Status: {entry['status']} — specialist file পাওয়া যায়নি, plan only।\n"
             "Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Delegation plan, execution নয়। "
-            "এই department GAP — strategy-level research-এর কোনো worker নেই। "
+            "DRAFT ONLY — mock brain ($0). Delegation plan, execution নয় — "
+            "specialist file পাওয়া যায়নি। "
             "Prospect-level research করে ProspectResearcher (dept 01 Sales)। "
             "Gate: ok।"
         )
