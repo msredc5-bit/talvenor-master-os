@@ -13,7 +13,7 @@ deployment plan। এই department শুধু plan আর DRAFT বানা
 - **CTO AI Engineering Agent** — `CTOAIEngineeringAgent`, task_kind `manage_ai_engineering`, gate `ok`
 - Manager file: `01-Agency-Department/departments/03-ai-engineering/manager/cto_ai_engineering_agent.py`
 - Skill file: `01-Agency-Department/departments/03-ai-engineering/skills/cto-ai-engineering-agent.md`
-- Manager কোনো worker execute করে না, কিছু deploy করে না।
+- Manager Phase 3 specialist-দের load করে চালায় (DRAFT only), কিছু deploy করে না; engine/section-এর পুরনো worker execute করে না।
 - Agency Chief wiring **Phase 2 DONE** — Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে call করে।
 
 ## Mapped Existing Staff
@@ -32,24 +32,24 @@ only** — live production stack **Vapi/Sophia**, Retell নয়। QAEngineer
 
 | Brief role | Mapping | Note |
 |---|---|---|
-| AI Solution Architect | ROLE-ONLY | কোনো worker code নেই; skill doc অনুযায়ী হাতে করা |
+| AI Solution Architect | EXISTING — `departments/03-ai-engineering/specialists/ai_solution_architect.py` | `solution_architect`, gate none — solution design DRAFT plan only; live build নয় |
 | Voice Agent Builder | EXISTING — RetellBuilder | `receptionist_build`, gate ok — DRAFT plan only; live stack Vapi/Sophia |
-| Conversation Designer | ROLE-ONLY | কোনো worker code নেই; skill doc অনুযায়ী হাতে করা |
-| Prompt Engineering Agent | ROLE-ONLY | কোনো worker code নেই; skill doc অনুযায়ী হাতে করা |
-| Vapi Integration Agent | ROLE-ONLY | Brief-এর integration role-এর নাম সংশোধন করা হয়েছে — live provider Vapi; কোনো worker code নেই |
+| Conversation Designer | EXISTING — `departments/03-ai-engineering/specialists/conversation_designer.py` | `conversation_design`, gate none — ৮ ধাপের call-flow DRAFT, honest AI disclosure সহ |
+| Prompt Engineering Agent | EXISTING — `departments/03-ai-engineering/specialists/prompt_engineering_agent.py` | `prompt_engineering`, gate none — prompt DRAFT + tuning notes (GPT-4o-mini, temp 0.2); live prompt বদলায় না |
+| Vapi Integration Agent | EXISTING — `departments/03-ai-engineering/specialists/vapi_integration_agent.py` | `vapi_integration`, gate none — Vapi integration DRAFT plan; brief-এর integration role-এর নাম সংশোধন করা হয়েছে — live provider Vapi |
 | CRM Integration Agent | **GAP** | CRM (n8n Data Tables) live নয় — integration সম্ভব নয়; কোনো worker/skill নেই |
-| Calendar Integration Agent | ROLE-ONLY | Booking link live (Google Calendar Appointment Schedule, 15 min, New York Time); কোনো worker code নেই |
-| n8n Automation Engineer | ROLE-ONLY | n8n workflows READY, not LIVE; কোনো worker code নেই |
+| Calendar Integration Agent | EXISTING — `departments/03-ai-engineering/specialists/calendar_integration_agent.py` | `calendar_integration`, gate none — booking-link integration DRAFT (Google Calendar Appointment Schedule, 15 min, New York Time); live calendar ছোঁয় না |
+| n8n Automation Engineer | EXISTING — `departments/03-ai-engineering/specialists/n8n_automation_engineer.py` | `n8n_automation`, gate none — n8n workflow DRAFT notes; workflows READY, not LIVE |
 | Testing & Debugging Agent | EXISTING — QAEngineer (partial) | `receptionist_qa`, QA checklist; dept 07-এর সঙ্গে shared |
-| Deployment Agent | ROLE-ONLY | Deployment-এ Boss-এর ok + manual steps লাগে; কোনো worker deploy করে না |
+| Deployment Agent | EXISTING — `departments/03-ai-engineering/specialists/deployment_agent.py` | `deployment`, gate none — deployment plan DRAFT ONLY; Boss-এর ok + manual steps লাগে, কোনো worker deploy করে না |
 
 ## Missing Roles
 
 - **CRM Integration Agent — GAP।** CRM live না হওয়া পর্যন্ত এই role তৈরি করা
   যায় না; কোনো worker code বা skill নেই।
-- ROLE-ONLY ৭টি role-এর (AI Solution Architect, Conversation Designer, Prompt
-  Engineering, Vapi Integration, Calendar Integration, n8n Automation, Deployment)
-  কোনো worker code নেই; এগুলো skill doc-এর role হিসেবে থাকে।
+- Phase 3-এ ৭টি role বানানো হয়েছে (AI Solution Architect, Conversation
+  Designer, Prompt Engineering, Vapi Integration, Calendar Integration,
+  n8n Automation, Deployment) — সবাই EXISTING, skill + worker সহ।
 
 ## Honest Status
 

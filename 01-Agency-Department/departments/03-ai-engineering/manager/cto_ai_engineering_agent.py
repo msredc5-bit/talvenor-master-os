@@ -2,8 +2,9 @@
 
 ভূমিকা (role): AI Engineering department-এর specialist-দের delegate করা —
 receptionist build (DRAFT plan only), QA checklist (shared, dept 07), আর
-ROLE-ONLY integration/design role-গুলো। এই manager শুধু delegation plan-এর
-DRAFT বানায়; কোনো worker execute করে না, কিছু deploy করে না।
+৭ specialist (solution, conversation, prompt, Vapi, calendar, n8n,
+deployment) — এদের task এলে manager specialist-কে load করে চালায়, শুধু
+plan দেয় না। এই manager delegation plan-এর DRAFT বানায়; engine/section-এর পুরনো worker execute করে না, কিছু deploy করে না।
 Gate: ok — delegation plan-এ Boss-এর "ok" লাগে; deploy/send/spend/delete
 কোনো gated action এই manager নিজে করে না।
 অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
@@ -11,12 +12,13 @@ LIVE production voice stack Vapi: Sophia, live receptionist, +1 (947)
 223-0244 — Sophia কোনো demo agent নয়। Retell DROPPED 2026-10-26;
 RetellBuilder শুধু DRAFT plan, production নয়।
 Agency Chief wiring Phase 2 DONE — Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে call করে।
-এই manager কখনো করে না: কোনো worker execute করে না, কিছু deploy করে না,
+এই manager কখনো করে না: engine/section-এর পুরনো worker execute করে না, কিছু deploy করে না,
 production-এ কিছু বদলায় না, কিছু পাঠায় না, খরচ করে না, মুছে না,
 client-এর তথ্য/দাম/পরিসংখ্যান বানায় না, কোনো guarantee দেয় না,
 dental/medical বা patient-health ব্যবসা নেয় না।
 """
 
+import importlib.util
 import os
 import sys
 
@@ -41,27 +43,27 @@ DEPARTMENT_TASKS = {
     },
     "solution_architect": {
         "specialist": "AI Solution Architect",
-        "file": "ROLE-ONLY — skill: departments/03-ai-engineering/skills/cto-ai-engineering-agent.md",
+        "file": "departments/03-ai-engineering/specialists/ai_solution_architect.py",
         "gate": None,
-        "status": "ROLE-ONLY",
+        "status": "EXISTING",
     },
     "conversation_design": {
         "specialist": "Conversation Designer",
-        "file": "ROLE-ONLY — skill: departments/03-ai-engineering/skills/cto-ai-engineering-agent.md",
+        "file": "departments/03-ai-engineering/specialists/conversation_designer.py",
         "gate": None,
-        "status": "ROLE-ONLY",
+        "status": "EXISTING",
     },
     "prompt_engineering": {
         "specialist": "Prompt Engineering Agent",
-        "file": "ROLE-ONLY — skill: departments/03-ai-engineering/skills/cto-ai-engineering-agent.md",
+        "file": "departments/03-ai-engineering/specialists/prompt_engineering_agent.py",
         "gate": None,
-        "status": "ROLE-ONLY",
+        "status": "EXISTING",
     },
     "vapi_integration": {
         "specialist": "Vapi Integration Agent",
-        "file": "ROLE-ONLY — skill: departments/03-ai-engineering/skills/cto-ai-engineering-agent.md",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "file": "departments/03-ai-engineering/specialists/vapi_integration_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
     "crm_integration": {
         "specialist": "CRM Integration Agent",
@@ -71,27 +73,39 @@ DEPARTMENT_TASKS = {
     },
     "calendar_integration": {
         "specialist": "Calendar Integration Agent",
-        "file": "ROLE-ONLY — skill: departments/03-ai-engineering/skills/cto-ai-engineering-agent.md",
+        "file": "departments/03-ai-engineering/specialists/calendar_integration_agent.py",
         "gate": None,
-        "status": "ROLE-ONLY",
+        "status": "EXISTING",
     },
     "n8n_automation": {
         "specialist": "n8n Automation Engineer",
-        "file": "ROLE-ONLY — skill: departments/03-ai-engineering/skills/cto-ai-engineering-agent.md",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "file": "departments/03-ai-engineering/specialists/n8n_automation_engineer.py",
+        "gate": None,
+        "status": "EXISTING",
     },
     "deployment": {
         "specialist": "Deployment Agent",
-        "file": "ROLE-ONLY — skill: departments/03-ai-engineering/skills/cto-ai-engineering-agent.md",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "file": "departments/03-ai-engineering/specialists/deployment_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
+}
+
+# task_kind -> specialist class name (manager -> specialist importlib loading,
+# Chief-এর DEPARTMENT_ROUTING loader-এর মতো)।
+SPECIALIST_CLASSES = {
+    "solution_architect": "AISolutionArchitect",
+    "conversation_design": "ConversationDesigner",
+    "prompt_engineering": "PromptEngineeringAgent",
+    "vapi_integration": "VapiIntegrationAgent",
+    "calendar_integration": "CalendarIntegrationAgent",
+    "n8n_automation": "N8nAutomationEngineer",
+    "deployment": "DeploymentAgent",
 }
 
 
 class CTOAIEngineeringAgent:
-    """AI Engineering specialist-দের delegation plan DRAFT বানায়। কখনো execute করে না, deploy করে না।"""
+    """AI Engineering specialist-দের delegation plan DRAFT বানায় + Phase 3 specialist-দের load করে চালায় (DRAFT only); deploy করে না।"""
 
     task_kind = "manage_ai_engineering"
     gate = "ok"
@@ -140,7 +154,7 @@ class CTOAIEngineeringAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Delegation plan DRAFT বানানো। কোনো worker execute করে না, file লেখে না, network ছোঁয় না।"""
+        """Delegation plan DRAFT বানানো + Phase 3 specialist load+run (DRAFT only)। কোনো file লেখে না, network ছোঁয় না।"""
         task = task or {}
         title = task.get("title") or "Manage AI Engineering"
         gated_action = task.get("gated_action")
@@ -232,6 +246,26 @@ class CTOAIEngineeringAgent:
                 "gate": self.gate,
             }
 
+        # Specialist-এর standalone .py থাকলে (departments/03-ai-engineering/
+        # specialists/) importlib দিয়ে load করে চালানো — Chief-এর loader-এর
+        # মতো। Receptionist build/QA (engine/workers) আর GAP/ROLE-ONLY
+        # kind-গুলো নিচের delegation plan branch-এ যায়।
+        if (entry["status"] == "EXISTING"
+                and entry["file"].startswith(
+                    "departments/03-ai-engineering/specialists/")):
+            here = os.path.dirname(os.path.abspath(__file__))
+            specialist_path = os.path.normpath(os.path.join(
+                here, "..", entry["file"].split(
+                    "departments/03-ai-engineering/", 1)[1]))
+            spec = importlib.util.spec_from_file_location(
+                f"dept03_specialist_{task_kind}", specialist_path)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            specialist_cls = getattr(mod, SPECIALIST_CLASSES[task_kind])
+            specialist = specialist_cls()
+            gw = gateway if gateway is not None else self._gateway(approvals_path)
+            return specialist.run(task, brain, gw, approvals_path)
+
         payload = task.get("payload") or {}
         client = payload.get("client") or "BOSS INPUT REQUIRED"
         output = (
@@ -257,11 +291,6 @@ class CTOAIEngineeringAgent:
             output += (
                 "4. QAEngineer shared with dept 07 — QA checklist, partial; "
                 "verdict-এর জন্য Boss-এর ok লাগে।\n"
-            )
-        if task_kind == "deployment":
-            output += (
-                "4. Deployment-এ কোনো worker নেই — Boss-এর ok + manual steps "
-                "ছাড়া deploy নয়।\n"
             )
         if entry["status"] == "ROLE-ONLY":
             output += (
