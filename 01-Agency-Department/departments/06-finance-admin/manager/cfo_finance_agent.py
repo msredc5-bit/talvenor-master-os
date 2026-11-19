@@ -2,24 +2,36 @@
 
 ভূমিকা (role): 06-finance-admin department-এর manager — finance/admin
 task এলে কোন specialist-এর কাজ, তা ঠিক করে DELEGATION PLAN-এর DRAFT
-বানানো। নিজে কোনো invoice/report লেখে না, কোনো worker চালায় না।
-Gate: ok — delegation plan ব্যবহার করতে Boss-এর "ok" লাগে।
+বানানো, আর Phase 3-এর dept-06 specialist-দের (draft-only) চালানো।
+নিজে কোনো invoice/report লেখে না। Section/engine-এর পুরনো worker
+(BillingInvoiceAgent / ReportCompiler) চালায় না — তাদের জন্য শুধু
+delegation plan-এর DRAFT। Gate: ok — delegation plan ব্যবহার করতে
+Boss-এর "ok" লাগে।
 অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
 Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।
+Specialist wiring Phase 3 DONE — manager এখন dept-06 specialist-দের
+importlib দিয়ে load করে চালায় (draft-only)।
 
-Mapped existing staff (2): BillingInvoiceAgent (billing_invoice, ok —
+Mapped existing staff (6): BillingInvoiceAgent (billing_invoice, ok —
 LOCKED pricing, invoice শুধু paying client-এর জন্য Boss-এর কথায়,
 prospect-কে কখনো দাম quote নয়), ReportCompiler (report_compile, no
-gate — দেখা যায় এমন metric ছাড়া কিছু নয়, সংখ্যা বানায় না)।
+gate — দেখা যায় এমন metric ছাড়া কিছু নয়, সংখ্যা বানায় না), +
+Phase 3 specialists (4, no gate): RevenueTrackingAgent
+(revenue_tracking — revenue $0, template only), SubscriptionTrackingAgent
+(subscription_tracking — paid $0 so far), DocumentManagementAgent
+(document_management — organisation draft only),
+ComplianceCalendarAgent (compliance_calendar — attorney review
+deferred, কোনো deadline বানানো নয়)।
 LOCKED pricing (2026-11-12, internal only): Starter $547/mo + $597;
 Growth $1,109/mo + $1,297; Scale $1,672/mo + $1,997 — prospect-কে
 কখনো quote নয়।
-এই manager কখনো করে না: worker execute করে না, payment নেয় না,
-invoice issue করে না, কিছু পাঠায় না, খরচ করে না, দাম বানায় না,
-client-এর তথ্য/পরিসংখ্যান বানায় না, কোনো guarantee দেয় না,
-dental/medical বা patient-health ব্যবসা নেয় না।
+এই manager কখনো করে না: section/engine-এর পুরনো worker execute করে না,
+payment নেয় না, invoice issue করে না, কিছু পাঠায় না, খরচ করে না,
+দাম বানায় না, client-এর তথ্য/পরিসংখ্যান বানায় না, কোনো guarantee
+দেয় না, dental/medical বা patient-health ব্যবসা নেয় না।
 """
 
+import importlib.util
 import os
 import sys
 
@@ -60,9 +72,10 @@ DEPARTMENT_TASKS = {
     },
     "revenue_tracking": {
         "specialist": "Revenue Tracking Agent",
-        "file": "ROLE-ONLY — skill: departments/06-finance-admin/skills/revenue-tracking-agent.md (planned, not built)",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "class": "RevenueTrackingAgent",
+        "file": "departments/06-finance-admin/specialists/revenue_tracking_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
     "expense_tracking": {
         "specialist": "Expense Tracking Agent",
@@ -72,27 +85,30 @@ DEPARTMENT_TASKS = {
     },
     "subscription_tracking": {
         "specialist": "Subscription Tracking Agent",
-        "file": "ROLE-ONLY — skill: departments/06-finance-admin/skills/subscription-tracking-agent.md (planned, not built)",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "class": "SubscriptionTrackingAgent",
+        "file": "departments/06-finance-admin/specialists/subscription_tracking_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
     "document_management": {
         "specialist": "Document Management Agent",
-        "file": "ROLE-ONLY — skill: departments/06-finance-admin/skills/document-management-agent.md (planned, not built)",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "class": "DocumentManagementAgent",
+        "file": "departments/06-finance-admin/specialists/document_management_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
     "compliance_calendar": {
         "specialist": "Compliance Calendar Agent",
-        "file": "ROLE-ONLY — skill: departments/06-finance-admin/skills/compliance-calendar-agent.md (planned, not built)",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "class": "ComplianceCalendarAgent",
+        "file": "departments/06-finance-admin/specialists/compliance_calendar_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
 }
 
 
 class CFOFinanceAgent:
-    """Finance/admin task-এর delegation plan DRAFT বানায়। Worker চালায় না।"""
+    """Finance/admin task-এর delegation plan DRAFT বানায়; dept-06 specialist (Phase 3) চালায় — DRAFT only।"""
 
     task_kind = "manage_finance_admin"
     gate = "ok"
@@ -152,7 +168,7 @@ class CFOFinanceAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Delegation plan DRAFT বানানো। কোনো worker চালায় না, file লেখে না, network ছোঁয় না।"""
+        """Delegation plan DRAFT বানানো; dept-06 specialist (Phase 3) চালানো। কোনো file লেখে না, network ছোঁয় না।"""
         task = task or {}
         title = task.get("title") or "Finance & admin delegation"
         gated_action = task.get("gated_action")
@@ -179,6 +195,59 @@ class CFOFinanceAgent:
                 }
 
         task_kind = task.get("task_kind")
+
+        # Overview — task_kind না থাকলে (বা manager-এর নিজের kind হলে):
+        # department-এর সব specialist-এর তালিকা সহ overview DRAFT।
+        if not task_kind or task_kind == self.task_kind:
+            if brain is not None:
+                try:
+                    brain_text = brain.complete(
+                        "Finance & admin department overview for Talvenor. "
+                        "List the department specialists, their files, gates, "
+                        "and honest status. Do not invent any fact, price, "
+                        "or statistic. No dental/medical.")
+                except TypeError:
+                    brain_text = brain.complete(
+                        "Finance & admin department overview for Talvenor.",
+                        max_tokens=500)
+            else:
+                brain_text = ("No brain passed — overview built from "
+                              "DEPARTMENT_TASKS only.")
+            lines = [
+                "[MOCK DRAFT] Finance & Admin — department overview delegation plan (DRAFT ONLY)",
+                "Manager: CFO Finance Agent | task_kind: manage_finance_admin | gate: ok",
+                "Specialists:",
+            ]
+            for kind in sorted(DEPARTMENT_TASKS.keys()):
+                overview_entry = DEPARTMENT_TASKS[kind]
+                lines.append(
+                    f"- {kind}: {overview_entry['specialist']} | "
+                    f"{overview_entry['file']} | "
+                    f"gate: {overview_entry['gate'] or 'none'} | "
+                    f"{overview_entry['status']}"
+                )
+            lines.append(
+                "Note: Paying client 0, revenue $0; invoice শুধু paying "
+                "client-এর জন্য Boss-এর কথায়। Email PAUSED since 2026-11-14।"
+            )
+            lines.append(
+                f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}")
+            lines.append(f"Brain note: {brain_text}")
+            notes = (
+                "DRAFT ONLY — mock brain ($0). Overview delegation plan, "
+                "section/engine-এর পুরনো worker execute নয়। Chief wiring "
+                "Phase 2 DONE — Chief এখন এই manager-কে DEPARTMENT_ROUTING "
+                "দিয়ে call করে।"
+            )
+            return {
+                "status": "draft-ready",
+                "output": "\n".join(lines),
+                "notes": notes,
+                "draft_only": True,
+                "mock_brain": True,
+                "gate": self.gate,
+            }
+
         entry = DEPARTMENT_TASKS.get(task_kind)
 
         if entry is None:
@@ -204,6 +273,25 @@ class CFOFinanceAgent:
                 "mock_brain": True,
                 "gate": self.gate,
             }
+
+        # Phase 3 specialist — standalone .py আছে এমন kind হলে specialist-কে
+        # importlib দিয়ে load করে চালানো (Chief-এর loader-এর মতো); তার
+        # result-ই ফেরানো। Section/engine-এর পুরনো worker-দের জন্য নিচের
+        # plan-draft behavior অপরিবর্তিত।
+        if (entry["status"] == "EXISTING"
+                and entry["file"].startswith(
+                    "departments/06-finance-admin/specialists/")):
+            here = os.path.dirname(os.path.abspath(__file__))
+            specialist_path = os.path.normpath(os.path.join(
+                here, "..", "..", "..", entry["file"]))
+            spec = importlib.util.spec_from_file_location(
+                f"dept06_specialist_{task_kind}", specialist_path)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            specialist_cls = getattr(mod, entry["class"])
+            specialist = specialist_cls()
+            gw = gateway if gateway is not None else self._gateway(approvals_path)
+            return specialist.run(task, brain, gw, approvals_path)
 
         if brain is not None:
             try:

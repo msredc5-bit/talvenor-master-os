@@ -41,20 +41,21 @@ Manager-এর কাজ: `manage_finance_admin` — task_kind দেখে spec
 
 | Role | Status | Note |
 |---|---|---|
-| Revenue Tracking Agent | ROLE-ONLY | Role definition only — revenue-র হিসাব রাখার ভাবনা; paying client 0, তাই track করার revenue এখনো নেই। |
+| Revenue Tracking Agent | EXISTING | `departments/06-finance-admin/specialists/revenue_tracking_agent.py` (`revenue_tracking`, gate None) — revenue $0, template only; paying client 0, তাই track করার revenue এখনো নেই। |
 | Expense Tracking Agent | GAP | $0 spend cap — কোনো expense নেই, তাই track করার কিছু নেই; worker-ও নেই, skill-ও নেই। |
 | Invoice Management Agent | EXISTING | BillingInvoiceAgent-ই করে (`billing_invoice` / `invoice_management`, gate `ok`)। |
-| Subscription Tracking Agent | ROLE-ONLY | Role definition only — subscription-র হিসাব; paying client 0, তাই track করার subscription এখনো নেই। |
+| Subscription Tracking Agent | EXISTING | `departments/06-finance-admin/specialists/subscription_tracking_agent.py` (`subscription_tracking`, gate None) — Vapi free credit, paid $0 so far; কোনো subscription/cost বানানো নয়। |
 | Financial Reporting Agent | EXISTING | ReportCompiler-ই করে (`report_compile` / `financial_reporting`, no gate) — visible metrics only। |
-| Document Management Agent | ROLE-ONLY | Role definition only — Agency document সাজানো; worker নেই। |
-| Compliance Calendar Agent | ROLE-ONLY | Role definition only — deadline/compliance তারিখের হিসাব; worker নেই। |
+| Document Management Agent | EXISTING | `departments/06-finance-admin/specialists/document_management_agent.py` (`document_management`, gate None) — organisation draft only; কোনো file লেখা/সরানো হয় না। |
+| Compliance Calendar Agent | EXISTING | `departments/06-finance-admin/specialists/compliance_calendar_agent.py` (`compliance_calendar`, gate None) — attorney review deferred; কোনো deadline বানানো নয়। |
 
 ## Missing roles (worker নেই)
 
 - Expense Tracking Agent — GAP ($0 spend cap, কোনো expense নেই)।
-- Revenue Tracking, Subscription Tracking, Document Management, Compliance
-  Calendar — ROLE-ONLY: role definition আছে, worker নেই, skill .md
-  registry-তে এখনো বানানো হয়নি।
+
+Phase 3 DONE (2026-11-19): Revenue Tracking, Subscription Tracking,
+Document Management, Compliance Calendar — 4টাই EXISTING এখন
+(specialist worker + skill .md আছে, CFO Finance Agent চালায়)।
 
 ## Gate
 
