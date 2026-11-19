@@ -59,7 +59,7 @@ Agentic Agency Office হলো Talvenor Master OS-এর 01-Agency-Department-�
 - **CRM:** n8n Cloud Data Tables — PLANNED, এখনো live নয়।
 - **Calendar:** Google Calendar Appointment Schedule — "Talvenor Demo", 15 min, New York Time। Booking link: https://calendar.app.google/WLoxBfnLGTdjK3LB8
 - **Brain:** mock ($0)। Live MetaSpark path UNPROVEN — এখনো প্রমাণিত নয়।
-- **Dashboard:** ceo-office-dashboard artifact + local 3D dashboard।
+- **Dashboard:** Talvenor Master OS 3D Dashboard — artifact `talvenor-master-os-3d-dashboard` + local `dashboards/dashboard-3d.html` (একটাই dashboard)। পুরনো ceo-office-dashboard artifact 2026-11-20-এ delete।
 - **Voice:** Vapi।
 - **GitHub:** talvenor-master-os repo — `github.com/msredc5-bit/talvenor-master-os`।
 

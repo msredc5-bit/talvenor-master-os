@@ -19,9 +19,9 @@ Bangladesh থেকে individual হিসেবে signup + payout হয় 
 
 ## ফলাফল রেকর্ড করা (Boss-এর কাজ)
 
-- **3D office dashboard** (`ceo-office-dashboard` artifact) — Gate 0-র
-  ঘরে ফলাফল লেখা যায়। Boss সেখানে জানালে Elora এই ফাইল + Chief
-  module-এর Gate 0 state আপডেট করবে।
+- **Elora-কে chat-এ জানান** — Boss ফলাফল বললে Elora এই ফাইল + Chief
+  module-এর Gate 0 state আপডেট করবে। (আগের dashboard artifact
+  2026-11-20-এ delete — 3D dashboard static, সেখানে লেখা যায় না)।
 - এই ফাইলের উপরের **Status লাইনে** PASSED লেখা থাকলেই Chief Gate 0
   পাস ধরবে — নইলে fail-closed: NOT PASSED। Chief-এর কোড নিজে থেকে
   Gate 0 পাস বলে ধরে না।

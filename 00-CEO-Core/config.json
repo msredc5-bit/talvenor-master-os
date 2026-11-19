@@ -4,7 +4,7 @@
     "headline": "Never miss a call. Never lose a job.",
     "line": "You run the jobs. We run the phone."
   },
-  "built": "2026-11-16",
+  "built": "2026-11-20",
   "businesses": [
     {
       "category": "Agency - service selling",
@@ -86,11 +86,15 @@
       "phase_4_n8n_wiring": "BUILT 2026-11-16 - n8n wiring doc + sync_status.py, both workflows READY NOT LIVE, host = Muse runtime + bridge cron ($0)",
       "phase_5_three_engines": "BUILT 2026-11-16 - shared tool-calling core + 3 engines (Agency 15 staff / 8 tools / 15 skills, Products 5 / 8 / 5, Content 8 / 8 / 8)",
       "phase_6_brain_runner": "BUILT 2026-11-16 - BrainFactory (mock default $0, live MetaSpark unwired-until-flipped, no live calls) + run_office.py runner (routes via Main CEO Bot, gates via ApprovalGateway, TEMP store supported) + check_phase6",
-      "phase_7_sections": "BUILT 2026-11-17 - 16 sections, 23 section agents, 23 section skills (Agency 5 sections / 6 new agents, Products 6 / 7, Content 5 / 10); Agency 15 workers mapped, Content 6 workers wrapped; Gate 0 still NOT passed, upload still OFF"
+      "phase_7_sections": "BUILT 2026-11-17 - 16 sections, 23 section agents, 23 section skills (Agency 5 sections / 6 new agents, Products 6 / 7, Content 5 / 10); Agency 15 workers mapped, Content 6 workers wrapped; Gate 0 still NOT passed, upload still OFF",
+      "agentic_phase_1": "BUILT 2026-11-19 - 8 departments inside 01-Agency-Department (governance/ 4 files, departments/ 24 files, agents/agent-registry/ 2 files, workflows/ 5 files); 21 existing staff mapped, 62 specialists: 15 EXISTING-mapped, 43 ROLE-ONLY, 4 GAP",
+      "agentic_phase_2": "BUILT 2026-11-19 - Agency Chief DEPARTMENT_ROUTING: 8 task types -> 8 department managers, gate ok; check_departments.py 21/21",
+      "agentic_phase_3": "BUILT 2026-11-19 - 43/43 ROLE-ONLY specialists built as worker code (Sales 5, Marketing 4, AI Engineering 7, Client Ops 4, Research 7, Finance 4, Quality 6, Innovation 6); registry 65/69 EXISTING, 4 GAP untouched; check_specialists.py 41/41",
+      "unified_os": "BUILT 2026-11-19 - CENTRAL-HQ/ 7 doc files (architecture layer only, no new repo, no new monorepo): Agency = 01-Agency-Department, Commerce = Vet Kit (Etsy CLOSED, Amazon GATED, Shopify PARKED Boss-direct), Media = 03-Content-Creation-Department; ONE brain (mock) + 3 Chiefs"
     }
   },
   "owner": "Md Mainuddin (Boss)",
-  "phase": 7,
+  "phase": 8,
   "reused_systems": {
     "agency_office": "~/workspace/talvenor-office/",
     "creator_os": "VENDORED in 03-Content-Creation-Department/engine/workers/ - ~/workspace/creator-os-combined/ stays the canonical upstream, no longer a runtime dependency",
@@ -100,7 +104,7 @@
   "spend_cap_usd": 0,
   "system": "Talvenor Master OS",
   "timezone": "Asia/Dhaka",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "voice": {
     "engines": {
       "stt_bn": "sherpa-onnx",

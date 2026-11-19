@@ -6,8 +6,8 @@ workflow এখনো একটা mail-ও পাঠায়নি, একট�
 
 ## Host-এর সত্য কথা ($0)
 
-- **এখনকার host = Muse runtime + 10-min bridge cron (`ceo-office-bridge`)।**
-  এটাই $0-তে চলে — cron প্রতি ১০ মিনিটে office-এর queued task দেখে,
+- **এখনকার host = Muse runtime + 10-min bridge cron (`master-os-3d-bridge`)।**
+  এটাই $0-তে চলে — cron প্রতি ১০ মিনিটে repo-র store/tasks.json-এর queued task দেখে,
   draft/result বানায়, কখনো send/publish/spend/delete করে না।
 - **২৪/৭ always-on server নেই।** সত্যিকারের server (VPS/Render/Railway
   বা নিজের PC-তে ২৪ ঘণ্টা চালু service) টাকা দিয়ে করতে হবে — পরে,
@@ -44,8 +44,9 @@ workflow এখনো একটা mail-ও পাঠায়নি, একট�
   করবে।
 - **দুই system একসাথে চলবে না:** n8n LIVE হওয়ার পর main-chat-এ tap
   করে পাঠানো বন্ধ — নইলে একই prospect-কে double mail যাবে। Test pass
-  হলে cron `tier2-daily-send-trigger` re-scope হবে — draft Sheet-এ
-  লেখা, পাঠানো n8n-এর কাজ।
+  হলে (আর email restart-এর পরে — cron-টি 2026-11-14 থেকে DISABLED,
+  email PAUSED) cron `tier2-daily-send-trigger` re-scope হবে — draft
+  Sheet-এ লেখা, পাঠানো n8n-এর কাজ।
 - **Safety net:** Elora প্রতিটা draft path-এর আগে Sent-check করে
   (আগে পাঠানো থাকলে Sheet-এ `ready` করে না); Sheet-এ সব দেখা যায়
   (কী গেল, কখন, message ID); বন্ধ করতে চাইলে n8n-এ Deactivate করলেই

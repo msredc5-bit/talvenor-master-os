@@ -1,4 +1,4 @@
-"""Layer 0 — Store interface. SQLite today, Postgres tomorrow (same interface)."""
+"""Layer 0 — Store interface. Master OS DB is JSON store files (store/tasks.json, store/approvals.json); no SQLite/PostgreSQL in this repo."""
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

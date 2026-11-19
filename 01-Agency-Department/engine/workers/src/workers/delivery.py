@@ -6,7 +6,7 @@ from src.workers.base import WorkerBase
 
 
 class RetellBuilder(WorkerBase):
-    """Builds a Retell receptionist from the prompt template (Ava v2 pattern)."""
+    """Builds a DRAFT receptionist build plan from the prompt template. Retell dropped 2026-10-26 — live stack is Vapi/Sophia; this outputs a plan only, never a live agent."""
     task_kind = "retell_build"
     default_payload = {"business": "Apex Plumbing", "trade": "plumbing"}
     requires_gate = "ok"
@@ -15,7 +15,7 @@ class RetellBuilder(WorkerBase):
         business = task.payload.get("business", "Apex Plumbing")
         trade = task.payload.get("trade", "plumbing")
         plan = self.llm.complete(
-            f"Build Retell receptionist for {business} ({trade}): self-sufficient "
+            f"Build Vapi receptionist (DRAFT plan only) for {business} ({trade}): self-sufficient "
             f"demo prompt — in-prompt schedule, emergency flow, callback handling, "
             f"FAQs, no invented pricing, fictional AP- confirmation numbers, "
             f"end_call only. Honest AI disclosure included."
@@ -26,7 +26,7 @@ class RetellBuilder(WorkerBase):
 
 
 class QAEngineer(WorkerBase):
-    """Runs the Retell QA checklist before any demo is called READY."""
+    """Runs the receptionist QA checklist (DRAFT) before any demo is called READY. Live stack is Vapi/Sophia — Retell dropped 2026-10-26."""
     task_kind = "retell_qa"
     default_payload = {"agent": "ava-apex-plumbing-demo"}
     requires_gate = None  # checklist run; verdict still needs Boss's ok via G2
@@ -34,7 +34,7 @@ class QAEngineer(WorkerBase):
     def do_work(self, task: Task) -> tuple[str, dict]:
         agent = task.payload.get("agent", "ava-apex-plumbing-demo")
         plan = self.llm.complete(
-            f"QA checklist for Retell agent {agent}: prompt completeness, "
+            f"QA checklist for Vapi agent {agent}: prompt completeness, "
             f"no broken tool references, emergency flow, pricing honesty, "
             f"transfer number real-or-absent, end_call behavior. Verdict: READY or CHANGES."
         )
