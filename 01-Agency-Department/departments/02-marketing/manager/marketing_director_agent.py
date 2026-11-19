@@ -1,19 +1,21 @@
 """Marketing Director Agent — Marketing department-এর manager (Phase 1).
 
-ভূমিকা (role): Marketing department-এর ৪ জন existing specialist-কে delegate
-করা — content plan, video produce, caption write, publish prep। এই manager
-শুধু delegation plan-এর DRAFT বানায়; কোনো worker execute করে না, নিজে
-কিছু post করে না।
+ভূমিকা (role): Marketing department-এর ৮ জন existing specialist-কে delegate
+করা — content plan, video produce, caption write, publish prep, market
+position, social manage, seo, analytics। এই manager শুধু delegation plan-এর
+DRAFT বানায়; নতুন ৪ জন standalone specialist-কে (Phase 3) importlib দিয়ে
+load করে তাদের draft ফেরত দেয় — নিজে কিছু post করে না।
 Gate: ok — delegation plan-এ Boss-এর "ok" লাগে; publish-এর gate "post it",
 send/spend/delete কোনো gated action এই manager নিজে করে না।
 অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
 Agency Chief wiring Phase 2 DONE — Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে call করে।
-এই manager কখনো করে না: কোনো worker execute করে না, কিছু post/publish
+এই manager কখনো করে না: engine/section-এর পুরনো worker execute করে না, কিছু post/publish
 করে না, paid ad চালায় না, খরচ করে না, মুছে না, client-এর তথ্য/দাম/
 পরিসংখ্যান বানায় না, কোনো guarantee দেয় না, dental/medical বা
 patient-health ব্যবসা নেয় না।
 """
 
+import importlib.util
 import os
 import sys
 
@@ -50,15 +52,17 @@ DEPARTMENT_TASKS = {
     },
     "market_position": {
         "specialist": "Market Positioning Agent",
-        "file": "ROLE-ONLY — skill: departments/02-marketing/skills/marketing-director-agent.md",
+        "class": "MarketPositioningAgent",
+        "file": "departments/02-marketing/specialists/market_positioning_agent.py",
         "gate": None,
-        "status": "ROLE-ONLY",
+        "status": "EXISTING",
     },
     "social_manage": {
         "specialist": "Social Media Agent",
-        "file": "ROLE-ONLY — skill: departments/02-marketing/skills/marketing-director-agent.md",
-        "gate": "post it",
-        "status": "ROLE-ONLY",
+        "class": "SocialMediaAgent",
+        "file": "departments/02-marketing/specialists/social_media_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
     "ad_campaign": {
         "specialist": "Ad Campaign Agent",
@@ -68,21 +72,23 @@ DEPARTMENT_TASKS = {
     },
     "seo": {
         "specialist": "SEO Agent",
-        "file": "ROLE-ONLY — skill: departments/02-marketing/skills/marketing-director-agent.md",
+        "class": "SEOAgent",
+        "file": "departments/02-marketing/specialists/seo_agent.py",
         "gate": None,
-        "status": "ROLE-ONLY",
+        "status": "EXISTING",
     },
     "analytics": {
         "specialist": "Analytics Agent",
-        "file": "ROLE-ONLY — skill: departments/02-marketing/skills/marketing-director-agent.md",
+        "class": "AnalyticsAgent",
+        "file": "departments/02-marketing/specialists/analytics_agent.py",
         "gate": None,
-        "status": "ROLE-ONLY",
+        "status": "EXISTING",
     },
 }
 
 
 class MarketingDirectorAgent:
-    """Marketing specialist-দের delegation plan DRAFT বানায়। কখনো execute করে না, post করে না।"""
+    """Marketing specialist-দের delegation plan DRAFT বানায় + Phase 3 specialist-দের load করে চালায় (DRAFT only); post করে না।"""
 
     task_kind = "manage_marketing"
     gate = "ok"
@@ -130,7 +136,7 @@ class MarketingDirectorAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Delegation plan DRAFT বানানো। কোনো worker execute করে না, file লেখে না, network ছোঁয় না।"""
+        """Delegation plan DRAFT বানানো + Phase 3 specialist load+run (DRAFT only)। কোনো file লেখে না, network ছোঁয় না।"""
         task = task or {}
         title = task.get("title") or "Manage Marketing"
         gated_action = task.get("gated_action")
@@ -171,7 +177,7 @@ class MarketingDirectorAgent:
             lines = [
                 "[MOCK DRAFT] Marketing — department overview delegation plan (DRAFT ONLY)",
                 "Manager: Marketing Director Agent | task_kind: manage_marketing | gate: ok",
-                "Specialists (4 EXISTING):",
+                "Specialists (8 EXISTING):",
             ]
             for kind in sorted(DEPARTMENT_TASKS.keys()):
                 entry = DEPARTMENT_TASKS[kind]
@@ -220,6 +226,23 @@ class MarketingDirectorAgent:
                 "mock_brain": True,
                 "gate": self.gate,
             }
+
+        # Phase 3 standalone specialists — departments/02-marketing/specialists/
+        # -এর .py থাকলে Chief-এর loader-এর মতো importlib দিয়ে load করে
+        # specialist-কে চালানো; তার result-ই ফেরত দেওয়া। Existing engine
+        # worker-দের (content_plan / video_produce / caption_write /
+        # publish_prep) plan-draft behavior নিচে অপরিবর্তিত থাকে।
+        if entry.get("status") == "EXISTING" and entry.get("class"):
+            specialist_path = os.path.normpath(os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "..",
+                "specialists", os.path.basename(entry["file"])))
+            spec = importlib.util.spec_from_file_location(
+                f"marketing_specialist_{task_kind}", specialist_path)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            specialist_cls = getattr(mod, entry["class"])
+            specialist = specialist_cls()
+            return specialist.run(task, brain, gateway, approvals_path)
 
         payload = task.get("payload") or {}
         topic = payload.get("topic") or "BOSS INPUT REQUIRED"

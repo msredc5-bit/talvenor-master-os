@@ -12,7 +12,7 @@ DRAFT বানায় — নিজে কিছু post করে না।
 - **Marketing Director Agent** — `MarketingDirectorAgent`, task_kind `manage_marketing`, gate `ok`
 - Manager file: `01-Agency-Department/departments/02-marketing/manager/marketing_director_agent.py`
 - Skill file: `01-Agency-Department/departments/02-marketing/skills/marketing-director-agent.md`
-- Manager কোনো worker execute করে না, নিজে কিছু post করে না।
+- Manager Phase 3 specialist-দের load করে চালায় (DRAFT only), নিজে কিছু post করে না; engine/section-এর পুরনো worker execute করে না।
 - Agency Chief wiring **Phase 2 DONE** — Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে call করে।
 
 ## Mapped Existing Staff (4)
@@ -27,24 +27,29 @@ DRAFT বানায় — নিজে কিছু post করে না।
 Note: PublishPrep শুধু **prep** করে — কখনো post করে না। আসল publish Boss-এর
 "post it" approval-এর পর হাতে করা হয়।
 
+Phase 3 (2026-11-19) standalone specialists — আরও ৪ জন EXISTING:
+Market Positioning Agent (`market_position`), Social Media Agent
+(`social_manage`, planning draft only, NEVER posts), SEO Agent (`seo`),
+Analytics Agent (`analytics`) — সবাই `departments/02-marketing/specialists/`
+-এ, gate none, DRAFT only। Manager এদের importlib দিয়ে load করে।
+
 ## Brief Roles → Mapping
 
 | Brief role | Mapping | Note |
 |---|---|---|
-| Market Positioning Agent | ROLE-ONLY | কোনো worker code নেই; skill doc অনুযায়ী হাতে করা |
+| Market Positioning Agent | EXISTING — Market Positioning Agent | `market_position`, gate none | `departments/02-marketing/specialists/market_positioning_agent.py` |
 | Content Strategy Agent | EXISTING — ContentPlanner | `content_plan`, gate ok |
-| Social Media Agent | ROLE-ONLY | PublishPrep শুধু prep করে, কখনো post করে না; social management হাতে করা |
+| Social Media Agent | EXISTING — Social Media Agent | `social_manage`, gate none | `departments/02-marketing/specialists/social_media_agent.py` — planning draft only, NEVER posts; PublishPrep শুধু prep করে, কখনো post করে না |
 | Ad Campaign Agent | **GAP** | Paid ads — $0 spend cap, planned নয়; কোনো worker/skill নেই |
 | Copywriting Agent | EXISTING — CaptionWriter | `caption_write`, gate none |
 | Video Creative Agent | EXISTING — VideoProducer | `video_produce`, gate ok |
-| SEO Agent | ROLE-ONLY | কোনো worker code নেই; skill doc অনুযায়ী হাতে করা |
-| Analytics Agent | ROLE-ONLY | কোনো worker code নেই; weekly reporting ReportCompiler-এর (Finance & Admin, dept 07) আওতায় |
+| SEO Agent | EXISTING — SEO Agent | `seo`, gate none | `departments/02-marketing/specialists/seo_agent.py` |
+| Analytics Agent | EXISTING — Analytics Agent | `analytics`, gate none | `departments/02-marketing/specialists/analytics_agent.py` — visible metrics only, কখনো estimate নয়; weekly reporting ReportCompiler-এর (Finance & Admin, dept 07) আওতায় |
 
 ## Missing Roles
 
 - **Ad Campaign Agent — GAP।** Paid ads $0 spend cap-এর কারণে planned নয়; কোনো
   worker code বা skill নেই। Boss সিদ্ধান্ত না নিলে এই role তৈরি হবে না।
-- ROLE-ONLY ৪টি role-এর (Market Positioning, Social Media, SEO, Analytics) কোনো worker code নেই; এগুলো skill doc-এর role হিসেবে থাকে।
 
 ## Honest Status
 
