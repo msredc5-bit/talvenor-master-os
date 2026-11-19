@@ -26,7 +26,8 @@ status-সহ পৌঁছে দেওয়ার plan DRAFT আকারে �
 5. `gated_action` থাকলে আগে approval — PENDING record করে থামুন; draft-ও নয়।
 6. `client_intake` / `client_success`-এর plan-এ লিখুন: কিছু পাঠাতে "send" gate
    লাগে — Boss-এর exact word ছাড়া নয়।
-7. ROLE-ONLY role-এর plan-এ স্পষ্ট লিখুন: worker code নেই, হাতে করতে হবে।
+7. ROLE-ONLY role আর নেই — ৪ নতুন specialist-ই EXISTING; তাদের task-এ
+   manager specialist-কে load করে তার DRAFT ফেরত দেয়।
 8. Renewal/upsell plan-এ লিখুন: Boss-এর ok ছাড়া client-কে কোনো upsell বলা হয় না।
 9. কোনো তথ্য না থাকলে `BOSS INPUT REQUIRED` লিখুন — কখনো বানাবেন না।
 
@@ -43,7 +44,7 @@ status-সহ পৌঁছে দেওয়ার plan DRAFT আকারে �
 
 - ✅ Delegation plan DRAFT বানানো।
 - ✅ ApprovalGateway-তে PENDING approval record চাওয়া (gated action-এর জন্য)।
-- ❌ কোনো worker execute করা নয়।
+- ❌ engine/section-এর পুরনো worker execute করা নয় (Phase 3 specialist load+run ছাড়া)।
 - ❌ কিছু পাঠানো / খরচ করা / মোছা নয়।
 - ❌ Gate word ছাড়া `send`/`spend`/`delete` নয়।
 - ❌ দাম বলা নয় (pricing LOCKED, internal only — client-কে দাম শুধু Boss-এর
@@ -58,15 +59,18 @@ status-সহ পৌঁছে দেওয়ার plan DRAFT আকারে �
 | `delivery_manage` | ServiceDeliveryManager | ok | EXISTING |
 | `client_success` | ClientSuccessAgent | send | EXISTING |
 | `inbox_triage` | InboxTriager | none | EXISTING |
-| `call_monitoring` | Call Monitoring Agent | none | ROLE-ONLY |
-| `client_reporting` | Client Reporting Agent | none | ROLE-ONLY |
-| `retention` | Retention Agent | none | ROLE-ONLY |
-| `renewal_upsell` | Renewal & Upsell Agent | ok | ROLE-ONLY |
+| `call_monitoring` | CallMonitoringAgent | none | EXISTING |
+| `client_reporting` | ClientReportingAgent | none | EXISTING |
+| `retention` | RetentionAgent | none | EXISTING |
+| `renewal_upsell` | RenewalUpsellAgent | none | EXISTING |
 
 - Intake-এর তথ্য ClientIntakeReceiver-এর checklist DRAFT-এ যায়; তারপর
   OnboardingAgent-এর onboarding DRAFT — কোনো ধাপে কিছু পাঠানো হয় না।
 - Client-এর কোনো reply/বার্তা Boss-কে দেখিয়ে, "send" gate-এর পরেই যায়।
-- ROLE-ONLY role-এর কাজ Boss/Elora হাতে করেন; manager শুধু plan দেয়।
+- Call-monitoring checklist, client report, retention plan, আর
+  renewal/upsell plan DRAFT এখন ৪ নতুন specialist বানায়; manager
+  তাদের load করে DRAFT ফেরত দেয়।
+- ROLE-ONLY role আর নেই — ৪ নতুন specialist-ই EXISTING।
 
 ## Success Criteria (সফলতা)
 
@@ -87,7 +91,7 @@ status-সহ পৌঁছে দেওয়ার plan DRAFT আকারে �
 
 ## Never-Do List (কখনো করে না)
 
-- কোনো worker execute করে না।
+- engine/section-এর পুরনো worker execute করে না (Phase 3 specialist-দের load করে চালায়, DRAFT only)।
 - কিছু পাঠায় না, খরচ করে না, মোছে না।
 - Client-এর তথ্য, দাম, পরিসংখ্যান, testimonial, guarantee বানায় না।
 - Dental/medical বা patient-health ব্যবসা নেয় না।

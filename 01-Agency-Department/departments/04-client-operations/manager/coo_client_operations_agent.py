@@ -1,20 +1,23 @@
 """COO Client Operations Agent — Client Operations department-এর manager (Phase 1).
 
-ভূমিকা (role): Client Operations department-এর ৫ জন existing specialist-কে
+ভূমিকা (role): Client Operations department-এর ৯ জন existing specialist-কে
 delegate করা — client intake, onboarding draft, delivery manage, client
-success, inbox triage। এই manager শুধু delegation plan-এর DRAFT বানায়;
-কোনো worker execute করে না।
+success, inbox triage, call monitoring, client reporting, retention,
+renewal/upsell। Engine/section-এর worker-দের জন্য শুধু delegation plan-এর
+DRAFT বানায়; specialists/ dir-এর standalone specialist-দের (Phase 3)
+load করে তাদের DRAFT ফেরত দেয়।
 Gate: ok — delegation plan-এ Boss-এর "ok" লাগে; intake/success-সংক্রান্ত
 কিছু পাঠাতে "send" gate লাগে, যা এই manager নিজে করে না।
 অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
 Paying clients 0 — এখনো কোনো live client নেই; intake/onboarding plan
 DRAFT হিসেবেই থাকে।
 Agency Chief wiring Phase 2 DONE — Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে call করে।
-এই manager কখনো করে না: কোনো worker execute করে না, কিছু পাঠায় না,
+এই manager কখনো করে না: engine/section-এর worker execute করে না, কিছু পাঠায় না,
 খরচ করে না, মুছে না, client-এর তথ্য/দাম/পরিসংখ্যান বানায় না, কোনো
 guarantee দেয় না, dental/medical বা patient-health ব্যবসা নেয় না।
 """
 
+import importlib.util
 import os
 import sys
 
@@ -57,33 +60,37 @@ DEPARTMENT_TASKS = {
     },
     "call_monitoring": {
         "specialist": "Call Monitoring Agent",
-        "file": "ROLE-ONLY — skill: departments/04-client-operations/skills/coo-client-operations-agent.md",
+        "class": "CallMonitoringAgent",
+        "file": "departments/04-client-operations/specialists/call_monitoring.py",
         "gate": None,
-        "status": "ROLE-ONLY",
+        "status": "EXISTING",
     },
     "client_reporting": {
         "specialist": "Client Reporting Agent",
-        "file": "ROLE-ONLY — skill: departments/04-client-operations/skills/coo-client-operations-agent.md",
+        "class": "ClientReportingAgent",
+        "file": "departments/04-client-operations/specialists/client_reporting.py",
         "gate": None,
-        "status": "ROLE-ONLY",
+        "status": "EXISTING",
     },
     "retention": {
         "specialist": "Retention Agent",
-        "file": "ROLE-ONLY — skill: departments/04-client-operations/skills/coo-client-operations-agent.md",
+        "class": "RetentionAgent",
+        "file": "departments/04-client-operations/specialists/retention.py",
         "gate": None,
-        "status": "ROLE-ONLY",
+        "status": "EXISTING",
     },
     "renewal_upsell": {
         "specialist": "Renewal & Upsell Agent",
-        "file": "ROLE-ONLY — skill: departments/04-client-operations/skills/coo-client-operations-agent.md",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "class": "RenewalUpsellAgent",
+        "file": "departments/04-client-operations/specialists/renewal_upsell.py",
+        "gate": None,
+        "status": "EXISTING",
     },
 }
 
 
 class COOClientOperationsAgent:
-    """Client Operations specialist-দের delegation plan DRAFT বানায়। কখনো execute করে না।"""
+    """Client Operations specialist-দের delegation plan DRAFT বানায় + Phase 3 specialist-দের load করে চালায় (DRAFT only)।"""
 
     task_kind = "manage_client_operations"
     gate = "ok"
@@ -131,7 +138,7 @@ class COOClientOperationsAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Delegation plan DRAFT বানানো। কোনো worker execute করে না, file লেখে না, network ছোঁয় না।"""
+        """Delegation plan DRAFT বানানো + Phase 3 specialist load+run (DRAFT only)। কোনো file লেখে না, network ছোঁয় না।"""
         task = task or {}
         title = task.get("title") or "Manage Client Operations"
         gated_action = task.get("gated_action")
@@ -172,7 +179,7 @@ class COOClientOperationsAgent:
             lines = [
                 "[MOCK DRAFT] Client Operations — department overview delegation plan (DRAFT ONLY)",
                 "Manager: COO Client Operations Agent | task_kind: manage_client_operations | gate: ok",
-                "Specialists (5 EXISTING):",
+                "Specialists (9 EXISTING):",
             ]
             for kind in sorted(DEPARTMENT_TASKS.keys()):
                 entry = DEPARTMENT_TASKS[kind]
@@ -182,8 +189,9 @@ class COOClientOperationsAgent:
                 )
             lines.append(
                 "Note: Paying clients 0 — এখনো কোনো live client নেই; intake ও "
-                "onboarding plan DRAFT হিসেবেই থাকে। Call monitoring, reporting, "
-                "retention, renewal/upsell ROLE-ONLY।"
+                "onboarding plan DRAFT হিসেবেই থাকে। Call monitoring, "
+                "reporting, retention, renewal/upsell-এর specialist-রাও এখন "
+                "EXISTING — তাদের DRAFT manager-এর মাধ্যমে আসে।"
             )
             lines.append(f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}")
             lines.append(f"Brain note: {brain_text}")
@@ -221,6 +229,25 @@ class COOClientOperationsAgent:
                 "mock_brain": True,
                 "gate": self.gate,
             }
+
+        # Phase 3: specialists/ dir-এ standalone .py থাকলে তাকে importlib
+        # দিয়ে load করে চালানো — ফলাফল specialist-এর DRAFT-ই ফেরত যায়।
+        # Engine/section worker-দের জন্য নিচের plan-draft আচরণ অপরিবর্তিত।
+        spec_file = entry.get("file") or ""
+        if (entry.get("status") == "EXISTING"
+                and spec_file.startswith(
+                    "departments/04-client-operations/specialists/")
+                and spec_file.endswith(".py")):
+            here = os.path.dirname(os.path.abspath(__file__))
+            spec_path = os.path.normpath(os.path.join(
+                here, "..", "specialists", os.path.basename(spec_file)))
+            spec = importlib.util.spec_from_file_location(
+                f"dept04_specialist_{task_kind}", spec_path)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            specialist_cls = getattr(mod, entry["class"])
+            specialist = specialist_cls()
+            return specialist.run(task, brain, gateway, approvals_path)
 
         payload = task.get("payload") or {}
         client = payload.get("client") or "BOSS INPUT REQUIRED"

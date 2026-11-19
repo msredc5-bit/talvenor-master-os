@@ -12,10 +12,10 @@ reporting / retention / renewal-এর role-গুলো। এই department �
 - **COO Client Operations Agent** — `COOClientOperationsAgent`, task_kind `manage_client_operations`, gate `ok`
 - Manager file: `01-Agency-Department/departments/04-client-operations/manager/coo_client_operations_agent.py`
 - Skill file: `01-Agency-Department/departments/04-client-operations/skills/coo-client-operations-agent.md`
-- Manager কোনো worker execute করে না; শুধু delegation plan-এর DRAFT বানায়।
+- Manager delegation plan-এর DRAFT বানায় + Phase 3 specialist-দের load করে চালায় (DRAFT only); engine/section-এর পুরনো worker execute করে না।
 - Agency Chief wiring **Phase 2 DONE** — Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে call করে।
 
-## Mapped Existing Staff (5)
+## Mapped Existing Staff (9)
 
 | Worker | Task type | File path | Gate | Status |
 |---|---|---|---|---|
@@ -24,6 +24,10 @@ reporting / retention / renewal-এর role-গুলো। এই department �
 | ServiceDeliveryManager | `delivery_manage` | `01-Agency-Department/sections/delivery/agents/service_delivery_manager.py` | ok | EXISTING |
 | ClientSuccessAgent | `client_success` | `01-Agency-Department/sections/delivery/agents/client_success_agent.py` | send | EXISTING |
 | InboxTriager | `inbox_triage` | `01-Agency-Department/engine/workers/src/workers/admin.py` | none | EXISTING |
+| CallMonitoringAgent | `call_monitoring` | `01-Agency-Department/departments/04-client-operations/specialists/call_monitoring.py` | none | EXISTING |
+| ClientReportingAgent | `client_reporting` | `01-Agency-Department/departments/04-client-operations/specialists/client_reporting.py` | none | EXISTING |
+| RetentionAgent | `retention` | `01-Agency-Department/departments/04-client-operations/specialists/retention.py` | none | EXISTING |
+| RenewalUpsellAgent | `renewal_upsell` | `01-Agency-Department/departments/04-client-operations/specialists/renewal_upsell.py` | none | EXISTING |
 
 ## Brief Roles → Mapping
 
@@ -32,17 +36,19 @@ reporting / retention / renewal-এর role-গুলো। এই department �
 | Client Onboarding Agent | EXISTING — OnboardingAgent | `onboarding_draft`, gate ok |
 | Business Requirement Analyst | EXISTING — ClientIntakeReceiver | `client_intake`, gate send — intake log + checklist DRAFT |
 | Client Configuration Agent | EXISTING — ServiceDeliveryManager | `delivery_manage`, gate ok |
-| Call Monitoring Agent | ROLE-ONLY | কোনো worker code নেই; skill doc অনুযায়ী হাতে করা |
-| Client Reporting Agent | ROLE-ONLY | কোনো worker code নেই; skill doc অনুযায়ী হাতে করা |
+| Call Monitoring Agent | EXISTING — CallMonitoringAgent | `call_monitoring`, gate none — checklist DRAFT; live call দেখে না |
+| Client Reporting Agent | EXISTING — ClientReportingAgent | `client_reporting`, gate none — report template + DRAFT; সংখ্যা না থাকলে BOSS INPUT REQUIRED |
 | Support Agent | EXISTING — ClientSuccessAgent | `client_success`, gate send |
-| Retention Agent | ROLE-ONLY | কোনো worker code নেই; skill doc অনুযায়ী হাতে করা |
-| Renewal & Upsell Agent | ROLE-ONLY | কোনো worker code নেই; skill doc অনুযায়ী হাতে করা — কোনো upsell client-কে বলা হয় না যতক্ষণ Boss ok না দেন |
+| Retention Agent | EXISTING — RetentionAgent | `retention`, gate none — retention plan DRAFT; paying client 0 |
+| Renewal & Upsell Agent | EXISTING — RenewalUpsellAgent | `renewal_upsell`, gate none — renewal/upsell plan DRAFT; দাম quote নয়, Boss-এর ok ছাড়া client-কে upsell বলা হয় না |
 
 ## Missing Roles
 
-- এই department-এ কোনো GAP role নেই — brief-এর ৮টি role-ই EXISTING বা ROLE-ONLY হিসেবে covered।
-- তবে ROLE-ONLY ৪টি role-এর (Call Monitoring, Client Reporting, Retention,
-  Renewal & Upsell) কোনো worker code নেই; এগুলো skill doc-এর role হিসেবে থাকে।
+- এই department-এ কোনো GAP role নেই — brief-এর ৮টি role-ই EXISTING
+  হিসেবে covered।
+- ROLE-ONLY role আর নেই — Call Monitoring, Client Reporting, Retention,
+  Renewal & Upsell — ৪টিই Phase 3-এ worker code সহ EXISTING হয়েছে
+  (2026-11-19)।
 
 ## Honest Status
 
