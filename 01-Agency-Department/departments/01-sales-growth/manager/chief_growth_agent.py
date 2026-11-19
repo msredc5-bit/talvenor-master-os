@@ -1,19 +1,21 @@
 """Chief Growth Agent — Sales & Growth department-এর manager (Phase 1).
 
-ভূমিকা (role): Sales & Growth department-এর ৮ জন existing specialist-কে
+ভূমিকা (role): Sales & Growth department-এর ১৩ জন existing specialist-কে
 delegate করা — prospect research, outreach draft, reply triage, negotiation
-prep, objection sim, sales close, follow-up draft, schedule help। এই manager
-শুধু delegation plan-এর DRAFT বানায়; কোনো worker execute করে না।
+prep, objection sim, sales close, follow-up draft, schedule help, maps
+prospect find, business verify, lead score, CRM manage, sales intelligence। এই manager
+delegation plan-এর DRAFT বানায় + Phase 3 specialist-দের importlib দিয়ে load করে চালায় (DRAFT only); engine/section-এর পুরনো worker execute করে না।
 Gate: ok — delegation plan-এ Boss-এর "ok" লাগে; send/publish/spend/delete
 কোনো gated action এই manager নিজে করে না।
 অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
 Agency Chief wiring Phase 2 DONE — Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে call করে।
-এই manager কখনো করে না: কোনো worker execute করে না, কিছু পাঠায় না,
+এই manager কখনো করে না: engine/section-এর পুরনো worker execute করে না, কিছু পাঠায় না,
 প্রকাশ করে না, খরচ করে না, মুছে না, client-এর তথ্য/দাম/পরিসংখ্যান
 বানায় না, কোনো guarantee দেয় না, dental/medical বা patient-health
 ব্যবসা নেয় না।
 """
 
+import importlib.util
 import os
 import sys
 
@@ -74,33 +76,44 @@ DEPARTMENT_TASKS = {
     },
     "maps_prospect_find": {
         "specialist": "Google Maps Prospect Finder",
-        "file": "ROLE-ONLY — skill: departments/01-sales-growth/skills/chief-growth-agent.md",
+        "class": "GoogleMapsProspectFinder",
+        "file": "departments/01-sales-growth/specialists/google_maps_prospect_finder.py",
         "gate": None,
-        "status": "ROLE-ONLY",
+        "status": "EXISTING",
     },
     "business_verify": {
         "specialist": "Business Verification Agent",
-        "file": "ROLE-ONLY — skill: departments/01-sales-growth/skills/chief-growth-agent.md",
+        "class": "BusinessVerificationAgent",
+        "file": "departments/01-sales-growth/specialists/business_verification_agent.py",
         "gate": None,
-        "status": "ROLE-ONLY",
+        "status": "EXISTING",
     },
     "lead_score": {
         "specialist": "Lead Scoring Agent",
-        "file": "ROLE-ONLY — skill: departments/01-sales-growth/skills/chief-growth-agent.md",
+        "class": "LeadScoringAgent",
+        "file": "departments/01-sales-growth/specialists/lead_scoring_agent.py",
         "gate": None,
-        "status": "ROLE-ONLY",
+        "status": "EXISTING",
     },
     "crm_manage": {
         "specialist": "CRM Manager Agent",
-        "file": "ROLE-ONLY — skill: departments/01-sales-growth/skills/chief-growth-agent.md",
+        "class": "CRMManagerAgent",
+        "file": "departments/01-sales-growth/specialists/crm_manager_agent.py",
         "gate": None,
-        "status": "ROLE-ONLY",
+        "status": "EXISTING",
+    },
+    "sales_intelligence": {
+        "specialist": "Sales Intelligence Agent",
+        "class": "SalesIntelligenceAgent",
+        "file": "departments/01-sales-growth/specialists/sales_intelligence_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
 }
 
 
 class ChiefGrowthAgent:
-    """Sales & Growth specialist-দের delegation plan DRAFT বানায়। কখনো execute করে না।"""
+    """Sales & Growth specialist-দের delegation plan DRAFT বানায় + Phase 3 specialist-দের load করে চালায় (DRAFT only)।"""
 
     task_kind = "manage_sales_growth"
     gate = "ok"
@@ -148,7 +161,7 @@ class ChiefGrowthAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Delegation plan DRAFT বানানো। কোনো worker execute করে না, file লেখে না, network ছোঁয় না।"""
+        """Delegation plan DRAFT বানানো + Phase 3 specialist load+run (DRAFT only)। কোনো file লেখে না, network ছোঁয় না।"""
         task = task or {}
         title = task.get("title") or "Manage Sales & Growth"
         gated_action = task.get("gated_action")
@@ -189,7 +202,7 @@ class ChiefGrowthAgent:
             lines = [
                 "[MOCK DRAFT] Sales & Growth — department overview delegation plan (DRAFT ONLY)",
                 "Manager: Chief Growth Agent | task_kind: manage_sales_growth | gate: ok",
-                "Specialists (8 EXISTING):",
+                "Specialists (13 EXISTING):",
             ]
             for kind in sorted(DEPARTMENT_TASKS.keys()):
                 entry = DEPARTMENT_TASKS[kind]
@@ -238,6 +251,24 @@ class ChiefGrowthAgent:
                 "mock_brain": True,
                 "gate": self.gate,
             }
+
+        # Phase 3 — standalone specialist (departments/01-sales-growth/specialists/)
+        # থাকলে তাকে importlib দিয়ে load করে run করা (Chief-এর loader-এর মতো);
+        # plan-draft নয়, specialist-এর নিজের draft-ই ফেরত। 8 engine/section
+        # worker-এর plan-draft behavior অপরিবর্তিত।
+        spec_file = entry.get("file") or ""
+        spec_class = entry.get("class")
+        if spec_class and spec_file.startswith("departments/01-sales-growth/specialists/"):
+            here = os.path.dirname(os.path.abspath(__file__))
+            spec_path = os.path.normpath(os.path.join(
+                here, "..", "specialists", os.path.basename(spec_file)))
+            spec = importlib.util.spec_from_file_location(
+                f"sales_specialist_{task_kind}", spec_path)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            agent_cls = getattr(mod, spec_class)
+            agent = agent_cls()
+            return agent.run(task, brain, gateway, approvals_path)
 
         payload = task.get("payload") or {}
         prospect = payload.get("prospect") or "BOSS INPUT REQUIRED"

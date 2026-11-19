@@ -1,1 +1,623 @@
-[{"department":"01 Sales & Growth","gate":null,"notes":"Worker: ProspectResearcher (prospect_research). Research notes; field not found means NOT_FOUND, never invented.","role":"Lead Research Agent","skill_file":"01-Agency-Department/engine/skills/prospect-researcher.md","status":"EXISTING","worker_file":"01-Agency-Department/engine/workers/src/workers/acquisition.py"},{"department":"01 Sales & Growth","gate":null,"notes":"Skill not yet written. Discovery today is done by ProspectResearcher plus Apify/Places by hand.","role":"Google Maps Prospect Finder","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"01 Sales & Growth","gate":null,"notes":"Skill not yet written. Website/phone/service-area verification (SOP 11-signal scoring) not yet bound to a worker.","role":"Business Verification Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"01 Sales & Growth","gate":null,"notes":"Skill not yet written. STRONG/MEDIUM/WEAK to Tier 1/2/4 scoring not yet bound to a worker.","role":"Lead Scoring Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"01 Sales & Growth","gate":"send","notes":"Worker: OutreachDrafter (outreach_draft). Drafts only, never sends. Email PAUSED since 2026-11-14.","role":"Email Outreach Agent","skill_file":"01-Agency-Department/engine/skills/outreach-drafter.md","status":"EXISTING","worker_file":"01-Agency-Department/engine/workers/src/workers/acquisition.py"},{"department":"01 Sales & Growth","gate":"send","notes":"Worker: FollowUpAgent (followup_draft). PARKED by the 100-mail rule: PA has 37 first mails, no state at 100 yet.","role":"Follow-up Agent","skill_file":"01-Agency-Department/sections/sell/skills/followup-agent.md","status":"EXISTING","worker_file":"01-Agency-Department/sections/sell/agents/followup_agent.py"},{"department":"01 Sales & Growth","gate":null,"notes":"Skill not yet written. CRM (n8n Cloud Data Tables) is PLANNED, not live, so no CRM worker can exist yet.","role":"CRM Manager Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"01 Sales & Growth","gate":null,"notes":"Skill not yet written. Insight from reply/lead signals not yet bound to a worker.","role":"Sales Intelligence Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"01 Sales & Growth","gate":"send","notes":"Existing worker with no brief counterpart (reply_triage). Locked rules: decline means polite exit; interest means draft only, never price, booking link allowed.","role":"ReplyHandler","skill_file":"01-Agency-Department/engine/skills/reply-triager.md","status":"EXISTING","worker_file":"01-Agency-Department/engine/workers/src/workers/acquisition.py"},{"department":"01 Sales & Growth","gate":"ok","notes":"Existing worker with no brief counterpart (negotiation_prep). Never quotes prices; pricing is internal only.","role":"NegotiationCoach","skill_file":"01-Agency-Department/engine/skills/negotiation-coach.md","status":"EXISTING","worker_file":"01-Agency-Department/engine/workers/src/workers/acquisition.py"},{"department":"01 Sales & Growth","gate":"ok","notes":"Existing worker with no brief counterpart (objection_sim). Objection practice/sim draft.","role":"ObjectionSimulator","skill_file":"01-Agency-Department/engine/skills/objection-simulator.md","status":"EXISTING","worker_file":"01-Agency-Department/engine/workers/src/workers/marketing.py"},{"department":"01 Sales & Growth","gate":"ok","notes":"Existing worker with no brief counterpart (sales_close). Close prep only; contracts/signing stay with Boss.","role":"SalesCloser","skill_file":"01-Agency-Department/sections/sell/skills/sales-closer.md","status":"EXISTING","worker_file":"01-Agency-Department/sections/sell/agents/sales_closer.py"},{"department":"01 Sales & Growth","gate":null,"notes":"Existing worker with no brief counterpart (schedule_help). Booking link https://calendar.app.google/WLoxBfnLGTdjK3LB8 (15 min, New York Time).","role":"SchedulerAssistant","skill_file":"01-Agency-Department/engine/skills/scheduler.md","status":"EXISTING","worker_file":"01-Agency-Department/engine/workers/src/workers/admin.py"},{"department":"02 Marketing","gate":null,"notes":"Skill not yet written. Positioning/messaging not yet bound to a worker.","role":"Market Positioning Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"02 Marketing","gate":"ok","notes":"Worker: ContentPlanner (content_plan). Weekly content plan draft.","role":"Content Strategy Agent","skill_file":"01-Agency-Department/engine/skills/content-planner.md","status":"EXISTING","worker_file":"01-Agency-Department/engine/workers/src/workers/marketing.py"},{"department":"02 Marketing","gate":null,"notes":"Skill not yet written. Never posts. Prep work is covered by PublishPrep only.","role":"Social Media Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"02 Marketing","gate":null,"notes":"Not built and not planned: paid ads are blocked by the $0 spend cap. No budget, no worker.","role":"Ad Campaign Agent","skill_file":null,"status":"GAP","worker_file":null},{"department":"02 Marketing","gate":null,"notes":"Worker: CaptionWriter (caption_write). Caption + hashtag + CTA pack draft; IG 5-8 / LinkedIn 3 / Facebook 0-2 hashtags.","role":"Copywriting Agent","skill_file":"01-Agency-Department/engine/skills/caption-writer.md","status":"EXISTING","worker_file":"01-Agency-Department/engine/workers/src/workers/marketing.py"},{"department":"02 Marketing","gate":"ok","notes":"Worker: VideoProducer (video_produce). Script + shot list draft; hook in first 2 seconds, REAL footage, 9:16.","role":"Video Creative Agent","skill_file":"01-Agency-Department/engine/skills/video-producer.md","status":"EXISTING","worker_file":"01-Agency-Department/engine/workers/src/workers/marketing.py"},{"department":"02 Marketing","gate":null,"notes":"Skill not yet written. SEO work not yet bound to a worker.","role":"SEO Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"02 Marketing","gate":null,"notes":"Skill not yet written. Weekly reporting is covered by ReportCompiler (Dept 06); visible metrics only, never estimated.","role":"Analytics Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"02 Marketing","gate":"post it","notes":"Existing worker with no brief counterpart (publish_prep). Prep only, never posts; publishing is done by Boss himself from main chat.","role":"PublishPrep","skill_file":"01-Agency-Department/engine/skills/publish-prep.md","status":"EXISTING","worker_file":"01-Agency-Department/engine/workers/src/workers/marketing.py"},{"department":"03 AI Engineering","gate":null,"notes":"Skill not yet written. Solution design not yet bound to a worker.","role":"AI Solution Architect","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"03 AI Engineering","gate":"ok","notes":"Worker: RetellBuilder (receptionist_build). DRAFT plan ONLY. Live stack is Vapi/Sophia; Retell was dropped 2026-10-26 and is never production.","role":"Voice Agent Builder","skill_file":"01-Agency-Department/engine/skills/receptionist-builder.md","status":"EXISTING","worker_file":"01-Agency-Department/engine/workers/src/workers/delivery.py"},{"department":"03 AI Engineering","gate":null,"notes":"Skill not yet written. Call flow / conversation design not yet bound to a worker.","role":"Conversation Designer","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"03 AI Engineering","gate":null,"notes":"Skill not yet written. Prompt writing/tuning not yet bound to a worker.","role":"Prompt Engineering Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"03 AI Engineering","gate":null,"notes":"Skill not yet written. Name CORRECTED from the brief's Retell name: the live stack is Vapi, so this is the Vapi Integration Agent. No worker yet.","role":"Vapi Integration Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"03 AI Engineering","gate":null,"notes":"Not built and not planned: CRM is not live (n8n Cloud Data Tables PLANNED), so there is no CRM to integrate.","role":"CRM Integration Agent","skill_file":null,"status":"GAP","worker_file":null},{"department":"03 AI Engineering","gate":null,"notes":"Skill not yet written. Booking link is live (Google Calendar Appointment Schedule) but there is no worker code; the link is shared by hand.","role":"Calendar Integration Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"03 AI Engineering","gate":null,"notes":"Skill not yet written. n8n workflows are READY, not LIVE; Boss import + test still pending.","role":"n8n Automation Engineer","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"03 AI Engineering","gate":null,"notes":"Worker: QAEngineer (receptionist_qa). Partial: QA checklist only. Shared with Dept 07 Voice Quality Testing.","role":"Testing & Debugging Agent","skill_file":"01-Agency-Department/engine/skills/qa-engineer.md","status":"EXISTING","worker_file":"01-Agency-Department/engine/workers/src/workers/delivery.py"},{"department":"03 AI Engineering","gate":null,"notes":"Skill not yet written. Deployment needs Boss ok plus manual steps; no worker exists.","role":"Deployment Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"04 Client Operations","gate":"ok","notes":"Worker: OnboardingAgent (onboarding_draft). Onboarding pack draft; untested on a real client (0 paying clients).","role":"Client Onboarding Agent","skill_file":"01-Agency-Department/engine/skills/onboarding-agent.md","status":"EXISTING","worker_file":"01-Agency-Department/engine/workers/src/workers/delivery.py"},{"department":"04 Client Operations","gate":"send","notes":"Worker: ClientIntakeReceiver (client_intake). Intake: hours, services, FAQs, emergency routing, booking rules, escalation.","role":"Business Requirement Analyst","skill_file":"01-Agency-Department/sections/receive/skills/client-intake-receiver.md","status":"EXISTING","worker_file":"01-Agency-Department/sections/receive/agents/client_intake_receiver.py"},{"department":"04 Client Operations","gate":"ok","notes":"Worker: ServiceDeliveryManager (delivery_manage). Manages delivery/configuration.","role":"Client Configuration Agent","skill_file":"01-Agency-Department/sections/delivery/skills/service-delivery-manager.md","status":"EXISTING","worker_file":"01-Agency-Department/sections/delivery/agents/service_delivery_manager.py"},{"department":"04 Client Operations","gate":null,"notes":"Skill not yet written. No live monitoring worker exists yet for Sophia calls.","role":"Call Monitoring Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"04 Client Operations","gate":null,"notes":"Skill not yet written. Client reporting not yet bound to a worker.","role":"Client Reporting Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"04 Client Operations","gate":"send","notes":"Worker: ClientSuccessAgent (client_success). Support draft only; send gate required.","role":"Support Agent","skill_file":"01-Agency-Department/sections/delivery/skills/client-success-agent.md","status":"EXISTING","worker_file":"01-Agency-Department/sections/delivery/agents/client_success_agent.py"},{"department":"04 Client Operations","gate":null,"notes":"Skill not yet written. 0 clients, so no retention worker needed yet.","role":"Retention Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"04 Client Operations","gate":null,"notes":"Skill not yet written. 0 clients, so no renewal/upsell worker needed yet.","role":"Renewal & Upsell Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"04 Client Operations","gate":null,"notes":"Existing worker with no brief counterpart (inbox_triage). Triages inbox; reads and sorts, never sends.","role":"InboxTriager","skill_file":"01-Agency-Department/engine/skills/inbox-triager.md","status":"EXISTING","worker_file":"01-Agency-Department/engine/workers/src/workers/admin.py"},{"department":"05 Research & Strategy","gate":null,"notes":"Skill not yet written. Competitor research not yet bound to a worker.","role":"Competitor Research Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"05 Research & Strategy","gate":null,"notes":"Skill not yet written. Industry research not yet bound to a worker.","role":"Industry Research Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"05 Research & Strategy","gate":null,"notes":"Skill not yet written. Pricing research is internal only; never quoted to prospects.","role":"Pricing Research Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"05 Research & Strategy","gate":null,"notes":"Skill not yet written. Niche selection not yet bound to a worker. Dental/medical businesses are never a target; always DQ.","role":"Niche Selection Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"05 Research & Strategy","gate":null,"notes":"Skill not yet written. Offer development not yet bound to a worker. No guarantees.","role":"Offer Development Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"05 Research & Strategy","gate":null,"notes":"Skill not yet written. Market opportunity work not yet bound to a worker.","role":"Market Opportunity Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"05 Research & Strategy","gate":null,"notes":"Skill not yet written. Business intelligence not yet bound to a worker.","role":"Business Intelligence Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"06 Finance & Admin","gate":null,"notes":"Skill not yet written. Revenue is $0 (0 paying clients); nothing to track yet.","role":"Revenue Tracking Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"06 Finance & Admin","gate":null,"notes":"Not built and not planned: $0 spend cap means there are no expenses to track.","role":"Expense Tracking Agent","skill_file":null,"status":"GAP","worker_file":null},{"department":"06 Finance & Admin","gate":"ok","notes":"Worker: BillingInvoiceAgent (billing_invoice). Invoice ONLY for a paying client on Boss's word; no invoice made yet.","role":"Invoice Management Agent","skill_file":"01-Agency-Department/sections/ops/skills/billing-invoice-agent.md","status":"EXISTING","worker_file":"01-Agency-Department/sections/ops/agents/billing_invoice_agent.py"},{"department":"06 Finance & Admin","gate":null,"notes":"Skill not yet written. Subscription tracking not yet bound to a worker.","role":"Subscription Tracking Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"06 Finance & Admin","gate":null,"notes":"Worker: ReportCompiler (report_compile). Visible metrics only; never estimated or invented.","role":"Financial Reporting Agent","skill_file":"01-Agency-Department/engine/skills/report-compiler.md","status":"EXISTING","worker_file":"01-Agency-Department/engine/workers/src/workers/admin.py"},{"department":"06 Finance & Admin","gate":null,"notes":"Skill not yet written. Document management not yet bound to a worker.","role":"Document Management Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"06 Finance & Admin","gate":null,"notes":"Skill not yet written. Compliance dates not yet bound to a worker.","role":"Compliance Calendar Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"07 Quality & Security","gate":null,"notes":"Worker: QAEngineer (receptionist_qa). Partial: 12-check QA checklist only. Shared with Dept 03 Testing & Debugging.","role":"Voice Quality Testing Agent","skill_file":"01-Agency-Department/engine/skills/qa-engineer.md","status":"EXISTING","worker_file":"01-Agency-Department/engine/workers/src/workers/delivery.py"},{"department":"07 Quality & Security","gate":null,"notes":"Skill not yet written. Call scenario testing not yet bound to a worker.","role":"Call Scenario Testing Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"07 Quality & Security","gate":null,"notes":"Skill not yet written. Workflow testing not yet bound to a worker.","role":"Workflow Testing Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"07 Quality & Security","gate":null,"notes":"Skill not yet written. Data validation not yet bound to a worker.","role":"Data Validation Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"07 Quality & Security","gate":null,"notes":"Skill not yet written. Security monitoring not yet bound to a worker.","role":"Security Monitoring Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"07 Quality & Security","gate":null,"notes":"Skill not yet written. Access control not yet bound to a worker.","role":"Access Control Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"07 Quality & Security","gate":null,"notes":"Not built and not planned: there is no backup system in the repo.","role":"Backup & Recovery Agent","skill_file":null,"status":"GAP","worker_file":null},{"department":"07 Quality & Security","gate":null,"notes":"Skill not yet written. Compliance review not yet bound to a worker.","role":"Compliance Review Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"08 Product & Innovation","gate":null,"notes":"Skill not yet written. New AI product research not yet bound to a worker.","role":"New AI Product Research Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"08 Product & Innovation","gate":null,"notes":"Skill not yet written. New feature research not yet bound to a worker.","role":"New Feature Research Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"08 Product & Innovation","gate":null,"notes":"Skill not yet written. Automation R&D not yet bound to a worker.","role":"Automation R&D Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"08 Product & Innovation","gate":null,"notes":"Skill not yet written. Technology evaluation not yet bound to a worker.","role":"Technology Evaluation Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"08 Product & Innovation","gate":null,"notes":"Skill not yet written. Product improvement not yet bound to a worker.","role":"Product Improvement Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null},{"department":"08 Product & Innovation","gate":null,"notes":"Skill not yet written. Prototype building not yet bound to a worker.","role":"Prototype Builder Agent","skill_file":null,"status":"ROLE-ONLY","worker_file":null}]
+[
+  {
+    "department": "01 Sales & Growth",
+    "gate": null,
+    "notes": "Worker: ProspectResearcher (prospect_research). Research notes; field not found means NOT_FOUND, never invented.",
+    "role": "Lead Research Agent",
+    "skill_file": "01-Agency-Department/engine/skills/prospect-researcher.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/engine/workers/src/workers/acquisition.py"
+  },
+  {
+    "department": "01 Sales & Growth",
+    "gate": null,
+    "notes": "Worker: GoogleMapsProspectFinder (maps_prospect_find); skill 01-Agency-Department/departments/01-sales-growth/skills/google-maps-prospect-finder.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Google Maps Prospect Finder",
+    "skill_file": "01-Agency-Department/departments/01-sales-growth/skills/google-maps-prospect-finder.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/01-sales-growth/specialists/google_maps_prospect_finder.py"
+  },
+  {
+    "department": "01 Sales & Growth",
+    "gate": null,
+    "notes": "Worker: BusinessVerificationAgent (business_verify); skill 01-Agency-Department/departments/01-sales-growth/skills/business-verification-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Business Verification Agent",
+    "skill_file": "01-Agency-Department/departments/01-sales-growth/skills/business-verification-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/01-sales-growth/specialists/business_verification_agent.py"
+  },
+  {
+    "department": "01 Sales & Growth",
+    "gate": null,
+    "notes": "Worker: LeadScoringAgent (lead_score); skill 01-Agency-Department/departments/01-sales-growth/skills/lead-scoring-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Lead Scoring Agent",
+    "skill_file": "01-Agency-Department/departments/01-sales-growth/skills/lead-scoring-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/01-sales-growth/specialists/lead_scoring_agent.py"
+  },
+  {
+    "department": "01 Sales & Growth",
+    "gate": "send",
+    "notes": "Worker: OutreachDrafter (outreach_draft). Drafts only, never sends. Email PAUSED since 2026-11-14.",
+    "role": "Email Outreach Agent",
+    "skill_file": "01-Agency-Department/engine/skills/outreach-drafter.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/engine/workers/src/workers/acquisition.py"
+  },
+  {
+    "department": "01 Sales & Growth",
+    "gate": "send",
+    "notes": "Worker: FollowUpAgent (followup_draft). PARKED by the 100-mail rule: PA has 37 first mails, no state at 100 yet.",
+    "role": "Follow-up Agent",
+    "skill_file": "01-Agency-Department/sections/sell/skills/followup-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/sections/sell/agents/followup_agent.py"
+  },
+  {
+    "department": "01 Sales & Growth",
+    "gate": null,
+    "notes": "Worker: CRMManagerAgent (crm_manage); skill 01-Agency-Department/departments/01-sales-growth/skills/crm-manager-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain. CRM (n8n Cloud Data Tables) PLANNED, not live — worker drafts the CRM plan only.",
+    "role": "CRM Manager Agent",
+    "skill_file": "01-Agency-Department/departments/01-sales-growth/skills/crm-manager-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/01-sales-growth/specialists/crm_manager_agent.py"
+  },
+  {
+    "department": "01 Sales & Growth",
+    "gate": null,
+    "notes": "Worker: SalesIntelligenceAgent (sales_intelligence); skill 01-Agency-Department/departments/01-sales-growth/skills/sales-intelligence-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Sales Intelligence Agent",
+    "skill_file": "01-Agency-Department/departments/01-sales-growth/skills/sales-intelligence-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/01-sales-growth/specialists/sales_intelligence_agent.py"
+  },
+  {
+    "department": "01 Sales & Growth",
+    "gate": "send",
+    "notes": "Existing worker with no brief counterpart (reply_triage). Locked rules: decline means polite exit; interest means draft only, never price, booking link allowed.",
+    "role": "ReplyHandler",
+    "skill_file": "01-Agency-Department/engine/skills/reply-triager.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/engine/workers/src/workers/acquisition.py"
+  },
+  {
+    "department": "01 Sales & Growth",
+    "gate": "ok",
+    "notes": "Existing worker with no brief counterpart (negotiation_prep). Never quotes prices; pricing is internal only.",
+    "role": "NegotiationCoach",
+    "skill_file": "01-Agency-Department/engine/skills/negotiation-coach.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/engine/workers/src/workers/acquisition.py"
+  },
+  {
+    "department": "01 Sales & Growth",
+    "gate": "ok",
+    "notes": "Existing worker with no brief counterpart (objection_sim). Objection practice/sim draft.",
+    "role": "ObjectionSimulator",
+    "skill_file": "01-Agency-Department/engine/skills/objection-simulator.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/engine/workers/src/workers/marketing.py"
+  },
+  {
+    "department": "01 Sales & Growth",
+    "gate": "ok",
+    "notes": "Existing worker with no brief counterpart (sales_close). Close prep only; contracts/signing stay with Boss.",
+    "role": "SalesCloser",
+    "skill_file": "01-Agency-Department/sections/sell/skills/sales-closer.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/sections/sell/agents/sales_closer.py"
+  },
+  {
+    "department": "01 Sales & Growth",
+    "gate": null,
+    "notes": "Existing worker with no brief counterpart (schedule_help). Booking link https://calendar.app.google/WLoxBfnLGTdjK3LB8 (15 min, New York Time).",
+    "role": "SchedulerAssistant",
+    "skill_file": "01-Agency-Department/engine/skills/scheduler.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/engine/workers/src/workers/admin.py"
+  },
+  {
+    "department": "02 Marketing",
+    "gate": null,
+    "notes": "Worker: MarketPositioningAgent (market_position); skill 01-Agency-Department/departments/02-marketing/skills/market-positioning-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Market Positioning Agent",
+    "skill_file": "01-Agency-Department/departments/02-marketing/skills/market-positioning-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/02-marketing/specialists/market_positioning_agent.py"
+  },
+  {
+    "department": "02 Marketing",
+    "gate": "ok",
+    "notes": "Worker: ContentPlanner (content_plan). Weekly content plan draft.",
+    "role": "Content Strategy Agent",
+    "skill_file": "01-Agency-Department/engine/skills/content-planner.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/engine/workers/src/workers/marketing.py"
+  },
+  {
+    "department": "02 Marketing",
+    "gate": null,
+    "notes": "Worker: SocialMediaAgent (social_manage); skill 01-Agency-Department/departments/02-marketing/skills/social-media-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain. Never posts — planning draft only.",
+    "role": "Social Media Agent",
+    "skill_file": "01-Agency-Department/departments/02-marketing/skills/social-media-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/02-marketing/specialists/social_media_agent.py"
+  },
+  {
+    "department": "02 Marketing",
+    "gate": null,
+    "notes": "Not built and not planned: paid ads are blocked by the $0 spend cap. No budget, no worker.",
+    "role": "Ad Campaign Agent",
+    "skill_file": null,
+    "status": "GAP",
+    "worker_file": null
+  },
+  {
+    "department": "02 Marketing",
+    "gate": null,
+    "notes": "Worker: CaptionWriter (caption_write). Caption + hashtag + CTA pack draft; IG 5-8 / LinkedIn 3 / Facebook 0-2 hashtags.",
+    "role": "Copywriting Agent",
+    "skill_file": "01-Agency-Department/engine/skills/caption-writer.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/engine/workers/src/workers/marketing.py"
+  },
+  {
+    "department": "02 Marketing",
+    "gate": "ok",
+    "notes": "Worker: VideoProducer (video_produce). Script + shot list draft; hook in first 2 seconds, REAL footage, 9:16.",
+    "role": "Video Creative Agent",
+    "skill_file": "01-Agency-Department/engine/skills/video-producer.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/engine/workers/src/workers/marketing.py"
+  },
+  {
+    "department": "02 Marketing",
+    "gate": null,
+    "notes": "Worker: SEOAgent (seo); skill 01-Agency-Department/departments/02-marketing/skills/seo-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "SEO Agent",
+    "skill_file": "01-Agency-Department/departments/02-marketing/skills/seo-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/02-marketing/specialists/seo_agent.py"
+  },
+  {
+    "department": "02 Marketing",
+    "gate": null,
+    "notes": "Worker: AnalyticsAgent (analytics); skill 01-Agency-Department/departments/02-marketing/skills/analytics-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain. Visible metrics only.",
+    "role": "Analytics Agent",
+    "skill_file": "01-Agency-Department/departments/02-marketing/skills/analytics-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/02-marketing/specialists/analytics_agent.py"
+  },
+  {
+    "department": "02 Marketing",
+    "gate": "post it",
+    "notes": "Existing worker with no brief counterpart (publish_prep). Prep only, never posts; publishing is done by Boss himself from main chat.",
+    "role": "PublishPrep",
+    "skill_file": "01-Agency-Department/engine/skills/publish-prep.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/engine/workers/src/workers/marketing.py"
+  },
+  {
+    "department": "03 AI Engineering",
+    "gate": null,
+    "notes": "Worker: AISolutionArchitect (solution_architect); skill 01-Agency-Department/departments/03-ai-engineering/skills/ai-solution-architect.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "AI Solution Architect",
+    "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/ai-solution-architect.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/03-ai-engineering/specialists/ai_solution_architect.py"
+  },
+  {
+    "department": "03 AI Engineering",
+    "gate": "ok",
+    "notes": "Worker: RetellBuilder (receptionist_build). DRAFT plan ONLY. Live stack is Vapi/Sophia; Retell was dropped 2026-10-26 and is never production.",
+    "role": "Voice Agent Builder",
+    "skill_file": "01-Agency-Department/engine/skills/receptionist-builder.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/engine/workers/src/workers/delivery.py"
+  },
+  {
+    "department": "03 AI Engineering",
+    "gate": null,
+    "notes": "Worker: ConversationDesigner (conversation_design); skill 01-Agency-Department/departments/03-ai-engineering/skills/conversation-designer.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Conversation Designer",
+    "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/conversation-designer.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/03-ai-engineering/specialists/conversation_designer.py"
+  },
+  {
+    "department": "03 AI Engineering",
+    "gate": null,
+    "notes": "Worker: PromptEngineeringAgent (prompt_engineering); skill 01-Agency-Department/departments/03-ai-engineering/skills/prompt-engineering-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Prompt Engineering Agent",
+    "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/prompt-engineering-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/03-ai-engineering/specialists/prompt_engineering_agent.py"
+  },
+  {
+    "department": "03 AI Engineering",
+    "gate": null,
+    "notes": "Worker: VapiIntegrationAgent (vapi_integration); skill 01-Agency-Department/departments/03-ai-engineering/skills/vapi-integration-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain. Brief's Retell name corrected to Vapi.",
+    "role": "Vapi Integration Agent",
+    "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/vapi-integration-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/03-ai-engineering/specialists/vapi_integration_agent.py"
+  },
+  {
+    "department": "03 AI Engineering",
+    "gate": null,
+    "notes": "Not built and not planned: CRM is not live (n8n Cloud Data Tables PLANNED), so there is no CRM to integrate.",
+    "role": "CRM Integration Agent",
+    "skill_file": null,
+    "status": "GAP",
+    "worker_file": null
+  },
+  {
+    "department": "03 AI Engineering",
+    "gate": null,
+    "notes": "Worker: CalendarIntegrationAgent (calendar_integration); skill 01-Agency-Department/departments/03-ai-engineering/skills/calendar-integration-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain. Booking link live.",
+    "role": "Calendar Integration Agent",
+    "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/calendar-integration-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/03-ai-engineering/specialists/calendar_integration_agent.py"
+  },
+  {
+    "department": "03 AI Engineering",
+    "gate": null,
+    "notes": "Worker: N8nAutomationEngineer (n8n_automation); skill 01-Agency-Department/departments/03-ai-engineering/skills/n8n-automation-engineer.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain. Workflows READY, not LIVE.",
+    "role": "n8n Automation Engineer",
+    "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/n8n-automation-engineer.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/03-ai-engineering/specialists/n8n_automation_engineer.py"
+  },
+  {
+    "department": "03 AI Engineering",
+    "gate": null,
+    "notes": "Worker: QAEngineer (receptionist_qa). Partial: QA checklist only. Shared with Dept 07 Voice Quality Testing.",
+    "role": "Testing & Debugging Agent",
+    "skill_file": "01-Agency-Department/engine/skills/qa-engineer.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/engine/workers/src/workers/delivery.py"
+  },
+  {
+    "department": "03 AI Engineering",
+    "gate": null,
+    "notes": "Worker: DeploymentAgent (deployment); skill 01-Agency-Department/departments/03-ai-engineering/skills/deployment-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain. Deploy needs Boss's ok + manual step.",
+    "role": "Deployment Agent",
+    "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/deployment-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/03-ai-engineering/specialists/deployment_agent.py"
+  },
+  {
+    "department": "04 Client Operations",
+    "gate": "ok",
+    "notes": "Worker: OnboardingAgent (onboarding_draft). Onboarding pack draft; untested on a real client (0 paying clients).",
+    "role": "Client Onboarding Agent",
+    "skill_file": "01-Agency-Department/engine/skills/onboarding-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/engine/workers/src/workers/delivery.py"
+  },
+  {
+    "department": "04 Client Operations",
+    "gate": "send",
+    "notes": "Worker: ClientIntakeReceiver (client_intake). Intake: hours, services, FAQs, emergency routing, booking rules, escalation.",
+    "role": "Business Requirement Analyst",
+    "skill_file": "01-Agency-Department/sections/receive/skills/client-intake-receiver.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/sections/receive/agents/client_intake_receiver.py"
+  },
+  {
+    "department": "04 Client Operations",
+    "gate": "ok",
+    "notes": "Worker: ServiceDeliveryManager (delivery_manage). Manages delivery/configuration.",
+    "role": "Client Configuration Agent",
+    "skill_file": "01-Agency-Department/sections/delivery/skills/service-delivery-manager.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/sections/delivery/agents/service_delivery_manager.py"
+  },
+  {
+    "department": "04 Client Operations",
+    "gate": null,
+    "notes": "Worker: CallMonitoringAgent (call_monitoring); skill 01-Agency-Department/departments/04-client-operations/skills/call_monitoring.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain. Not live call monitoring — checklist draft.",
+    "role": "Call Monitoring Agent",
+    "skill_file": "01-Agency-Department/departments/04-client-operations/skills/call_monitoring.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/04-client-operations/specialists/call_monitoring.py"
+  },
+  {
+    "department": "04 Client Operations",
+    "gate": null,
+    "notes": "Worker: ClientReportingAgent (client_reporting); skill 01-Agency-Department/departments/04-client-operations/skills/client_reporting.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Client Reporting Agent",
+    "skill_file": "01-Agency-Department/departments/04-client-operations/skills/client_reporting.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/04-client-operations/specialists/client_reporting.py"
+  },
+  {
+    "department": "04 Client Operations",
+    "gate": "send",
+    "notes": "Worker: ClientSuccessAgent (client_success). Support draft only; send gate required.",
+    "role": "Support Agent",
+    "skill_file": "01-Agency-Department/sections/delivery/skills/client-success-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/sections/delivery/agents/client_success_agent.py"
+  },
+  {
+    "department": "04 Client Operations",
+    "gate": null,
+    "notes": "Worker: RetentionAgent (retention); skill 01-Agency-Department/departments/04-client-operations/skills/retention.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain. Client 0 — no work yet.",
+    "role": "Retention Agent",
+    "skill_file": "01-Agency-Department/departments/04-client-operations/skills/retention.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/04-client-operations/specialists/retention.py"
+  },
+  {
+    "department": "04 Client Operations",
+    "gate": null,
+    "notes": "Worker: RenewalUpsellAgent (renewal_upsell); skill 01-Agency-Department/departments/04-client-operations/skills/renewal_upsell.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain. Client 0 — no work yet.",
+    "role": "Renewal & Upsell Agent",
+    "skill_file": "01-Agency-Department/departments/04-client-operations/skills/renewal_upsell.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/04-client-operations/specialists/renewal_upsell.py"
+  },
+  {
+    "department": "04 Client Operations",
+    "gate": null,
+    "notes": "Existing worker with no brief counterpart (inbox_triage). Triages inbox; reads and sorts, never sends.",
+    "role": "InboxTriager",
+    "skill_file": "01-Agency-Department/engine/skills/inbox-triager.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/engine/workers/src/workers/admin.py"
+  },
+  {
+    "department": "05 Research & Strategy",
+    "gate": null,
+    "notes": "Worker: CompetitorResearchAgent (competitor_research); skill 01-Agency-Department/departments/05-research-strategy/skills/competitor-research-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Competitor Research Agent",
+    "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/competitor-research-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/05-research-strategy/specialists/competitor_research_agent.py"
+  },
+  {
+    "department": "05 Research & Strategy",
+    "gate": null,
+    "notes": "Worker: IndustryResearchAgent (industry_research); skill 01-Agency-Department/departments/05-research-strategy/skills/industry-research-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Industry Research Agent",
+    "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/industry-research-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/05-research-strategy/specialists/industry_research_agent.py"
+  },
+  {
+    "department": "05 Research & Strategy",
+    "gate": null,
+    "notes": "Worker: PricingResearchAgent (pricing_research); skill 01-Agency-Department/departments/05-research-strategy/skills/pricing-research-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain. Internal only — never quote a prospect.",
+    "role": "Pricing Research Agent",
+    "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/pricing-research-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/05-research-strategy/specialists/pricing_research_agent.py"
+  },
+  {
+    "department": "05 Research & Strategy",
+    "gate": null,
+    "notes": "Worker: NicheSelectionAgent (niche_selection); skill 01-Agency-Department/departments/05-research-strategy/skills/niche-selection-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain. Dental/medical always DQ.",
+    "role": "Niche Selection Agent",
+    "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/niche-selection-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/05-research-strategy/specialists/niche_selection_agent.py"
+  },
+  {
+    "department": "05 Research & Strategy",
+    "gate": null,
+    "notes": "Worker: OfferDevelopmentAgent (offer_development); skill 01-Agency-Department/departments/05-research-strategy/skills/offer-development-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain. No guarantees.",
+    "role": "Offer Development Agent",
+    "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/offer-development-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/05-research-strategy/specialists/offer_development_agent.py"
+  },
+  {
+    "department": "05 Research & Strategy",
+    "gate": null,
+    "notes": "Worker: MarketOpportunityAgent (market_opportunity); skill 01-Agency-Department/departments/05-research-strategy/skills/market-opportunity-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Market Opportunity Agent",
+    "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/market-opportunity-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/05-research-strategy/specialists/market_opportunity_agent.py"
+  },
+  {
+    "department": "05 Research & Strategy",
+    "gate": null,
+    "notes": "Worker: BusinessIntelligenceAgent (business_intelligence); skill 01-Agency-Department/departments/05-research-strategy/skills/business-intelligence-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Business Intelligence Agent",
+    "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/business-intelligence-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/05-research-strategy/specialists/business_intelligence_agent.py"
+  },
+  {
+    "department": "06 Finance & Admin",
+    "gate": null,
+    "notes": "Worker: RevenueTrackingAgent (revenue_tracking); skill 01-Agency-Department/departments/06-finance-admin/skills/revenue-tracking-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain. Revenue $0.",
+    "role": "Revenue Tracking Agent",
+    "skill_file": "01-Agency-Department/departments/06-finance-admin/skills/revenue-tracking-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/06-finance-admin/specialists/revenue_tracking_agent.py"
+  },
+  {
+    "department": "06 Finance & Admin",
+    "gate": null,
+    "notes": "Not built and not planned: $0 spend cap means there are no expenses to track.",
+    "role": "Expense Tracking Agent",
+    "skill_file": null,
+    "status": "GAP",
+    "worker_file": null
+  },
+  {
+    "department": "06 Finance & Admin",
+    "gate": "ok",
+    "notes": "Worker: BillingInvoiceAgent (billing_invoice). Invoice ONLY for a paying client on Boss's word; no invoice made yet.",
+    "role": "Invoice Management Agent",
+    "skill_file": "01-Agency-Department/sections/ops/skills/billing-invoice-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/sections/ops/agents/billing_invoice_agent.py"
+  },
+  {
+    "department": "06 Finance & Admin",
+    "gate": null,
+    "notes": "Worker: SubscriptionTrackingAgent (subscription_tracking); skill 01-Agency-Department/departments/06-finance-admin/skills/subscription-tracking-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Subscription Tracking Agent",
+    "skill_file": "01-Agency-Department/departments/06-finance-admin/skills/subscription-tracking-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/06-finance-admin/specialists/subscription_tracking_agent.py"
+  },
+  {
+    "department": "06 Finance & Admin",
+    "gate": null,
+    "notes": "Worker: ReportCompiler (report_compile). Visible metrics only; never estimated or invented.",
+    "role": "Financial Reporting Agent",
+    "skill_file": "01-Agency-Department/engine/skills/report-compiler.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/engine/workers/src/workers/admin.py"
+  },
+  {
+    "department": "06 Finance & Admin",
+    "gate": null,
+    "notes": "Worker: DocumentManagementAgent (document_management); skill 01-Agency-Department/departments/06-finance-admin/skills/document-management-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Document Management Agent",
+    "skill_file": "01-Agency-Department/departments/06-finance-admin/skills/document-management-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/06-finance-admin/specialists/document_management_agent.py"
+  },
+  {
+    "department": "06 Finance & Admin",
+    "gate": null,
+    "notes": "Worker: ComplianceCalendarAgent (compliance_calendar); skill 01-Agency-Department/departments/06-finance-admin/skills/compliance-calendar-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Compliance Calendar Agent",
+    "skill_file": "01-Agency-Department/departments/06-finance-admin/skills/compliance-calendar-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/06-finance-admin/specialists/compliance_calendar_agent.py"
+  },
+  {
+    "department": "07 Quality & Security",
+    "gate": null,
+    "notes": "Worker: QAEngineer (receptionist_qa). Partial: 12-check QA checklist only. Shared with Dept 03 Testing & Debugging.",
+    "role": "Voice Quality Testing Agent",
+    "skill_file": "01-Agency-Department/engine/skills/qa-engineer.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/engine/workers/src/workers/delivery.py"
+  },
+  {
+    "department": "07 Quality & Security",
+    "gate": null,
+    "notes": "Worker: CallScenarioTestingAgent (call_scenario_testing); skill 01-Agency-Department/departments/07-quality-security/skills/call-scenario-testing-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Call Scenario Testing Agent",
+    "skill_file": "01-Agency-Department/departments/07-quality-security/skills/call-scenario-testing-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/07-quality-security/specialists/call_scenario_testing_agent.py"
+  },
+  {
+    "department": "07 Quality & Security",
+    "gate": null,
+    "notes": "Worker: WorkflowTestingAgent (workflow_testing); skill 01-Agency-Department/departments/07-quality-security/skills/workflow-testing-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Workflow Testing Agent",
+    "skill_file": "01-Agency-Department/departments/07-quality-security/skills/workflow-testing-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/07-quality-security/specialists/workflow_testing_agent.py"
+  },
+  {
+    "department": "07 Quality & Security",
+    "gate": null,
+    "notes": "Worker: DataValidationAgent (data_validation); skill 01-Agency-Department/departments/07-quality-security/skills/data-validation-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Data Validation Agent",
+    "skill_file": "01-Agency-Department/departments/07-quality-security/skills/data-validation-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/07-quality-security/specialists/data_validation_agent.py"
+  },
+  {
+    "department": "07 Quality & Security",
+    "gate": null,
+    "notes": "Worker: SecurityMonitoringAgent (security_monitoring); skill 01-Agency-Department/departments/07-quality-security/skills/security-monitoring-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Security Monitoring Agent",
+    "skill_file": "01-Agency-Department/departments/07-quality-security/skills/security-monitoring-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/07-quality-security/specialists/security_monitoring_agent.py"
+  },
+  {
+    "department": "07 Quality & Security",
+    "gate": null,
+    "notes": "Worker: AccessControlAgent (access_control); skill 01-Agency-Department/departments/07-quality-security/skills/access-control-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Access Control Agent",
+    "skill_file": "01-Agency-Department/departments/07-quality-security/skills/access-control-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/07-quality-security/specialists/access_control_agent.py"
+  },
+  {
+    "department": "07 Quality & Security",
+    "gate": null,
+    "notes": "Not built and not planned: there is no backup system in the repo.",
+    "role": "Backup & Recovery Agent",
+    "skill_file": null,
+    "status": "GAP",
+    "worker_file": null
+  },
+  {
+    "department": "07 Quality & Security",
+    "gate": null,
+    "notes": "Worker: ComplianceReviewAgent (compliance_review); skill 01-Agency-Department/departments/07-quality-security/skills/compliance-review-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Compliance Review Agent",
+    "skill_file": "01-Agency-Department/departments/07-quality-security/skills/compliance-review-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/07-quality-security/specialists/compliance_review_agent.py"
+  },
+  {
+    "department": "08 Product & Innovation",
+    "gate": null,
+    "notes": "Worker: NewAIProductResearchAgent (new_ai_product_research); skill 01-Agency-Department/departments/08-product-innovation/skills/new-ai-product-research-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "New AI Product Research Agent",
+    "skill_file": "01-Agency-Department/departments/08-product-innovation/skills/new-ai-product-research-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/08-product-innovation/specialists/new_ai_product_research.py"
+  },
+  {
+    "department": "08 Product & Innovation",
+    "gate": null,
+    "notes": "Worker: NewFeatureResearchAgent (new_feature_research); skill 01-Agency-Department/departments/08-product-innovation/skills/new-feature-research-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "New Feature Research Agent",
+    "skill_file": "01-Agency-Department/departments/08-product-innovation/skills/new-feature-research-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/08-product-innovation/specialists/new_feature_research.py"
+  },
+  {
+    "department": "08 Product & Innovation",
+    "gate": null,
+    "notes": "Worker: AutomationRDAgent (automation_rd); skill 01-Agency-Department/departments/08-product-innovation/skills/automation-rd-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Automation R&D Agent",
+    "skill_file": "01-Agency-Department/departments/08-product-innovation/skills/automation-rd-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/08-product-innovation/specialists/automation_rd.py"
+  },
+  {
+    "department": "08 Product & Innovation",
+    "gate": null,
+    "notes": "Worker: TechnologyEvaluationAgent (technology_evaluation); skill 01-Agency-Department/departments/08-product-innovation/skills/technology-evaluation-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Technology Evaluation Agent",
+    "skill_file": "01-Agency-Department/departments/08-product-innovation/skills/technology-evaluation-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/08-product-innovation/specialists/technology_evaluation.py"
+  },
+  {
+    "department": "08 Product & Innovation",
+    "gate": null,
+    "notes": "Worker: ProductImprovementAgent (product_improvement); skill 01-Agency-Department/departments/08-product-innovation/skills/product-improvement-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Product Improvement Agent",
+    "skill_file": "01-Agency-Department/departments/08-product-innovation/skills/product-improvement-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/08-product-innovation/specialists/product_improvement.py"
+  },
+  {
+    "department": "08 Product & Innovation",
+    "gate": null,
+    "notes": "Worker: PrototypeBuilderAgent (prototype_builder); skill 01-Agency-Department/departments/08-product-innovation/skills/prototype-builder-agent.md. Phase 3 DONE 2026-11-19; DRAFT only, mock brain.",
+    "role": "Prototype Builder Agent",
+    "skill_file": "01-Agency-Department/departments/08-product-innovation/skills/prototype-builder-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/08-product-innovation/specialists/prototype_builder.py"
+  }
+]

@@ -23,7 +23,10 @@ draft লেখে না, কিছু পাঠায় না — delegation
    overview delegation plan DRAFT বানান।
 4. প্রতিটি plan-এ লিখুন: specialist-এর নাম, file/skill path, gate, honest status।
 5. `gated_action` থাকলে আগে approval — PENDING record করে থামুন; draft-ও নয়।
-6. ROLE-ONLY role-এর plan-এ স্পষ্ট লিখুন: worker code নেই, হাতে করতে হবে।
+6. Phase 3-এর ৫টি standalone specialist (`maps_prospect_find`,
+   `business_verify`, `lead_score`, `crm_manage`, `sales_intelligence`)
+   manager নিজে importlib দিয়ে load করে run করে — এদের plan-draft নয়,
+   specialist-এর নিজের draft ফেরত যায়।
 7. `followup_draft`-এর plan-এ সবসময় লিখুন: 100-mail rule-এ follow-up PARKED
    (Pennsylvania 37 first mails)।
 8. কোনো তথ্য না থাকলে `BOSS INPUT REQUIRED` লিখুন — কখনো বানাবেন না।
@@ -41,7 +44,7 @@ draft লেখে না, কিছু পাঠায় না — delegation
 
 - ✅ Delegation plan DRAFT বানানো।
 - ✅ ApprovalGateway-তে PENDING approval record চাওয়া (gated action-এর জন্য)।
-- ❌ কোনো worker execute করা নয়।
+- ❌ engine/section-এর পুরনো worker execute করা নয় (Phase 3 specialist load+run ছাড়া)।
 - ❌ কিছু পাঠানো / প্রকাশ করা / খরচ করা / মোছা নয়।
 - ❌ Gate word ছাড়া `send`/`publish`/`spend`/`delete` নয়।
 - ❌ দাম বলা নয় (pricing LOCKED, internal only)।
@@ -58,15 +61,17 @@ draft লেখে না, কিছু পাঠায় না — delegation
 | `sales_close` | SalesCloser | ok | EXISTING |
 | `followup_draft` | FollowUpAgent | send | EXISTING — PARKED (100-mail rule) |
 | `schedule_help` | SchedulerAssistant | none | EXISTING |
-| `maps_prospect_find` | Google Maps Prospect Finder | none | ROLE-ONLY |
-| `business_verify` | Business Verification Agent | none | ROLE-ONLY |
-| `lead_score` | Lead Scoring Agent | none | ROLE-ONLY |
-| `crm_manage` | CRM Manager Agent | none | ROLE-ONLY (CRM planned, not live) |
+| `maps_prospect_find` | Google Maps Prospect Finder | none | EXISTING |
+| `business_verify` | Business Verification Agent | none | EXISTING |
+| `lead_score` | Lead Scoring Agent | none | EXISTING |
+| `crm_manage` | CRM Manager Agent | none | EXISTING (CRM planned, not live) |
+| `sales_intelligence` | Sales Intelligence Agent | none | EXISTING |
 
 - Reply-তে interest / প্রশ্ন / pricing / demo request থাকলে ReplyHandler-এর
   triage DRAFT Boss-কে দেখাতে হবে — কখনো সরাসরি reply পাঠানো নয়।
 - Negotiation/close-এর call Boss নিজে নেন — manager শুধু prep plan DRAFT দেয়।
-- ROLE-ONLY role-এর কাজ Boss/Elora হাতে করেন; manager শুধু plan দেয়।
+- Phase 3-এর ৫টি standalone specialist manager importlib দিয়ে load করে
+  run করে; এদের plan-draft নয়, specialist-এর নিজের draft ফেরত যায়।
 
 ## Success Criteria (সফলতা)
 
@@ -86,7 +91,7 @@ draft লেখে না, কিছু পাঠায় না — delegation
 
 ## Never-Do List (কখনো করে না)
 
-- কোনো worker execute করে না।
+- engine/section-এর পুরনো worker execute করে না (Phase 3 specialist-দের load করে চালায়, DRAFT only)।
 - কিছু পাঠায় না, প্রকাশ করে না, খরচ করে না, মোছে না।
 - Client-এর তথ্য, দাম, পরিসংখ্যান, testimonial, guarantee বানায় না।
 - Dental/medical বা patient-health ব্যবসা নেয় না।
