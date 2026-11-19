@@ -1,24 +1,27 @@
 """Chief Quality Security Agent — quality & security department manager (Phase 1).
 
 ভূমিকা (role): 07-quality-security department-এর manager — quality/
-security task এলে কোন specialist-এর কাজ, তা ঠিক করে DELEGATION PLAN-এর
-DRAFT বানানো। নিজে কোনো QA/security check চালায় না, কোনো worker
-চালায় না।
+security task এলে কোন specialist-এর কাজ, তা ঠিক করে specialist-কে
+load করে চালানো (importlib), আর ফলাফল DRAFT হিসেবে ফেরত দেওয়া।
+নিজে কোনো QA/security check চালায় না।
 Gate: ok — delegation plan ব্যবহার করতে Boss-এর "ok" লাগে।
 অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
 Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।
 
-Mapped existing staff (1): QAEngineer (receptionist_qa, no gate —
-12-check QA checklist; dept 03 Testing & Debugging-এর সঙ্গেও shared)।
-Voice Quality Testing — QAEngineer দিয়ে আংশিক (partial), dedicated
-worker নেই। Backup & Recovery GAP — repo-তে কোনো backup system নেই।
+Mapped existing staff (7): QAEngineer (receptionist_qa, no gate —
+12-check QA checklist; dept 03 Testing & Debugging-এর সঙ্গেও shared)
++ 6 নতুন specialist (Phase 3): Call Scenario Testing, Workflow
+Testing, Data Validation, Security Monitoring, Access Control,
+Compliance Review — সবাই DRAFT only, gate None। Voice Quality Testing
+— QAEngineer দিয়ে আংশিক (partial), dedicated worker নেই। Backup &
+Recovery GAP — repo-তে কোনো backup system নেই।
 Live voice stack Vapi/Sophia — Sophia live receptionist, demo নয়।
-এই manager কখনো করে না: worker execute করে না, কোনো QA/security
-check নিজে চালায় না, কিছু পাঠায় না, খরচ করে না, client-এর তথ্য/দাম/
-পরিসংখ্যান বানায় না, কোনো guarantee দেয় না, dental/medical বা
-patient-health ব্যবসা নেয় না।
+এই manager কখনো করে না: কোনো QA/security check নিজে চালায় না, কিছু
+পাঠায় না, খরচ করে না, client-এর তথ্য/দাম/পরিসংখ্যান বানায় না, কোনো
+guarantee দেয় না, dental/medical বা patient-health ব্যবসা নেয় না।
 """
 
+import importlib.util
 import os
 import sys
 
@@ -49,33 +52,33 @@ DEPARTMENT_TASKS = {
     },
     "call_scenario_testing": {
         "specialist": "Call Scenario Testing Agent",
-        "file": "ROLE-ONLY — skill: departments/07-quality-security/skills/call-scenario-testing-agent.md (planned, not built)",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "file": "departments/07-quality-security/specialists/call_scenario_testing_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
     "workflow_testing": {
         "specialist": "Workflow Testing Agent",
-        "file": "ROLE-ONLY — skill: departments/07-quality-security/skills/workflow-testing-agent.md (planned, not built)",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "file": "departments/07-quality-security/specialists/workflow_testing_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
     "data_validation": {
         "specialist": "Data Validation Agent",
-        "file": "ROLE-ONLY — skill: departments/07-quality-security/skills/data-validation-agent.md (planned, not built)",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "file": "departments/07-quality-security/specialists/data_validation_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
     "security_monitoring": {
         "specialist": "Security Monitoring Agent",
-        "file": "ROLE-ONLY — skill: departments/07-quality-security/skills/security-monitoring-agent.md (planned, not built)",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "file": "departments/07-quality-security/specialists/security_monitoring_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
     "access_control": {
         "specialist": "Access Control Agent",
-        "file": "ROLE-ONLY — skill: departments/07-quality-security/skills/access-control-agent.md (planned, not built)",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "file": "departments/07-quality-security/specialists/access_control_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
     "backup_recovery": {
         "specialist": "Backup & Recovery Agent",
@@ -85,15 +88,45 @@ DEPARTMENT_TASKS = {
     },
     "compliance_review": {
         "specialist": "Compliance Review Agent",
-        "file": "ROLE-ONLY — skill: departments/07-quality-security/skills/compliance-review-agent.md (planned, not built)",
-        "gate": "ok",
-        "status": "ROLE-ONLY",
+        "file": "departments/07-quality-security/specialists/compliance_review_agent.py",
+        "gate": None,
+        "status": "EXISTING",
     },
+}
+
+# task_kind -> (specialist module file, relative to 01-Agency-Department/,
+# class name). শুধু standalone .py specialist-দের জন্য — QAEngineer
+# (engine/workers/...) এখানে নেই, তার জন্য plan-draft behavior-ই থাকে।
+SPECIALIST_MODULES = {
+    "call_scenario_testing": (
+        "departments/07-quality-security/specialists/call_scenario_testing_agent.py",
+        "CallScenarioTestingAgent",
+    ),
+    "workflow_testing": (
+        "departments/07-quality-security/specialists/workflow_testing_agent.py",
+        "WorkflowTestingAgent",
+    ),
+    "data_validation": (
+        "departments/07-quality-security/specialists/data_validation_agent.py",
+        "DataValidationAgent",
+    ),
+    "security_monitoring": (
+        "departments/07-quality-security/specialists/security_monitoring_agent.py",
+        "SecurityMonitoringAgent",
+    ),
+    "access_control": (
+        "departments/07-quality-security/specialists/access_control_agent.py",
+        "AccessControlAgent",
+    ),
+    "compliance_review": (
+        "departments/07-quality-security/specialists/compliance_review_agent.py",
+        "ComplianceReviewAgent",
+    ),
 }
 
 
 class ChiefQualitySecurityAgent:
-    """Quality/security task-এর delegation plan DRAFT বানায়। Worker চালায় না।"""
+    """Quality/security task-এর specialist-কে load করে চালায়; QAEngineer-এর জন্য delegation plan DRAFT বানায়। নিজে check চালায় না।"""
 
     task_kind = "manage_quality_security"
     gate = "ok"
@@ -150,8 +183,20 @@ class ChiefQualitySecurityAgent:
             "No dental/medical."
         )
 
+    def _load_specialist(self, task_kind):
+        """Standalone specialist .py importlib দিয়ে load করা (Chief-এর loader-এর মতো)।"""
+        module_file, class_name = SPECIALIST_MODULES[task_kind]
+        here = os.path.dirname(os.path.abspath(__file__))
+        agency_dir = os.path.normpath(os.path.join(here, "..", "..", ".."))
+        specialist_path = os.path.join(agency_dir, module_file)
+        spec = importlib.util.spec_from_file_location(
+            f"dept07_specialist_{task_kind}", specialist_path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return getattr(mod, class_name)()
+
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Delegation plan DRAFT বানানো। কোনো worker চালায় না, file লেখে না, network ছোঁয় না।"""
+        """Specialist চালানো বা delegation plan DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
         task = task or {}
         title = task.get("title") or "Quality & security delegation"
         gated_action = task.get("gated_action")
@@ -179,6 +224,59 @@ class ChiefQualitySecurityAgent:
 
         task_kind = task.get("task_kind")
         entry = DEPARTMENT_TASKS.get(task_kind)
+
+        # Overview — task_kind না থাকলে বা manager-এর নিজের kind হলে
+        # (M1–M4 pattern): সব specialist-এর তালিকা সহ overview draft।
+        if not task_kind or task_kind == self.task_kind:
+            if brain is not None:
+                try:
+                    brain_text = brain.complete(
+                        "Quality & Security department overview for Talvenor. "
+                        "List the department specialists, their files, gates, "
+                        "and honest status. Do not invent any fact.")
+                except TypeError:
+                    brain_text = brain.complete(
+                        "Quality & Security department overview for Talvenor.",
+                        max_tokens=500)
+            else:
+                brain_text = "No brain passed — overview built from DEPARTMENT_TASKS only."
+            lines = [
+                "[MOCK DRAFT] Quality & Security — department overview delegation plan (DRAFT ONLY)",
+                "Manager: Chief Quality Security Agent | task_kind: manage_quality_security | gate: ok",
+                "Specialists (7 EXISTING — QAEngineer shared + 6 Phase 3 specialists):",
+            ]
+            for kind in sorted(DEPARTMENT_TASKS.keys()):
+                item = DEPARTMENT_TASKS[kind]
+                lines.append(
+                    f"- {kind}: {item['specialist']} | {item['file']} | "
+                    f"gate: {item['gate'] or 'none'} | {item['status']}"
+                )
+            lines.append(
+                "Note: Backup & Recovery GAP — repo-তে কোনো backup system "
+                "নেই। QAEngineer dept 03-এর সঙ্গেও shared; voice quality "
+                "শুধু আংশিক cover করে। 6 নতুন specialist DRAFT only, gate None।"
+            )
+            lines.append(f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}")
+            lines.append(f"Brain note: {brain_text}")
+            notes = (
+                "DRAFT ONLY — mock brain ($0). Overview delegation plan, "
+                "কোনো check নিজে চালানো নয়। Chief wiring Phase 2 DONE — "
+                "Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।"
+            )
+            return {
+                "status": "draft-ready",
+                "output": "\n".join(lines),
+                "notes": notes,
+                "draft_only": True,
+                "mock_brain": True,
+                "gate": self.gate,
+            }
+
+        # Standalone specialist থাকলে তাকে load করে চালানো (importlib,
+        # Chief-এর loader-এর মতো) — specialist-এর ফলাফলই ফেরত দেওয়া।
+        if task_kind in SPECIALIST_MODULES:
+            specialist = self._load_specialist(task_kind)
+            return specialist.run(task, brain, gateway, approvals_path)
 
         if entry is None:
             kinds = ", ".join(sorted(DEPARTMENT_TASKS))

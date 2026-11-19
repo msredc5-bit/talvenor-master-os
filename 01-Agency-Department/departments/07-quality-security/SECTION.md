@@ -2,9 +2,9 @@
 
 **উদ্দেশ্য (purpose):** Talvenor Agency-র কাজের মান আর নিরাপত্তা —
 receptionist-এর QA, call scenario / workflow / data যাচাই, security
-monitoring, access control, backup, compliance review। এই department
-কোনো check নিজে চালায় না — manager শুধু task-কে specialist-এর কাছে
-route করার DELEGATION PLAN-এর DRAFT বানায়।
+monitoring, access control, backup, compliance review। Manager 6 নতুন
+specialist-কে load করে চালায় (DRAFT only); QAEngineer-এর জন্য শুধু
+task-কে specialist-এর কাছে route করার DELEGATION PLAN-এর DRAFT বানায়।
 
 **সত্য অবস্থা (2026-11-19):** Paying client 0। প্রথম মেইল 162। Email PAUSED
 (2026-11-14 থেকে, DNS fix বাকি)। Brain mock ($0)। Booking:
@@ -18,8 +18,9 @@ Live voice stack Vapi/Sophia — Sophia live receptionist, demo নয়।
 | ChiefQualitySecurityAgent | `departments/07-quality-security/manager/chief_quality_security_agent.py` | `departments/07-quality-security/skills/chief-quality-security-agent.md` | `ok` |
 
 Manager-এর কাজ: `manage_quality_security` — task_kind দেখে specialist
-ঠিক করা, delegation plan-এর DRAFT বানানো। Worker execute নয়, কোনো QA/
-security check নিজে চালানো নয়। Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।
+ঠিক করা; 6 নতুন specialist-কে load করে চালানো, QAEngineer-এর জন্য
+delegation plan-এর DRAFT বানানো। নিজে কোনো QA/security check চালানো
+নয়। Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।
 
 ## Mapped existing staff
 
@@ -39,21 +40,24 @@ security check নিজে চালানো নয়। Chief wiring Phase 2
 | Role | Status | Note |
 |---|---|---|
 | Voice Quality Testing Agent | EXISTING (partial) | QAEngineer-এর 12-check checklist voice quality আংশিক cover করে; dedicated voice-quality worker নেই। |
-| Call Scenario Testing Agent | ROLE-ONLY | Role definition only — call scenario test-এর ভাবনা; worker নেই। |
-| Workflow Testing Agent | ROLE-ONLY | Role definition only — workflow test-এর ভাবনা; worker নেই। |
-| Data Validation Agent | ROLE-ONLY | Role definition only — data যাচাইয়ের ভাবনা; worker নেই। |
-| Security Monitoring Agent | ROLE-ONLY | Role definition only — security নজরদারির ভাবনা; worker নেই। |
-| Access Control Agent | ROLE-ONLY | Role definition only — কে কী দেখতে/বদলাতে পারে, তার ভাবনা; worker নেই। |
+| Call Scenario Testing Agent | EXISTING | `departments/07-quality-security/specialists/call_scenario_testing_agent.py` — `call_scenario_testing`, gate None। Call-scenario test script DRAFT; কখনো live call নয়। |
+| Workflow Testing Agent | EXISTING | `departments/07-quality-security/specialists/workflow_testing_agent.py` — `workflow_testing`, gate None। Workflow test check-script DRAFT; কখনো live run নয়। |
+| Data Validation Agent | EXISTING | `departments/07-quality-security/specialists/data_validation_agent.py` — `data_validation`, gate None। Data validation DRAFT; ফলাফল বানায় না। |
+| Security Monitoring Agent | EXISTING | `departments/07-quality-security/specialists/security_monitoring_agent.py` — `security_monitoring`, gate None। Security monitoring checklist DRAFT; কখনো live monitoring নয়। |
+| Access Control Agent | EXISTING | `departments/07-quality-security/specialists/access_control_agent.py` — `access_control`, gate None। Access-control DRAFT; কোনো access বদলায় না। |
 | Backup & Recovery Agent | GAP | Repo-তে কোনো backup system নেই — worker-ও নেই, skill-ও নেই। |
-| Compliance Review Agent | ROLE-ONLY | Role definition only — compliance review-এর ভাবনা; worker নেই। |
+| Compliance Review Agent | EXISTING | `departments/07-quality-security/specialists/compliance_review_agent.py` — `compliance_review`, gate None। Compliance review DRAFT; কখনো legal advice নয়। |
 
 ## Missing roles (worker নেই)
 
 - Backup & Recovery Agent — GAP (repo-তে কোনো backup system নেই)।
-- Call Scenario Testing, Workflow Testing, Data Validation, Security
-  Monitoring, Access Control, Compliance Review — ROLE-ONLY: role
-  definition আছে, worker নেই, skill .md registry-তে এখনো বানানো হয়নি।
 - Voice Quality Testing — আংশিক আছে (QAEngineer), dedicated worker নেই।
+
+Phase 3 (2026-11-19): 6 নতুন specialist বানানো হয়েছে — Call Scenario
+Testing, Workflow Testing, Data Validation, Security Monitoring, Access
+Control, Compliance Review — সবাই EXISTING, DRAFT only, gate None।
+Manager এখন এদের importlib দিয়ে load করে চালায়; QAEngineer-এর জন্য
+আগের মতো delegation plan-এর DRAFT বানায়।
 
 ## Gate
 
@@ -61,6 +65,7 @@ security check নিজে চালানো নয়। Chief wiring Phase 2
   "ok" লাগে।
 - None (QAEngineer): QA checklist নিজেই নিরাপদ — verdict-ই শেষ কথা নয়,
   delivery-তে Boss-এর ok লাগে।
+- None (6 নতুন specialist): draft নিজেই নিরাপদ — DRAFT only, কোনো gate নেই।
 
 ## সৎ সীমা (honest limits)
 
