@@ -52,13 +52,13 @@ talvenor-master-os/
 ├── 00-CEO-Core/            # brain + gate + config + shared tool-calling core
 │   ├── main_ceo_bot.py         # REAL (router)
 │   ├── human_approval_gateway.py  # REAL (approve/reject)
-│   ├── brain.py                # REAL (Phase 6 + Phase 10 — BrainFactory: mock default / live via LiveBrainAdapter, loud mock fallback; live probe 2026-11-20 tunnel-403 BLOCKED, key unproven)
+│   ├── brain.py                # REAL (Phase 6 + Phase 10 + Phase 11 — BrainFactory: mock default / live via LiveBrainAdapter, loud mock fallback; provider chain: openrouter → meta → mock; live probe 2026-11-20 tunnel-403 BLOCKED, key unproven)
 │   ├── tool_calling.py         # REAL (Phase 5 — ToolRegistry + dispatcher, 7 mock handler)
 │   ├── tools.json              # REAL (7 tool-এর registry — booking_reply সহ)
 │   ├── jarvis_voice.py         # REAL (2026-11-17 — Piper+Vosk/sherpa, offline, $0; একই 3 function)
 │   ├── voice/                  # REAL (2026-11-17) — speak.py (Piper TTS), listen.py (Vosk en + sherpa-onnx bn), loop.py (শোনা → brain → বলা + gate); models/ + output/ git-এ যায় না
 │   ├── VOICE-SETUP.md          # Windows setup guide (Bengali)
-│   ├── config.json             # REAL (locked facts; brain: mock, phase 9, v0.9.0 + voice block)
+│   ├── config.json             # REAL (locked facts; brain: mock, phase 9, v0.9.0 + voice block + providers section: 7 LLM provider + fallback_chain)
 │   └── CEO-README.md
 ├── 01-Agency-Department/   # REAL (Phase 1 + Agentic 1–3) — Chief 15 worker + 8 department manager + 43 specialist ডাকে, draft-only; worker-রা এখন ভিতরে vendored (Phase 6)
 │   ├── chief_of_staff_agency.py  # REAL — ROUTING (15) + SECTION_ROUTING (6) + DEPARTMENT_ROUTING (8)
@@ -103,7 +103,7 @@ python3 ~/workspace/talvenor-master-os/scripts/check_phase0.py
 | জিনিস | অবস্থা |
 |---|---|
 | Approval gateway (approve/reject) | **REAL** — সত্যিই record করে, auto-approve নেই |
-| BrainFactory (`brain.py`) | **REAL (Phase 6 + Phase 10)** — config flag `brain: mock` (default, $0, draft-only) / `live` (via `live_brain.py` LiveBrainAdapter, loud mock fallback; live verification 2026-11-06 TIMEOUT + 2026-11-20 tunnel-403, key path UNPROVEN, কোনো live call এখনো হয়নি) |
+| BrainFactory (`brain.py`) | **REAL (Phase 6 + Phase 10 + Phase 11)** — config flag `brain: mock` (default, $0, draft-only) / `live` (via `live_brain.py` LiveBrainAdapter, loud mock fallback; provider chain `fallback_chain` থেকে: openrouter → meta → mock; 7 provider: meta/openai/anthropic/gemini/kimi/grok/openrouter, model config থেকে; live verification 2026-11-06 TIMEOUT + 2026-11-20 tunnel-403, key path UNPROVEN, কোনো live call এখনো হয়নি) |
 | Runner (`scripts/run_office.py`) | **REAL (Phase 6)** — এক command-এ office চালায় (Main CEO Bot → Chief → worker); gated কাজ PENDING-এ আটকায়; `--drain-queue --max 2` |
 | Shared tool-calling core (`tool_calling.py`) | **REAL (Phase 5)** — registry + dispatcher; mock tool DRAFT ফেরত দেয়, gated tool PENDING-এ আটকায়, সব call log করে |
 | Agency Engine (15 staff, 8 tool, 15 skill) | **REAL (Phase 5)** — draft-only, email PAUSED; send/publish/spend gated |
