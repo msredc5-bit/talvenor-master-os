@@ -34,6 +34,21 @@ LIVE BRAIN — Phase 10 (wired via live_brain.py):
     probe; otherwise the flag stays "mock" and the entry records
     the exact blocker.
 
+LIVE BRAIN — Phase 11 (provider chain, same adapter):
+  - The adapter now takes a CHAIN of providers from config.json
+    "fallback_chain" (e.g. ["openrouter", "meta", "mock"]) and tries
+    them one after another; only if all fail does it fall back to
+    the department mock. Any vendor's any chat model works — same
+    complete() interface, only the name changes.
+  - Providers live in 01-Agency-Department/engine/workers/src/live/:
+    meta (connector key), openai, anthropic, gemini, kimi, grok,
+    openrouter (each its own env var, never in a file). The model
+    name now comes from config ("brain_model" or the chain entry
+    "provider:model") — MetaSparkProvider is no longer pinned to
+    one model by the factory.
+  - Default stays "mock". A temp config {"brain": "live"} with no
+    providers section still builds the old default chain ["meta"].
+
 Stdlib only. No network, no spend, no secrets in this file.
 """
 
@@ -112,14 +127,15 @@ class BrainFactory:
 
         Mock (default): that department's own vendored mock, seeded as
         before — each Chief can use the result exactly as it used its
-        mock before. Live: LiveBrainAdapter wrapping the vendored
-        MetaSparkProvider (same adapter serves both departments — its
-        complete(prompt, *, max_tokens) accepts the positional call
-        both worker bases make; on live failure it falls back LOUDLY
-        to that department's own mock).
+        mock before. Live: LiveBrainAdapter wrapping the provider
+        chain from config.json "fallback_chain" (same adapter serves
+        both departments — its complete(prompt, *, max_tokens) accepts
+        the positional call both worker bases make; on live failure of
+        every provider it falls back LOUDLY to that department's own
+        mock).
         """
         if BrainFactory.get_brain_mode(config_path) == "live":
-            return BrainFactory._live_brain(department)
+            return BrainFactory._live_brain(department, config_path=config_path)
         if department == "agency":
             mod = _load_module(AGENCY_WORKERS_DIR, "src.mock.provider")
             return mod.MockLLMProvider(seed=seed or _AGENCY_MOCK_SEED)
@@ -130,15 +146,17 @@ class BrainFactory:
             f"Unknown department: {department!r}. Known: ['agency', 'content']")
 
     @staticmethod
-    def _live_brain(department):
-        """Construct the Phase 10 live adapter — NO network call here.
+    def _live_brain(department, config_path=CONFIG_PATH):
+        """Construct the Phase 10/11 live adapter — NO network call here.
 
-        The adapter wraps the vendored MetaSparkProvider and falls back
-        LOUDLY to the department's own mock if a live call fails.
-        Construction only stores model/timeout; the key is fetched by
-        the Secure Vault surrogate only when complete() is called.
-        Any failure to import/construct (e.g. the vendored provider
-        is absent) raises a clear error instead of attempting a call.
+        The adapter wraps the provider CHAIN from config.json
+        "fallback_chain" (default ["meta"] — the Phase 10 behavior)
+        and falls back LOUDLY to the department's own mock if every
+        provider fails. Construction only stores model/timeout; each
+        provider's key is fetched only when complete() is called
+        (env var, or Meta's Secure Vault surrogate — never a file).
+        Any failure to import/construct (e.g. an unknown provider in
+        the chain) raises a clear error instead of attempting a call.
         """
         if department == "agency":
             mod = _load_module(AGENCY_WORKERS_DIR, "src.mock.provider")
@@ -153,16 +171,23 @@ class BrainFactory:
         try:
             if CEO_CORE_DIR not in sys.path:
                 sys.path.insert(0, CEO_CORE_DIR)
-            from live_brain import LiveBrainAdapter  # noqa: E402
-            return LiveBrainAdapter(mock_brain=mock)
+            from live_brain import (  # noqa: E402
+                LiveBrainAdapter, build_provider_chain)
+            try:
+                with open(config_path, "r", encoding="utf-8") as f:
+                    cfg = json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                cfg = {}
+            chain = build_provider_chain(cfg)
+            return LiveBrainAdapter(mock_brain=mock, live_providers=chain)
         except Exception as exc:  # noqa: BLE001 — re-raised as a clear error
             raise RuntimeError(
                 "Live brain is not configured: the live adapter "
                 "could not be constructed in this "
-                f"environment ({type(exc).__name__}: {exc}). The live key "
-                "comes ONLY via the connector Secure Vault "
-                "(custom.meta-model-api-2) — it is never stored in a file. "
-                "Set \"brain\": \"mock\" in "
+                f"environment ({type(exc).__name__}: {exc}). Keys come "
+                "ONLY from environment variables (Meta: connector "
+                "Secure Vault custom.meta-model-api-2) — a key is never "
+                "stored in a file. Set \"brain\": \"mock\" in "
                 "00-CEO-Core/config.json to keep drafting at $0."
             ) from exc
 

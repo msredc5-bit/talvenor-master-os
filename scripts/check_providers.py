@@ -1,0 +1,515 @@
+#!/usr/bin/env python3
+"""check_providers.py — Phase 11 self-check for the 7 LLM providers.
+
+What it checks (mock mode ONLY — no live call, ever):
+  1. All 7 provider modules import standalone (python3 -I), fast, no network.
+  2. Each provider constructs with its key unset — 0 calls, no network.
+  3. Missing key -> clean RuntimeError naming the env var, and NO
+     network attempted (urlopen patched to fail the test if called).
+     Meta is excepted here: its key comes from the connector surrogate,
+     so instead its module must reference the connector path and its
+     health() must be clean — complete() is NEVER called (no live call).
+  4. Simulated success per env provider (fake key in-process only,
+     fake opener returns a canned payload) -> text returned, tokens counted.
+  5. Simulated API-error payload -> RuntimeError with "API error".
+  6. Simulated timeout (URLError) -> RuntimeError.
+  7. Adapter chain: stubs [fail, fail, ok] -> ok text; [fail, fail] ->
+     mock fallback, reason recorded.
+  8. BrainFactory selection by temp config: {"brain": "live"} -> chain
+     [meta] (Phase 10 compat); fallback_chain ["openai", "meta", "mock"]
+     -> chain [openai, meta]; "provider:model" entries pick the model;
+     unknown provider / empty chain -> RuntimeError; brain mock -> mocks.
+  9. Real config.json validation: providers section == registry (7),
+     each has https endpoint + env var (null only for meta) + non-empty
+     models list containing its default model; fallback_chain entries
+     resolve (known provider or "mock"), no duplicates; brain_provider
+     known; brain stays "mock"; phase 9 + v0.9.0.
+ 10. No secrets in the new/changed files (real key patterns only —
+     env-var NAME references and os.environ.get() are not secrets).
+ 11. Real store unchanged by this check run (Phase 9: live queue).
+
+No live call is made anywhere in this file. The fake key used in the
+simulated tests is the literal "test-fake-key" (not a real credential),
+set only in this process's environment, never written to a file.
+
+Stdlib only. Run: python3 scripts/check_providers.py
+"""
+
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+import urllib.request
+from unittest import mock
+
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CEO_CORE_DIR = os.path.join(BASE, "00-CEO-Core")
+WORKERS_DIR = os.path.join(
+    BASE, "01-Agency-Department", "engine", "workers")
+sys.path.insert(0, CEO_CORE_DIR)
+sys.path.insert(0, "/opt/muse/skills/custom-connector-setup/bin")
+
+results = []
+
+
+def check(name, ok, detail=""):
+    results.append((name, ok, detail))
+    print(f"[{'PASS' if ok else 'FAIL'}] {name}" + (f" — {detail}" if detail else ""))
+
+
+def _snapshot_store():
+    """Real store-এর snapshot (Phase 9: store এখন live queue)।"""
+    snap = {}
+    for name in ("store/tasks.json", "store/approvals.json"):
+        try:
+            with open(os.path.join(BASE, name), encoding="utf-8") as f:
+                snap[name] = f.read()
+        except OSError:
+            snap[name] = None
+    snap["tool_calls"] = os.path.exists(
+        os.path.join(BASE, "store", "tool_calls.json"))
+    return snap
+
+
+# (module, class, env var, default model) — Meta has no env var.
+PROVIDERS = [
+    ("src.live.meta_provider", "MetaSparkProvider", None, "muse-spark-1.3"),
+    ("src.live.openai_provider", "OpenAIProvider", "OPENAI_API_KEY", "gpt-4o"),
+    ("src.live.anthropic_provider", "AnthropicProvider", "ANTHROPIC_API_KEY",
+     "claude-sonnet-4-5"),
+    ("src.live.gemini_provider", "GeminiProvider", "GEMINI_API_KEY",
+     "gemini-2.5-flash"),
+    ("src.live.kimi_provider", "KimiProvider", "MOONSHOT_API_KEY", "kimi-k2.5"),
+    ("src.live.grok_provider", "GrokProvider", "XAI_API_KEY", "grok-4"),
+    ("src.live.openrouter_provider", "OpenRouterProvider",
+     "OPENROUTER_API_KEY", "openrouter/free"),
+]
+
+OPENAI_OK = {
+    "choices": [{"message": {"content": "LIVE-REPLY: provider works."}}],
+    "usage": {"prompt_tokens": 10, "completion_tokens": 5},
+}
+ANTHROPIC_OK = {
+    "content": [{"type": "text", "text": "LIVE-REPLY: provider works."}],
+    "usage": {"input_tokens": 10, "output_tokens": 5},
+}
+API_ERROR = {"error": {"message": "bad key", "code": "invalid_api_key"}}
+
+
+class _FakeHTTPResponse:
+    def __init__(self, payload):
+        self._data = json.dumps(payload).encode()
+
+    def read(self):
+        return self._data
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return False
+
+
+class _FakeOpener:
+    """urlopen-এর বদলে — কোনো network নয়, canned payload ফেরত দেয়।"""
+
+    def __init__(self, payload=None, exc=None):
+        self.payload = payload
+        self.exc = exc
+        self.calls = 0
+
+    def open(self, req, timeout=None):
+        self.calls += 1
+        if self.exc is not None:
+            raise self.exc
+        return _FakeHTTPResponse(self.payload)
+
+
+class _StubLive:
+    """Fake live provider — behavior: ok | fail."""
+
+    def __init__(self, behavior, name="stub-live"):
+        self.behavior = behavior
+        self.name = name
+        self.model = "stub-model"
+        self.calls = 0
+
+    def complete(self, prompt, *, max_tokens=500):
+        self.calls += 1
+        if self.behavior == "ok":
+            return "LIVE-REPLY: chain works."
+        raise RuntimeError("live brain call failed: URLError: timed out")
+
+
+def _temp_config(cfg_dict):
+    tmpdir = tempfile.mkdtemp()
+    path = os.path.join(tmpdir, "config-test.json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(cfg_dict, f)
+    return path
+
+
+def _unset_env(env_var):
+    """Context manager: env var সরিয়ে রাখে, শেষে ফেরত দেয়।"""
+    saved = os.environ.pop(env_var, None)
+
+    class _Ctx:
+        def __enter__(self):
+            os.environ.pop(env_var, None)
+            return None
+
+        def __exit__(self, *args):
+            if saved is None:
+                os.environ.pop(env_var, None)
+            else:
+                os.environ[env_var] = saved
+            return False
+
+    return _Ctx()
+
+
+def main():
+    store_before = _snapshot_store()
+
+    # 1. All 7 provider modules import standalone, fast, no network.
+    try:
+        ok_all = True
+        details = []
+        for module, _cls, _env, _model in PROVIDERS:
+            t0 = __import__("time").time()
+            proc = subprocess.run(
+                [sys.executable, "-I", "-c",
+                 "import sys; sys.path.insert(0, "
+                 f"{WORKERS_DIR!r}); import {module}; "
+                 "print('import OK')"],
+                capture_output=True, text=True, timeout=30, cwd=BASE)
+            elapsed = __import__("time").time() - t0
+            good = proc.returncode == 0 and elapsed < 10
+            ok_all = ok_all and good
+            details.append(f"{module.split('.')[-1]}:{elapsed:.1f}s"
+                           f":rc={proc.returncode}")
+        check("all 7 provider modules import standalone, fast, no network",
+              ok_all, ", ".join(details))
+    except Exception as e:  # noqa: BLE001
+        check("all 7 provider modules import standalone, fast, no network",
+              False, str(e))
+
+    # 2-6. Per-provider behavior (in-process, simulated only).
+    try:
+        from live_brain import (  # noqa: PLC0415
+            LiveBrainAdapter, _load_module)
+
+        for module, cls_name, env_var, default_model in PROVIDERS:
+            mod = _load_module(WORKERS_DIR, module)
+            cls = getattr(mod, cls_name)
+
+            # 2. Constructs with key unset, 0 calls, no network.
+            if env_var is not None:
+                with _unset_env(env_var):
+                    provider = cls()
+            else:
+                provider = cls()
+            h = provider.health()
+            check(f"{cls_name} constructs (key unset), 0 calls",
+                  h["provider"] == cls.name and h["calls"] == 0
+                  and getattr(provider, "model", None) == default_model,
+                  f"model={getattr(provider, 'model', None)}")
+
+            if env_var is None:
+                # Meta: no env var — complete() is NEVER called here
+                # (it would touch the connector + network). Instead
+                # verify the module uses the connector path.
+                with open(os.path.join(
+                        WORKERS_DIR, "src", "live", "meta_provider.py"),
+                        encoding="utf-8") as f:
+                    src = f.read()
+                check("MetaSparkProvider uses connector path, not env var",
+                      "custom.meta-model-api-2" in src
+                      and "os.environ" not in src,
+                      "surrogate path present")
+                continue
+
+            # 3. Missing key -> clean error naming the env var, NO network.
+            def _no_network(*args, **kwargs):
+                raise AssertionError("network attempted with no key")
+
+            with _unset_env(env_var):
+                with mock.patch.object(urllib.request, "build_opener",
+                                      side_effect=_no_network):
+                    try:
+                        provider.complete("smoke")
+                        raised = None
+                    except RuntimeError as e:
+                        raised = str(e)
+                    except AssertionError:
+                        raised = "NETWORK-ATTEMPTED"
+            check(f"{cls_name} missing key -> error names {env_var}, "
+                  "no network",
+                  raised is not None and env_var in raised
+                  and "NETWORK-ATTEMPTED" not in raised,
+                  (raised or "no error")[:120])
+
+            # 4-6. Simulated wire: success / API error / timeout.
+            ok_payload = (ANTHROPIC_OK if cls_name == "AnthropicProvider"
+                          else OPENAI_OK)
+            with mock.patch.dict(os.environ, {env_var: "test-fake-key"}):
+                # 4. Success -> text + tokens counted.
+                fake = _FakeOpener(payload=ok_payload)
+                with mock.patch.object(urllib.request, "build_opener",
+                                      return_value=fake):
+                    text = provider.complete("smoke", max_tokens=30)
+                h = provider.health()
+                check(f"{cls_name} simulated success: text + tokens",
+                      text.startswith("LIVE-REPLY")
+                      and h["calls"] >= 1
+                      and h["total_tokens"] == 15,
+                      f"text={text[:30]!r}, total={h['total_tokens']}")
+                # 5. API error payload -> RuntimeError.
+                fake_err = _FakeOpener(payload=API_ERROR)
+                with mock.patch.object(urllib.request, "build_opener",
+                                      return_value=fake_err):
+                    try:
+                        provider.complete("smoke")
+                        err = None
+                    except RuntimeError as e:
+                        err = str(e)
+                check(f"{cls_name} simulated API error -> RuntimeError",
+                      err is not None and "API error" in err
+                      and "invalid_api_key" in err,
+                      (err or "no error")[:120])
+                # 6. Timeout -> RuntimeError.
+                fake_to = _FakeOpener(
+                    exc=urllib.error.URLError("timed out"))
+                with mock.patch.object(urllib.request, "build_opener",
+                                      return_value=fake_to):
+                    try:
+                        provider.complete("smoke")
+                        err = None
+                    except RuntimeError as e:
+                        err = str(e)
+                check(f"{cls_name} simulated timeout -> RuntimeError",
+                      err is not None and "timed out" in err,
+                      (err or "no error")[:120])
+    except Exception as e:  # noqa: BLE001
+        check("per-provider behavior (construct/missing-key/simulated wire)",
+              False, str(e))
+
+    # 7. Adapter chain walks providers, then mock fallback.
+    try:
+        from live_brain import LiveBrainAdapter  # noqa: PLC0415
+        from brain import BrainFactory  # noqa: PLC0415
+
+        mock_cfg = _temp_config({"brain": "mock"})
+        agency_mock = BrainFactory.get_brain("agency", config_path=mock_cfg)
+
+        adapter = LiveBrainAdapter(
+            mock_brain=agency_mock,
+            live_providers=[_StubLive("fail", "stub-a"),
+                            _StubLive("fail", "stub-b"),
+                            _StubLive("ok", "stub-c")])
+        text = adapter.complete("smoke")
+        h = adapter.health()
+        check("chain [fail, fail, ok] -> ok text from 3rd provider",
+              text.startswith("LIVE-REPLY") and h["mode"] == "live"
+              and h["live_calls"] == 1 and h["fallback_calls"] == 0
+              and h["providers"] == ["stub-a", "stub-b", "stub-c"],
+              f"mode={h['mode']}, live_calls={h['live_calls']}")
+
+        adapter2 = LiveBrainAdapter(
+            mock_brain=agency_mock,
+            live_providers=[_StubLive("fail", "stub-a"),
+                            _StubLive("fail", "stub-b")])
+        text = adapter2.complete("smoke")
+        h = adapter2.health()
+        check("chain [fail, fail] -> mock fallback, reason recorded",
+              text.startswith("MOCK-PLAN") and h["mode"] == "mock-fallback"
+              and h["fallback_calls"] == 1
+              and h["last_failure"] is not None
+              and "stub-a" in h["last_failure"]
+              and "stub-b" in h["last_failure"],
+              f"mode={h['mode']}")
+    except Exception as e:  # noqa: BLE001
+        for name in ("chain [fail, fail, ok] -> ok text from 3rd provider",
+                     "chain [fail, fail] -> mock fallback, reason recorded"):
+            if not any(r[0] == name for r in results):
+                check(name, False, str(e))
+
+    # 8. BrainFactory selection by temp config.
+    try:
+        from brain import BrainFactory  # noqa: PLC0415
+
+        # (a) {"brain": "live"} -> default chain [meta] (Phase 10 compat).
+        cfg_a = _temp_config({"brain": "live"})
+        brain_a = BrainFactory.get_brain("agency", config_path=cfg_a)
+        h = brain_a.health()
+        check('factory {"brain": "live"} -> chain [meta] (Phase 10 compat)',
+              type(brain_a).__name__ == "LiveBrainAdapter"
+              and h["providers"] == ["meta-spark-live"]
+              and h["models"] == ["muse-spark-1.3"]
+              and h["calls"] == 0,
+              f"providers={h['providers']}, models={h['models']}")
+
+        # (b) fallback_chain ["openai", "meta", "mock"] -> [openai, meta].
+        cfg_b = _temp_config({"brain": "live",
+                              "fallback_chain": ["openai", "meta", "mock"]})
+        brain_b = BrainFactory.get_brain("agency", config_path=cfg_b)
+        h = brain_b.health()
+        check('factory chain ["openai", "meta", "mock"] -> [openai, meta]',
+              h["providers"] == ["openai-live", "meta-spark-live"]
+              and h["models"] == ["gpt-4o", "muse-spark-1.3"],
+              f"providers={h['providers']}")
+
+        # (c) "provider:model" entries pick the model.
+        cfg_c = _temp_config(
+            {"brain": "live",
+             "fallback_chain": ["openrouter:openrouter/free",
+                                "grok:grok-4.6"]})
+        brain_c = BrainFactory.get_brain("agency", config_path=cfg_c)
+        h = brain_c.health()
+        check('factory "provider:model" entries pick the model',
+              h["providers"] == ["openrouter-live", "grok-live"]
+              and h["models"] == ["openrouter/free", "grok-4.6"],
+              f"models={h['models']}")
+
+        # (d) unknown provider / empty chain -> RuntimeError.
+        cfg_d = _temp_config({"brain": "live",
+                              "fallback_chain": ["nope", "mock"]})
+        try:
+            BrainFactory.get_brain("agency", config_path=cfg_d)
+            bad_ok = False
+        except RuntimeError:
+            bad_ok = True
+        cfg_e = _temp_config({"brain": "live",
+                              "fallback_chain": ["mock"]})
+        try:
+            BrainFactory.get_brain("agency", config_path=cfg_e)
+            empty_ok = False
+        except RuntimeError:
+            empty_ok = True
+        check("factory unknown provider / empty chain -> RuntimeError",
+              bad_ok and empty_ok, f"unknown={bad_ok}, empty={empty_ok}")
+
+        # (e) brain mock -> each dept's own mock (unchanged).
+        mock_cfg = _temp_config({"brain": "mock"})
+        agency_brain = BrainFactory.get_brain("agency", config_path=mock_cfg)
+        content_brain = BrainFactory.get_brain("content",
+                                               config_path=mock_cfg)
+        check("factory brain mock -> each dept's own mock",
+              type(agency_brain).__name__ == "MockLLMProvider"
+              and type(content_brain).__name__ == "MockLLM",
+              f"agency={type(agency_brain).__name__}, "
+              f"content={type(content_brain).__name__}")
+    except Exception as e:  # noqa: BLE001
+        check("BrainFactory selection by temp config", False, str(e))
+
+    # 9. Real config.json validation.
+    try:
+        from live_brain import (  # noqa: PLC0415
+            PROVIDER_MODULES, DEFAULT_MODELS)
+
+        with open(os.path.join(CEO_CORE_DIR, "config.json"),
+                  encoding="utf-8") as f:
+            cfg = json.load(f)
+        providers = cfg.get("providers", {})
+        problems = []
+        if set(providers) != set(PROVIDER_MODULES):
+            problems.append(
+                f"providers keys {sorted(providers)} != registry "
+                f"{sorted(PROVIDER_MODULES)}")
+        for name, entry in providers.items():
+            if not str(entry.get("endpoint", "")).startswith("https://"):
+                problems.append(f"{name}: endpoint not https")
+            env_var = entry.get("env_var")
+            if name == "meta":
+                if env_var is not None:
+                    problems.append("meta: env_var must be null")
+            elif not isinstance(env_var, str) or not env_var:
+                problems.append(f"{name}: env_var missing")
+            models = entry.get("models", [])
+            if not isinstance(models, list) or not models:
+                problems.append(f"{name}: models empty")
+            elif DEFAULT_MODELS.get(name) not in models:
+                problems.append(
+                    f"{name}: default {DEFAULT_MODELS.get(name)} "
+                    "not in models")
+        chain = cfg.get("fallback_chain", [])
+        seen = set()
+        for entry in chain:
+            name = str(entry).partition(":")[0].strip().lower()
+            if name != "mock" and name not in PROVIDER_MODULES:
+                problems.append(f"fallback_chain: unknown {entry!r}")
+            if entry in seen:
+                problems.append(f"fallback_chain: duplicate {entry!r}")
+            seen.add(entry)
+        if cfg.get("brain_provider") not in PROVIDER_MODULES:
+            problems.append("brain_provider unknown")
+        if cfg.get("brain") != "mock":
+            problems.append("brain is not mock")
+        if cfg.get("phase") != 9 or cfg.get("version") != "0.9.0":
+            problems.append("phase/version moved (must stay 9 / 0.9.0)")
+        check("real config.json: 7 providers + chain + mock default",
+              not problems, "; ".join(problems[:5]) if problems else
+              f"providers={len(providers)}, chain={chain}")
+    except Exception as e:  # noqa: BLE001
+        check("real config.json: 7 providers + chain + mock default",
+              False, str(e))
+
+    # 10. No secrets in the new/changed files.
+    # (This check file itself is excluded: it holds the pattern
+    # literals and the "test-fake-key" dummy — the same self-reference
+    # the live-brain check notes.)
+    try:
+        secret_re = re.compile(
+            r"hsurr:|sk-[A-Za-z0-9]{16,}|sk-ant-[A-Za-z0-9]{16,}|"
+            r"AIza[A-Za-z0-9_\-]{20,}|xai-[A-Za-z0-9]{16,}|"
+            r"api_key\s*=\s*[\"'][^\"']{8,}[\"']|"
+            r"password\s*=\s*[\"'][^\"']+[\"']")
+        bad = []
+        rels = [
+            "01-Agency-Department/engine/workers/src/live/openai_provider.py",
+            "01-Agency-Department/engine/workers/src/live/anthropic_provider.py",
+            "01-Agency-Department/engine/workers/src/live/gemini_provider.py",
+            "01-Agency-Department/engine/workers/src/live/kimi_provider.py",
+            "01-Agency-Department/engine/workers/src/live/grok_provider.py",
+            "01-Agency-Department/engine/workers/src/live/openrouter_provider.py",
+            "00-CEO-Core/live_brain.py",
+            "00-CEO-Core/brain.py",
+            "00-CEO-Core/config.json",
+            "00-CEO-Core/PROVIDERS-SETUP-BANGLA.md",
+        ]
+        for rel in rels:
+            path = os.path.join(BASE, rel)
+            if not os.path.exists(path):
+                bad.append(f"{rel}:MISSING")
+                continue
+            with open(path, encoding="utf-8") as f:
+                for lineno, line in enumerate(f, 1):
+                    if secret_re.search(line):
+                        bad.append(f"{rel}:{lineno}")
+        check("no secrets in provider/config/guide files",
+              not bad, "; ".join(bad[:5]) if bad else "clean")
+    except Exception as e:  # noqa: BLE001
+        check("no secrets in provider/config/guide files", False, str(e))
+
+    # 11. Real store unchanged by this check run.
+    try:
+        after = _snapshot_store()
+        check("real store unchanged by this check run",
+              after == store_before,
+              "unchanged" if after == store_before else "CHANGED")
+    except Exception as e:  # noqa: BLE001
+        check("real store unchanged by this check run", False, str(e))
+
+    failed = [r for r in results if not r[1]]
+    print(f"\n{len(results) - len(failed)}/{len(results)} checks passed.")
+    if failed:
+        print("FAILED:", [r[0] for r in failed])
+        return 1
+    print("check_providers: ALL PASS (mock mode — no live call made).")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
