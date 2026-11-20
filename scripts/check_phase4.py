@@ -18,7 +18,7 @@
   7. config.json phase >= 4 + version >= 0.5.0 + gates ON + $0 cap
      (Phase 6 bumped phase to 6 / v0.6.0 — the check follows the
      check_phase2/3 precedent of >= instead of pinning the old phase)
-  8. আসল store/tasks.json + approvals.json এখনো খালি (0 record)
+  8. আসল store এই run-এ বদলায়নি (Phase 9: live queue)
   9. check_phase0 + check_phase1 + check_phase2 + check_phase3 এখনো PASS
 
 সব check TEMP file-এ চলে যেখানে সম্ভব — আসল store শুধু পড়া হয়,
@@ -47,7 +47,24 @@ def check(name, ok, detail=""):
     print(f"[{'PASS' if ok else 'FAIL'}] {name}" + (f" — {detail}" if detail else ""))
 
 
+def _snapshot_store():
+    """Real store-এর snapshot (Phase 9: store এখন live queue — taskboard /
+    bridge সত্যিই task লেখে, তাই 'খালি' আর invariant নয়)। Check-এর
+    কাজ শুধু প্রমাণ করা যে এই run store বদলায়নি।"""
+    snap = {}
+    for name in ("store/tasks.json", "store/approvals.json"):
+        try:
+            with open(os.path.join(BASE, name), encoding="utf-8") as f:
+                snap[name] = f.read()
+        except OSError:
+            snap[name] = None
+    snap["tool_calls"] = os.path.exists(
+        os.path.join(BASE, "store", "tool_calls.json"))
+    return snap
+
+
 def main():
+    store_before = _snapshot_store()
     # 1. Wiring doc: both workflows + NOT LIVE + Boss steps + pause + host truth
     try:
         with open(os.path.join(BASE, "dashboards", "n8n-wiring.md"),
@@ -76,6 +93,9 @@ def main():
         import sync_status  # noqa: PLC0415
 
         s = sync_status.collect_status()
+        # Phase 9: counts আসল store-এর সাথে মিলতে হবে (খালি থাকার দরকার নেই)
+        real_tasks = json.load(open(os.path.join(BASE, "store", "tasks.json"), encoding="utf-8")).get("records", [])
+        real_appr = json.load(open(os.path.join(BASE, "store", "approvals.json"), encoding="utf-8")).get("records", [])
         ok = (s["phase"] >= 4 and s["paying_clients"] == 0
               and s["first_mails"] == 162 and s["email"] == "PAUSED"
               and s["gate0"] == "NOT PASSED" and s["pa_list"] == 39
@@ -85,13 +105,15 @@ def main():
               and s["workflow_callback"]["status"] == "NOT LIVE"
               and s["workflow_auto_send"]["nodes"] == 8
               and s["workflow_callback"]["nodes"] == 3
-              and s["tasks_count"] == 0
-              and s["approvals_pending"] == 0
-              and s["approvals_approved"] == 0
+              and s["tasks_count"] == len(real_tasks)
+              and s["approvals_pending"] == len([r for r in real_appr if r.get("status") == "pending"])
+              and s["approvals_approved"] == len([r for r in real_appr if r.get("status") == "approved"])
               and s["spend_cap_usd"] == 0)
         check("sync collect_status: real values (phase >= 4, 0 clients, 162 mails, "
-              "Gate 0 NOT PASSED, PA 39, pipeline 0/10/3, NOT LIVE x2)", ok,
-              f"phase={s['phase']}, gate0={s['gate0']}, pa={s['pa_list']}")
+              "Gate 0 NOT PASSED, PA 39, pipeline 0/10/3, NOT LIVE x2, "
+              "counts match real store)", ok,
+              f"phase={s['phase']}, gate0={s['gate0']}, pa={s['pa_list']}, "
+              f"tasks={s['tasks_count']}")
     except Exception as e:  # noqa: BLE001
         check("sync collect_status: real values", False, str(e))
 
@@ -184,18 +206,14 @@ def main():
     except Exception as e:  # noqa: BLE001
         check("config.json phase 4 + v0.5.0 + gates ON + $0 cap", False, str(e))
 
-    # 8. Real store files untouched (still empty)
+    # 8. Real store unchanged by this check run (Phase 9: live queue)
     try:
-        with open(os.path.join(BASE, "store", "approvals.json"),
-                  encoding="utf-8") as f:
-            real_appr = json.load(f)
-        with open(os.path.join(BASE, "store", "tasks.json"),
-                  encoding="utf-8") as f:
-            real_tasks = json.load(f)
-        check("real store files untouched by checks",
-              real_appr.get("records") == [] and real_tasks.get("records") == [])
+        after = _snapshot_store()
+        check("real store unchanged by this check run",
+              after == store_before,
+              "unchanged" if after == store_before else "CHANGED")
     except Exception as e:  # noqa: BLE001
-        check("real store files untouched by checks", False, str(e))
+        check("real store unchanged by this check run", False, str(e))
 
     # 9. Phase 0 + 1 + 2 + 3 checks still pass
     try:

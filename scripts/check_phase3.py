@@ -19,7 +19,7 @@
  13. toolpilot-status.md-এ @ToolPilotai69, 0 subs, READY TO RECORD,
      [FILL AFTER TEST], ToolPilot-vs-new-channel প্রশ্ন unanswered
  14. tasks.json valid থাকে + অন্য department-এর entry মোছা হয় না
- 15. আসল store/tasks.json + approvals.json এখনো খালি (0 record)
+ 15. আসল store এই run-এ বদলায়নি (Phase 9: live queue)
  16. Dashboard-এ Phase 3 BUILT + Content Engine REAL + upload OFF আছে
  17. config.json-এর gate ON + $0 cap + phase 3 ঠিক আছে
  18. check_phase0.py + check_phase1.py + check_phase2.py এখনো PASS
@@ -76,7 +76,24 @@ def tmp_paths():
     return (os.path.join(d, "tasks.json"), os.path.join(d, "approvals.json"))
 
 
+def _snapshot_store():
+    """Real store-এর snapshot (Phase 9: store এখন live queue — taskboard /
+    bridge সত্যিই task লেখে, তাই 'খালি' আর invariant নয়)। Check-এর
+    কাজ শুধু প্রমাণ করা যে এই run store বদলায়নি।"""
+    snap = {}
+    for name in ("store/tasks.json", "store/approvals.json"):
+        try:
+            with open(os.path.join(BASE, name), encoding="utf-8") as f:
+                snap[name] = f.read()
+        except OSError:
+            snap[name] = None
+    snap["tool_calls"] = os.path.exists(
+        os.path.join(BASE, "store", "tool_calls.json"))
+    return snap
+
+
 def main():
+    store_before = _snapshot_store()
     # 1. Files exist
     missing = [f for f in EXPECTED_PHASE3_FILES if not os.path.isfile(os.path.join(BASE, f))]
     check("phase 3 files exist", not missing,
@@ -280,16 +297,14 @@ def main():
     except Exception as e:  # noqa: BLE001
         check("tasks.json valid + other dept entry preserved", False, str(e))
 
-    # 15. Real store files untouched (still empty)
+    # 15. Real store unchanged by this check run (Phase 9: live queue)
     try:
-        with open(os.path.join(BASE, "store", "approvals.json"), encoding="utf-8") as f:
-            real_appr = json.load(f)
-        with open(os.path.join(BASE, "store", "tasks.json"), encoding="utf-8") as f:
-            real_tasks = json.load(f)
-        check("real store files untouched by checks",
-              real_appr.get("records") == [] and real_tasks.get("records") == [])
+        after = _snapshot_store()
+        check("real store unchanged by this check run",
+              after == store_before,
+              "unchanged" if after == store_before else "CHANGED")
     except Exception as e:  # noqa: BLE001
-        check("real store files untouched by checks", False, str(e))
+        check("real store unchanged by this check run", False, str(e))
 
     # 16. Dashboard shows Phase 3 BUILT + Content Engine REAL + upload OFF
     try:

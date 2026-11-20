@@ -56,7 +56,24 @@ def check(name, ok, detail=""):
     print(f"[{'PASS' if ok else 'FAIL'}] {name}" + (f" — {detail}" if detail else ""))
 
 
+def _snapshot_store():
+    """Real store-এর snapshot (Phase 9: store এখন live queue — taskboard /
+    bridge সত্যিই task লেখে, তাই 'খালি' আর invariant নয়)। Check-এর
+    কাজ শুধু প্রমাণ করা যে এই run store বদলায়নি।"""
+    snap = {}
+    for name in ("store/tasks.json", "store/approvals.json"):
+        try:
+            with open(os.path.join(BASE, name), encoding="utf-8") as f:
+                snap[name] = f.read()
+        except OSError:
+            snap[name] = None
+    snap["tool_calls"] = os.path.exists(
+        os.path.join(BASE, "store", "tool_calls.json"))
+    return snap
+
+
 def main():
+    store_before = _snapshot_store()
     # 1. Files exist
     missing = [f for f in EXPECTED_FILES if not os.path.isfile(os.path.join(BASE, f))]
     check("all expected files exist", not missing,
@@ -80,14 +97,16 @@ def main():
     except Exception as e:  # noqa: BLE001
         check("config.json parses + locked facts", False, str(e))
 
-    # 3. Store JSON files parse + empty
+    # 3. Store JSON files parse (Phase 9: store এখন live queue — records
+    #    খালি থাকার দরকার নেই, শুধু parse হতে হবে + records list হতে হবে)
     for name in ("store/tasks.json", "store/approvals.json"):
         try:
             with open(os.path.join(BASE, name), encoding="utf-8") as f:
                 data = json.load(f)
-            check(f"{name} parses, records empty", data.get("records") == [])
+            check(f"{name} parses, records is a list",
+                  isinstance(data.get("records"), list))
         except Exception as e:  # noqa: BLE001
-            check(f"{name} parses, records empty", False, str(e))
+            check(f"{name} parses, records is a list", False, str(e))
 
     # 4. Gateway: import + approve/reject on a TEMP file only
     try:
@@ -107,9 +126,9 @@ def main():
         req2 = gw.request("publish", "phase0 check 2", "check_phase0")
         gw.reject(req2["id"])
         assert not gw.is_approved(req2["id"]) and len(gw.pending()) == 0
-        # আসল approvals.json ছোঁয়া হয়নি — verify
+        # আসল approvals.json ছোঁয়া হয়নি — verify (Phase 9: snapshot compare)
         with open(os.path.join(BASE, "store", "approvals.json"), encoding="utf-8") as f:
-            assert json.load(f)["records"] == []
+            assert f.read() == store_before["store/approvals.json"]
         check("approval gateway works (temp file only)", True)
     except Exception as e:  # noqa: BLE001
         check("approval gateway works (temp file only)", False, str(e))

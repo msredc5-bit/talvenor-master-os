@@ -28,6 +28,15 @@ Gate নিয়ম (Boss-এর সিদ্ধান্ত, কোডে ল�
   7. booking_reply    — lead-এর নাম দিলে booking link সহ এক লাইনের reply draft
                         (Boss-এর 2026-11-17 প্রশ্নের উদাহরণ tool — DRAFT ONLY)
 
+২টা live-ready handler (Phase 9 — live_tools.py, CODE ONLY, gated):
+  8. gmail_send       — hatch_gws_cli দিয়ে আসল মেইল (credential না থাকলে
+                        LOUD DRAFT fallback; dispatcher কখনো handler চালায় না)
+  9. n8n_trigger      — urllib POST দিয়ে n8n webhook (credential না থাকলে
+                        LOUD DRAFT fallback; URL কখনো পুরো print হয় না)
+  live-ready tool-এর status "live-ready" — dispatcher-এ gated intercept-এর
+  পরে কোনো direct execution path নেই (fail-closed)। এই module-এ
+  subprocess / urlopen call নেই — live execution Phase 9-এ নেই।
+
 ব্যবহার:
   import tool_calling
   registry = tool_calling.ToolRegistry.load_from_json("tools.json")
@@ -289,9 +298,15 @@ class ToolRegistry:
             raise ValueError(f"Tool {name!r}: 'params.properties' must be a dict.")
         if not isinstance(tool_dict["gated"], bool):
             raise ValueError(f"Tool {name!r}: 'gated' must be a boolean.")
-        if tool_dict["status"] not in ("mock", "real", "stub"):
+        if tool_dict["status"] not in ("mock", "real", "stub", "live-ready"):
             raise ValueError(
-                f"Tool {name!r}: 'status' must be 'mock', 'real', or 'stub'."
+                f"Tool {name!r}: 'status' must be 'mock', 'real', 'stub', "
+                "or 'live-ready'."
+            )
+        if tool_dict["status"] == "live-ready" and not tool_dict["gated"]:
+            raise ValueError(
+                f"Live-ready tool {name!r} must be gated — a live "
+                "connection without a gate is not allowed."
             )
         gated_action = tool_dict.get("gated_action")
         if tool_dict["gated"]:
@@ -389,6 +404,7 @@ def call_tool(name, args, context=None, registry=None, approvals_path=None,
       2. args validation fail -> error
       3. gated tool -> ApprovalGateway-এ PENDING request, handler চলে না
       4. stub -> blocked-stub
+      4b. live-ready (gated intercept এড়িয়ে এলে) -> error, fail-closed
       5. mock -> HANDLERS[handler] চালিয়ে draft-ready
       6. real + handler নেই -> error (bug, silent pass নয়)
       7. প্রতিটা call calls log-এ append হয় (log fail করলে log_error সহ)।
@@ -444,6 +460,19 @@ def call_tool(name, args, context=None, registry=None, approvals_path=None,
             "status": "blocked-stub",
             "tool": name,
             "note": "Tool is a stub — not available.",
+        }
+        _finish(result, name, args, requested_by, calls_log_path)
+        return result
+
+    # 4b. Live-ready — gated intercept-এর পরে এখানে এলে fail-closed:
+    # কোনো direct execution path নেই। (Gated live-ready tool এখানে
+    # আসেই না — ধাপ ৩-এ PENDING হয়। এই branch শুধু defense।)
+    if tool.get("status") == "live-ready":
+        result = {
+            "status": "error",
+            "tool": name,
+            "error": f"Live-ready tool {name!r} has no direct execution "
+                     "path — gated only, nothing executed.",
         }
         _finish(result, name, args, requested_by, calls_log_path)
         return result

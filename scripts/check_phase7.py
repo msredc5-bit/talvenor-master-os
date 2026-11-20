@@ -24,9 +24,9 @@
      upload_youtube( call নেই (upload OFF)
   9. নতুন section file-এ ~/workspace/boss-ceo /
      ~/workspace/creator-os-combined reference নেই
- 10. config.json phase 8 + v0.8.0 + brain mock + 3 business +
-     phase_7_sections + agentic_phase_3 + unified_os entry
- 11. Real store untouched (tasks 0, approvals 0, tool_calls.json নেই)
+ 10. config.json phase 9 + v0.9.0 + brain mock + 3 business +
+     phase_7_sections + agentic_phase_3 + unified_os + phase_9 entry
+ 11. Real store unchanged by this run (Phase 9: live queue)
  12. পুরনো check (phase0/1/2/3/4 + engines + phase6) এখনো PASS
 
 Chief-level test run_office.py subprocess-এ চলে (এক process-এ
@@ -174,7 +174,24 @@ def _load_agent_file(path):
     return mod
 
 
+def _snapshot_store():
+    """Real store-এর snapshot (Phase 9: store এখন live queue — taskboard /
+    bridge সত্যিই task লেখে, তাই 'খালি' আর invariant নয়)। Check-এর
+    কাজ শুধু প্রমাণ করা যে এই run store বদলায়নি।"""
+    snap = {}
+    for name in ("store/tasks.json", "store/approvals.json"):
+        try:
+            with open(os.path.join(BASE, name), encoding="utf-8") as f:
+                snap[name] = f.read()
+        except OSError:
+            snap[name] = None
+    snap["tool_calls"] = os.path.exists(
+        os.path.join(BASE, "store", "tool_calls.json"))
+    return snap
+
+
 def main():
+    store_before = _snapshot_store()
     # 1. All 16 SECTION.md files exist
     try:
         missing = []
@@ -518,43 +535,36 @@ def main():
         check("section files: no boss-ceo / creator-os-combined refs",
               False, str(e))
 
-    # 10. Config: phase 8 + v0.8.0 + brain mock + 3 businesses + phase_7
+    # 10. Config: phase 9 + v0.9.0 + brain mock + 3 businesses + phase_7
     try:
         with open(os.path.join(BASE, "00-CEO-Core", "config.json"),
                   encoding="utf-8") as f:
             cfg = json.load(f)
         phases = cfg.get("honest_status", {}).get("phases", {})
-        ok = (cfg.get("phase") == 8 and cfg.get("version") == "0.8.0"
+        ok = (cfg.get("phase") == 9 and cfg.get("version") == "0.9.0"
               and cfg.get("brain") == "mock"
               and len(cfg.get("businesses", [])) == 3
               and "phase_7_sections" in phases
               and "BUILT" in phases.get("phase_7_sections", "")
               and "phase_5_three_engines" in phases
               and "agentic_phase_3" in phases
-              and "unified_os" in phases)
-        check("config.json phase 8 + v0.8.0 + brain mock + 3 biz + phase_7 + agentic 1-3 + unified",
+              and "unified_os" in phases
+              and "phase_9_connections" in phases)
+        check("config.json phase 9 + v0.9.0 + brain mock + 3 biz + phase_7 + agentic 1-3 + unified + phase_9",
               ok, f"phase={cfg.get('phase')}, version={cfg.get('version')}, "
               f"brain={cfg.get('brain')}")
     except Exception as e:  # noqa: BLE001
-        check("config.json phase 8 + v0.8.0 + brain mock + 3 biz + phase_7 + agentic 1-3 + unified",
+        check("config.json phase 9 + v0.9.0 + brain mock + 3 biz + phase_7 + agentic 1-3 + unified + phase_9",
               False, str(e))
 
-    # 11. Real store untouched
+    # 11. Real store unchanged by this check run (Phase 9: live queue)
     try:
-        with open(os.path.join(BASE, "store", "tasks.json"),
-                  encoding="utf-8") as f:
-            real_tasks = json.load(f)
-        with open(os.path.join(BASE, "store", "approvals.json"),
-                  encoding="utf-8") as f:
-            real_appr = json.load(f)
-        no_calls = not os.path.exists(
-            os.path.join(BASE, "store", "tool_calls.json"))
-        check("real store untouched (tasks 0, approvals 0, no tool_calls)",
-              real_tasks.get("records") == []
-              and real_appr.get("records") == [] and no_calls)
+        after = _snapshot_store()
+        check("real store unchanged by this check run",
+              after == store_before,
+              "unchanged" if after == store_before else "CHANGED")
     except Exception as e:  # noqa: BLE001
-        check("real store untouched (tasks 0, approvals 0, no tool_calls)",
-              False, str(e))
+        check("real store unchanged by this check run", False, str(e))
 
     # 12. Earlier checks still PASS
     try:

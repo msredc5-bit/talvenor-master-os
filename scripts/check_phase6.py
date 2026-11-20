@@ -18,10 +18,10 @@
   9. run_office.py smoke: content draft, [MOCK DRAFT] labelled
  10. run_office.py --drain-queue on a TEMP store (max respected,
      mixed businesses, Chief log entries preserved)
- 11. config.json phase 6 + v0.6.0 + brain mock + 3 businesses +
-     phase_6 entry + vendored reused_systems
+ 11. config.json phase 6+ + brain consistent (mock, or live only with
+     a proven Phase 10 probe record) + 3 businesses + vendored truth
  12. No live 136 scope remains in repo docs (only DROPPED notes)
- 13. Real store untouched (tasks 0 records, approvals 0 records)
+ 13. Real store unchanged by this run (Phase 9: live queue)
  14. check_phase0/1/2/3/4 + check_engines still PASS
 
 Every store-touching step uses TEMP files only. Stdlib only, no
@@ -71,7 +71,24 @@ def _isolated_import_test(workers_dir, imports_code, label):
     return proc.returncode == 0, (proc.stdout + proc.stderr).strip()[-300:]
 
 
+def _snapshot_store():
+    """Real store-এর snapshot (Phase 9: store এখন live queue — taskboard /
+    bridge সত্যিই task লেখে, তাই 'খালি' আর invariant নয়)। Check-এর
+    কাজ শুধু প্রমাণ করা যে এই run store বদলায়নি।"""
+    snap = {}
+    for name in ("store/tasks.json", "store/approvals.json"):
+        try:
+            with open(os.path.join(BASE, name), encoding="utf-8") as f:
+                snap[name] = f.read()
+        except OSError:
+            snap[name] = None
+    snap["tool_calls"] = os.path.exists(
+        os.path.join(BASE, "store", "tool_calls.json"))
+    return snap
+
+
 def main():
+    store_before = _snapshot_store()
     # 1. Agency workers: isolated import, repo-only sys.path
     try:
         agency_dir = os.path.join(BASE, "01-Agency-Department", "engine", "workers")
@@ -127,12 +144,20 @@ def main():
         check("Chiefs + brain.py: no boss-ceo / creator-os-combined refs", False, str(e))
 
     # 4. BrainFactory: mock by default, each department's own mock
+    # (temp mock config — this check must not depend on the repo's
+    # current brain flag; Phase 10 flipped it live after a probe.)
     try:
         from brain import BrainFactory  # noqa: PLC0415
 
-        assert BrainFactory.get_brain_mode() == "mock"
-        agency_brain = BrainFactory.get_brain("agency")
-        content_brain = BrainFactory.get_brain("content")
+        tmpdir = tempfile.mkdtemp()
+        mock_cfg = os.path.join(tmpdir, "config-mock.json")
+        with open(mock_cfg, "w", encoding="utf-8") as f:
+            json.dump({"brain": "mock"}, f)
+        assert BrainFactory.get_brain_mode(mock_cfg) == "mock"
+        assert BrainFactory.get_brain_mode(
+            os.path.join(tmpdir, "config-missing.json")) == "mock"
+        agency_brain = BrainFactory.get_brain("agency", config_path=mock_cfg)
+        content_brain = BrainFactory.get_brain("content", config_path=mock_cfg)
         ok = (
             type(agency_brain).__name__ == "MockLLMProvider"
             and agency_brain.health()["provider"] == "mock"
@@ -177,7 +202,9 @@ def main():
         with open(live_cfg, "w", encoding="utf-8") as f:
             json.dump({"brain": "live"}, f)
         live_brain = BrainFactory.get_brain("agency", config_path=live_cfg)
-        live_ok = (type(live_brain).__name__ == "MetaSparkProvider"
+        live_ok = (type(live_brain).__name__ == "LiveBrainAdapter"
+                   and live_brain.health()["provider"] == "live-brain-adapter"
+                   and live_brain.health()["mode"] == "live"
                    and live_brain.health()["calls"] == 0)
         bad_cfg = os.path.join(tmpdir, "config-bad.json")
         with open(bad_cfg, "w", encoding="utf-8") as f:
@@ -295,8 +322,25 @@ def main():
             cfg = json.load(f)
         phases = cfg.get("honest_status", {}).get("phases", {})
         reused = cfg.get("reused_systems", {})
-        ok = (cfg.get("phase", 0) >= 6 and cfg.get("version", "") >= "0.6.0"
-              and cfg.get("brain") == "mock"
+
+        def _ver_tuple(v):
+            try:
+                return tuple(int(x) for x in str(v).split("."))
+            except ValueError:
+                return (0,)
+
+        brain = cfg.get("brain")
+        if brain == "live":
+            # Phase 10: live only with a proven probe record.
+            brain_ok = (cfg.get("phase", 0) >= 10
+                        and "phase_10_live_brain" in phases
+                        and "PROVEN LIVE"
+                        in phases.get("phase_10_live_brain", ""))
+        else:
+            brain_ok = brain == "mock"
+        ok = (cfg.get("phase", 0) >= 6
+              and _ver_tuple(cfg.get("version", "")) >= (0, 6, 0)
+              and brain_ok
               and len(cfg.get("businesses", [])) == 3
               and "phase_6_brain_runner" in phases
               and reused.get("engine_15_workers", "").startswith("VENDORED")
@@ -305,11 +349,11 @@ def main():
               in reused.get("engine_15_workers", "")
               and "no longer a runtime dependency"
               in reused.get("creator_os", ""))
-        check("config.json phase 6 + v0.6.0 + brain mock + 3 biz + vendored",
+        check("config.json phase 6+ + brain consistent + 3 biz + vendored",
               ok, f"phase={cfg.get('phase')}, version={cfg.get('version')}, "
               f"brain={cfg.get('brain')}")
     except Exception as e:  # noqa: BLE001
-        check("config.json phase 6 + v0.6.0 + brain mock + 3 biz + vendored",
+        check("config.json phase 6+ + brain consistent + 3 biz + vendored",
               False, str(e))
 
     # 12. No live 136 scope in repo docs — only DROPPED notes allowed.
@@ -337,16 +381,14 @@ def main():
     except Exception as e:  # noqa: BLE001
         check("no live 136 scope in repo docs (only DROPPED notes)", False, str(e))
 
-    # 13. Real store untouched
+    # 13. Real store unchanged by this check run (Phase 9: live queue)
     try:
-        with open(os.path.join(BASE, "store", "tasks.json"), encoding="utf-8") as f:
-            real_tasks = json.load(f)
-        with open(os.path.join(BASE, "store", "approvals.json"), encoding="utf-8") as f:
-            real_appr = json.load(f)
-        check("real store untouched (tasks 0, approvals 0)",
-              real_tasks.get("records") == [] and real_appr.get("records") == [])
+        after = _snapshot_store()
+        check("real store unchanged by this check run",
+              after == store_before,
+              "unchanged" if after == store_before else "CHANGED")
     except Exception as e:  # noqa: BLE001
-        check("real store untouched (tasks 0, approvals 0)", False, str(e))
+        check("real store unchanged by this check run", False, str(e))
 
     # 14. Earlier checks still PASS
     try:

@@ -5,7 +5,7 @@
      mock -> draft-ready, gated -> pending-approval, bad args -> error.
   2. প্রতিটা engine — tools.json, wrapper end-to-end (TEMP file-এ),
      STAFF.md-র role, প্রতিটা role-এর skill file (আসল content, no [FILL])।
-  3. আসল store ছোঁয়া হয়নি (tasks 0, approvals 0, tool_calls.json নেই)।
+  3. আসল store এই run-এ বদলায়নি (Phase 9: live queue)।
   4. Phase 0–4-র check-গুলো এখনো PASS।
 
 সব store-ছোঁয়া call TEMP file-এ চলে — আসল store কখনো লেখা হয় না।
@@ -56,7 +56,24 @@ def dummy_args(tool):
     return args
 
 
+def _snapshot_store():
+    """Real store-এর snapshot (Phase 9: store এখন live queue — taskboard /
+    bridge সত্যিই task লেখে, তাই 'খালি' আর invariant নয়)। Check-এর
+    কাজ শুধু প্রমাণ করা যে এই run store বদলায়নি।"""
+    snap = {}
+    for name in ("tasks.json", "approvals.json"):
+        try:
+            with open(os.path.join(STORE_DIR, name), encoding="utf-8") as f:
+                snap[name] = f.read()
+        except OSError:
+            snap[name] = None
+    snap["tool_calls"] = os.path.exists(
+        os.path.join(STORE_DIR, "tool_calls.json"))
+    return snap
+
+
 def main():
+    store_before = _snapshot_store()
     # --- 1. Shared core ---------------------------------------------------
     try:
         import tool_calling
@@ -239,20 +256,14 @@ def main():
         except Exception as exc:  # noqa: BLE001
             check(f"{key}: wrapper end-to-end", False, str(exc))
 
-    # --- 3. Real store untouched -------------------------------------------
+    # --- 3. Real store unchanged by this check run (Phase 9: live queue) ---
     try:
-        with open(os.path.join(STORE_DIR, "tasks.json"), "r", encoding="utf-8") as f:
-            tasks = json.load(f).get("records", [])
-        with open(os.path.join(STORE_DIR, "approvals.json"), "r", encoding="utf-8") as f:
-            approvals = json.load(f).get("records", [])
-        check("real store untouched (tasks 0, approvals 0)",
-              tasks == [] and approvals == [],
-              f"tasks {len(tasks)}, approvals {len(approvals)}")
-        check("real store has no tool_calls.json",
-              not os.path.exists(os.path.join(STORE_DIR, "tool_calls.json")),
-              "absent" if not os.path.exists(os.path.join(STORE_DIR, "tool_calls.json")) else "PRESENT")
+        after = _snapshot_store()
+        check("real store unchanged by this check run",
+              after == store_before,
+              "unchanged" if after == store_before else "CHANGED")
     except Exception as exc:  # noqa: BLE001
-        check("real store untouched", False, str(exc))
+        check("real store unchanged by this check run", False, str(exc))
 
     # --- 4. Phase 0–4 checks still pass ------------------------------------
     for n in range(5):
