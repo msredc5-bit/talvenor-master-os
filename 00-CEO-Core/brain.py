@@ -1,7 +1,7 @@
 """Brain — one switch for the office's LLM brain (Phase 6).
 
 BrainFactory reads the "brain" flag from 00-CEO-Core/config.json:
-  "mock" (DEFAULT, $0, drafts only) or "live" (MetaSparkProvider).
+  "mock" (DEFAULT, $0, drafts only) or "live" (LiveBrainAdapter).
 
 The two departments' mocks have DIFFERENT shapes, and the factory
 honours each one instead of forcing a single interface on them:
@@ -15,22 +15,24 @@ its existing call sites untouched: it just asks the factory for its
 own department's brain. Flipping the config flag swaps the brain for
 both Chiefs at once; the default stays mock.
 
-LIVE BRAIN — honest status (read before flipping the flag):
-  - The live provider is the VENDORED MetaSparkProvider
-    (01-Agency-Department/engine/workers/src/live/meta_provider.py).
-    Its key comes ONLY via the connector Secure Vault
+LIVE BRAIN — Phase 10 (wired via live_brain.py):
+  - The live call is the VENDORED MetaSparkProvider
+    (01-Agency-Department/engine/workers/src/live/meta_provider.py),
+    wrapped by LiveBrainAdapter (00-CEO-Core/live_brain.py). Its key
+    comes ONLY via the connector Secure Vault
     (custom.meta-model-api-2, dynamic_credentials surrogate) — the
     key never appears in any file, env var, argument, or log.
-  - Its first live verification TIMED OUT on 2026-11-06 ($0 spent,
-    key validity UNPROVEN) — the key path is UNPROVEN.
-  - Phase 6 makes NO live calls: constructing the provider performs
-    no network I/O (verified: import + construct, 0 calls). Only a
-    worker calling complete() would touch the network, and no Chief
-    does that while "brain" is "mock".
-  - "live" is therefore UNWIRED-UNTIL-FLIPPED: flip the flag only on
-    Boss's explicit word, and only after a live verification proves
-    the key path. If construction fails in this environment, the
-    factory raises a clear error instead of attempting any call.
+  - If a live call fails (no credential, timeout, 403/401, API
+    error), the adapter falls back LOUDLY to the department's own
+    mock brain (stderr-এ কারণ লিখে) — never silently pretends
+    live, never retries in a loop (one attempt per call).
+  - Constructing the adapter performs NO network I/O (verified:
+    import + construct, 0 calls). Only complete() touches the
+    network, and only when config "brain" is "live".
+  - Live probe result: see config.json honest_status.phases
+    phase_10_live_brain — PROVEN LIVE only after a successful
+    probe; otherwise the flag stays "mock" and the entry records
+    the exact blocker.
 
 Stdlib only. No network, no spend, no secrets in this file.
 """
@@ -110,12 +112,14 @@ class BrainFactory:
 
         Mock (default): that department's own vendored mock, seeded as
         before — each Chief can use the result exactly as it used its
-        mock before. Live: the vendored MetaSparkProvider (same object
-        serves both departments — its complete(prompt, *, max_tokens)
-        accepts the positional call both worker bases make).
+        mock before. Live: LiveBrainAdapter wrapping the vendored
+        MetaSparkProvider (same adapter serves both departments — its
+        complete(prompt, *, max_tokens) accepts the positional call
+        both worker bases make; on live failure it falls back LOUDLY
+        to that department's own mock).
         """
         if BrainFactory.get_brain_mode(config_path) == "live":
-            return BrainFactory._live_brain()
+            return BrainFactory._live_brain(department)
         if department == "agency":
             mod = _load_module(AGENCY_WORKERS_DIR, "src.mock.provider")
             return mod.MockLLMProvider(seed=seed or _AGENCY_MOCK_SEED)
@@ -126,29 +130,41 @@ class BrainFactory:
             f"Unknown department: {department!r}. Known: ['agency', 'content']")
 
     @staticmethod
-    def _live_brain():
-        """Construct the vendored live provider — NO network call here.
+    def _live_brain(department):
+        """Construct the Phase 10 live adapter — NO network call here.
 
+        The adapter wraps the vendored MetaSparkProvider and falls back
+        LOUDLY to the department's own mock if a live call fails.
         Construction only stores model/timeout; the key is fetched by
-        the Secure Vault surrogate only when complete() is called, and
-        Phase 6 never calls it. Any failure to import/construct (e.g.
-        the connector surrogate is absent) raises a clear error
-        instead of attempting a call.
+        the Secure Vault surrogate only when complete() is called.
+        Any failure to import/construct (e.g. the vendored provider
+        is absent) raises a clear error instead of attempting a call.
         """
+        if department == "agency":
+            mod = _load_module(AGENCY_WORKERS_DIR, "src.mock.provider")
+            mock = mod.MockLLMProvider(seed=_AGENCY_MOCK_SEED)
+        elif department == "content":
+            mod = _load_module(CONTENT_WORKERS_DIR, "src.workers.base")
+            mock = mod.MockLLM(seed=_CONTENT_MOCK_SEED)
+        else:
+            raise ValueError(
+                f"Unknown department: {department!r}. "
+                "Known: ['agency', 'content']")
         try:
-            mod = _load_module(AGENCY_WORKERS_DIR, "src.live.meta_provider")
-            provider = mod.MetaSparkProvider()
+            if CEO_CORE_DIR not in sys.path:
+                sys.path.insert(0, CEO_CORE_DIR)
+            from live_brain import LiveBrainAdapter  # noqa: E402
+            return LiveBrainAdapter(mock_brain=mock)
         except Exception as exc:  # noqa: BLE001 — re-raised as a clear error
             raise RuntimeError(
-                "Live brain is not configured: the vendored "
-                "MetaSparkProvider could not be constructed in this "
+                "Live brain is not configured: the live adapter "
+                "could not be constructed in this "
                 f"environment ({type(exc).__name__}: {exc}). The live key "
                 "comes ONLY via the connector Secure Vault "
                 "(custom.meta-model-api-2) — it is never stored in a file. "
-                "Phase 6 makes no live calls; set \"brain\": \"mock\" in "
+                "Set \"brain\": \"mock\" in "
                 "00-CEO-Core/config.json to keep drafting at $0."
             ) from exc
-        return provider
 
 
 def get_brain(department, seed=None, config_path=CONFIG_PATH):
