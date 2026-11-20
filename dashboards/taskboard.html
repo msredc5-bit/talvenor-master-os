@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Talvenor Master OS — Task Board</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: #FFFBF5; color: #0B1D33; margin: 0; padding: 24px; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  h1 { color: #EA580C; margin-bottom: 4px; }
+  .sub { color: #555; margin-top: 0; }
+  .card { background: #fff; border: 1px solid #e5ddd2; border-radius: 12px; padding: 18px 20px; margin: 14px 0; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+  .queued { background: #e0e7ff; color: #3730a3; }
+  .done { background: #d1fae5; color: #065f46; }
+  .failed { background: #fee2e2; color: #991b1b; }
+  table { width: 100%; border-collapse: collapse; }
+  td, th { text-align: left; padding: 8px 6px; border-bottom: 1px solid #eee; vertical-align: top; }
+  label { display: block; font-size: 13px; font-weight: 700; margin: 10px 0 4px; }
+  input, select { width: 100%; padding: 9px 10px; border: 1px solid #ddd5c6; border-radius: 8px; font-size: 14px; background: #fff; color: #0B1D33; }
+  button { background: #EA580C; color: #fff; border: 0; border-radius: 8px; padding: 10px 18px; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 14px; }
+  button:hover { background: #c2410c; }
+  #msg { font-size: 13px; margin-top: 10px; }
+  #msg.err { color: #991b1b; }
+  #msg.ok { color: #065f46; }
+  .note { font-size: 13px; color: #666; }
+  .status-line { font-size: 14px; }
+  .status-line b { color: #0B1D33; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎬 Talvenor Master OS — Task Board</h1>
+  <p class="sub">Task দাও — bridge প্রতি ১০ মিনিটে queue থেকে নেবে (সর্বোচ্চ ২টা), draft/result বানাবে। Send / publish / spend / delete কখনো নয়।</p>
+
+  <div class="card">
+    <h2>অবস্থা (status.json থেকে)</h2>
+    <p class="status-line" id="status">লোড হচ্ছে…</p>
+  </div>
+
+  <div class="card">
+    <h2>নতুন task</h2>
+    <form id="task-form">
+      <label for="title">Title (কী করতে হবে)</label>
+      <input id="title" type="text" maxlength="200" required
+             placeholder="যেমন: verify the Talvenor booking link is live">
+      <label for="type">Type</label>
+      <input id="type" type="text" list="types" required
+             placeholder="research" value="research">
+      <datalist id="types">
+        <option value="research"></option>
+        <option value="caption_write"></option>
+        <option value="script_write"></option>
+        <option value="outreach_draft"></option>
+        <option value="gate0_check"></option>
+      </datalist>
+      <label for="business">Business</label>
+      <select id="business">
+        <option value="agency">Agency — AI Receptionist (MAIN)</option>
+        <option value="digital-product">Digital Product — Vet Kit</option>
+        <option value="content">Content — Creator OS</option>
+      </select>
+      <button type="submit">Queue-তে দাও</button>
+      <p id="msg"></p>
+    </form>
+    <p class="note">Task queue-তে গেলে status "queued" হয়। Bridge (প্রতি ১০
+    মিনিট) সেটা নিয়ে আসল কাজ করে, result লিখে "done" করে। এই board
+    শুধু task দেয় আর দেখায় — নিজে কিছু চালায় না।</p>
+  </div>
+
+  <div class="card">
+    <h2>Queue</h2>
+    <table>
+      <thead><tr><th>Title</th><th>Type</th><th>Business</th><th>Status</th><th>Queued</th></tr></thead>
+      <tbody id="tasks"><tr><td colspan="5">লোড হচ্ছে…</td></tr></tbody>
+    </table>
+    <p><button type="button" id="refresh">Refresh</button></p>
+  </div>
+</div>
+<script>
+async function loadStatus() {
+  try {
+    const r = await fetch('/api/status');
+    const s = await r.json();
+    document.getElementById('status').innerHTML =
+      'Phase <b>' + s.phase + '</b> · v' + s.version +
+      ' · Clients <b>' + s.paying_clients + '</b>' +
+      ' · First mails <b>' + s.first_mails + '</b>' +
+      ' · Email <b>' + s.email + '</b>' +
+      ' · Gate 0 <b>' + s.gate0 + '</b>' +
+      ' · Tasks <b>' + s.tasks_count + '</b>';
+  } catch (e) {
+    document.getElementById('status').textContent = 'Status পড়া যায়নি: ' + e;
+  }
+}
+async function loadTasks() {
+  try {
+    const r = await fetch('/api/tasks');
+    const d = await r.json();
+    const rows = (d.records || []).slice().reverse();
+    const tb = document.getElementById('tasks');
+    if (!rows.length) {
+      tb.innerHTML = '<tr><td colspan="5">Queue খালি — কোনো task নেই।</td></tr>';
+      return;
+    }
+    tb.innerHTML = rows.map(function (t) {
+      const cls = t.status === 'done' ? 'done' : (t.status === 'failed' ? 'failed' : 'queued');
+      return '<tr><td>' + esc(t.title) + '</td><td>' + esc(t.type) + '</td><td>' +
+        esc(t.business) + '</td><td><span class="badge ' + cls + '">' + esc(t.status) +
+        '</span></td><td>' + esc((t.queued_at || '').slice(0, 19).replace('T', ' ')) + '</td></tr>';
+    }).join('');
+  } catch (e) {
+    document.getElementById('tasks').innerHTML =
+      '<tr><td colspan="5">Task পড়া যায়নি: ' + esc(String(e)) + '</td></tr>';
+  }
+}
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c];
+  });
+}
+document.getElementById('task-form').addEventListener('submit', async function (ev) {
+  ev.preventDefault();
+  const msg = document.getElementById('msg');
+  msg.className = ''; msg.textContent = 'পাঠানো হচ্ছে…';
+  const body = {
+    title: document.getElementById('title').value,
+    type: document.getElementById('type').value,
+    business: document.getElementById('business').value,
+    payload: {}
+  };
+  try {
+    const r = await fetch('/api/tasks', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    if (!r.ok) { msg.className = 'err'; msg.textContent = 'হয়নি: ' + (d.error || r.status); return; }
+    msg.className = 'ok'; msg.textContent = 'Queue-তে গেছে — id ' + d.id + ' (queued)।';
+    document.getElementById('title').value = '';
+    loadTasks(); loadStatus();
+  } catch (e) {
+    msg.className = 'err'; msg.textContent = 'হয়নি: ' + e;
+  }
+});
+document.getElementById('refresh').addEventListener('click', function () { loadTasks(); loadStatus(); });
+loadStatus(); loadTasks();
+setInterval(function () { loadTasks(); loadStatus(); }, 30000);
+</script>
+</body>
+</html>
