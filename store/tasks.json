@@ -1,1 +1,16 @@
-{"records":[],"schema":"tasks-v1"}
+{
+  "schema": "tasks-v1",
+  "records": [
+    {
+      "id": "6e3b269f4533",
+      "status": "done",
+      "business": "agency",
+      "type": "research",
+      "title": "verify the Talvenor booking link https://calendar.app.google/WLoxBfnLGTdjK3LB8 is live",
+      "payload": {},
+      "queued_at": "2026-11-20T11:05:02.606945+00:00",
+      "result": "VERIFIED LIVE 2026-11-20 17:14 Dhaka (11:14 UTC): the Talvenor Demo booking page at https://calendar.app.google/WLoxBfnLGTdjK3LB8 loads successfully with no error and no sign-in required. Page title 'Talvenor Demo', host MsredC, 15-minute appointments, heading 'Select an appointment time'. Available slots visible: Fri Nov 20, 2026 3:15pm-5:45pm; Sat Nov 21 from 2:00am; Sun Nov 22-Thu Nov 26 2:00pm-5:45pm each day (times shown in GMT). Calendar shows available dates Nov 20-30 and Dec 1-12. No booking was made. Link is live and safe to keep using in outreach and content.",
+      "completed_at": "2026-11-20T11:14:14.032705+00:00"
+    }
+  ]
+}

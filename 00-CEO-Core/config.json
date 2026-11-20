@@ -90,11 +90,12 @@
       "agentic_phase_1": "BUILT 2026-11-19 - 8 departments inside 01-Agency-Department (governance/ 4 files, departments/ 24 files, agents/agent-registry/ 2 files, workflows/ 5 files); 21 existing staff mapped, 62 specialists: 15 EXISTING-mapped, 43 ROLE-ONLY, 4 GAP",
       "agentic_phase_2": "BUILT 2026-11-19 - Agency Chief DEPARTMENT_ROUTING: 8 task types -> 8 department managers, gate ok; check_departments.py 21/21",
       "agentic_phase_3": "BUILT 2026-11-19 - 43/43 ROLE-ONLY specialists built as worker code (Sales 5, Marketing 4, AI Engineering 7, Client Ops 4, Research 7, Finance 4, Quality 6, Innovation 6); registry 65/69 EXISTING, 4 GAP untouched; check_specialists.py 41/41",
-      "unified_os": "BUILT 2026-11-19 - CENTRAL-HQ/ 7 doc files (architecture layer only, no new repo, no new monorepo): Agency = 01-Agency-Department, Commerce = Vet Kit (Etsy CLOSED, Amazon GATED, Shopify PARKED Boss-direct), Media = 03-Content-Creation-Department; ONE brain (mock) + 3 Chiefs"
+      "unified_os": "BUILT 2026-11-19 - CENTRAL-HQ/ 7 doc files (architecture layer only, no new repo, no new monorepo): Agency = 01-Agency-Department, Commerce = Vet Kit (Etsy CLOSED, Amazon GATED, Shopify PARKED Boss-direct), Media = 03-Content-Creation-Department; ONE brain (mock) + 3 Chiefs",
+      "phase_9_connections": "BUILT 2026-11-20 - taskboard (dashboards/taskboard.html + scripts/taskboard_server.py, port 8766, POST /api/tasks -> queued in store/tasks.json) + MCP stdio server (00-CEO-Core/mcp/, 7 mock tools only, check 9/9) + live-ready tool code (00-CEO-Core/live_tools.py: gmail_send + n8n_trigger, env-only creds, gated, DRAFT fallback, never sends; tools.json 9 tools, check 7/7); brain still mock; store now a live queue"
     }
   },
   "owner": "Md Mainuddin (Boss)",
-  "phase": 8,
+  "phase": 9,
   "reused_systems": {
     "agency_office": "~/workspace/talvenor-office/",
     "creator_os": "VENDORED in 03-Content-Creation-Department/engine/workers/ - ~/workspace/creator-os-combined/ stays the canonical upstream, no longer a runtime dependency",
@@ -104,7 +105,7 @@
   "spend_cap_usd": 0,
   "system": "Talvenor Master OS",
   "timezone": "Asia/Dhaka",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "voice": {
     "engines": {
       "stt_bn": "sherpa-onnx",

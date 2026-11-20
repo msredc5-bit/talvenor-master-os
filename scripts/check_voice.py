@@ -12,12 +12,12 @@
   6. sounddevice importable — এই VM-এ PortAudio নেই বলে FAIL হবে
      (Windows wheel-এ PortAudio বান্ডেল থাকে — VM-only সীমা, ভান নয়)
   7. config.json-এর voice block = VERIFIED id-গুলো + brain mock +
-     phase 8 + v0.8.0
+     phase 9 + v0.9.0
   8. নতুন file-এ secret নেই (api key / password / secret / bearer)
   9. Gate test (TEMP approvals): voice-এ "send" বললে PENDING হয়,
      execute হয় না; আসল store ছোঁয় না
  10. scripts/voice_test.py subprocess PASS (আসল synth + transcribe)
- 11. Real store untouched (tasks 0, approvals 0, tool_calls.json নেই)
+ 11. Real store unchanged by this run (Phase 9: live queue)
  12. check_phase0 এখনো PASS
 
 Stdlib only — piper/vosk/sherpa শুধু importlib probe-এ (import করা হয়
@@ -64,7 +64,24 @@ def check(name, ok, detail=""):
           + (f" — {detail}" if detail else ""))
 
 
+def _snapshot_store():
+    """Real store-এর snapshot (Phase 9: store এখন live queue — taskboard /
+    bridge সত্যিই task লেখে, তাই 'খালি' আর invariant নয়)। Check-এর
+    কাজ শুধু প্রমাণ করা যে এই run store বদলায়নি।"""
+    snap = {}
+    for name in ("store/tasks.json", "store/approvals.json"):
+        try:
+            with open(os.path.join(BASE, name), encoding="utf-8") as f:
+                snap[name] = f.read()
+        except OSError:
+            snap[name] = None
+    snap["tool_calls"] = os.path.exists(
+        os.path.join(BASE, "store", "tool_calls.json"))
+    return snap
+
+
 def main():
+    store_before = _snapshot_store()
     # 1. files exist
     missing = [p for p in NEW_FILES if not os.path.exists(p)]
     check("voice file আছে (4 voice module + jarvis_voice + setup + 3 script)",
@@ -173,13 +190,13 @@ def main():
               and v.get("models", {}).get("sherpa_bn")
               == EXPECTED_MODELS["sherpa_bn"]
               and cfg.get("brain") == "mock"
-              and cfg.get("phase") == 8
-              and cfg.get("version") == "0.8.0")
-        check("config voice block = VERIFIED ids + brain mock + phase 8",
+              and cfg.get("phase") == 9
+              and cfg.get("version") == "0.9.0")
+        check("config voice block = VERIFIED ids + brain mock + phase 9",
               ok, f"voices={v.get('voices')}, brain={cfg.get('brain')}, "
               f"phase={cfg.get('phase')}, version={cfg.get('version')}")
     except Exception as e:  # noqa: BLE001
-        check("config voice block = VERIFIED ids + brain mock + phase 8",
+        check("config voice block = VERIFIED ids + brain mock + phase 9",
               False, str(e))
 
     # 9. no secrets in new files
@@ -242,22 +259,14 @@ def main():
         check("scripts/voice_test.py PASS (আসল synth + transcribe)",
               False, str(e))
 
-    # 12. real store untouched
+    # 12. real store unchanged by this check run (Phase 9: live queue)
     try:
-        with open(os.path.join(BASE, "store", "tasks.json"),
-                  encoding="utf-8") as f:
-            real_tasks = json.load(f)
-        with open(os.path.join(BASE, "store", "approvals.json"),
-                  encoding="utf-8") as f:
-            real_appr = json.load(f)
-        no_calls = not os.path.exists(
-            os.path.join(BASE, "store", "tool_calls.json"))
-        check("real store untouched (tasks 0, approvals 0, no tool_calls)",
-              real_tasks.get("records") == []
-              and real_appr.get("records") == [] and no_calls)
+        after = _snapshot_store()
+        check("real store unchanged by this check run",
+              after == store_before,
+              "unchanged" if after == store_before else "CHANGED")
     except Exception as e:  # noqa: BLE001
-        check("real store untouched (tasks 0, approvals 0, no tool_calls)",
-              False, str(e))
+        check("real store unchanged by this check run", False, str(e))
 
     # 13. check_phase0 still PASS
     try:

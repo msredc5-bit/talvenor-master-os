@@ -43,7 +43,7 @@
   "gates_enabled": true,
   "pa_list": 39,
   "paying_clients": 0,
-  "phase": 8,
+  "phase": 9,
   "phase_status": {
     "phase_0": "BUILT (this folder)",
     "phase_1_agency": "BUILT 2026-11-16 - Agency Chief REAL, 15 workers wired, draft-only",
@@ -61,9 +61,9 @@
     "stub": 0
   },
   "spend_cap_usd": 0,
-  "tasks_count": 0,
+  "tasks_count": 1,
   "toolpilot_subs": 0,
-  "version": "0.8.0",
+  "version": "0.9.0",
   "voice": {
     "detail": "Jarvis voice — Piper TTS + Vosk/sherpa STT, offline, $0 (mic test Boss-এর PC-তে বাকি)",
     "label": "REAL"
