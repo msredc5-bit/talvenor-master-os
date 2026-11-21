@@ -1,18 +1,17 @@
 """Renewal & Upsell Agent — renewal/upsell plan draft (Dept 04).
 
-ভূমিকা (role): paying client-এর renewal বা upsell-এর plan-এর DRAFT
-লেখা — কখনো client-কে কিছু বলে না, কোনো দাম quote করে না।
-Gate: none — plan DRAFT নিজেই নিরাপদ।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: write a DRAFT of the plan for a paying client's renewal or upsell —
+never tell the client anything, never quote a price.
+Gate: none — the plan DRAFT itself is safe.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-সত্য: paying clients 0 — কোনো renewal due নয়, কোনো upsell হয়নি।
-এই plan DRAFT মাত্র। Upsell client-কে বলা হয় না যতক্ষণ Boss "ok"
-না দেন। Pricing LOCKED, internal only — দাম শুধু Boss-এর সিদ্ধান্তে
-বলা হয়।
+Truth: paying clients 0 — no renewal due, no upsell happened.
+This plan is only a DRAFT. An upsell is not told to the client until Boss says "ok"
+. Pricing LOCKED, internal only — a price is told only by Boss's decision.
 
-এই agent কখনো করে না: client-কে renewal/upsell বলে না, দাম/discount/
-tier quote করে না, কোনো renewal/upsell হয়েছে বলে দাবি করে না, কিছু
-পাঠায় না, কোনো guarantee দেয় না, dental/medical নয়।
+This agent never: tells the client about renewal/upsell, quotes a price/discount/
+tier, claims any renewal/upsell happened, sends
+anything, gives no guarantee, no dental/medical.
 """
 
 import os
@@ -26,7 +25,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class RenewalUpsellAgent:
-    """Renewal/upsell plan DRAFT ONLY — দাম quote করে না।"""
+    """Renewal/upsell plan DRAFT ONLY — quotes no price."""
 
     task_kind = "renewal_upsell"
     gate = None
@@ -34,7 +33,7 @@ class RenewalUpsellAgent:
     role = "Renewal & Upsell Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -46,7 +45,7 @@ class RenewalUpsellAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -75,7 +74,7 @@ class RenewalUpsellAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Renewal/upsell plan DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Making a renewal/upsell plan DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Renewal/upsell plan draft"
         gated_action = task.get("gated_action")
@@ -130,8 +129,8 @@ class RenewalUpsellAgent:
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Renewal/upsell plan DRAFT ONLY — "
-            "paying client 0, কোনো renewal due নয়, কোনো upsell হয়নি। "
-            "Client-কে কিছু বলা হয়নি, কোনো দাম quote করা হয়নি। Gate: none।"
+            "paying client 0, no renewal due, no upsell happened. "
+            "Nothing was told to the client, no price was quoted. Gate: none."
         )
         return {
             "status": "draft-ready",

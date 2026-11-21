@@ -1,17 +1,17 @@
 """Retention Agent — retention plan draft (Dept 04).
 
-ভূমিকা (role): client-কে ধরে রাখার retention plan-এর DRAFT লেখা —
-কখনো client-কে কিছু বলে না, কিছু পাঠায় না।
-Gate: none — plan DRAFT নিজেই নিরাপদ।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: write a DRAFT of the retention plan for keeping a client —
+never tell the client anything, send anything.
+Gate: none — the plan DRAFT itself is safe.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-সত্য: paying clients 0 — retention-এর কাজ এখনো শুরু হয়নি, কোনো
-retained client নেই। এই plan DRAFT মাত্র; কোনো real client-এর ওপর
-এখনো চালানো হয়নি।
+Truth: paying clients 0 — retention work has not started yet, no
+retained client. This plan is only a DRAFT; it has not been run on any real client
+yet.
 
-এই agent কখনো করে না: কোনো client-কে retained বলে দাবি করে না,
-client-কে কিছু বলে/পাঠায় না, discount/guarantee/দাম বলে না, কোনো
-ফলাফল বানায় না, dental/medical নয়।
+This agent never: claims any client is retained,
+tells/sends the client anything, tells about a discount/guarantee/price, invents any
+result — no dental/medical.
 """
 
 import os
@@ -25,7 +25,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class RetentionAgent:
-    """Retention plan DRAFT ONLY — কোনো retained client-এর দাবি নয়।"""
+    """Retention plan DRAFT ONLY — no claim of a retained client."""
 
     task_kind = "retention"
     gate = None
@@ -33,7 +33,7 @@ class RetentionAgent:
     role = "Retention Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -45,7 +45,7 @@ class RetentionAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -72,7 +72,7 @@ class RetentionAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Retention plan DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Making a retention plan DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Retention plan draft"
         gated_action = task.get("gated_action")
@@ -129,8 +129,8 @@ class RetentionAgent:
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Retention plan DRAFT ONLY — "
-            "paying client 0, কোনো retained client নেই, কোনো ফলাফল বানানো "
-            "হয়নি। Client-কে কিছু বলা/পাঠানো হয়নি। Gate: none।"
+            "paying client 0, no retained client, no result invented "
+            "yet. Nothing was told/sent to the client. Gate: none."
         )
         return {
             "status": "draft-ready",

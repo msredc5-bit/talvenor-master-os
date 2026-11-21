@@ -1,21 +1,20 @@
 """Call Monitoring Agent — call-monitoring plan/checklist draft (Dept 04).
 
-ভূমিকা (role): Sophia-র live call-এর জন্য কী check করতে হবে, তার
-plan/checklist-এর DRAFT লেখা — কখনো live call দেখে না, live call-এর
-data দাবি করে না।
-Gate: none — checklist DRAFT নিজেই নিরাপদ, কিছু পাঠানো হয় না।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: write a DRAFT of the plan/checklist of what to check for Sophia's live calls —
+never watch a live call, never claim live-call
+data.
+Gate: none — the checklist DRAFT itself is safe, nothing is sent.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-সত্য: live monitoring-এর কোনো automated access নেই — worker-এর কাছে
-Sophia-র live call দেখার কোনো উপায় নেই। Checklist DRAFT Boss-কে যায়;
-Boss নিজে Vapi dashboard-এ গিয়ে আসল call দেখে যাচাই করেন।
+Truth: there is no automated access to live monitoring — the worker has no way
+to watch Sophia's live calls. The checklist DRAFT goes to Boss;
+Boss himself goes to the Vapi dashboard and checks the real calls.
 Live stack: Vapi/Sophia, +1 (947) 223-0244, GPT-4o-mini, Emma voice,
-Deepgram nova-3। Paying clients 0 — কোনো real client-এর call-এ এই
-checklist এখনো test হয়নি।
+Deepgram nova-3. Paying clients 0 — this checklist has not been tested on any real client's calls yet.
 
-এই agent কখনো করে না: live call দেখে না, শোনে না, call-এর সংখ্যা/
-transcript/ফলাফল বানায় না, কিছু পাঠায় না, দাম quote করে না, কোনো
-guarantee দেয় না, dental/medical নয়।
+This agent never: watches or listens to a live call, invents a call's numbers/
+transcript/results, sends anything, quotes a price, gives any
+guarantee gives none, no dental/medical.
 """
 
 import os
@@ -29,7 +28,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class CallMonitoringAgent:
-    """Call-monitoring checklist DRAFT ONLY — live call দেখে না।"""
+    """Call-monitoring checklist DRAFT ONLY — does not watch live calls."""
 
     task_kind = "call_monitoring"
     gate = None
@@ -37,7 +36,7 @@ class CallMonitoringAgent:
     role = "Call Monitoring Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -49,7 +48,7 @@ class CallMonitoringAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -78,7 +77,7 @@ class CallMonitoringAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Call-monitoring checklist DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Making a call-monitoring checklist DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Call monitoring checklist draft"
         gated_action = task.get("gated_action")
@@ -143,8 +142,8 @@ class CallMonitoringAgent:
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Call-monitoring checklist DRAFT "
-            "ONLY, live monitoring নয় — worker-এর live call-এর কোনো access "
-            "নেই, কোনো live call data দাবি করা হয়নি। Gate: none।"
+            "ONLY, not live monitoring — the worker has no access to live calls "
+            "no live-call data was claimed. Gate: none."
         )
         return {
             "status": "draft-ready",

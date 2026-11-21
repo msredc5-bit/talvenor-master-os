@@ -1,18 +1,18 @@
 """Client Reporting Agent — client report draft (Dept 04).
 
-ভূমিকা (role): client-কে দেওয়ার report-এর template + DRAFT লেখা —
-কোন আসল সংখ্যা কোথায় বসবে, তা দেখিয়ে। আসল সংখ্যা না থাকলে বানায় না।
-Gate: none — report DRAFT নিজেই নিরাপদ, client-কে পাঠানো হয় না।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: write a template + DRAFT of a report to give to a client —
+Showing where each real number goes. If there are no real numbers, it does not invent any.
+Gate: none — the report DRAFT itself is safe, it is not sent to the client.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-সত্য: paying clients 0 — কোনো real client-এর সংখ্যা এখনো নেই। Report-এ
-যা দেখা যায় তাই থাকে (visible numbers only); সংখ্যা না থাকলে
-BOSS INPUT REQUIRED। Report DRAFT Boss-কে যায় — Boss আসল সংখ্যা বসিয়ে,
-review করে নিজে client-কে পাঠান।
+Truth: paying clients 0 — there are still no real client numbers. The report has
+only what can be seen (visible numbers only); if there is no number,
+BOSS INPUT REQUIRED. The report DRAFT goes to Boss — Boss fills in the real numbers,
+reviews it, and sends it to the client himself.
 
-এই agent কখনো করে না: client-এর সংখ্যা/পরিসংখ্যান বানায় না, estimate
-করে না, report client-কে পাঠায় না, দাম quote করে না, কোনো guarantee
-দেয় না, dental/medical নয়।
+This agent never: invents a client's numbers/statistics, estimates,
+sends the report to the client, quotes a price, gives any guarantee
+gives none, no dental/medical.
 """
 
 import os
@@ -26,7 +26,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class ClientReportingAgent:
-    """Client report DRAFT ONLY — আসল সংখ্যা ছাড়া সংখ্যা লেখে না।"""
+    """Client report DRAFT ONLY — writes no number without a real number."""
 
     task_kind = "client_reporting"
     gate = None
@@ -34,7 +34,7 @@ class ClientReportingAgent:
     role = "Client Reporting Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -46,7 +46,7 @@ class ClientReportingAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -75,7 +75,7 @@ class ClientReportingAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Client report DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Making a client report DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Client report draft"
         gated_action = task.get("gated_action")
@@ -137,9 +137,9 @@ class ClientReportingAgent:
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Client report template + DRAFT "
-            "ONLY — কোনো সংখ্যা বানানো হয়নি, estimate করা হয়নি; missing "
-            "সংখ্যা BOSS INPUT REQUIRED। Report client-কে পাঠানো হয়নি। "
-            "Gate: none।"
+            "ONLY — no number was invented, no estimate was made; missing "
+            "numbers are BOSS INPUT REQUIRED. The report was not sent to the client. "
+            "Gate: none."
         )
         return {
             "status": "draft-ready",
