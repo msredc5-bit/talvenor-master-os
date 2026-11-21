@@ -1,22 +1,22 @@
 """Document Management Agent — document organisation draft (Dept 06, Phase 3).
 
-ভূমিকা (role): শুধু document কোথায় আছে তার organisation-এর DRAFT
-বানানো — document বানায় না, file লেখে/সরায়/muছে না।
-Gate: None — draft নিজেই নিরাপদ।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: only make a DRAFT of the organisation of where documents are
+— it makes no document, writes/moves/deletes no file.
+Gate: None — the draft itself is safe.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-তালিকায় শুধু যাচাই করা জায়গা: Master OS repo
+The list has only verified places: Master OS repo
 (`talvenor-master-os` — 00-CEO-Core, 01-Agency-Department,
 02-Digital-Product-Department, 03-Content-Creation-Department,
 CENTRAL-HQ, scripts, store), Talvenor office
 (`~/workspace/talvenor-office/`), brand asset
 (`~/workspace/talvenor-brand/`), JSON store
-(`store/tasks.json`, `store/approvals.json`)। CRM = n8n Cloud Data
-Tables PLANNED, live নয়।
+(`store/tasks.json`, `store/approvals.json`). CRM = n8n Cloud Data
+Tables PLANNED, not live.
 
-এই agent কখনো করে না: document বানায় না, file লেখে/সরায়/muছে না,
-বানানো document-এর নাম/অস্তিত্ব দাবি করে না, কিছু পাঠায় না, খরচ
-করে না, কোনো guarantee দেয় না, dental/medical নয়।
+This agent never: makes a document, writes/moves/deletes a file,
+claims an invented document's name/existence, sends anything, spends
+anything, gives no guarantee, no dental/medical.
 """
 
 import os
@@ -30,7 +30,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class DocumentManagementAgent:
-    """Document organisation DRAFT ONLY — কোনো file ছোঁয় না।"""
+    """Document organisation DRAFT ONLY — touches no file."""
 
     task_kind = "document_management"
     gate = None
@@ -38,7 +38,7 @@ class DocumentManagementAgent:
     role = "Document Management Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -50,7 +50,7 @@ class DocumentManagementAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -77,7 +77,7 @@ class DocumentManagementAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Document organisation DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Making a document organisation DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Document organisation"
         gated_action = task.get("gated_action")
@@ -112,23 +112,23 @@ class DocumentManagementAgent:
         output = (
             "[MOCK DRAFT] Document organisation — DRAFT ONLY\n"
             f"Department: {self.department} | Worker: {self.role}\n"
-            "Known locations (যাচাই করা, 2026-11-19):\n"
+            "Known locations (verified, 2026-11-19):\n"
             "- Master OS repo: talvenor-master-os/ — 00-CEO-Core, "
             "01-Agency-Department, 02-Digital-Product-Department, "
-            "03-Content-Creation-Department, CENTRAL-HQ, scripts, store।\n"
+            "03-Content-Creation-Department, CENTRAL-HQ, scripts, store.\n"
             "- JSON store: store/tasks.json, store/approvals.json "
-            "(DB = JSON store files)।\n"
-            "- Talvenor office: ~/workspace/talvenor-office/।\n"
-            "- Brand asset: ~/workspace/talvenor-brand/ (logos, social kit)।\n"
-            "- CRM: n8n Cloud Data Tables PLANNED, live নয় — document এখানে নেই।\n"
-            "নতুন document-এর জায়গা Boss ঠিক করবেন — BOSS INPUT REQUIRED।\n"
+            "(DB = JSON store files).\n"
+            "- Talvenor office: ~/workspace/talvenor-office/.\n"
+            "- Brand asset: ~/workspace/talvenor-brand/ (logos, social kit).\n"
+            "- CRM: n8n Cloud Data Tables PLANNED, not live — no document is here.\n"
+            "Boss will decide the place for a new document — BOSS INPUT REQUIRED.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Document organisation ONLY — "
-            "কোনো file লেখা/সরানো/muছা হয়নি, কোনো document বানানো হয়নি। "
-            "Gate: None।"
+            "No file was written/moved/deleted, no document was made. "
+            "Gate: None."
         )
         return {
             "status": "draft-ready",

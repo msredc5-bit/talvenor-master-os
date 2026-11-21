@@ -1,18 +1,18 @@
 """Compliance Calendar Agent — compliance dates draft (Dept 06, Phase 3).
 
-ভূমিকা (role): শুধু compliance তারিখের হিসাবের DRAFT বানানো — কখনো
-deadline বানায় না, legal পরামর্শ দেয় না, আইনি দাবি করে না।
-Gate: None — draft নিজেই নিরাপদ।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: only make a DRAFT of the compliance date account — never
+invent a deadline, give legal advice, or make a legal claim.
+Gate: None — the draft itself is safe.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-জানা সত্য (2026-11-19): attorney review (service agreement) DEFERRED
-— প্রথম paying client-এর আগে নয়, তারিখ নেই; dental/medical ব্যবসা
-কখনো target নয় (সবসময় DQ); সাপ্তাহিক cadence রবিবার 6 PM Dhaka।
-এর বাইরে কোনো compliance তারিখ জানা নেই — সব "BOSS INPUT REQUIRED"।
+Known facts (2026-11-19): attorney review (service agreement) DEFERRED
+— not before the first paying client, no date; dental/medical business
+is never a target (always DQ); weekly cadence Sunday 6 PM Dhaka.
+No compliance date is known beyond this — all "BOSS INPUT REQUIRED".
 
-এই agent কখনো করে না: deadline/তারিখ বানায় না, legal পরামর্শ দেয়
-না, আইনি দাবি করে না, কিছু পাঠায় না, খরচ করে না, কোনো guarantee
-দেয় না, dental/medical নয়।
+This agent never: invents a deadline/date, gives legal advice,
+makes a legal claim, sends anything, spends anything, gives any guarantee
+gives none, no dental/medical.
 """
 
 import os
@@ -26,7 +26,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class ComplianceCalendarAgent:
-    """Compliance calendar DRAFT ONLY — কখনো deadline বানায় না।"""
+    """Compliance calendar DRAFT ONLY — never invents a deadline."""
 
     task_kind = "compliance_calendar"
     gate = None
@@ -34,7 +34,7 @@ class ComplianceCalendarAgent:
     role = "Compliance Calendar Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -46,7 +46,7 @@ class ComplianceCalendarAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -74,7 +74,7 @@ class ComplianceCalendarAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Compliance calendar DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Making a compliance calendar DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Compliance calendar"
         gated_action = task.get("gated_action")
@@ -109,20 +109,19 @@ class ComplianceCalendarAgent:
         output = (
             "[MOCK DRAFT] Compliance calendar — DRAFT ONLY\n"
             f"Department: {self.department} | Worker: {self.role}\n"
-            "Known compliance items (শুধু জানা সত্য):\n"
-            "- Attorney review (service agreement): DEFERRED — প্রথম paying "
-            "client-এর আগে নয়; তারিখ নেই।\n"
-            "- Dental/medical targeting: কখনো নয় — সবসময় DQ।\n"
-            "- Weekly content plan + report: প্রতি রবিবার 6 PM Dhaka।\n"
-            "- অন্য compliance তারিখ: BOSS INPUT REQUIRED — কোনো তারিখ বানানো নয়।\n"
-            "Attorney review-এর তারিখ প্রথম paying client এলে Boss ঠিক করবেন।\n"
+            "Known compliance items (only known facts):\n"
+            "- Attorney review (service agreement): DEFERRED — not before the first paying client; no date.\n"
+            "- Dental/medical targeting: never — always DQ.\n"
+            "- Weekly content plan + report: every Sunday 6 PM Dhaka.\n"
+            "- Other compliance dates: BOSS INPUT REQUIRED — no date invented.\n"
+            "Boss will set the attorney review date when the first paying client comes.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Compliance calendar ONLY — "
-            "কোনো deadline/তারিখ বানানো হয়নি, কোনো legal দাবি নয়। "
-            "Attorney review deferred until first paying client। Gate: None।"
+            "No deadline/date was invented, no legal claim. "
+            "Attorney review deferred until first paying client. Gate: None."
         )
         return {
             "status": "draft-ready",

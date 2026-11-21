@@ -1,18 +1,18 @@
 """Subscription Tracking Agent — subscription tracking draft (Dept 06, Phase 3).
 
-ভূমিকা (role): শুধু subscription-এর হিসাবের DRAFT বানানো — কখনো
-subscription বা খরচ বানায় না, কখনো subscription কেনে না।
-Gate: None — draft নিজেই নিরাপদ।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: building a DRAFT of subscription tracking only — never
+invents subscriptions or costs, never buys a subscription.
+Gate: None — the draft itself is safe.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-জানা সত্য (2026-11-19): Vapi — free credit $5 (verified 2026-11-11),
-paid plan এখনো নেই, paid $0; Twilio — number এখনো import হয়নি;
-n8n Cloud — plan/cost জানা নেই (BOSS INPUT REQUIRED)। $0 spend cap —
-Boss-এর অনুমোদন ছাড়া কোনো paid subscription নয়।
+Known facts (2026-11-19): Vapi — free credit $5 (verified 2026-11-11),
+no paid plan yet, paid $0; Twilio — number not imported yet;
+n8n Cloud — plan/cost unknown (BOSS INPUT REQUIRED). $0 spend cap —
+no paid subscription without Boss's approval.
 
-এই agent কখনো করে না: subscription/plan/cost বানায় না, subscription
-কেনে না, খরচ করে না, plan বদলায় না, কিছু পাঠায় না, কোনো guarantee
-দেয় না, dental/medical নয়।
+This agent never does this: it does not invent subscription/plan/cost,
+does not buy a subscription, does not spend, does not change plans, sends nothing, gives no guarantee,
+no dental/medical.
 """
 
 import os
@@ -21,7 +21,7 @@ import sys
 BOOKING_LINK = "https://calendar.app.google/WLoxBfnLGTdjK3LB8"
 TALVENOR_PHONE = "+1 (947) 223-0244"
 
-# জানা সত্য (2026-11-19) — paid subscription $0 so far।
+# Known facts (2026-11-19) — paid subscription $0 so far.
 PAID_SUBSCRIPTIONS_TOTAL = 0
 
 _GATE_ACTION_MAP = {"post it": "publish", "upload it": "publish"}
@@ -29,7 +29,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class SubscriptionTrackingAgent:
-    """Subscription tracking DRAFT ONLY — কখনো subscription/cost বানায় না।"""
+    """Subscription tracking DRAFT ONLY — never invents subscription/cost."""
 
     task_kind = "subscription_tracking"
     gate = None
@@ -37,7 +37,7 @@ class SubscriptionTrackingAgent:
     role = "Subscription Tracking Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -49,7 +49,7 @@ class SubscriptionTrackingAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -76,7 +76,7 @@ class SubscriptionTrackingAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Subscription tracking DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Building a subscription tracking DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Subscription tracking"
         gated_action = task.get("gated_action")
@@ -111,19 +111,19 @@ class SubscriptionTrackingAgent:
         output = (
             "[MOCK DRAFT] Subscription tracking — DRAFT ONLY\n"
             f"Department: {self.department} | Worker: {self.role}\n"
-            f"Paid subscriptions total (real): ${PAID_SUBSCRIPTIONS_TOTAL} — $0 spend cap।\n"
-            "Known subscriptions (শুধু জানা সত্য):\n"
-            "- Vapi (live voice stack, Sophia): free credit $5, paid plan এখনো নেই।\n"
-            "- Twilio: number এখনো import হয়নি — cost BOSS INPUT REQUIRED।\n"
-            "- n8n Cloud (Data Tables PLANNED, live নয়): plan/cost BOSS INPUT REQUIRED।\n"
-            "Boss-এর অনুমোদন ছাড়া কোনো paid subscription নয়।\n"
+            f"Paid subscriptions total (real): ${PAID_SUBSCRIPTIONS_TOTAL} — $0 spend cap.\n"
+            "Known subscriptions (only known facts):\n"
+            "- Vapi (live voice stack, Sophia): free credit $5, no paid plan yet.\n"
+            "- Twilio: number not imported yet — cost BOSS INPUT REQUIRED.\n"
+            "- n8n Cloud (Data Tables PLANNED, not live): plan/cost BOSS INPUT REQUIRED.\n"
+            "No paid subscription without Boss's approval.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Subscription tracking ONLY — "
-            "কোনো subscription/plan/cost বানানো হয়নি। Paid $0 so far। "
-            "Gate: None।"
+            "No subscription/plan/cost was invented. Paid $0 so far. "
+            "Gate: None."
         )
         return {
             "status": "draft-ready",

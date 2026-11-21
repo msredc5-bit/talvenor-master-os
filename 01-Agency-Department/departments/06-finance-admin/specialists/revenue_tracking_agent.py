@@ -1,18 +1,18 @@
 """Revenue Tracking Agent — revenue tracking template draft (Dept 06, Phase 3).
 
-ভূমিকা (role): শুধু revenue tracking-এর TEMPLATE-এর DRAFT বানানো —
-কখনো revenue বানায় না, client-এর নাম/টাকা বসায় না।
-Gate: None — draft নিজেই নিরাপদ।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: only make a DRAFT of the TEMPLATE for revenue tracking —
+never invent revenue, never put in a client's name/money.
+Gate: None — the draft itself is safe.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-সত্য অবস্থা (2026-11-19): paying client 0, revenue $0 — track করার
-মতো revenue নেই। Template-এ শুধু column header + খালি row-র জায়গা;
-কোনো ভরা row নেই। LOCKED pricing internal only — template-এ দামের
-সংখ্যা বসানো হয় না, prospect-কে কখনো দাম quote নয়।
+True state (2026-11-19): paying client 0, revenue $0 — no revenue to track.
+The template has only column headers + space for empty rows;
+no filled row. LOCKED pricing internal only — no price numbers are put in the template;
+never quote a price to a prospect.
 
-এই agent কখনো করে না: revenue বানায় না, client/টাকা বসায় না,
-invoice issue করে না, payment নেয় না, কিছু পাঠায় না, খরচ করে না,
-দাম quote করে না, কোনো guarantee দেয় না, dental/medical নয়।
+This agent never: invents revenue, puts in a client/money,
+issues an invoice, takes a payment, sends anything, spends anything,
+quotes a price, gives no guarantee, no dental/medical.
 """
 
 import os
@@ -21,7 +21,7 @@ import sys
 BOOKING_LINK = "https://calendar.app.google/WLoxBfnLGTdjK3LB8"
 TALVENOR_PHONE = "+1 (947) 223-0244"
 
-# সত্য অবস্থা (2026-11-19) — track করার মতো revenue নেই।
+# True state (2026-11-19) — no revenue to track.
 PAYING_CLIENTS = 0
 REVENUE_TOTAL = 0
 
@@ -30,7 +30,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class RevenueTrackingAgent:
-    """Revenue tracking template DRAFT ONLY — কখনো revenue বানায় না।"""
+    """Revenue tracking template DRAFT ONLY — never invents revenue."""
 
     task_kind = "revenue_tracking"
     gate = None
@@ -38,7 +38,7 @@ class RevenueTrackingAgent:
     role = "Revenue Tracking Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -50,7 +50,7 @@ class RevenueTrackingAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -78,7 +78,7 @@ class RevenueTrackingAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Revenue tracking template DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Making a revenue tracking template DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Revenue tracking template"
         gated_action = task.get("gated_action")
@@ -114,20 +114,19 @@ class RevenueTrackingAgent:
             "[MOCK DRAFT] Revenue tracking template — DRAFT ONLY\n"
             f"Department: {self.department} | Worker: {self.role}\n"
             f"Paying clients (real, 2026-11-19): {PAYING_CLIENTS} | "
-            f"Revenue (real): ${REVENUE_TOTAL} — track করার মতো revenue নেই।\n"
-            "Template (columns only — কোনো ভরা row নেই):\n"
+            f"Revenue (real): ${REVENUE_TOTAL} — no revenue to track.\n"
+            "Template (columns only — no filled row):\n"
             "Client | Tier | Monthly | Build fee | Status\n"
-            "--- row ভরবে Boss, paying client এলে ---\n"
-            "Total revenue: $0 (paying client 0)।\n"
-            "LOCKED pricing internal only — template-এ দামের সংখ্যা বসানো "
-            "হয় না; prospect-কে কখনো দাম quote নয়।\n"
+            "--- Boss will fill the row, when a paying client comes ---\n"
+            "Total revenue: $0 (paying client 0).\n"
+            "LOCKED pricing internal only — no price numbers are put in the template; never quote a price to a prospect.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Revenue tracking template ONLY — "
-            "কোনো revenue/client/টাকা বানানো হয়নি। Paying client 0, "
-            "revenue $0। Gate: None।"
+            "No revenue/client/money was invented. Paying client 0, "
+            "revenue $0. Gate: None."
         )
         return {
             "status": "draft-ready",
