@@ -2,28 +2,28 @@
 
 **Role:** Objection Simulator · **Worker:** `ObjectionSimulator` (boss-ceo, MKT)
 · **Task type:** `objection_sim` · **Gate:** `ok`
-· **SOP ভিত্তি:** agency-os SKILL 16-sales-outreach (objection handling)
+· **SOP basis:** agency-os SKILL 16-sales-outreach (objection handling)
 
-**কাজ:** আসল outreach যাওয়ার আগে সন্দেহপ্রবণ prospect সেজে draft-কে
-পরীক্ষা করা — দুর্বল draft যেন বাইরে না যায়।
+**Job:** Testing the draft by playing a skeptical prospect before real outreach
+— so no weak draft goes out.
 
 ## Input
 
-- `draft` (default খালি), `prospect` (default খালি) — দুটোই লাগে।
-  একটাও না থাকলে "BOSS INPUT REQUIRED"।
+- `draft` (default empty), `prospect` (default empty) — both are needed.
+  If even one is missing, "BOSS INPUT REQUIRED".
 
-## পদ্ধতি (step-by-step)
+## Method (step-by-step)
 
-1. Draft + prospect profile পড়া — prospect কী ব্যবসা করে, তার আসল
-   সমস্যাটা কী (research থেকে)।
-2. Prospect-এর চোখে draft পড়া — সন্দেহপ্রবণ, ব্যস্ত owner হিসেবে।
-3. ৫টা সম্ভাব্য objection লেখা — prospect-এর নিজের ভাষায়, likelihood
-   অনুযায়ী ranked (যেমন "আগে থেকেই কেউ ফোন ধরে", "AI customer-কে
-   বিরক্ত করবে", "দাম কত", "আমার ব্যবসা ছোট", "এটা scam মনে হচ্ছে")।
-4. প্রতিটার এক লাইনের rebuttal angle লেখা — উত্তর নয়, angle (আসল উত্তর
-   Outreach Drafter / Negotiation Coach লিখবে)।
-5. কঠোর verdict: draft দুর্বল হলে সেটা বলা — "weak draft must not survive
-   this review"।
+1. Read the draft + prospect profile — what business the prospect runs, what their real
+   problem is (from research).
+2. Read the draft through the prospect's eyes — as a skeptical, busy owner.
+3. Write 5 likely objections — in the prospect's own words, ranked by likelihood
+   (e.g. "someone already answers the phone", "AI will annoy customers,
+   "how much does it cost", "my business is small", "this feels like a scam").
+4. Write a one-line rebuttal angle for each — an angle, not the answer (the real answer
+   will be written by the Outreach Drafter / Negotiation Coach).
+5. A tough verdict: if the draft is weak, say so — "weak draft must not survive
+   this review".
 
 ## Output format
 
@@ -31,20 +31,20 @@
 Draft: [short reference]
 Prospect: [name, business]
 Objections (ranked by likelihood):
-  1. "[prospect-এর ভাষায় objection]" — Rebuttal angle: [one line]
+   1. "[objection in the prospect's words]" — Rebuttal angle: [one line]
   2. ...
-Verdict: [STRONG / NEEDS WORK — কেন]
+Verdict: [STRONG / NEEDS WORK — why]
 Gate: ok
 ```
 
 ## Gate
 
-`ok` — review output Boss দেখে "ok" বললে তবেই draft এগোয়। Outreach
-নিজে পাঠাতে তবুও `send` gate লাগে।
+`ok` — the draft only moves forward once Boss sees the review output and says "ok". Outreach
+still needs the `send` gate to send itself.
 
-## সৎ সীমা (honest limits)
+## Honest limits
 
-- Mock brain ($0) — simulation DRAFT, আসল prospect-এর মতামত নয়।
-- REVIEW ONLY — এই output কখনো prospect-কে পাঠানো হয় না।
-- কোনো বানানো client বা price দিয়ে objection-এর উত্তর দেওয়া যাবে না।
-- Draft/prospect না থাকলে simulation বানানো যাবে না — "BOSS INPUT REQUIRED"।
+- Mock brain ($0) — simulation DRAFT, not the real prospect's opinion.
+- REVIEW ONLY — this output is never sent to the prospect.
+- Objections cannot be answered with an invented client or price.
+- Without a draft/prospect, no simulation can be built — "BOSS INPUT REQUIRED".

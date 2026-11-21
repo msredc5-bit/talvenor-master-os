@@ -1,158 +1,158 @@
-# STAFF.md — Agency Engine-র কর্মী তালিকা (Phase 5)
+# STAFF.md — Agency Engine staff list (Phase 5)
 
-Talvenor AI Receptionist Agency — Boss-এর প্রথম ব্যবসা, MAIN।
-এই তালিকার ১৫টা role = `01-Agency-Department/engine/workers/src/workers/`-এর ১৫টা আসল (vendored copy; upstream `~/workspace/boss-ceo/src/workers/`)
-worker, একটাও বানানো নয়। নাম, division, gate — Chief-এর ROUTING
-(`../chief_of_staff_agency.py`) থেকে হুবহু নেওয়া।
+Talvenor AI Receptionist Agency — Boss's first business, MAIN.
+The 15 roles in this list = the 15 real ones in `01-Agency-Department/engine/workers/src/workers/` (vendored copy; upstream `~/workspace/boss-ceo/src/workers/`)
+workers, not one invented. Names, divisions, gates — taken verbatim from the Chief's ROUTING
+(`../chief_of_staff_agency.py`).
 
-সত্য অবস্থা (2026-11-16): Email PAUSED (2026-11-14 থেকে, DNS fix বাকি) —
-draft-ই শেষ কথা, send নয়। Paying client 0। প্রথম মেইল 162।
-Booking: https://calendar.app.google/WLoxBfnLGTdjK3LB8 · ফোন +1 (947) 223-0244।
-সব worker MockLLMProvider (mock brain, $0) দিয়ে চলে — সব output DRAFT।
-Live stack Vapi/Sophia — RetellBuilder-এর output শুধু DRAFT build plan।
+True status (2026-11-16): Email PAUSED (since 2026-11-14, DNS fix pending) —
+the draft is the final word, not sending. Paying client 0. First mail 162.
+Booking: https://calendar.app.google/WLoxBfnLGTdjK3LB8 · Phone +1 (947) 223-0244.
+All workers run on MockLLMProvider (mock brain, $0) — all output is DRAFT.
+Live stack Vapi/Sophia — RetellBuilder's output is only a DRAFT build plan.
 
-Gate শব্দের মানে: output পাঠাতে/ব্যবহার করতে Boss-এর যে exact শব্দ লাগবে।
-None = draft নিজেই নিরাপদ, কোনো gate নেই।
+Gate word meaning: the exact word from Boss needed to send/use the output.
+None = the draft itself is safe, no gate.
 
 ---
 
 ## 1. Prospect Researcher
 
 - **Worker:** `ProspectResearcher` · **Division:** ACQ · **Task type:** `prospect_research` · **Gate:** None
-- **কী করে:** US home-service SMB (plumbing, HVAC, roofing, garage door, septic, tree, foundation, restoration, pest, vet) খুঁজে বের করে — owner-এর নাম, missed-call pain signal, tech gap, আর personalization angle সহ। Dental/medical/patient-health কখনো নয়।
-- **Input:** `niche` (default: plumbing), `region` (default: Texas)।
-- **Output:** ১০টা prospect-এর research notes — field: name, owner, pain_signals, angle।
-- **Skill:** `skills/prospect-researcher.md` · **SOP ভিত্তি:** agency-os SKILL 02-lead-generation + SOP prospect-qualification-talvenor.md।
+- **What it does:** finds US home-service SMBs (plumbing, HVAC, roofing, garage door, septic, tree, foundation, restoration, pest, vet) — with the owner's name, missed-call pain signal, tech gap, and personalization angle. Never dental/medical/patient-health.
+- **Input:** `niche` (default: plumbing), `region` (default: Texas).
+- **Output:** research notes for 10 prospects — fields: name, owner, pain_signals, angle.
+- **Skill:** `skills/prospect-researcher.md` · **SOP basis:** agency-os SKILL 02-lead-generation + SOP prospect-qualification-talvenor.md.
 
 ## 2. Outreach Drafter
 
 - **Worker:** `OutreachDrafter` · **Division:** ACQ · **Task type:** `outreach_draft` · **Gate:** `send`
-- **কী করে:** Cold email / Instagram DM-এর draft লেখে — short, plain US English, hook প্রথমে, একটা CTA (short call)। Email 20–30/day, IG 5–10/day warm-up। Draft ONLY — পাঠানো Boss-এর কাজ।
-- **Input:** `channel` (email | instagram, default: email)।
-- **Output:** ৫টা draft — email হলে from `hello@talvenorai.agency`, IG হলে `@talvenor_ai`। কোনো price, guarantee, বানানো client নয়।
-- **Skill:** `skills/outreach-drafter.md` · **SOP ভিত্তি:** agency-os SKILL 16-sales-outreach। **সীমা:** Email PAUSED — draft-ই শেষ কথা।
+- **What it does:** writes drafts of cold email / Instagram DM — short, plain US English, hook first, one CTA (short call). Email 20–30/day, IG 5–10/day warm-up. Draft ONLY — sending is Boss's job.
+- **Input:** `channel` (email | instagram, default: email).
+- **Output:** 5 drafts — if email, from `hello@talvenorai.agency`; if IG, `@talvenor_ai`. No price, guarantee, or invented client.
+- **Skill:** `skills/outreach-drafter.md` · **SOP basis:** agency-os SKILL 16-sales-outreach. **Limit:** Email PAUSED — the draft is the final word.
 
 ## 3. Reply Triager
 
 - **Worker:** `ReplyHandler` · **Division:** ACQ · **Task type:** `reply_triage` · **Gate:** `send`
-- **কী করে:** Prospect-এর reply আলাদা করে — interest / question / pricing / demo request / decline। Decline হলে polite exit; বাকিগুলো DRAFT reply only — price quote নয়, short call-এর offer, Boss-কে নাম + platform + message সহ flag করা।
-- **Input:** `reply_type` (default: interest)।
-- **Output:** Triage verdict + draft reply (interest-ধরনের reply-তে gate `send`, decline-এ gate None)।
-- **Skill:** `skills/reply-triager.md` · **SOP ভিত্তি:** agency-os SKILL 16-sales-outreach (reply rule 2026-10-14)।
+- **What it does:** sorts a prospect's reply — interest / question / pricing / demo request / decline. On a decline, a polite exit; the rest are DRAFT reply only — no price quote, offer of a short call, flag Boss with name + platform + message.
+- **Input:** `reply_type` (default: interest).
+- **Output:** Triage verdict + draft reply (gate `send` on an interest-type reply, gate None on a decline).
+- **Skill:** `skills/reply-triager.md` · **SOP basis:** agency-os SKILL 16-sales-outreach (reply rule 2026-10-14).
 
 ## 4. Negotiation Coach
 
 - **Worker:** `NegotiationCoach` · **Division:** ACQ · **Task type:** `negotiation_prep` · **Gate:** `ok`
-- **কী করে:** Founder-কে live sales call-এর জন্য তৈরি করে — ৩টা সম্ভাব্য প্রশ্ন + শক্ত উত্তর, এড়ানোর মতো ২টা trap, আর ৬০ সেকেন্ডের opening script (plain US English)। Call Boss নিজে নেন — এটা শুধু prep।
-- **Input:** `prospect` (profile, default: খালি), `goal` (default: book the demo call)।
-- **Output:** Prep pack — ৩ Q&A, ২ trap, ৬০-sec opening script। Boss-এর সিদ্ধান্ত লাগে এমন কিছু থাকলে GATE হিসেবে flag করা। কোনো price quote নয়।
-- **Skill:** `skills/negotiation-coach.md` · **SOP ভিত্তি:** agency-os SKILL 16-sales-outreach (call prep / objection handling)।
+- **What it does:** prepares the Founder for a live sales call — 3 likely questions + strong answers, 2 traps to avoid, and a 60-second opening script (plain US English). Boss takes the call himself — this is only prep.
+- **Input:** `prospect` (profile, default: empty), `goal` (default: book the demo call).
+- **Output:** Prep pack — 3 Q&A, 2 traps, 60-sec opening script. Anything needing Boss's decision is flagged as a GATE. No price quote.
+- **Skill:** `skills/negotiation-coach.md` · **SOP basis:** agency-os SKILL 16-sales-outreach (call prep / objection handling).
 
 ## 5. Receptionist Builder
 
 - **Worker:** `RetellBuilder` · **Division:** DEL · **Task type:** `receptionist_build` · **Gate:** `ok`
-- **কী করে:** Client-এর receptionist-এর **DRAFT build plan** লেখে — agent prompt, knowledge base, recording script। Live stack Vapi/Sophia (Boss Retell-এর জন্য টাকা দেবেন না) — তাই এই worker কখনো live build করে না, শুধু plan।
-- **Input:** `business` (default: Apex Plumbing), `trade` (default: plumbing)।
-- **Output:** DRAFT plan — agent-prompt, knowledge-base, recording-script। In-prompt schedule, emergency flow, callback handling, FAQ, honest AI disclosure, fictional AP- confirmation number, end_call only। কোনো বানানো pricing নয়।
-- **Skill:** `skills/receptionist-builder.md` · **SOP ভিত্তি:** agency-os SKILL 06-vapi-voice-agent (Vapi layer) + 05-agent-architecture।
+- **What it does:** writes a **DRAFT build plan** for the client's receptionist — agent prompt, knowledge base, recording script. Live stack Vapi/Sophia (Boss will not pay for Retell) — so this worker never builds live, only the plan.
+- **Input:** `business` (default: Apex Plumbing), `trade` (default: plumbing).
+- **Output:** DRAFT plan — agent-prompt, knowledge-base, recording-script. In-prompt schedule, emergency flow, callback handling, FAQ, honest AI disclosure, fictional AP- confirmation number, end_call only. No invented pricing.
+- **Skill:** `skills/receptionist-builder.md` · **SOP basis:** agency-os SKILL 06-vapi-voice-agent (Vapi layer) + 05-agent-architecture.
 
 ## 6. QA Engineer
 
 - **Worker:** `QAEngineer` · **Division:** DEL · **Task type:** `receptionist_qa` · **Gate:** None
-- **কী করে:** Demo receptionist READY বলার আগে ১২টা check-এর QA checklist চালায় — prompt completeness, ভাঙা tool reference নেই, emergency flow, pricing honesty, transfer number আসল-না-অনুপস্থিত, end_call behavior।
-- **Input:** `agent` (default: ava-apex-plumbing-demo)।
-- **Output:** Checklist + verdict: READY অথবা CHANGES। Verdict-ই শেষ কথা নয় — delivery-তে Boss-এর ok লাগে।
-- **Skill:** `skills/qa-engineer.md` · **SOP ভিত্তি:** agency-os SKILL 18-qa-testing (mandatory gate)।
+- **What it does:** runs a QA checklist of 12 checks before calling the demo receptionist READY — prompt completeness, no broken tool reference, emergency flow, pricing honesty, transfer number real-or-absent, end_call behavior.
+- **Input:** `agent` (default: BOSS INPUT REQUIRED).
+- **Output:** Checklist + verdict: READY or CHANGES. The verdict is not the final word — delivery needs Boss's ok.
+- **Skill:** `skills/qa-engineer.md` · **SOP basis:** agency-os SKILL 18-qa-testing (mandatory gate).
 
 ## 7. Onboarding Agent
 
 - **Worker:** `OnboardingAgent` · **Division:** DEL · **Task type:** `onboarding_draft` · **Gate:** `ok`
-- **কী করে:** নতুন client-এর onboarding pack-এর draft লেখে — business info form, hours/services/price-list request, transfer number confirmation, ৭ দিনে live-এর শর্ত (3-month minimum, তারপর month-to-month)।
-- **Input:** `client` (default: new client)।
-- **Output:** Onboarding pack — info-form, terms, timeline। কোনো বানানো detail নয়; client-এর আসল তথ্য না থাকলে "BOSS INPUT REQUIRED"।
-- **Skill:** `skills/onboarding-agent.md` · **SOP ভিত্তি:** agency-os SKILL 20-agency-operations (onboarding)।
+- **What it does:** writes a draft of the onboarding pack for a new client — business info form, hours/services/price-list request, transfer number confirmation, live-in-7-days terms (3-month minimum, then month-to-month).
+- **Input:** `client` (default: new client).
+- **Output:** Onboarding pack — info-form, terms, timeline. No invented detail; without the client's real information, "BOSS INPUT REQUIRED".
+- **Skill:** `skills/onboarding-agent.md` · **SOP basis:** agency-os SKILL 20-agency-operations (onboarding).
 
 ## 8. Content Planner
 
 - **Worker:** `ContentPlanner` · **Division:** MKT · **Task type:** `content_plan` · **Gate:** `ok`
-- **কী করে:** প্রতি রবিবার ৬টা (Dhaka) পরের সপ্তাহের ৫ পোস্টের plan বানায় — Facebook / Instagram / LinkedIn, pillar: missed-call pain, AI receptionist demo, founder voice, social proof (বানানো client ছাড়া), CTA। প্রতি পোস্টে platform, format, hook, best US-Eastern time।
-- **Input:** (কোনো default payload নেই — সপ্তাহের plan-ই input)।
-- **Output:** ৫ পোস্টের plan। Boss-এর "ok" না পেলে কিছু বানানো হয় না।
-- **Skill:** `skills/content-planner.md` · **SOP ভিত্তি:** agency-os SKILL 17-marketing।
+- **What it does:** builds the next week's 5-post plan every Sunday 6 PM (Dhaka) — Facebook / Instagram / LinkedIn, pillars: missed-call pain, AI receptionist demo, founder voice, social proof (without invented clients), CTA. Per post: platform, format, hook, best US-Eastern time.
+- **Input:** (no default payload — the week's plan is the input).
+- **Output:** 5-post plan. Nothing is built without Boss's "ok".
+- **Skill:** `skills/content-planner.md` · **SOP basis:** agency-os SKILL 17-marketing.
 
 ## 9. Video Producer
 
 - **Worker:** `VideoProducer` · **Division:** MKT · **Task type:** `video_produce` · **Gate:** `ok`
-- **কী করে:** Reel package বানায় — প্রথম ২ সেকেন্ডে hook, REAL footage (frame-verified, stills-motion নয়), US-English voiceover, karaoke caption, Talvenor end card (wave logo, কখনো redraw নয়), hypothetical-এ "Illustrative example"। Format 9:16।
-- **Input:** `topic` (default: missed call = lost job)।
-- **Output:** Reel package (script + shot list + voiceover + caption spec)। Publish/upload-এ gate `upload it` লাগে — এই worker নিজে upload করে না।
-- **Skill:** `skills/video-producer.md` · **SOP ভিত্তি:** agency-os SKILL 17-marketing + reel-factory SOP।
+- **What it does:** builds a Reel package — hook in the first 2 seconds, REAL footage (frame-verified, not stills-motion), US-English voiceover, karaoke caption, Talvenor end card (wave logo, never redrawn), "Illustrative example" on hypotheticals. Format 9:16.
+- **Input:** `topic` (default: missed call = lost job).
+- **Output:** Reel package (script + shot list + voiceover + caption spec). Publish/upload needs gate `upload it` — this worker never uploads itself.
+- **Skill:** `skills/video-producer.md` · **SOP basis:** agency-os SKILL 17-marketing + reel-factory SOP.
 
 ## 10. Caption Writer
 
 - **Worker:** `CaptionWriter` · **Division:** MKT · **Task type:** `caption_write` · **Gate:** None
-- **কী করে:** Finished creative-এর caption + hashtag + CTA pack লেখে — প্রথম লাইনে hook, plain US English, একটা CTA ("link in bio" শুধু যখন আসল booking link আছে)। Hashtag: IG 5–8, LinkedIn 3, Facebook 0–2।
-- **Input:** `platform` (default: instagram)।
-- **Output:** Caption pack — caption, hashtags, CTA। কোনো price, guarantee নয়। Publish-এ তবুও gate লাগে (`post it`) — caption নিজে publish নয়।
-- **Skill:** `skills/caption-writer.md` · **SOP ভিত্তি:** agency-os SKILL 17-marketing + caption-pack SOP।
+- **What it does:** writes the caption + hashtag + CTA pack for a finished creative — hook in the first line, plain US English, one CTA ("link in bio" only when the real booking link exists). Hashtags: IG 5–8, LinkedIn 3, Facebook 0–2.
+- **Input:** `platform` (default: instagram).
+- **Output:** Caption pack — caption, hashtags, CTA. No price, no guarantee. Publishing still needs a gate (`post it`) — a caption is not a publish.
+- **Skill:** `skills/caption-writer.md` · **SOP basis:** agency-os SKILL 17-marketing + caption-pack SOP.
 
 ## 11. Publish Prep
 
 - **Worker:** `PublishPrep` · **Division:** MKT · **Task type:** `publish_prep` · **Gate:** `post it`
-- **কী করে:** Approved post publish-এর জন্য তৈরি করে — final file + caption + first comment + scheduled time (US Eastern)। শুধু PREPARE — publish করে না। Detached auto-publish নিষিদ্ধ (2026-10-10 lesson)।
-- **Input:** `count` (default: 2)।
-- **Output:** Publish-ready pack। Publishing শুধু main chat থেকে, Boss "post it" বললে।
-- **Skill:** `skills/publish-prep.md` · **SOP ভিত্তি:** agency-os SKILL 17-marketing + 2026-10-10 publishing lesson।
+- **What it does:** prepares an approved post for publishing — final file + caption + first comment + scheduled time (US Eastern). Only PREPARE — it does not publish. Detached auto-publish is forbidden (2026-10-10 lesson).
+- **Input:** `count` (default: 2).
+- **Output:** Publish-ready pack. Publishing only from the main chat, when Boss says "post it".
+- **Skill:** `skills/publish-prep.md` · **SOP basis:** agency-os SKILL 17-marketing + 2026-10-10 publishing lesson.
 
 ## 12. Objection Simulator
 
 - **Worker:** `ObjectionSimulator` · **Division:** MKT · **Task type:** `objection_sim` · **Gate:** `ok`
-- **কী করে:** আসল outreach যাওয়ার আগে সন্দেহপ্রবণ prospect সেজে draft-কে পরীক্ষা করে — সম্ভাব্য ৫টা objection, prospect-এর নিজের ভাষায়, likelihood অনুযায়ী ranked, প্রতিটার এক লাইনের rebuttal angle। কঠোর হতে হয় — দুর্বল draft টিকতে পারবে না।
-- **Input:** `draft`, `prospect` (দুটোই default খালি)।
-- **Output:** ৫ objection + rebuttal angle। REVIEW ONLY — কখনো prospect-কে পাঠানো হয় না।
-- **Skill:** `skills/objection-simulator.md` · **SOP ভিত্তি:** agency-os SKILL 16-sales-outreach (objection handling)।
+- **What it does:** tests the draft by playing a skeptical prospect before real outreach — 5 likely objections, in the prospect's own words, ranked by likelihood, with a one-line rebuttal angle for each. It must be tough — a weak draft cannot survive.
+- **Input:** `draft`, `prospect` (both default empty).
+- **Output:** 5 objections + rebuttal angle. REVIEW ONLY — never sent to the prospect.
+- **Skill:** `skills/objection-simulator.md` · **SOP basis:** agency-os SKILL 16-sales-outreach (objection handling).
 
 ## 13. Inbox Triager
 
 - **Worker:** `InboxTriager` · **Division:** OPS · **Task type:** `inbox_triage` · **Gate:** None
-- **কী করে:** Inbox সাজায় — urgent / prospect / vendor / noise। Boss-এর voice-এ (short, plain) draft reply লেখে। টাকা, প্রতিশ্রুতি, বা পাঠানোর মতো কিছু থাকলে Boss-কে flag করে। কিছু পাঠায় না।
-- **Input:** (কোনো default payload নেই — inbox-ই input)।
-- **Output:** Triage list + draft reply। Sends: False — DRAFT ONLY।
-- **Skill:** `skills/inbox-triager.md` · **SOP ভিত্তি:** agency-os SKILL 20-agency-operations + 15-crm-lead-machine।
+- **What it does:** organizes the inbox — urgent / prospect / vendor / noise. Writes draft replies in Boss's voice (short, plain). Flags Boss when money, a promise, or sending is involved. Sends nothing.
+- **Input:** (no default payload — the inbox is the input).
+- **Output:** Triage list + draft reply. Sends: False — DRAFT ONLY.
+- **Skill:** `skills/inbox-triager.md` · **SOP basis:** agency-os SKILL 20-agency-operations + 15-crm-lead-machine.
 
 ## 14. Report Compiler
 
 - **Worker:** `ReportCompiler` · **Division:** OPS · **Task type:** `report_compile` · **Gate:** None
-- **কী করে:** সাপ্তাহিক performance report বানায় — কী post হয়েছে, দেখা যায় এমন platform number দিয়ে best/worst, lead list (নাম/platform/message/next step), পরের সপ্তাহে কী বদলাবে। Number না থাকলে "নেই" বলে Boss-কে paste করতে বলে — কখনো অনুমান বা বানানো metric নয়।
-- **Input:** (কোনো default payload নেই — সপ্তাহের কাজ + platform number-ই input)।
-- **Output:** Report — posted, performance, leads, next-week। Metrics policy: visible-only।
-- **Skill:** `skills/report-compiler.md` · **SOP ভিত্তি:** agency-os SKILL 20-agency-operations (reporting) + 15-crm-lead-machine।
+- **What it does:** builds the weekly performance report — what was posted, best/worst using platform numbers that can actually be seen, lead list (name/platform/message/next step), what changes next week. Without numbers it says "none" and asks Boss to paste them — never a guess or invented metric.
+- **Input:** (no default payload — the week's work + platform numbers are the input).
+- **Output:** Report — posted, performance, leads, next-week. Metrics policy: visible-only.
+- **Skill:** `skills/report-compiler.md` · **SOP basis:** agency-os SKILL 20-agency-operations (reporting) + 15-crm-lead-machine.
 
 ## 15. Scheduler
 
 - **Worker:** `SchedulerAssistant` · **Division:** OPS · **Task type:** `schedule_help` · **Gate:** None
-- **কী করে:** Scheduling-এ সাহায্য করে — ৩টা slot প্রস্তাব করে (Asia/Dhaka + US-Eastern equivalent), invite-এর draft লেখে। Boss confirm করার আগে কিছু পাঠানো হয় না।
-- **Input:** `what` (default: client demo call)।
-- **Output:** ৩ slot + draft invite। Booking link: https://calendar.app.google/WLoxBfnLGTdjK3LB8 (15 min, New York Time)।
-- **Skill:** `skills/scheduler.md` · **SOP ভিত্তি:** agency-os SKILL 20-agency-operations।
+- **What it does:** helps with scheduling — proposes 3 slots (Asia/Dhaka + US-Eastern equivalent), writes a draft invite. Nothing is sent before Boss confirms.
+- **Input:** `what` (default: client demo call).
+- **Output:** 3 slots + draft invite. Booking link: https://calendar.app.google/WLoxBfnLGTdjK3LB8 (15 min, New York Time).
+- **Skill:** `skills/scheduler.md` · **SOP basis:** agency-os SKILL 20-agency-operations.
 
 ---
 
 **Source:** `01-Agency-Department/engine/workers/src/workers/{acquisition,delivery,marketing,admin}.py` (vendored; upstream `~/workspace/boss-ceo/src/workers/`)
 (task_kind / default_payload / requires_gate) · `../chief_of_staff_agency.py` (ROUTING)
 · `../pipeline.md` · `~/workspace/agency-os/SOP/prospect-qualification-talvenor.md`
-· agency-os SKILL 02, 03, 06, 15, 16, 17, 18, 20।
+· agency-os SKILL 02, 03, 06, 15, 16, 17, 18, 20.
 
 ---
 
 ## Phase 7 — Section map (2026-11-17)
 
-১৫টা mapped staff (উপরের তালিকা) + ৬টা NEW section agent = **২১ staff**।
-Mapped staff-দের worker code engine-এ vendored থাকে
-(`engine/workers/src/workers/`), duplicate করা হয়নি — এখানে শুধু map।
-NEW agent-রা `sections/<section>/agents/`-এ আসল `.py` file + নিজের skill
-(`sections/<section>/skills/`)। Chief-এর `SECTION_ROUTING`-এ ৬টা নতুন
-task type চলে (ROUTING-এর ১৫টা অপরিবর্তিত)।
+15 mapped staff (the list above) + 6 NEW section agents = **21 staff**.
+Mapped staff workers' code stays vendored in the engine
+(`engine/workers/src/workers/`), not duplicated — only mapped here.
+NEW agents are real `.py` files in `sections/<section>/agents/` + their own skill
+(`sections/<section>/skills/`). The Chief's `SECTION_ROUTING` gets 6 new
+task types (the ROUTING's 15 are unchanged).
 
 | Section | Staff | Task type | Agent file / vendored worker | Skill file | Gate | Status |
 |---|---|---|---|---|---|---|
@@ -178,8 +178,8 @@ task type চলে (ROUTING-এর ১৫টা অপরিবর্তিত)
 | ops | ReportCompiler | `report_compile` | `engine/workers/src/workers/admin.py` | `engine/skills/report-compiler.md` | None | MAPPED |
 | ops | BillingInvoiceAgent | `billing_invoice` | `sections/ops/agents/billing_invoice_agent.py` | `sections/ops/skills/billing-invoice-agent.md` | `ok` | NEW |
 
-**সত্য অবস্থা (2026-11-17, Phase 7):** Email PAUSED (2026-11-14 থেকে) —
-draft-ই শেষ কথা। Paying client 0। প্রথম মেইল 162 — কোনো state 100-তে নেই,
-কোনো follow-up due নয় (100-mail নিয়ম)। LOCKED pricing শুধু invoice-এর
-জন্য (Starter $547/mo + $597 build; Growth $1,109/mo + $1,297 build;
-Scale $1,672/mo + $1,997 build) — prospect-কে কখনো দাম quote নয়।
+**True status (2026-11-17, Phase 7):** Email PAUSED (since 2026-11-14) —
+the draft is the final word. Paying client 0. First mail 162 — no state is at 100,
+no follow-up is due (100-mail rule). LOCKED pricing only for the invoice
+(Starter $547/mo + $597 build; Growth $1,109/mo + $1,297 build;
+Scale $1,672/mo + $1,997 build) — never quote a price to a prospect.

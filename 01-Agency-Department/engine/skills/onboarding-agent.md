@@ -2,30 +2,30 @@
 
 **Role:** Onboarding Agent · **Worker:** `OnboardingAgent` (boss-ceo, DEL)
 · **Task type:** `onboarding_draft` · **Gate:** `ok`
-· **SOP ভিত্তি:** agency-os SKILL 20-agency-operations (client onboarding)
+· **SOP basis:** agency-os SKILL 20-agency-operations (client onboarding)
 
-**কাজ:** নতুন client-এর onboarding pack-এর DRAFT লেখা — তথ্য সংগ্রহের
-pack, build নিজে নয়।
+**Job:** Writing a DRAFT of the onboarding pack for a new client — a pack for gathering information,
+not the build itself.
 
 ## Input
 
-- `client` (default: new client) — client-এর নাম + ব্যবসা।
-- Client-এর যা তথ্য আছে (research / call notes থেকে)। না থাকলে
-  "BOSS INPUT REQUIRED"।
+- `client` (default: new client) — the client's name + business.
+- Whatever information the client has (from research / call notes). If none,
+  "BOSS INPUT REQUIRED".
 
-## পদ্ধতি (step-by-step)
+## Method (step-by-step)
 
-1. Business info form-এর DRAFT লেখা — ব্যবসার নাম, ঠিকানা, ফোন, website,
-   owner-এর নাম ও যোগাযোগ।
-2. Hours / services / price-list request লেখা — client-কে যা পাঠাতে হবে
-   তার তালিকা।
-3. Transfer number confirmation লেখা — কোন নম্বরে call transfer হবে,
-   আসল নম্বর client দেবেন (বানানো যাবে না)।
-4. Terms লেখা — ৭ দিনে live-এর শর্ত, 3-month minimum, তারপর month-to-month,
-   30 days notice। Price লেখা যাবে না — Boss যে variant confirm করবেন
-   সেটা ছাড়া।
-5. Timeline লেখা — onboarding → build plan → QA → launch, ধাপে ধাপে।
-6. Pack Boss-কে দেখানো — Boss "ok" বললে তবেই client-কে দেওয়া হয়।
+1. Write a DRAFT of the business info form — business name, address, phone, website,
+   owner's name and contact.
+2. Write the hours / services / price-list request —
+   the list of what the client must send.
+3. Write the transfer number confirmation — which number calls transfer to,
+   the real number the client will give (cannot be invented).
+4. Write the terms — live-in-7-days terms, 3-month minimum, then month-to-month,
+   30 days notice. No price can be written — except the variant
+   Boss confirms.
+5. Write the timeline — onboarding → build plan → QA → launch, step by step.
+6. Show the pack to Boss — it is given to the client only once Boss says "ok".
 
 ## Output format
 
@@ -35,20 +35,20 @@ Onboarding pack (DRAFT):
   1. Info form: [fields]
   2. Needed from client: [hours, services, price list, transfer number]
   3. Terms: [7-day live, 3-month minimum, then month-to-month, 30 days notice]
-  4. Timeline: [steps + dates — তারিখ Boss confirm করবেন]
-BOSS INPUT REQUIRED: [যা তথ্য এখনো নেই]
+  4. Timeline: [steps + dates — dates Boss will confirm]
+BOSS INPUT REQUIRED: [information still missing]
 Gate: ok
 ```
 
 ## Gate
 
-`ok` — pack Boss দেখে "ok" বললে তবেই client-কে পাঠানো হয়।
+`ok` — the pack is sent to the client only once Boss sees it and says "ok".
 
-## সৎ সীমা (honest limits)
+## Honest limits
 
-- Mock brain ($0) — pack DRAFT only।
-- Client-এর আসল তথ্য (transfer number, hours, price) ছাড়া pack অসম্পূর্ণ
-  থাকে — বানিয়ে পূরণ করা যাবে না।
-- Paying client 0 — এখনো কোনো client-এর onboarding হয়নি; এই pack
-  এখনো বাস্তবে ব্যবহার হয়নি।
-- Terms-এ price/guarantee লেখা যাবে না — Boss-এর confirm করা variant ছাড়া।
+- Mock brain ($0) — pack DRAFT only.
+- Without the client's real information (transfer number, hours, price), the pack stays incomplete
+  — it cannot be filled in by inventing.
+- Paying client 0 — no client has been onboarded yet; this pack
+  has not been used in practice yet.
+- No price/guarantee can be written in the terms — except the variant Boss confirms.

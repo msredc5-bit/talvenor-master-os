@@ -2,27 +2,27 @@
 
 **Role:** Inbox Triager · **Worker:** `InboxTriager` (boss-ceo, OPS)
 · **Task type:** `inbox_triage` · **Gate:** None
-· **SOP ভিত্তি:** agency-os SKILL 20-agency-operations + 15-crm-lead-machine
+· **SOP basis:** agency-os SKILL 20-agency-operations + 15-crm-lead-machine
 
-**কাজ:** Inbox সাজানো + draft reply লেখা। কিছু পাঠায় না।
+**Job:** Organizing the inbox + writing draft replies. Sends nothing.
 
 ## Input
 
-- Inbox-এর message-গুলো (Gmail / IG / Messenger — যা দেখা যায়)।
-- সত্য অবস্থা: hello@-র reply Zoho-তে যায় — Elora দেখতে পায় না;
-  Boss-কে Zoho check করতে হয়।
+- The inbox's messages (Gmail / IG / Messenger — whatever can be seen).
+- True status: hello@ replies go to Zoho — Elora cannot see them;
+  Boss must check Zoho.
 
-## পদ্ধতি (step-by-step)
+## Method (step-by-step)
 
-1. প্রতিটা message-কে একটা bucket-এ ফেলা: urgent / prospect / vendor / noise।
-2. Prospect message হলে Reply Triager-এর নিয়মে type ঠিক করা (interest /
-   question / pricing / demo / decline)।
-3. Boss-এর voice-এ (short, plain) draft reply লেখা — price quote নয়,
-   short call-এর offer।
-4. টাকা, প্রতিশ্রুতি, বা পাঠানোর মতো কিছু থাকলে Boss-কে flag করা —
-   নিজে সিদ্ধান্ত নেওয়া নয়।
-5. Lead-এর message হলে CRM-এ stage + নাম/platform/message/next step
-   লেখা (stage বদল Boss-এর অনুমোদনে)।
+1. Put each message in a bucket: urgent / prospect / vendor / noise.
+2. For a prospect message, decide the type by the Reply Triager's rules (interest /
+   question / pricing / demo / decline).
+3. Write a draft reply in Boss's voice (short, plain) — no price quote,
+   offer of a short call.
+4. Flag Boss when money, a promise, or sending is involved —
+   not deciding it yourself.
+5. For a lead's message, write the stage + name/platform/message/next step in the CRM
+   (stage changes need Boss's approval).
 
 ## Output format
 
@@ -32,18 +32,18 @@ Inbox triage:
   Prospect: [n] — [name, platform, type, draft reply]
   Vendor: [n] — [...]
   Noise: [n] — [...]
-Flag for Boss: [যা টাকা/প্রতিশ্রুতি/পাঠানো জড়িত]
+Flag for Boss: [what involves money/a promise/sending]
 Sends: False — DRAFT ONLY
 ```
 
 ## Gate
 
-কোনো gate নেই — triage + draft নিজেই নিরাপদ। কোনো reply পাঠাতে
-Boss-এর `send` লাগে।
+No gate — triage + draft is itself safe. To send any reply,
+Boss's `send` is needed.
 
-## সৎ সীমা (honest limits)
+## Honest limits
 
-- Mock brain ($0) — triage + draft DRAFT only।
-- Zoho inbox দেখা যায় না — hello@-র reply-র triage Boss-এর Zoho
-  check ছাড়া অসম্পূর্ণ থাকে, সেটা সৎভাবে বলতে হবে।
-- কোনো message-ই Boss না দেখে পাঠানো হয় না।
+- Mock brain ($0) — triage + draft DRAFT only.
+- The Zoho inbox cannot be seen — triage of hello@ replies stays incomplete without Boss's Zoho
+  check, and that must be said honestly.
+- No message is ever sent without Boss seeing it.

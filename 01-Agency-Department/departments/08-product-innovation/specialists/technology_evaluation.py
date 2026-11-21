@@ -1,17 +1,17 @@
 """Technology Evaluation Agent — technology evaluation draft (Dept 08, Phase 3).
 
-ভূমিকা (role): নতুন tool/technology যাচাই করে evaluation-এর DRAFT
-লেখা — শুধু যাচাই করা সত্য (verified fact) দিয়ে তুলনা, কোনো বানানো
-benchmark, দাম, পরিসংখ্যান নয়।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: writing an evaluation DRAFT that checks a new tool/technology
+— comparing with verified facts only, no invented
+benchmark, price, or statistic.
+Gate: none — the draft itself is safe, no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-যাচাই করা সত্য: Vapi LIVE (Sophia, +1 (947) 223-0244, GPT-4o-mini,
-Emma voice, Deepgram nova-3)। Retell DROPPED 2026-10-26 — কখনো
-production নয়। DB = JSON store files। CRM n8n Cloud Data Tables
-PLANNED, live নয়। $0 spend cap — কোনো tool কেনার প্রস্তাব নয়।
-এই agent কখনো করে না: benchmark/দাম/পরিসংখ্যান বানায় না, tool
-কেনে না, live stack বদলায় না, কিছু পাঠায় না, খরচ করে না।
+Verified facts: Vapi LIVE (Sophia, +1 (947) 223-0244, GPT-4o-mini,
+Emma voice, Deepgram nova-3). Retell DROPPED 2026-10-26 — never
+production. DB = JSON store files. CRM n8n Cloud Data Tables
+PLANNED, not live. $0 spend cap — no proposal to buy any tool.
+This agent never does this: it invents no benchmark/price/statistic, buys no tool,
+changes no live stack, sends nothing, spends nothing.
 """
 
 import os
@@ -25,7 +25,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class TechnologyEvaluationAgent:
-    """Technology evaluation DRAFT ONLY — verified fact only, বানানো নয়।"""
+    """Technology evaluation DRAFT ONLY — verified facts only, nothing invented."""
 
     task_kind = "technology_evaluation"
     gate = None
@@ -33,7 +33,7 @@ class TechnologyEvaluationAgent:
     role = "Technology Evaluation Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -45,7 +45,7 @@ class TechnologyEvaluationAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -73,7 +73,7 @@ class TechnologyEvaluationAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Technology evaluation DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Building a technology evaluation DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Technology evaluation draft"
         gated_action = task.get("gated_action")
@@ -117,7 +117,7 @@ class TechnologyEvaluationAgent:
             "- Vapi LIVE — Sophia live receptionist, "
             f"{TALVENOR_PHONE}, GPT-4o-mini, Emma voice, Deepgram nova-3.\n"
             "- Retell DROPPED 2026-10-26 — never production, not an option.\n"
-            "- DB = JSON store files; CRM n8n Cloud Data Tables PLANNED, live নয়.\n"
+            "- DB = JSON store files; CRM n8n Cloud Data Tables PLANNED, not live.\n"
             "Pros/cons: only what is verified above — anything else is "
             "'BOSS INPUT REQUIRED' / verification pending.\n"
             "Cost: $0 spend cap — no purchase proposal; free / no-cost "
@@ -129,8 +129,8 @@ class TechnologyEvaluationAgent:
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Evaluation draft ONLY, verified "
-            "fact দিয়ে — কোনো বানানো benchmark, দাম, পরিসংখ্যান নেই। "
-            "$0 spend cap মানা হয়েছে। Gate: none।"
+            "facts — no invented benchmark, price, or statistic. "
+            "The $0 spend cap is honored. Gate: none."
         )
         return {
             "status": "draft-ready",

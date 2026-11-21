@@ -2,34 +2,34 @@
 
 **Role:** Outreach Drafter · **Worker:** `OutreachDrafter` (boss-ceo, ACQ)
 · **Task type:** `outreach_draft` · **Gate:** `send`
-· **SOP ভিত্তি:** agency-os SKILL 16-sales-outreach
+· **SOP basis:** agency-os SKILL 16-sales-outreach
 
-**ব্যবসা:** Talvenor AI Receptionist — US home-service owner-দের কাছে
-cold email / IG DM। Short, plain US English, hook প্রথমে, একটা CTA।
+**Business:** Talvenor AI Receptionist — cold email / IG DM to US home-service owners.
+Short, plain US English, hook first, one CTA.
 
 ## Input
 
-- `channel`: `email` (default) বা `instagram`।
-- Prospect profile (research থেকে): নাম, ব্যবসা, শহর, sharpest problem +
-  evidence। না থাকলে Prospect Researcher-কে আগে পাঠানো।
+- `channel`: `email` (default) or `instagram`.
+- Prospect profile (from research): name, business, city, sharpest problem +
+  evidence. Without it, send it to the Prospect Researcher first.
 
-## পদ্ধতি (step-by-step)
+## Method (step-by-step)
 
-1. Channel ঠিক করা: email হলে from `hello@talvenorai.agency`, IG হলে
-   `@talvenor_ai`। Limit মনে রাখা: email 20–30/day personalized, IG 5–10/day warm-up।
-2. Prospect-এর research থেকে একটাই personalization angle নেওয়া (যেমন
-   phone-only booking) — generic template নয়, প্রতিটা draft ওই ব্যবসার জন্য লেখা।
-3. Draft লেখা — কাঠামো: hook (missed call = lost job), এক লাইনে সমস্যা
-   (evidence সহ, hypothesis হিসেবে), সমাধান (AI receptionist 24/7 answers),
-   একটা CTA (15-min call — booking link:
-   https://calendar.app.google/WLoxBfnLGTdjK3LB8)।
-4. Check করা: কোনো price নেই, কোনো guarantee নেই, কোনো বানানো client /
-   testimonial / statistic নেই, dental/medical নয়। Owner-এর নামের ঠিকানায়
-   পাঠানোর চেষ্টা — generic info@ reply করে 1%-এর কম (জানা সত্য)।
-5. Follow-up নিয়ম মনে রাখা: কোনো state-এ 100টা first mail না হলে ওই
-   state-এর follow-up নয়। FL-এর ceiling 98 — এখন কোথাও follow-up due নয়।
-   20টা ready PA follow-up draft PARKED আছে।
-6. Draft Boss-কে দেখানো — পাঠানো নয়।
+1. Decide the channel: if email, from `hello@talvenorai.agency`; if IG,
+   `@talvenor_ai`. Remember the limits: email 20–30/day personalized, IG 5–10/day warm-up.
+2. Take just one personalization angle from the prospect's research (e.g.
+   phone-only booking) — not a generic template; every draft is written for that business.
+3. Write the draft — structure: hook (missed call = lost job), the problem in one line
+   (with evidence, as a hypothesis), the solution (AI receptionist 24/7 answers),
+   one CTA (15-min call — booking link:
+   https://calendar.app.google/WLoxBfnLGTdjK3LB8).
+4. Check: no price, no guarantee, no invented client /
+   testimonial / statistic, no dental/medical. Try sending to the owner's named address —
+   generic info@ replies under 1% (known fact).
+5. Remember the follow-up rule: if a state has not reached 100 first mails, no
+   follow-up for that state. FL's ceiling is 98 — no follow-up is due anywhere now.
+   20 ready PA follow-up drafts are PARKED.
+6. Show the draft to Boss — not send it.
 
 ## Output format
 
@@ -39,22 +39,22 @@ Subject (email only): [short, hook]
 ---
 [Draft — plain US English, 1 CTA]
 ---
-Gate: send — Boss-এর exact শব্দ ছাড়া পাঠানো যাবে না।
+Gate: send — nothing can be sent without Boss's exact word.
 ```
 
 ## Gate
 
-`send` — Boss-এর exact শব্দ লাগে, আর পাঠানোর কাজ Boss নিজে করেন
-(main chat থেকে)। এই system শুধু DRAFT বানায়।
+`send` — Boss's exact word is needed, and Boss himself does the sending
+(from the main chat). This system only builds DRAFTs.
 
-## সৎ সীমা (honest limits)
+## Honest limits
 
-- **Email PAUSED (2026-11-14 থেকে)** — SPF-এ Gmail include নেই, DMARC নেই;
-  DNS fix Boss-এর হাতে বাকি, "check koro" না বললে কিছু পাঠানো হয় না।
-  Draft-ই শেষ কথা।
-- Mock brain ($0) — output DRAFT। প্রতিটা send-এ Boss-এর tap লাগে;
-  detached cron worker দিয়ে send চালানো যাবে না (Day 2-এর শিক্ষা)।
-- Timeout মানে failure নয় — retry-এর আগে Sent check করতে হয় (Metz/AAA
-  double-send-এর শিক্ষা)।
-- n8n auto-send LIVE নয় (READY, Boss-এর import + test বাকি) — দুই system
-  একসাথে চলবে না।
+- **Email PAUSED (since 2026-11-14)** — SPF has no Gmail include, no DMARC;
+  the DNS fix is still in Boss's hands; nothing is sent until he says "check koro".
+  The draft is the final word.
+- Mock brain ($0) — output DRAFT. Every send needs Boss's tap;
+  sending cannot run through a detached cron worker (the Day 2 lesson).
+- A timeout does not mean failure — Sent must be checked before retry (the Metz/AAA
+  double-send lesson).
+- n8n auto-send is not LIVE (READY, Boss's import + test pending) — the two systems
+  cannot run together.
