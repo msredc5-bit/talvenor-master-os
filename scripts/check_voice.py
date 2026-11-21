@@ -1,27 +1,27 @@
 #!/usr/bin/env python3
 """Voice self-check — Jarvis voice loop (Piper + Vosk/sherpa-onnx).
 
-যাচাই করে:
-  1. voice package + setup doc + script file আছে
-  2. jarvis_voice.py STUB নয় — একই public function (listen/speak/
-     handle_voice_command) voice package-এ delegate করে
-  3. voice module-গুলো import হয় (stdlib only import time-এ)
-  4. voice module-এর top-level import-এ piper/vosk/sherpa_onnx/
-     sounddevice/numpy নেই (lazy import — না থাকলেও import হয়)
+Verifies:
+  1. Voice package + setup doc + script files exist
+  2. jarvis_voice.py is not a STUB — the same public functions (listen/speak/
+     handle_voice_command) delegate to the voice package
+  3. Voice modules import (stdlib only at import time)
+  4. Voice modules' top-level imports have no piper/vosk/sherpa_onnx/
+     sounddevice/numpy (lazy import — imports even without them)
   5. piper / vosk / sherpa_onnx importable (probe)
-  6. sounddevice importable — এই VM-এ PortAudio নেই বলে FAIL হবে
-     (Windows wheel-এ PortAudio বান্ডেল থাকে — VM-only সীমা, ভান নয়)
-  7. config.json-এর voice block = VERIFIED id-গুলো + brain mock +
-     phase 9 + v0.9.0
-  8. নতুন file-এ secret নেই (api key / password / secret / bearer)
-  9. Gate test (TEMP approvals): voice-এ "send" বললে PENDING হয়,
-     execute হয় না; আসল store ছোঁয় না
- 10. scripts/voice_test.py subprocess PASS (আসল synth + transcribe)
+  6. sounddevice importable — FAILs because this VM has no PortAudio
+     (the Windows wheel bundles PortAudio — a VM-only limit, not a pretence)
+  7. config.json's voice block = the VERIFIED ids + brain mock +
+     phase 11 + v0.9.0
+  8. No secrets in new files (api key / password / secret / bearer)
+  9. Gate test (TEMP approvals): saying "send" by voice gives PENDING,
+     never executes; does not touch the real store
+ 10. scripts/voice_test.py subprocess PASS (real synth + transcribe)
  11. Real store unchanged by this run (Phase 9: live queue)
- 12. check_phase0 এখনো PASS
+ 12. check_phase0 still PASS
 
-Stdlib only — piper/vosk/sherpa শুধু importlib probe-এ (import করা হয়
-না)। Exit 0 = PASS। কোনো FAIL-এর কারণ print হয়।
+Stdlib only — piper/vosk/sherpa only in importlib probes (not imported).
+Exit 0 = PASS. Any FAIL's reason is printed.
 """
 
 import ast
@@ -38,7 +38,7 @@ CEO_CORE_DIR = os.path.join(BASE, "00-CEO-Core")
 VOICE_DIR = os.path.join(CEO_CORE_DIR, "voice")
 sys.path.insert(0, CEO_CORE_DIR)
 
-# VERIFIED 2026-11-17 — upstream sources (VOICE-SETUP.md দেখুন)।
+# VERIFIED 2026-11-17 — upstream sources (see VOICE-SETUP.md).
 EXPECTED_VOICES = {"bn": "bn_BD-google-medium", "en": "en_US-lessac-medium"}
 EXPECTED_MODELS = {"vosk_en": "vosk-model-small-en-us-0.15",
                    "sherpa_bn": "vosk-model-small-streaming-bn"}
@@ -65,9 +65,9 @@ def check(name, ok, detail=""):
 
 
 def _snapshot_store():
-    """Real store-এর snapshot (Phase 9: store এখন live queue — taskboard /
-    bridge সত্যিই task লেখে, তাই 'খালি' আর invariant নয়)। Check-এর
-    কাজ শুধু প্রমাণ করা যে এই run store বদলায়নি।"""
+    """Snapshot of the real store (Phase 9: store is now a live queue — taskboard /
+    bridge really writes tasks, so 'empty' is no longer an invariant). The check's
+    only job is to prove this run did not change the store."""
     snap = {}
     for name in ("store/tasks.json", "store/approvals.json"):
         try:
@@ -84,29 +84,29 @@ def main():
     store_before = _snapshot_store()
     # 1. files exist
     missing = [p for p in NEW_FILES if not os.path.exists(p)]
-    check("voice file আছে (4 voice module + jarvis_voice + setup + 3 script)",
+    check("voice files exist (4 voice modules + jarvis_voice + setup + 3 scripts)",
           not missing,
-          f"মোট {len(NEW_FILES)} file" + (f"; নেই: {missing}" if missing else ""))
+          f"total {len(NEW_FILES)} files" + (f"; missing: {missing}" if missing else ""))
 
-    # 2. jarvis_voice.py — STUB নয়, একই public function
+    # 2. jarvis_voice.py — not a STUB, same public functions
     try:
         with open(os.path.join(CEO_CORE_DIR, "jarvis_voice.py"),
                   encoding="utf-8") as f:
             src = f.read()
         has_fns = all(f"def {fn}(" in src for fn in
                       ("listen", "speak", "handle_voice_command"))
-        # "STUB" শব্দটা docstring-এ ইতিহাস হিসেবে থাকতে পারে ("আগে ছিল
-        # STUB") — আসল যাচাই: STUB_NOTICE/NotImplementedError নেই + REAL।
+        # The word "STUB" may stay in a docstring as history ("was"
+        # STUB) — the real check: no STUB_NOTICE/NotImplementedError + REAL.
         no_stub = ("STUB_NOTICE" not in src
                    and "NotImplementedError" not in src
                    and "REAL" in src)
         delegates = "from voice.listen import" in src \
             and "from voice.speak import" in src
-        check("jarvis_voice.py REAL (STUB নয়, একই 3 function, delegate)",
+        check("jarvis_voice.py REAL (not a STUB, same 3 functions, delegate)",
               has_fns and no_stub and delegates,
               f"fns={has_fns}, no-STUB={no_stub}, delegate={delegates}")
     except Exception as e:  # noqa: BLE001
-        check("jarvis_voice.py REAL (STUB নয়, একই 3 function, delegate)",
+        check("jarvis_voice.py REAL (not a STUB, same 3 functions, delegate)",
               False, str(e))
 
     # 3. voice modules import OK
@@ -145,9 +145,9 @@ def main():
         if hit:
             bad[path] = sorted(hit)
     check("voice module top-level import stdlib-only (piper/vosk lazy)",
-          not bad, f"সমস্যা: {bad}" if bad else "piper/vosk/sherpa শুধু function-এ")
+          not bad, f"problem: {bad}" if bad else "piper/vosk/sherpa only in functions")
 
-    # 5-7. engine probes (importlib — import করা হয় না)
+    # 5-7. engine probes (importlib — not imported)
     for mod, label in (("piper", "piper-tts"),
                        ("vosk", "vosk"),
                        ("sherpa_onnx", "sherpa-onnx")):
@@ -161,7 +161,7 @@ def main():
             check(f"{label} importable", True, f"version: {ver}")
         else:
             check(f"{label} importable", False,
-                  f"pip install {label} চালান (VOICE-SETUP.md)")
+                  f"run pip install {label} (VOICE-SETUP.md)")
     spec = importlib.util.find_spec("sounddevice")
     if spec is not None:
         try:
@@ -170,13 +170,13 @@ def main():
                   f"version: {getattr(sounddevice, '__version__', 'n/a')}")
         except OSError as e:
             check("sounddevice importable (mic path)", False,
-                  "PortAudio নেই এই VM-এ (apt-এ candidate নেই) — "
-                  "VM-only সীমা; Windows wheel-এ PortAudio বান্ডেল থাকে। "
+                  "No PortAudio on this VM (no apt candidate) — "
+                  "VM-only limit; the Windows wheel bundles PortAudio. "
                   f"({e})")
     else:
         check("sounddevice importable (mic path)", False,
-              "pip install sounddevice চালান — Windows wheel-এ PortAudio "
-              "বান্ডেল থাকে।")
+              "run pip install sounddevice — the Windows wheel bundles PortAudio "
+              "bundles it.")
 
     # 8. config voice block = VERIFIED ids + brain mock + phase 7
     try:
@@ -190,18 +190,18 @@ def main():
               and v.get("models", {}).get("sherpa_bn")
               == EXPECTED_MODELS["sherpa_bn"]
               and cfg.get("brain") == "mock"
-              and cfg.get("phase") == 9
+              and cfg.get("phase") == 11
               and cfg.get("version") == "0.9.0")
-        check("config voice block = VERIFIED ids + brain mock + phase 9",
+        check("config voice block = VERIFIED ids + brain mock + phase 11",
               ok, f"voices={v.get('voices')}, brain={cfg.get('brain')}, "
               f"phase={cfg.get('phase')}, version={cfg.get('version')}")
     except Exception as e:  # noqa: BLE001
-        check("config voice block = VERIFIED ids + brain mock + phase 9",
+        check("config voice block = VERIFIED ids + brain mock + phase 11",
               False, str(e))
 
     # 9. no secrets in new files
-    # (এই check file নিজে বাদ: pattern literal + docstring-এ "secret"
-    # শব্দটা থাকেই — সেটা credential নয়, scanner-এর নিজের শব্দ।)
+    # (this check file itself excluded: the pattern literal + the word "secret" in docstrings
+    # are always there — that is not a credential, it is the scanner's own word.)
     secret_re = re.compile(
         r"api[_-]?key|apikey|password|passwd|\bsecret\b|bearer|"
         r"sk-[A-Za-z0-9]{16,}", re.IGNORECASE)
@@ -216,8 +216,8 @@ def main():
                         hits.setdefault(path, []).append(i)
         except FileNotFoundError:
             hits[path] = ["FILE MISSING"]
-    check("নতুন file-এ secret নেই (key/password/secret/bearer)", not hits,
-          f"পাওয়া গেছে: {hits}" if hits else "clean")
+    check("no secrets in new files (key/password/secret/bearer)", not hits,
+          f"found: {hits}" if hits else "clean")
 
     # 10. gate test — TEMP approvals path only
     try:
@@ -235,28 +235,28 @@ def main():
                        and len(recs) == 1
                        and recs[0]["action"] == "send"
                        and recs[0]["status"] == "pending")
-            check("gate test (TEMP): voice 'send' -> PENDING, execute নয়",
+            check("gate test (TEMP): voice 'send' -> PENDING, never executes",
                   gate_ok,
                   f"gated={result.get('gated_action')}, "
                   f"approval={result.get('approval_id')}, "
                   f"temp records={len(recs)}")
     except Exception as e:  # noqa: BLE001
-        check("gate test (TEMP): voice 'send' -> PENDING, execute নয়",
+        check("gate test (TEMP): voice 'send' -> PENDING, never executes",
               False, f"{type(e).__name__}: {e}")
 
-    # 11. voice_test.py subprocess (আসল synth + transcribe)
+    # 11. voice_test.py subprocess (real synth + transcribe)
     try:
         proc = subprocess.run(
             [sys.executable, os.path.join(BASE, "scripts", "voice_test.py")],
             capture_output=True, text=True, timeout=900)
         tail = (proc.stdout or "").strip().splitlines()[-3:]
-        check("scripts/voice_test.py PASS (আসল synth + transcribe)",
+        check("scripts/voice_test.py PASS (real synth + transcribe)",
               proc.returncode == 0, " | ".join(tail))
     except subprocess.TimeoutExpired:
-        check("scripts/voice_test.py PASS (আসল synth + transcribe)",
-              False, "timeout 900s — HF CDN ধীর হতে পারে")
+        check("scripts/voice_test.py PASS (real synth + transcribe)",
+              False, "timeout 900s — the HF CDN may be slow")
     except Exception as e:  # noqa: BLE001
-        check("scripts/voice_test.py PASS (আসল synth + transcribe)",
+        check("scripts/voice_test.py PASS (real synth + transcribe)",
               False, str(e))
 
     # 12. real store unchanged by this check run (Phase 9: live queue)
@@ -273,10 +273,10 @@ def main():
         proc = subprocess.run(
             [sys.executable, os.path.join(BASE, "scripts", "check_phase0.py")],
             capture_output=True, text=True, timeout=300)
-        check("check_phase0 এখনো PASS", proc.returncode == 0,
+        check("check_phase0 still PASS", proc.returncode == 0,
               f"exit={proc.returncode}")
     except Exception as e:  # noqa: BLE001
-        check("check_phase0 এখনো PASS", False, str(e))
+        check("check_phase0 still PASS", False, str(e))
 
     failed = [r for r in results if not r[1]]
     print(f"\n{len(results) - len(failed)}/{len(results)} voice checks passed.")

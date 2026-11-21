@@ -1,34 +1,38 @@
 #!/usr/bin/env python3
-"""Phase 3 self-check — 43 ROLE-ONLY specialists (worker code + skills).
+"""Phase 3 self-check — 47 specialists (worker code + skills).
 
-যাচাই করে:
-  1. ৪৩টা specialist worker file আছে (registry.json-এর path + disk মেলে)
-  2. ৪৩টাই python3 -I-তে standalone import হয় (stdlib only) +
-     class attrs ঠিক (task_kind / gate None / department / role)
-  3. ৪৩টা skill file আছে (registry.json-এর path disk-এ আছে)
-  4. ৪৩টাই TEMP store-এ in-process run করে -> draft-ready, [MOCK DRAFT],
+2026-11-21: the 4 GAP roles (Ad Campaign, CRM Integration, Expense
+Tracking, Backup & Recovery) got worker code — 43 -> 47 specialists,
+registry 69 EXISTING / 0 GAP.
+
+Verifies:
+  1. The 47 specialist worker files exist (registry.json paths match disk)
+  2. All 47 import standalone under python3 -I (stdlib only) +
+     class attrs correct (task_kind / gate None / department / role)
+  3. The 47 skill files exist (registry.json paths are on disk)
+  4. All 47 run in-process in a TEMP store -> draft-ready, [MOCK DRAFT],
      draft_only, mock_brain, gate None
-  5. ৪৩টাই gated action-এ (send) -> pending-approval, TEMP approvals-এ
-     ঠিক ১টা pending record (প্রতি dept-এ specialist সংখ্যা = record সংখ্যা)
-  6. ৮টা manager-ই run_office.py দিয়ে নতুন specialist kind route করে
+  5. All 47 on a gated action (send) -> pending-approval, in TEMP approvals
+     exactly 1 pending record (specialist count per dept = record count)
+  6. All 8 managers route the new specialist kinds via run_office.py
      (TEMP store) -> draft-ready, [MOCK DRAFT]
-  7. ৮টা dept-এই gated (send) -> PENDING, ঠিক ১ pending approval,
-     execute হয় না (TEMP store, run_office.py)
-  8. ৪টা GAP role-এর কোনো worker/skill file নেই; manager-এ তাদের
-     task_kind দিলে GAP blocker-সহ delegation plan draft আসে
-  9. Registry consistency: 65 EXISTING / 0 ROLE-ONLY / 4 GAP;
-     সব EXISTING path disk-এ আছে; registry.md-র counts table মেলে
- 10. departments/ + registry.md-এ কোনো stale "manager never executes"
-     দাবি নেই
- 11. departments/ + registry-তে forbidden term নেই (Retell Integration /
+  7. In all 8 depts, gated (send) -> PENDING, exactly 1 pending approval,
+     never executes (TEMP store, run_office.py)
+  8. GAP roles 0 — the earlier 4 GAP kinds now route via managers to real specialists
+     -> draft-ready [MOCK DRAFT]
+  9. Registry consistency: 69 EXISTING / 0 ROLE-ONLY / 0 GAP;
+     all EXISTING paths are on disk; registry.md's counts table matches
+ 10. departments/ + registry.md — no stale "manager never executes"
+     claims
+ 11. No forbidden terms in departments/ + registry (Retell Integration /
      PostgreSQL / Sophia Demo / Paperclip / UroNex / NexaFlow /
-     90-second demo; Etsy/Amazon শুধু CLOSED/GATED বাক্যে)
+     90-second demo; Etsy/Amazon only in CLOSED/GATED sentences)
  12. Real store unchanged by this run (Phase 9: live queue)
- 13. পুরনো check (phase0/1/2/3/4 + engines + phase6 + phase7 +
-     check_departments 21/21) এখনো PASS
+ 13. Old checks (phase0/1/2/3/4 + engines + phase6 + phase7 +
+     check_departments 21/21) still PASS
 
-সব store-touching step TEMP file-এ। Stdlib only, no network,
-no send, no publish, no spend, no delete। Exit 0 = PASS.
+All store-touching steps use TEMP files. Stdlib only, no network,
+no send, no publish, no spend, no delete. Exit 0 = PASS.
 """
 
 import importlib.util
@@ -79,7 +83,7 @@ DEPTS = [
 ]
 DEPT_BY_SLUG = {d[0]: d for d in DEPTS}
 
-# Registry-র department display name -> folder slug
+# Registry department display name -> folder slug
 DEPT_SLUG = {
     "01 Sales & Growth": "01-sales-growth",
     "02 Marketing": "02-marketing",
@@ -100,7 +104,7 @@ def _norm(s):
 
 
 def _scan_specialists():
-    """Disk-এর ৪৩ specialist: role -> {class, task_kind, dept, path}."""
+    """The 43 specialists on disk: role -> {class, task_kind, dept, path}."""
     out = {}
     for slug, _tt, _mf, _mc in DEPTS:
         d = os.path.join(DEPARTMENTS_DIR, slug, "specialists")
@@ -127,9 +131,9 @@ def _load_file(mod_name, path):
 
 
 def _snapshot_store():
-    """Real store-এর snapshot (Phase 9: store এখন live queue — taskboard /
-    bridge সত্যিই task লেখে, তাই 'খালি' আর invariant নয়)। Check-এর
-    কাজ শুধু প্রমাণ করা যে এই run store বদলায়নি।"""
+    """Snapshot of the real store (Phase 9: store is now a live queue — taskboard /
+    bridge really writes tasks, so 'empty' is no longer an invariant). The check's
+    only job is to prove this run did not change the store."""
     snap = {}
     for name in ("store/tasks.json", "store/approvals.json"):
         try:
@@ -150,24 +154,24 @@ def main():
              and "/specialists/" in e["worker_file"]]
     scanned = _scan_specialists()
 
-    # 1. 43 specialist files exist (registry path + disk agree)
+    # 1. 47 specialist files exist (registry path + disk agree)
     try:
         missing = [e["worker_file"] for e in built
                    if not os.path.isfile(os.path.join(BASE, e["worker_file"]))]
         disk_paths = {os.path.relpath(v["path"], BASE)
                       for v in scanned.values()}
         reg_paths = {e["worker_file"] for e in built}
-        ok = (len(built) == 43 and len(scanned) == 43
+        ok = (len(built) == 47 and len(scanned) == 47
               and not missing and disk_paths == reg_paths)
-        check("43 specialist files exist (registry + disk agree)",
+        check("47 specialist files exist (registry + disk agree)",
               ok, f"registry={len(built)}, disk={len(scanned)}, "
               f"missing={missing}" if missing else
               f"registry={len(built)}, disk={len(scanned)}")
     except Exception as e:  # noqa: BLE001
-        check("43 specialist files exist (registry + disk agree)",
+        check("47 specialist files exist (registry + disk agree)",
               False, str(e))
 
-    # 2. All 43 import standalone (python3 -I) + class attrs
+    # 2. All 47 import standalone (python3 -I) + class attrs
     try:
         payload = [(v["path"], v["class"], v["task_kind"], v["dept"], role)
                    for role, v in sorted(scanned.items())]
@@ -188,27 +192,27 @@ def main():
         proc = subprocess.run(
             [sys.executable, "-I", "-c", "\n".join(code_lines)],
             capture_output=True, text=True, timeout=180, cwd=BASE)
-        ok = proc.returncode == 0 and "SPECIALISTS_OK 43" in proc.stdout
+        ok = proc.returncode == 0 and "SPECIALISTS_OK 47" in proc.stdout
         detail = (proc.stdout + proc.stderr).strip()[-300:]
-        check("43 specialists import standalone + class attrs correct",
-              ok, f"43 specialists; " + detail)
+        check("47 specialists import standalone + class attrs correct",
+              ok, f"47 specialists; " + detail)
     except Exception as e:  # noqa: BLE001
-        check("43 specialists import standalone + class attrs correct",
+        check("47 specialists import standalone + class attrs correct",
               False, str(e))
 
-    # 3. All 43 skill files exist (registry path on disk)
+    # 3. All 47 skill files exist (registry path on disk)
     try:
         missing = [e["skill_file"] for e in built
                    if not e["skill_file"]
                    or not os.path.isfile(os.path.join(BASE, e["skill_file"]))]
-        check("43 specialist skill files exist (registry paths on disk)",
+        check("47 specialist skill files exist (registry paths on disk)",
               not missing,
-              f"missing={missing}" if missing else "43/43")
+              f"missing={missing}" if missing else "47/47")
     except Exception as e:  # noqa: BLE001
-        check("43 specialist skill files exist (registry paths on disk)",
+        check("47 specialist skill files exist (registry paths on disk)",
               False, str(e))
 
-    # 4. All 43 run in-process on TEMP store -> draft-ready [MOCK DRAFT]
+    # 4. All 47 run in-process on TEMP store -> draft-ready [MOCK DRAFT]
     for slug, _tt, _mf, _mc in DEPTS:
         try:
             members = {r: v for r, v in scanned.items()
@@ -234,7 +238,7 @@ def main():
             check(f"dept {slug}: specialists run -> draft-ready [MOCK DRAFT]",
                   False, str(e))
 
-    # 5. All 43 gated (send) -> pending-approval, 1 pending record each
+    # 5. All 47 gated (send) -> pending-approval, 1 pending record each
     for slug, _tt, _mf, _mc in DEPTS:
         try:
             members = {r: v for r, v in scanned.items()
@@ -322,48 +326,38 @@ def main():
             check(f"gated {task_type} + {kind} + send -> PENDING, 1 approval",
                   False, str(e))
 
-    # 8. 4 GAP roles: no worker/skill file; manager says unknown-task
+    # 8. 0 GAP roles: the 4 former GAP kinds now route via their manager
+    #    to a real specialist -> draft-ready [MOCK DRAFT]
     try:
         gaps = [e for e in registry if e["status"] == "GAP"]
         bad = []
-        if len(gaps) != 4:
+        if len(gaps) != 0:
             bad.append(f"gap count={len(gaps)}")
-        for e in gaps:
-            slug = DEPT_SLUG[e["department"]]
-            snake = _norm(e["role"]).replace(" ", "_")
-            if e["worker_file"] is not None or e["skill_file"] is not None:
-                bad.append(f"{e['role']}: registry path not null")
-            spec_path = os.path.join(DEPARTMENTS_DIR, slug, "specialists",
-                                     snake + ".py")
-            if os.path.exists(spec_path):
-                bad.append(f"{e['role']}: worker file exists {spec_path}")
-            skills = os.listdir(os.path.join(DEPARTMENTS_DIR, slug, "skills"))
-            if any(_norm(os.path.splitext(s)[0]) == _norm(e["role"])
-                   for s in skills):
-                bad.append(f"{e['role']}: skill file exists")
-            # manager-এ GAP kind দিলে delegation plan draft আসতে হবে যাতে
-            # GAP blocker স্পষ্ট লেখা থাকে — worker execute হয় না
+        for kind, slug in (("ad_campaign", "02-marketing"),
+                           ("crm_integration", "03-ai-engineering"),
+                           ("expense_tracking", "06-finance-admin"),
+                           ("backup_recovery", "07-quality-security")):
             _s, _tt, mfile, mcls = DEPT_BY_SLUG[slug]
-            mod = _load_file("p3_gap_mgr_" + slug, os.path.join(
+            mod = _load_file("p3_formergap_mgr_" + slug, os.path.join(
                 DEPARTMENTS_DIR, slug, "manager", mfile))
             mgr = getattr(mod, mcls)()
-            res = mgr.run({"title": f"Phase 3 GAP smoke {snake}",
-                           "task_kind": snake}, brain=None)
+            res = mgr.run({"title": f"Phase 3 former-GAP smoke {kind}",
+                           "task_kind": kind}, brain=None)
             if not (res.get("status") == "draft-ready"
-                    and "GAP" in (res.get("output") or "")
-                    and ("worker/skill নেই" in (res.get("output") or "")
-                         or "no worker" in (res.get("output") or ""))):
-                bad.append(f"{e['role']}: manager status="
-                           f"{res.get('status')}")
-        check("4 GAP roles: no worker/skill file, manager GAP plan draft",
+                    and "[MOCK DRAFT]" in (res.get("output") or "")
+                    + (res.get("notes") or "")
+                    and res.get("draft_only") is True
+                    and res.get("mock_brain") is True):
+                bad.append(f"{kind}: manager status={res.get('status')}")
+        check("0 GAP roles: former GAP kinds route via manager -> draft-ready",
               not bad, "; ".join(bad) if bad
-              else "Ad Campaign / CRM Integration / Expense Tracking / "
-              "Backup & Recovery")
+              else "ad_campaign / crm_integration / expense_tracking / "
+              "backup_recovery")
     except Exception as e:  # noqa: BLE001
-        check("4 GAP roles: no worker/skill file, manager GAP plan draft",
+        check("0 GAP roles: former GAP kinds route via manager -> draft-ready",
               False, str(e))
 
-    # 9. Registry consistency: 65/0/4, paths on disk, md counts match
+    # 9. Registry consistency: 69/0/0, paths on disk, md counts match
     try:
         n_exist = sum(1 for e in registry if e["status"] == "EXISTING")
         n_role = sum(1 for e in registry if e["status"] == "ROLE-ONLY")
@@ -375,28 +369,28 @@ def main():
                     if e["skill_file"]
                     and not os.path.isfile(os.path.join(BASE, e["skill_file"]))]
         md = open(REGISTRY_MD, encoding="utf-8").read()
-        md_ok = ("| **মোট** | **62** | **7** | **69** | **65** | **0** | **4** |"
+        md_ok = ("| **Total** | **62** | **7** | **69** | **69** | **0** | **0** |"
                  in md)
-        ok = (n_exist == 65 and n_role == 0 and n_gap == 4
+        ok = (n_exist == 69 and n_role == 0 and n_gap == 0
               and not missing and md_ok)
-        check("registry consistent: 65 EXISTING / 0 ROLE-ONLY / 4 GAP",
+        check("registry consistent: 69 EXISTING / 0 ROLE-ONLY / 0 GAP",
               ok, f"json={n_exist}/{n_role}/{n_gap}, "
               f"missing={missing}, md_counts={'ok' if md_ok else 'BAD'}")
     except Exception as e:  # noqa: BLE001
-        check("registry consistent: 65 EXISTING / 0 ROLE-ONLY / 4 GAP",
+        check("registry consistent: 69 EXISTING / 0 ROLE-ONLY / 0 GAP",
               False, str(e))
 
     # 10. No stale "manager never executes" claims
     try:
         stale = []
-        needles = ("কোনো worker execute করে না",
-                   "কোনো worker execute করা নয়",
-                   "worker-কে call করে না",
-                   "worker code নেই, হাতে করতে হবে",
-                   "সব ROLE-ONLY",
+        needles = ("No worker executes",
+                   "No worker is executing",
+                   "does not call the worker",
+                   "no worker code, must be done by hand",
+                   "All ROLE-ONLY",
                    "GAP department —",
                    "Mapped staff 2",
-                   "ROLE-ONLY role-এর কাজ Boss/Elora হাতে করেন")
+                   "Boss/Elora do the ROLE-ONLY role's work by hand")
         targets = []
         for slug, _tt, mfile, _mc in DEPTS:
             targets.append(os.path.join(DEPARTMENTS_DIR, slug, "manager",
@@ -435,7 +429,7 @@ def main():
             for needle in needles:
                 if needle in text:
                     bad.append(f"{os.path.relpath(path, BASE)}: {needle}")
-            # Etsy/Amazon শুধু CLOSED/GATED বাক্যে চলবে, live দাবি নয়
+            # Etsy/Amazon only in CLOSED/GATED sentences, not live claims
             for i, line in enumerate(text.split("\n"), 1):
                 if ("Etsy" in line or "Amazon" in line) and \
                         "CLOSED" not in line and "GATED" not in line:

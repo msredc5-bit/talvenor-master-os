@@ -23,7 +23,7 @@ What it checks (mock mode ONLY — no live call, ever):
      each has https endpoint + env var (null only for meta) + non-empty
      models list containing its default model; fallback_chain entries
      resolve (known provider or "mock"), no duplicates; brain_provider
-     known; brain stays "mock"; phase 9 + v0.9.0.
+     known; brain stays "mock"; phase 11 + v0.9.0.
  10. No secrets in the new/changed files (real key patterns only —
      env-var NAME references and os.environ.get() are not secrets).
  11. Real store unchanged by this check run (Phase 9: live queue).
@@ -60,7 +60,7 @@ def check(name, ok, detail=""):
 
 
 def _snapshot_store():
-    """Real store-এর snapshot (Phase 9: store এখন live queue)।"""
+    """Snapshot of the real store (Phase 9: store is now a live queue)."""
     snap = {}
     for name in ("store/tasks.json", "store/approvals.json"):
         try:
@@ -113,7 +113,7 @@ class _FakeHTTPResponse:
 
 
 class _FakeOpener:
-    """urlopen-এর বদলে — কোনো network নয়, canned payload ফেরত দেয়।"""
+    """Instead of urlopen — no network, returns a canned payload."""
 
     def __init__(self, payload=None, exc=None):
         self.payload = payload
@@ -152,7 +152,7 @@ def _temp_config(cfg_dict):
 
 
 def _unset_env(env_var):
-    """Context manager: env var সরিয়ে রাখে, শেষে ফেরত দেয়।"""
+    """Context manager: sets an env var aside, restores it at the end."""
     saved = os.environ.pop(env_var, None)
 
     class _Ctx:
@@ -447,8 +447,10 @@ def main():
             problems.append("brain_provider unknown")
         if cfg.get("brain") != "mock":
             problems.append("brain is not mock")
-        if cfg.get("phase") != 9 or cfg.get("version") != "0.9.0":
-            problems.append("phase/version moved (must stay 9 / 0.9.0)")
+        # D1 (2026-11-21): phase 9 -> 11 — the pin moves with the
+        # config bump, it does not stay 9.
+        if cfg.get("phase") != 11 or cfg.get("version") != "0.9.0":
+            problems.append("phase/version moved (must stay 11 / 0.9.0)")
         check("real config.json: 7 providers + chain + mock default",
               not problems, "; ".join(problems[:5]) if problems else
               f"providers={len(providers)}, chain={chain}")
@@ -477,7 +479,7 @@ def main():
             "00-CEO-Core/live_brain.py",
             "00-CEO-Core/brain.py",
             "00-CEO-Core/config.json",
-            "00-CEO-Core/PROVIDERS-SETUP-BANGLA.md",
+            "00-CEO-Core/PROVIDERS-SETUP.md",
         ]
         for rel in rels:
             path = os.path.join(BASE, rel)

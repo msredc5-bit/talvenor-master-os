@@ -15,6 +15,12 @@ Usage:
   python3 scripts/run_office.py --business products --task gate0_check \\
       --input '{}'
 
+  # Skill search (business-agnostic — does not go to a Chief, local search +
+  # DRAFT proposal; --business accepts any value, route_task decides by type
+  # first):
+  python3 scripts/run_office.py --business agency --task find_skill \\
+      --input '{"query": "backup", "title": "find skill: backup"}'
+
   # Gated action -> PENDING, never executed:
   python3 scripts/run_office.py --business agency --task outreach_draft \\
       --input '{"title": "Send Day 4 batch", "gated_action": "send"}'
@@ -56,6 +62,7 @@ DEFAULT_STORE_DIR = os.path.join(ROOT, "store")
 sys.path.insert(0, CEO_CORE_DIR)
 
 import main_ceo_bot  # noqa: E402
+import vault  # noqa: E402 — D3: drain writes done/failed task results to the vault
 
 BUSINESS_ALIASES = {
     "agency": "agency",
@@ -112,6 +119,17 @@ def build_task(business, task_type, input_data):
     for key in ("gated_action", "approval_id", "requested_by"):
         if input_data.get(key) is not None:
             task[key] = input_data[key]
+    if task_type == "find_skill":
+        # The skill-finder task's fields (from --input's top level,
+        # else from the payload) — otherwise the query is lost and local
+        # search runs on an empty query.
+        for key in ("query", "propose", "candidate_repo", "candidate_skill",
+                    "source_url", "license", "fit_note", "agent", "detail",
+                    "proposals_path"):
+            if input_data.get(key) is not None:
+                task[key] = input_data[key]
+            elif key in task["payload"]:
+                task[key] = task["payload"][key]
     return task
 
 
@@ -160,16 +178,28 @@ def _mark_queued_record(tasks_path, record_id, status, result):
 
     Re-reading matters: the subprocess run already appended the
     Chief's own log entry to tasks.json — a blind write-back of the
-    pre-drain records would delete it.
+    pre-drain records would delete it. After marking, the result is also written
+    to the vault (store/vault/README.md's promise — D3); if the vault write fails,
+    the drain result still stands, only vault_error is set.
     """
     records = _read_store_tasks(tasks_path)
+    vault_error = None
     for rec in records:
         if rec.get("id") == record_id:
             rec["status"] = status
             rec["result"] = result
             rec["drained_at"] = _now_iso()
             break
+    else:
+        _write_store_tasks(tasks_path, records)
+        return None
     _write_store_tasks(tasks_path, records)
+    try:
+        store_dir = os.path.dirname(tasks_path)
+        vault.write_result(store_dir, rec)
+    except Exception as exc:  # noqa: BLE001 — the vault never breaks the drain
+        vault_error = f"{type(exc).__name__}: {exc}"
+    return vault_error
 
 
 def drain_queue(store_dir, max_tasks):
@@ -185,16 +215,27 @@ def drain_queue(store_dir, max_tasks):
         except Exception as exc:  # noqa: BLE001 — a failed drain must not crash the run
             ok, result = False, {"error": f"{type(exc).__name__}: {exc}"}
         status = "done" if ok and result.get("status") != "error" else "failed"
-        _mark_queued_record(tasks_path, record["id"], status, result)
-        processed.append({"id": record["id"], "business": record.get("business"),
-                          "type": record.get("type"), "status": status})
+        vault_error = _mark_queued_record(tasks_path, record["id"], status, result)
+        entry = {"id": record["id"], "business": record.get("business"),
+                 "type": record.get("type"), "status": status}
+        if vault_error:
+            entry["vault_error"] = vault_error
+        processed.append(entry)
     return {"mode": "drain-queue", "store_dir": store_dir,
             "max": max_tasks, "processed": processed}
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        description="Run a Talvenor Master OS task via the Main CEO Bot.")
+        description="Run a Talvenor Master OS task via the Main CEO Bot.",
+        epilog="Examples:\n"
+               "  run one task: --business agency --task caption_write "
+               "--input '{\"title\": \"...\"}'\n"
+               "  find a skill: --business agency --task find_skill "
+               "--input '{\"query\": \"backup\"}'\n"
+               "  drain the queue: --drain-queue --max 2 "
+               "(done/failed result also lands in store/vault/)",
+        formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--business", choices=sorted(BUSINESS_ALIASES),
                         help="agency | products | content")
     parser.add_argument("--task", help="task type, e.g. caption_write")
