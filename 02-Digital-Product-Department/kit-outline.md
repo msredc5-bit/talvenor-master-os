@@ -1,99 +1,99 @@
-# Vet No-Show Recovery Kit — BLUEPRINT (নকশা, kit নিজে নয়)
+# Vet No-Show Recovery Kit — BLUEPRINT (the design, not the kit itself)
 
-**Price:** $49 one-time (প্রথম ৩০ buyer-এর জন্য launch price $39, তারপর $49)।
-**Format:** Google Sheets + Google Docs + copy-paste script। কোড নেই, app
-নেই, install করতে হয় না। Lemon Squeezy থেকে download link-এ দেওয়া হবে
-(Gumroad backup listing)।
-**কার জন্য:** Independent companion-animal vet clinic, ১–৫ vet, buyer =
-front-desk / practice manager। Corporate chain নয় (ওদের central system
-আছে), solo mobile vet নয় (খুব ছোট)।
+**Price:** $49 one-time (launch price $39 for the first 30 buyers, then $49).
+**Format:** Google Sheets + Google Docs + copy-paste script. No code, no app,
+nothing to install. It will be delivered via a download link from Lemon Squeezy
+(Gumroad backup listing).
+**For whom:** Independent companion-animal vet clinic, 1–5 vets, buyer =
+front-desk / practice manager. Not a corporate chain (they have a central system),
+not a solo mobile vet (too small).
 
-> ⚠️ **এটা BLUEPRINT — kit নিজে এখনো বানানো হয়নি।** Gate 0 (Lemon
-> Squeezy signup test) পাস না হওয়া পর্যন্ত kit বানানো/বেচা শুরু হবে না।
-> এই ফাইলে যা আছে তা research report
+> ⚠️ **This is a BLUEPRINT — the kit itself has not been built yet.** Until Gate 0 (the
+> Lemon Squeezy signup test) passes, building/selling the kit will not start.
+> What is in this file is the design taken from the research report
 > (`~/workspace/research_notes/digital-product-final-20261112/report.md`
-> §4.1, §5) থেকে নেওয়া নকশা — কোনো sale, কোনো launch নয়।
+> §4.1, §5) — no sale, no launch.
 
-## কেন এই kit (গবেষণা থেকে, source সহ)
+## Why this kit (from the research, with sources)
 
-- No-show rate **~11%** [VERIFIED — AAHA]। গড় vet visit **~$200**
-  [VERIFIED — AVMA 2025]। একটা সাধারণ clinic-এর বছরে **~$50k–$150k**
-  ঝুঁকিতে থাকে (labeled estimate — ২৫ appointment/day × 11% × 250 দিন)।
-- US-এ **34,296** vet practice [VERIFIED — Census 2023]।
-- আসল উদাহরণ: PAWS Clinic, 2025-এ 904 no-show, দিনে ৮–৯ খালি slot
-  [VERIFIED — clinic Facebook post, 15 Jan 2026]।
-- Vet = Talvenor-এর target niche #2 — kit-এর buyer মানেই pre-qualified
-  receptionist prospect (wedge — UNTESTED: ২০ জন buyer-এর ১ জন
-  $1,109/mo receptionist নিলে ~$11K/mo)।
+- No-show rate **~11%** [VERIFIED — AAHA]. Average vet visit **~$200**
+  [VERIFIED — AVMA 2025]. A typical clinic has **~$50k–$150k** per year
+  at risk (labeled estimate — 25 appointments/day × 11% × 250 days).
+- **34,296** vet practices in the US [VERIFIED — Census 2023].
+- Real example: PAWS Clinic, 904 no-shows in 2025, 8–9 empty slots a day
+  [VERIFIED — clinic Facebook post, 15 Jan 2026].
+- Vet = Talvenor's target niche #2 — a kit buyer is by definition a pre-qualified
+  receptionist prospect (wedge — UNTESTED: if 1 of 20 buyers
+  takes the $1,109/mo receptionist, ~$11K/mo).
 
-## Kit-এর ৬ অংশ (সব বানাতে হবে — এখনো কোনোটা বানানো হয়নি)
+## The kit's 6 parts (all to be built — none built yet)
 
-### ১. Reminder Cadence Pack (Docs + script)
-- T-72h / T-24h / T-2h — SMS + email + phone-call script, copy-paste।
-- প্রতিটা script-এ [NAME] / [PET] / [TIME] field থাকবে।
-- **Gate 1-এ যাচাই করতে হবে:** cadence + script AAHA/PetDesk-এর
-  published guidance-এর সাথে মেলে কি না। মিল না হলে ঠিক করতে হবে।
+### 1. Reminder Cadence Pack (Docs + script)
+- T-72h / T-24h / T-2h — SMS + email + phone-call script, copy-paste.
+- Every script will have [NAME] / [PET] / [TIME] fields.
+- **Must be checked at Gate 1:** whether the cadence + script match AAHA/PetDesk's
+  published guidance. If not, fix it.
 
-### ২. Same-Day Rebooking Scripts (Docs)
-- Client no-show করলে বা late cancel করলে front desk কী বলবে — যাতে
-  slot-টা সেদিনই আবার ভরে যায়, হারিয়ে না যায়।
-- Phone script + in-person script, দুটোই plain US English।
+### 2. Same-Day Rebooking Scripts (Docs)
+- What the front desk says when a client no-shows or late-cancels — so that
+  the slot is filled again the same day, not lost.
+- Phone script + in-person script, both in plain US English.
 
-### ৩. Waitlist-Fill SOP (Docs, এক পাতা)
-- Slot খালি হলে কাকে আগে ফোন করবে, কোন order-এ, exact call script সহ।
-- এক পাতার procedure — front desk-এ লাগানো যায়।
+### 3. Waitlist-Fill SOP (Docs, one page)
+- Who to call first when a slot opens, in what order, with an exact call script.
+- A one-page procedure — can be posted at the front desk.
 
-### ৪. No-Show Log + $ Tracker (Sheets)
-- প্রতিটা no-show log করবে; formula auto-total করবে: এই মাসে কত
-  appointment miss হলো, আনুমানিক কত $ হারালো, recovery rate কত।
-- Sample সংখ্যা দিয়ে formula test করতে হবে (build-এর সময়)।
-- **এই $ figure-টাই আসল point:** clinic নিজের চোখে loss-টা দেখবে।
+### 4. No-Show Log + $ Tracker (Sheets)
+- Log every no-show; formulas auto-total: how many appointments were missed
+  this month, roughly how many $ were lost, what the recovery rate is.
+- The formulas must be tested with sample numbers (during build).
+- **This $ figure is the real point:** the clinic sees its loss with its own eyes.
 
-### ৫. Deposit / No-Show Policy Template (Docs)
-- Clinic adopt করতে পারে এমন plain-words policy template।
-- ⚠️ লেখা থাকবে: **"have your own attorney review before using"** —
-  এটা legal advice নয়, Elora কখনো এটাকে legal advice হিসেবে দেবে না।
+### 5. Deposit / No-Show Policy Template (Docs)
+- A plain-words policy template a clinic can adopt.
+- ⚠️ It will say: **"have your own attorney review before using"** —
+  this is not legal advice, and Elora never presents it as legal advice.
 
-### ৬. Front-Desk Quick Card (Docs, এক পাতা)
-- ৫ লাইন — যেগুলো মানলে বেশিরভাগ no-show ঠেকে। Reception desk-এ
-  রাখার মতো এক পাতা।
+### 6. Front-Desk Quick Card (Docs, one page)
+- 5 lines — following them prevents most no-shows. One page to keep
+  at the reception desk.
 
-## Build order (Gate 0-র পরে, ৩–৪ সপ্তাহ, দিনে ১ ঘণ্টা, $0)
+## Build order (after Gate 0, 3–4 weeks, 1 hour/day, $0)
 
-| সপ্তাহ | কাজ | শেষ হলে |
+| Week | Work | Done when |
 |---|---|---|
-| Week 0 — Gate 0 | Lemon Squeezy signup test (Boss-এর step) | Store খোলে, নইলে Polar → Gumroad test |
-| Week 1 — Validate + list | (a) Cadence AAHA/PetDesk-এর সাথে যাচাই (Gate 1)। (b) PA list 100-এ পূর্ণ করা | 100-clinic list filed; cadence verified |
-| Week 2 — Build | ৬ অংশ Sheets/Docs-এ বানানো; $ tracker formula sample-এ test; policy-তে attorney-review note | Kit সম্পূর্ণ; একবার পুরো read-through |
-| Week 3 — Store + sales page | Lemon Squeezy listing (primary) + Gumroad (backup); sales page (source সহ $50k–$150k math, tracker-এর ৩ screenshot, FAQ, free sample: ১ reminder-script set) | দুটো listing live; Boss sales page review করবেন |
-| Week 4 — Launch | দিনে ২৫ মেইল, 100 clinic-কে (৪ দিন); প্রতিটা reply + sale sheet-এ লেখা | 100 মেইল পাঠানো; reply/sale সংখ্যা জানা |
+| Week 0 — Gate 0 | Lemon Squeezy signup test (Boss's step) | Store opens, otherwise test Polar → Gumroad |
+| Week 1 — Validate + list | (a) Check the cadence against AAHA/PetDesk (Gate 1). (b) Complete the PA list to 100 | 100-clinic list filed; cadence verified |
+| Week 2 — Build | Build the 6 parts in Sheets/Docs; test the $ tracker formula on a sample; attorney-review note in the policy | Kit complete; one full read-through |
+| Week 3 — Store + sales page | Lemon Squeezy listing (primary) + Gumroad (backup); sales page ($50k–$150k math with source, 3 screenshots of the tracker, FAQ, free sample: 1 reminder-script set) | Both listings live; Boss will review the sales page |
+| Week 4 — Launch | 25 emails/day to 100 clinics (4 days); every reply + sale written in a sheet | 100 emails sent; reply/sale count known |
 
-## Gate (kill criteria — আগে থেকে লেখা, পরে বদলানো যাবে না)
+## Gates (kill criteria — written in advance, cannot be changed later)
 
-| Gate | কখন | পাস | ফেল → কী হবে |
+| Gate | When | Pass | Fail → what happens |
 |---|---|---|---|
-| **Gate 0 — rail** | Week 0 | Lemon Squeezy (বা Polar/Gumroad) store খোলে, BD individual + BD bank payout | সব rail বন্ধ → **product track পুরো KILL**, Boss-কে জানানো |
-| **Gate 1 — vet accuracy** | Week 1 | Cadence + script AAHA/PetDesk guidance-এর সাথে মেলে | মেলে না → একবার revise; তাও না মিললে **KILL বা re-scope** |
-| **Gate 2 — channel** | Week 4–6 (100 মেইল, তারপর 200) | ≥2% reply rate AND 100 মেইলে ≥1 sale | 100 মেইলে **0 reply** → email বন্ধ, vet Facebook group ২ সপ্তাহ; তাও 0 → **KILL**। Reply আছে, 200 মেইলে 0 sale → $29 test একবার; তাও 0 → **KILL** |
-| **Gate 3 — traction** | Month 3 | মোট ≥10 sale | <10 sale → **PAUSE** — Boss-এর সাথে price/offer/channel আবার ভাবা |
+| **Gate 0 — rail** | Week 0 | Lemon Squeezy (or Polar/Gumroad) store opens, BD individual + BD bank payout | All rails closed → **product track fully KILLed**, Boss told |
+| **Gate 1 — vet accuracy** | Week 1 | Cadence + script match AAHA/PetDesk guidance | Does not match → revise once; if it still does not match, **KILL or re-scope** |
+| **Gate 2 — channel** | Week 4–6 (100 emails, then 200) | ≥2% reply rate AND ≥1 sale at 100 emails | **0 replies** at 100 emails → stop email, vet Facebook groups for 2 weeks; still 0 → **KILL**. Replies but 0 sales at 200 emails → one $29 test; still 0 → **KILL** |
+| **Gate 3 — traction** | Month 3 | Total ≥10 sales | <10 sales → **PAUSE** — rethink price/offer/channel with Boss |
 
-## সত্য অবস্থা (2026-11-16)
+## True status (2026-11-16)
 
-| জিনিস | অবস্থা |
+| Item | Status |
 |---|---|
-| Gate 0 | **NOT PASSED** — Boss-এর Lemon Squeezy test বাকি |
-| Kit-এর ৬ অংশ | কোনোটা বানানো হয়নি — শুধু এই blueprint আছে |
-| PA list | **39 / 100** (যাচাই করা) |
+| Gate 0 | **NOT PASSED** — Boss's Lemon Squeezy test pending |
+| The kit's 6 parts | None built — only this blueprint exists |
+| PA list | **39 / 100** (verified) |
 | Sale | **0** |
-| $10K/mo verdict (সৎ) | kit একা ৬–১২ মাসে $10K/mo দেবে না। Credible: **$300–$1,000/mo** (৬–২০ sale/mo), Gate 2 পাস করলে। $10K/mo-র একমাত্র পথ wedge — UNTESTED। |
+| $10K/mo verdict (honest) | The kit alone will not deliver $10K/mo in 6–12 months. Credible: **$300–$1,000/mo** (6–20 sales/mo), if Gate 2 passes. The only path to $10K/mo is the wedge — UNTESTED. |
 
-## যা করা যাবে না
+## What cannot be done
 
-- Etsy-তে list করা যাবে না (Bangladesh-এর জন্য বন্ধ)।
-- Policy template-কে legal advice হিসেবে দেওয়া যাবে না।
-- কোনো clinic-কে দুইবার মেইল করা যাবে না।
-- $49 price-এর কোনো verified sale আছে বলে দাবি করা যাবে না — price
-  inference (পাশের product-এর anchor থেকে), observed traction নয়।
-- PIMS (practice-management software) replace করার দাবি করা যাবে না —
-  kit PIMS-এর পাশে কাজ করে (script, cadence, waitlist), 76.5% practice
-  ইতিমধ্যে PIMS ব্যবহার করে [AVMA 2025]।
+- Cannot list on Etsy (closed for Bangladesh).
+- Cannot present the policy template as legal advice.
+- Cannot email any clinic twice.
+- Cannot claim any verified sale at the $49 price — the price is an
+  inference (from a neighboring product's anchor), not observed traction.
+- Cannot claim to replace a PIMS (practice-management software) —
+  the kit works alongside a PIMS (script, cadence, waitlist), and 76.5% of practices
+  already use a PIMS [AVMA 2025].

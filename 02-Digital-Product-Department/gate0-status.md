@@ -2,45 +2,45 @@
 
 **Status: NOT PASSED (2026-11-16)**
 
-## Gate 0 কী
+## What Gate 0 is
 
-Vet Kit বানানোর আগে প্রথমে যাচাই করতে হবে: Lemon Squeezy-তে
-Bangladesh থেকে individual হিসেবে signup + payout হয় কি না।
-নতুন signup-দের triage করা হয় — Stripe Managed Payments-এর দিকে
-পাঠাতে পারে, যেখানে Bangladesh বাদ। তাই আগে test, তারপর build।
+Before building the Vet Kit, first verify: whether signup + payout on
+Lemon Squeezy works from Bangladesh as an individual.
+New signups are triaged — they may be sent toward Stripe Managed Payments,
+where Bangladesh is excluded. So test first, then build.
 
-## Boss-এর step (~15 min, $0)
+## Boss's step (~15 min, $0)
 
-1. lemonsqueezy.com-এ যান।
-2. Individual হিসেবে signup করুন (MAINUDDIN LLC নয় — LLC US-registered,
-   US bank নেই বলে individual-ই সঠিক পথ)।
-3. Payout method দেখুন — BD bank payout দেখা যায় কি না।
-4. ফলাফল জানান: পাস / ফেল / কী বলল (screenshot দিলে ভালো হয়)।
+1. Go to lemonsqueezy.com.
+2. Sign up as an individual (not MAINUDDIN LLC — the LLC is US-registered,
+   with no US bank, so individual is the right path).
+3. Look at the payout method — check whether BD bank payout is available.
+4. Report the result: pass / fail / what it said (a screenshot helps).
 
-## ফলাফল রেকর্ড করা (Boss-এর কাজ)
+## Recording the result (Boss's job)
 
-- **Elora-কে chat-এ জানান** — Boss ফলাফল বললে Elora এই ফাইল + Chief
-  module-এর Gate 0 state আপডেট করবে। (আগের dashboard artifact
-  2026-11-20-এ delete — 3D dashboard static, সেখানে লেখা যায় না)।
-- এই ফাইলের উপরের **Status লাইনে** PASSED লেখা থাকলেই Chief Gate 0
-  পাস ধরবে — নইলে fail-closed: NOT PASSED। Chief-এর কোড নিজে থেকে
-  Gate 0 পাস বলে ধরে না।
+- **Tell Elora in chat** — when Boss reports the result, Elora will update this file + the Chief
+  module's Gate 0 state. (The earlier dashboard artifact was deleted
+  2026-11-20 — the 3D dashboard is static, nothing can be written there).
+- Only if the top **Status line** of this file says PASSED will the Chief
+  treat Gate 0 as passed — otherwise fail-closed: NOT PASSED. The Chief's code
+  does not treat Gate 0 as passed on its own.
 
-## ফলাফল অনুযায়ী
+## Depending on the result
 
-- **পাস:** Phase 2-র বাকি কাজ শুরু — PA list 100-এ পূর্ণ করা, Gate 1
-  (cadence AAHA/PetDesk যাচাই), kit-এর ৬ অংশ বানানো, store listing,
-  launch।
-- **ফেল (triage/blocked):** Backup rail test — **Polar** (BD seller/payout
-  list-এ আছে, Stripe Connect Express)। Polar-ও না হলে **Gumroad**
-  (BD bank payout আছে, individual হিসেবে register করতে হবে)।
-- **সব rail বন্ধ:** Product track পুরো KILL — kit বানানো হবে না, Boss-কে
-  জানানো হবে। টাকা পাওয়ার উপায় ছাড়া product বানানো যাবে না।
+- **Pass:** start the rest of Phase 2 — complete the PA list to 100, Gate 1
+  (check the cadence against AAHA/PetDesk), build the kit's 6 parts, store listing,
+  launch.
+- **Fail (triage/blocked):** test the backup rail — **Polar** (BD is on the seller/payout
+  list, Stripe Connect Express). If Polar also fails, **Gumroad**
+  (BD bank payout exists, must register as an individual).
+- **All rails closed:** product track fully KILLed — the kit will not be built, Boss will
+  be told. A product cannot be built with no way to receive money.
 
-## সত্য অবস্থা (2026-11-16)
+## True status (2026-11-16)
 
-- Gate 0 NOT PASSED — test হয়নি।
-- তবু Phase 2-এ যা করা গেছে (Gate 0-র বাইরে, honest কাজ): kit
-  **blueprint** (`kit-outline.md` — নকশা, kit নয়), PA list **39/100**
-  (যাচাই করা), Products Chief module REAL।
-- Kit-এর ৬ অংশ বানানো হয়নি, sale 0, launch হয়নি — Gate 0-র পরে।
+- Gate 0 NOT PASSED — the test has not happened.
+- What could still be done in Phase 2 (outside Gate 0, honest work): the kit
+  **blueprint** (`kit-outline.md` — the design, not the kit), PA list **39/100**
+  (verified), Products Chief module REAL.
+- The kit's 6 parts have not been built, sale 0, no launch — after Gate 0.

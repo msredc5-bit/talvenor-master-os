@@ -1,76 +1,76 @@
 # Skill: Payment-Rails Checker
 
-**Role:** Gate 0 test-এর ধাপ লেখা + Boss-এর ফলাফল রেকর্ড করা — নিজে কখনো
-signup করে না।
-**Status: Gate 0 NOT PASSED** — Boss-এর Lemon Squeezy test বাকি।
+**Role:** Write the Gate 0 test steps + record Boss's result — never
+signs up itself.
+**Status: Gate 0 NOT PASSED** — Boss's Lemon Squeezy test is pending.
 
 ## Rails (research report §2 — verified live 2026-11-12)
 
-| Platform | BD founder-এর জন্য? | Fee per sale | Payout | Verdict |
+| Platform | For a BD founder? | Fee per sale | Payout | Verdict |
 |---|---|---|---|---|
-| **Lemon Squeezy** | YES — BD official bank-payout list-এ আছে [VERIFIED] | 5% + $0.50 (+1.5% int'l buyer) | $50 min; created 1st/15th, 13-day hold, paid 14th/28th; 1% payout fee to non-US bank | **Primary rail।** Sunset risk, no date; test signup first। |
-| **Polar** | YES — BD seller/payout list-এ আছে via Stripe Connect Express [STRONG INDICATION] | 5% + $0.50 (+1.5% non-US card); payout $2/mo + 0.25% + 25¢ | 7-day settlement for new orgs; account review up to 14 days | **Best backup।** BD individual-vs-business eligibility: UNKNOWN — check before committing। |
-| **Gumroad** | YES — bank payouts in BDT to a BD bank [VERIFIED] | 10% + $0.50 plus 2.9% + $0.30 card processing (≈12.9% + $0.80 effective); 30% via Discover | $100 min; weekly (BD payout day Tuesday); 7-day hold | Fallback। **LLC catch: register as an INDIVIDUAL in Bangladesh, not as MAINUDDIN LLC** — bank account যে country-তে business registered সেই country-তেই থাকতে হবে, আর LLC US-registered, US bank নেই। |
-| **Paddle** | YES, conditional — BD unsupported-countries list-এ নেই [VERIFIED] | 5% + $0.50, all-inclusive | $100 min; monthly, by the 15th; wire or Payoneer (Payoneer Boss-এর LOCKED — wire ব্যবহার; $15 SWIFT fee for BD: UNKNOWN) | Viable but gated by approval review; approval can be refused without reason। |
-| **Etsy** | **NO** — BD eligible-countries list-এ নেই [VERIFIED] | — | — | **Hard no। Do not build on Etsy।** |
+| **Lemon Squeezy** | YES — BD is on the official bank-payout list [VERIFIED] | 5% + $0.50 (+1.5% int'l buyer) | $50 min; created 1st/15th, 13-day hold, paid 14th/28th; 1% payout fee to non-US bank | **Primary rail.** Sunset risk, no date; test signup first. |
+| **Polar** | YES — BD is on the seller/payout list via Stripe Connect Express [STRONG INDICATION] | 5% + $0.50 (+1.5% non-US card); payout $2/mo + 0.25% + 25¢ | 7-day settlement for new orgs; account review up to 14 days | **Best backup.** BD individual-vs-business eligibility: UNKNOWN — check before committing. |
+| **Gumroad** | YES — bank payouts in BDT to a BD bank [VERIFIED] | 10% + $0.50 plus 2.9% + $0.30 card processing (≈12.9% + $0.80 effective); 30% via Discover | $100 min; weekly (BD payout day Tuesday); 7-day hold | Fallback. **LLC catch: register as an INDIVIDUAL in Bangladesh, not as MAINUDDIN LLC** — the bank account must be in the country where the business is registered, and the LLC is US-registered with no US bank. |
+| **Paddle** | YES, conditional — BD is not on the unsupported-countries list [VERIFIED] | 5% + $0.50, all-inclusive | $100 min; monthly, by the 15th; wire or Payoneer (Payoneer is Boss's LOCKED — use wire; $15 SWIFT fee for BD: UNKNOWN) | Viable but gated by approval review; approval can be refused without reason. |
+| **Etsy** | **NO** — BD is not on the eligible-countries list [VERIFIED] | — | — | **Hard no. Do not build on Etsy.** |
 
 Worked example, $49 sale (US card): Lemon Squeezy keeps $46.05; Paddle
-$46.05; Polar ~$46.05; Gumroad ~$41.88। Cash timing (Lemon Squeezy):
-sale → bank ≈ 3–5 weeks (13-day hold + payout cycle + 1–5 days transfer)।
+$46.05; Polar ~$46.05; Gumroad ~$41.88. Cash timing (Lemon Squeezy):
+sale → bank ≈ 3–5 weeks (13-day hold + payout cycle + 1–5 days transfer).
 
 ## Inputs
 
-- `02-Digital-Product-Department/gate0-status.md` — Gate 0-র একমাত্র সত্য
-  উৎস ("Status: PASSED" লেখা না থাকলে NOT PASSED)
+- `02-Digital-Product-Department/gate0-status.md` — the only true source
+  for Gate 0 ("Status: PASSED" not written means NOT PASSED)
 - Research report §2 + `notes/payment-rails-verification-20261112.md`
-- Boss-এর ফলাফল (pass / fail / কী বলল, screenshot থাকলে ভালো)
+- Boss's result (pass / fail / what it said, screenshot if available)
 
 ## Step-by-step method
 
-### Gate 0 test (Boss-এর step, ~15 min, $0)
-1. lemonsqueezy.com-এ যান।
-2. **Individual হিসেবে signup করুন** (MAINUDDIN LLC নয় — LLC
-   US-registered, US bank নেই বলে individual-ই সঠিক পথ)।
-3. Payout method দেখুন — BD bank payout দেখা যায় কি না।
-4. ফলাফল জানান: পাস / ফেল / কী বলল (screenshot দিলে ভালো হয়)।
+### Gate 0 test (Boss's step, ~15 min, $0)
+1. Go to lemonsqueezy.com.
+2. **Sign up as an individual** (not MAINUDDIN LLC — the LLC is
+   US-registered with no US bank, so individual is the right path).
+3. Look at the payout method — check whether BD bank payout is available.
+4. Report the result: pass / fail / what it said (a screenshot helps).
 
-### ফলাফল অনুযায়ী
-- **পাস:** Phase 2-র বাকি কাজ শুরু — PA list 100-এ পূর্ণ করা, Gate 1
-  (cadence AAHA/PetDesk যাচাই), kit-এর ৬ অংশ বানানো, store listing,
-  launch।
-- **ফেল (triage/blocked):** Backup rail test — **Polar** (BD seller/payout
-  list-এ আছে, Stripe Connect Express)। Polar-ও না হলে **Gumroad**
-  (BD bank payout আছে, individual হিসেবে register করতে হবে)।
-- **সব rail বন্ধ:** Product track পুরো **KILL** — kit বানানো হবে না,
-  Boss-কে জানানো হবে। টাকা পাওয়ার উপায় ছাড়া product বানানো যাবে না।
+### Depending on the result
+- **Pass:** start the rest of Phase 2 — complete the PA list to 100, Gate 1
+  (check the cadence against AAHA/PetDesk), build the kit's 6 parts, store listing,
+  launch.
+- **Fail (triage/blocked):** test the backup rail — **Polar** (BD is on the seller/payout
+  list, Stripe Connect Express). If Polar also fails, **Gumroad**
+  (BD bank payout exists, must register as an individual).
+- **All rails closed:** product track fully **KILL**ed — the kit will not be built,
+  Boss will be told. A product cannot be built with no way to receive money.
 
-### ফলাফল রেকর্ড করা
-- Boss ফলাফল জানালে (3D office dashboard-এর Gate 0 ঘরে বা chat-এ) Elora
-  `gate0-status.md`-এর উপরের **Status লাইন** আপডেট করবে। Chief-এর কোড
-  নিজে থেকে Gate 0 পাস বলে ধরে না — শুধু Status লাইনটাই উৎস।
-- **নতুন risk:** Lemon Squeezy-র নতুন signup flow triage করে — "tell us
-  about your business" বলে Stripe Managed Payments-এর দিকে পাঠাতে পারে,
-  যেখানে Bangladesh বাদ (37 country only)। তাই আগে test, তারপর build।
+### Recording the result
+- When Boss reports the result (in the 3D office dashboard's Gate 0 room or in chat), Elora
+  will update the top **Status line** of `gate0-status.md`. The Chief's code
+  does not treat Gate 0 as passed on its own — only the Status line is the source.
+- **New risk:** Lemon Squeezy's new signup flow triages — saying "tell us
+  about your business" it may send you toward Stripe Managed Payments,
+  where Bangladesh is excluded (37 countries only). So test first, then build.
 
 ## Output format
 
-- Gate 0 test steps (Boss-এর জন্য, ৪ ধাপ) + ফলাফলের রেকর্ড: তারিখ, rail,
-  ফলাফল (PASSED / FAILED + কারণ), পরের rail (যদি থাকে)।
-- Status লাইনের আসল অবস্থা — কখনো অনুমান নয়।
+- Gate 0 test steps (for Boss, 4 steps) + a record of the result: date, rail,
+  result (PASSED / FAILED + reason), next rail (if any).
+- The Status line's real state — never a guess.
 
 ## Gate
 
-- এই role-এ কোনো gate নেই — এটা শুধু যাচাই + রেকর্ড।
-- কিন্তু signup করা Boss-এর নিজের step — Elora/Boss-এর পাসওয়ার্ড দিয়ে
-  কখনো login/signup করে না।
+- This role has no gate — it is only checking + recording.
+- But signing up is Boss's own step — Elora never logs in/signs up with
+  Boss's password.
 
 ## Honest limits
 
-- **Gate 0 NOT PASSED** — test হয়নি। কোনো rail-এ এখনো store খোলা হয়নি।
-- Lemon Squeezy maintenance mode-এ আছে, possible sunset, no date — তাই
-  customer list + file exportable রাখতে হবে।
-- Polar-এর BD individual-vs-business eligibility **UNKNOWN** — commit
-  করার আগে check করতে হবে।
-- **Etsy কখনো plan-এ নেই** — Bangladesh-এর জন্য বন্ধ, hard no।
-- **BOSS INPUT REQUIRED:** Gate 0 test-এর ফলাফল — Boss নিজে signup করে
-  জানাবেন। এই ফলাফল ছাড়া এই role-এর আর কিছু করার নেই।
+- **Gate 0 NOT PASSED** — the test has not happened. No store has been opened on any rail yet.
+- Lemon Squeezy is in maintenance mode, possible sunset, no date — so the
+  customer list + files must stay exportable.
+- Polar's BD individual-vs-business eligibility is **UNKNOWN** — it must be checked before
+  committing.
+- **Etsy is never in the plan** — closed for Bangladesh, hard no.
+- **BOSS INPUT REQUIRED:** the Gate 0 test result — Boss will sign up himself
+  and report it. Without this result, this role has nothing more to do.

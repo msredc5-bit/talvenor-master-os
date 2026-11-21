@@ -1,64 +1,64 @@
 # Skill: Support Drafter
 
-**Role:** Kit buyer-দের প্রশ্নের reply-এর DRAFT লেখা — DRAFT only, পাঠানো নয়।
-**Status: BLOCKED (কাজ নেই এখন)** — sale 0, কোনো buyer নেই, কোনো support
-প্রশ্নও নেই। Gate 0 পাস + প্রথম sale-এর পরেই এই role-এর কাজ শুরু হবে।
+**Role:** Write DRAFT replies to kit buyers' questions — DRAFT only, never sent.
+**Status: BLOCKED (no work now)** — sale 0, no buyers, no support
+questions either. This role's work starts only after Gate 0 passes + the first sale.
 
 ## Product (locked facts)
 
-- **Product:** Vet No-Show Recovery Kit, **$49 one-time** (প্রথম ৩০ buyer-এর
-  জন্য launch price **$39**)। Format: Google Sheets + Google Docs +
-  copy-paste script। Delivery: Lemon Squeezy download link (Gumroad backup)।
-- **Kit-এর ৬ অংশ:** Reminder Cadence Pack (T-72h/T-24h/T-2h), Same-Day
+- **Product:** Vet No-Show Recovery Kit, **$49 one-time** (launch price **$39** for the
+  first 30 buyers). Format: Google Sheets + Google Docs +
+  copy-paste script. Delivery: Lemon Squeezy download link (Gumroad backup).
+- **The kit's 6 parts:** Reminder Cadence Pack (T-72h/T-24h/T-2h), Same-Day
   Rebooking Scripts, Waitlist-Fill SOP, No-Show Log + $ Tracker (Sheets),
-  Deposit/No-Show Policy Template, Front-Desk Quick Card।
+  Deposit/No-Show Policy Template, Front-Desk Quick Card.
 - **Support load (ASSUMPTION):** ~10 min/buyer — automatic delivery, email
-  questions only → 20 sales/mo ≈ 3.3 hr/mo।
+  questions only → 20 sales/mo ≈ 3.3 hr/mo.
 
 ## Inputs
 
-- Buyer-এর আসল message (Boss forward করবেন — Elora buyer-এর inbox দেখে না)
-- `02-Digital-Product-Department/kit-outline.md` (৬ অংশের বিবরণ)
-- Refund policy (sales page-এ যা লেখা থাকবে — এখনো ঠিক হয়নি; **BOSS INPUT
+- The buyer's real message (Boss will forward it — Elora does not see the buyer's inbox)
+- `02-Digital-Product-Department/kit-outline.md` (description of the 6 parts)
+- Refund policy (whatever will be written on the sales page — not decided yet; **BOSS INPUT
   REQUIRED**)
-- Research report §7.3 (per-sale economics: Lemon Squeezy-তে $49 sale-এ
-  net $46.05; 3% refund ASSUMPTION-এ effective net $44.67)
+- Research report §7.3 (per-sale economics: on Lemon Squeezy a $49 sale nets
+  $46.05; at a 3% refund ASSUMPTION, effective net $44.67)
 
 ## Step-by-step method
 
-1. **Buyer-এর message পড়া** — প্রশ্নটা কোন ধরনের: (a) delivery/file
-   খোলা, (b) tracker formula, (c) script ব্যবহার, (d) refund, (e) policy
-   template নিয়ে প্রশ্ন।
-2. **উত্তরের DRAFT লেখা** — plain US English, ছোট, direct। File/অংশের
-   নাম ঠিক লেখা (kit-outline.md থেকে)।
-3. **Policy প্রশ্ন হলে** সবসময় লেখা: "have your own attorney review
-   before using" — template legal advice নয়।
-4. **Refund প্রশ্ন হলে** sales page-এর policy অনুযায়ী লেখা — policy ঠিক
-   না হলে DRAFT-এ লেখা: **BOSS INPUT REQUIRED** (refund policy) — অনুমান
-   করে policy বানানো যাবে না।
-5. **Price প্রশ্ন হলে** শুধু locked $49 (launch $39 প্রথম ৩০ buyer) লেখা
-   — এর বাইরে কোনো price, discount, guarantee লেখা যাবে না।
-6. **DRAFT Boss-কে দেখানো** — Boss `send` বললে তবেই পাঠানো হয়।
+1. **Read the buyer's message** — what kind of question is it: (a) delivery/file
+   opening, (b) tracker formula, (c) using a script, (d) refund, (e) a question
+   about the policy template.
+2. **Write the reply DRAFT** — plain US English, short, direct. Write the file/part
+   names correctly (from kit-outline.md).
+3. **If it is a policy question**, always write: "have your own attorney review
+   before using" — the template is not legal advice.
+4. **If it is a refund question**, write per the sales page's policy — if the policy is not
+   decided, write in the DRAFT: **BOSS INPUT REQUIRED** (refund policy) — a policy
+   cannot be invented by guessing.
+5. **If it is a price question**, write only the locked $49 (launch $39 for the first 30 buyers)
+   — no other price, discount, or guarantee can be written.
+6. **Show the DRAFT to Boss** — it is only sent after Boss says `send`.
 
 ## Output format
 
-- Reply DRAFT (plain US English) + এক লাইন note: কোন অংশের প্রশ্ন, কোনো
-  BOSS INPUT REQUIRED আছে কি না।
-- DRAFT-এর মাথায় লেখা থাকবে: DRAFT — পাঠানো হয়নি।
+- Reply DRAFT (plain US English) + a one-line note: which part the question is about, whether
+  any BOSS INPUT REQUIRED exists.
+- The top of the DRAFT will say: DRAFT — not sent.
 
 ## Gate
 
-- পাঠাতে Boss-এর `send` লাগে। DRAFT নিজেই নিরাপদ, কোনো gate নেই।
+- Boss's `send` is needed to send it. The DRAFT itself is safe, no gate.
 
 ## Honest limits
 
-- **Sale 0 — কোনো buyer নেই।** এই skill-এর আসল test এখনো হয়নি।
-- Refund policy এখনো ঠিক হয়নি — Boss-এর decision ছাড়া refund নিয়ে
-  কিছু লেখা যাবে না।
-- কোনো client/testimonial/statistic বানানো যাবে না। কোনো invented
-  buyer-এর প্রশ্নের উত্তর লেখা যাবে না — আসল message আসলেই তবে DRAFT।
-- Policy template-কে legal advice হিসেবে দেওয়া যাবে না।
-- Locked $49-এর বাইরে কোনো price quote করা যাবে না; prospect-কে $49-ও
-  quote করা যাবে না Boss confirm না করলে।
-- **BOSS INPUT REQUIRED:** refund policy (sales page-এর জন্য) + প্রথম
-  buyer-এর আসল message (আসলে তবেই DRAFT)।
+- **Sale 0 — no buyers.** This skill's real test has not happened yet.
+- The refund policy is not decided yet — nothing about refunds can be written
+  without Boss's decision.
+- No client/testimonial/statistic can be invented. No reply can be written to an invented
+  buyer's question — a DRAFT only when a real message arrives.
+- The policy template cannot be presented as legal advice.
+- No price outside the locked $49 can be quoted; even $49 cannot be
+  quoted to a prospect unless Boss confirms.
+- **BOSS INPUT REQUIRED:** refund policy (for the sales page) + the first
+  buyer's real message (DRAFT only when it arrives).
