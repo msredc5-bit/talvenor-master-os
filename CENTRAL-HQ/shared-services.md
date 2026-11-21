@@ -1,106 +1,106 @@
-# Central HQ — Shared Services (আসল জিনিসের সাথে ম্যাপ)
+# Central HQ — Shared Services (mapped to the real things)
 
-> Status: DRAFT — Boss-এর অনুমোদনের অপেক্ষায়
-> তারিখ: 2026-11-19
-> উদ্দেশ্য: brief-এর 10টি shared department-এর প্রতিটি আসলে কী, কোথায় থাকে, আসল অবস্থা কী — সেটা লেখা। brief-এর নাম রাখা হয়েছে, ভেতরের দাবি বাস্তবতা দিয়ে ঠিক করা হয়েছে।
+> Status: DRAFT — awaiting Boss's approval
+> Date: 2026-11-19
+> Purpose: write what each of the brief's 10 shared departments really is, where it lives, and its real state. The brief's names are kept; the claims inside are corrected with reality.
 
-## Status-এর মানে
+## What the statuses mean
 
-| Status | মানে |
+| Status | Means |
 |---|---|
-| BUILT | ফাইল/code আছে, যাচাই করা হয়েছে। |
-| READY NOT LIVE | তৈরি, কিন্তু live চালু নয় — Boss-এর step বা gate বাকি। |
-| DRAFT | খসড়া — final নয়, Boss-এর review বাকি। |
-| GAP | বানানো হয়নি। |
-| NOT PASSED | Gate পাস হয়নি — এগোনো BLOCKED। |
+| BUILT | Files/code exist, verified. |
+| READY NOT LIVE | Ready, but not live — Boss's step or gate remaining. |
+| DRAFT | Draft — not final, Boss's review remaining. |
+| GAP | Not built. |
+| NOT PASSED | Gate not passed — moving forward BLOCKED. |
 
 ---
 
 ## 1. Executive Management — Main CEO Bot + 3 Chiefs
 
-| বিষয় | বিবরণ |
+| Item | Details |
 |---|---|
-| আসলে কী | Boss-এর নির্দেশে 3টি business-কে পরিচালনা: Main CEO Bot routing করে, 3 Chief (Agency / Products / Content) নিজ নিজ business-এর দৈনন্দিন সমন্বয় করে। |
-| কোথায় থাকে | `00-CEO-Core/main_ceo_bot.py`, `00-CEO-Core/config.json` (hierarchy + businesses); Chiefs: `01-Agency-Department/` (Agency Chief), `02-Digital-Product-Department/chief_of_staff_products.py`, `03-Content-Creation-Department/chief_of_staff_content.py` |
-| আসল অবস্থা | BUILT (mock brain)। Chief→manager wiring Phase 2 — NOT BUILT, Boss-এর `go` বাকি। কোনো Chief gated action নিজে execute করে না। |
+| What it really is | Running the 3 businesses on Boss's orders: the Main CEO Bot routes, and the 3 Chiefs (Agency / Products / Content) coordinate each business's day-to-day work. |
+| Where it lives | `00-CEO-Core/main_ceo_bot.py`, `00-CEO-Core/config.json` (hierarchy + businesses); Chiefs: `01-Agency-Department/` (Agency Chief), `02-Digital-Product-Department/chief_of_staff_products.py`, `03-Content-Creation-Department/chief_of_staff_content.py` |
+| Real state | BUILT (mock brain). Chief→manager wiring Phase 2 — DONE 2026-11-19 (Chiefs call the 8 managers via DEPARTMENT_ROUTING). No Chief executes a gated action itself. |
 
 ## 2. Strategic Planning — config.json + BUILD-LOG
 
-| বিষয় | বিবরণ |
+| Item | Details |
 |---|---|
-| আসলে কী | Business goal, priority, phase-এর সিদ্ধান্ত — config-এ লেখা থাকে, BUILD-LOG-এ কাজের ইতিহাস থাকে। |
-| কোথায় থাকে | `00-CEO-Core/config.json` (businesses, phases, gates, spend cap $0); `BUILD-LOG.md` (repo root, 584 লাইন, 2026-11-19 পর্যন্ত) |
-| আসল অবস্থা | BUILT। Planning-এর সিদ্ধান্ত Boss নেন — কোনো agent নিজে strategy বদলাতে পারে না। |
+| What it really is | Business goals, priorities, phase decisions — written in config, with work history in BUILD-LOG. |
+| Where it lives | `00-CEO-Core/config.json` (businesses, phases, gates, spend cap $0); `BUILD-LOG.md` (repo root, 716 lines, up to 2026-11-21) |
+| Real state | BUILT. Boss makes the planning decisions — no agent can change strategy by itself. |
 
 ## 3. AI Infrastructure — BrainFactory (mock) + Vapi + Ollama CPU-only
 
-| বিষয় | বিবরণ |
+| Item | Details |
 |---|---|
-| আসলে কী | Model routing ও reasoning-এর জায়গা: BrainFactory (mock default, $0), live MetaSpark path UNPROVEN; voice stack Vapi (Sophia live); local ছোট মডেলের জন্য Ollama CPU-only। |
-| কোথায় থাকে | `00-CEO-Core/brain.py` (BrainFactory); `00-CEO-Core/tool_calling.py` + `tools.json`; voice: `00-CEO-Core/jarvis_voice.py`, `00-CEO-Core/voice/` (Piper TTS + Vosk en + sherpa-onnx bn) |
-| আসল অবস্থা | BUILT (mock)। Live MetaSpark UNPROVEN — কোনো live call হয়নি। Boss-এর PC: AMD Ryzen 3 5300U, 8GB RAM, Radeon integrated 496MB VRAM — GPU video / GPU Ollama CLOSED; CPU-only ছোট মডেল (1–1.5B) মাত্র। |
+| What it really is | The place for model routing and reasoning: BrainFactory (mock default, $0), live MetaSpark path UNPROVEN; voice stack Vapi (Sophia live); Ollama CPU-only for small local models. |
+| Where it lives | `00-CEO-Core/brain.py` (BrainFactory); `00-CEO-Core/tool_calling.py` + `tools.json`; voice: `00-CEO-Core/jarvis_voice.py`, `00-CEO-Core/voice/` (Piper TTS + Vosk en + sherpa-onnx bn) |
+| Real state | BUILT (mock). Live MetaSpark UNPROVEN — no live call made. Boss's PC: AMD Ryzen 3 5300U, 8GB RAM, Radeon integrated 496MB VRAM — GPU video / GPU Ollama CLOSED; CPU-only small models (1–1.5B) only. |
 
 ## 4. Agent Management — Agent Registry (69 entry) + Phase 7 Section Agents
 
-| বিষয় | বিবরণ |
+| Item | Details |
 |---|---|
-| আসলে কী | কোন agent/worker আছে, তার status কী, gate কী — registry-তে লেখা। Phase 7-এর section agent-রা 3 business-এর section-এ কাজ করে। |
-| কোথায় থাকে | `01-Agency-Department/agents/agent-registry/registry.md` + `registry.json` (69 entry: EXISTING 22 / ROLE-ONLY 43 / GAP 4; 8 manager আলাদা তালিকায়); Phase 7 sections: `01-Agency-Department/sections/`, `02-Digital-Product-Department/sections/`, `03-Content-Creation-Department/sections/` |
-| আসল অবস্থা | BUILT (Phase 1, DRAFT — Boss-এর review-এর জন্য)। Registry-র 43টি ROLE-ONLY — শুধু role-এর সংজ্ঞা, worker code নেই। |
+| What it really is | Which agents/workers exist, their status, their gates — written in the registry. Phase 7's section agents work in the 3 businesses' sections. |
+| Where it lives | `01-Agency-Department/agents/agent-registry/registry.md` + `registry.json` (69 entries: EXISTING 69 / ROLE-ONLY 0 / GAP 0 — Phase 3 + 2026-11-21 GAP-worker build; 8 managers in a separate list); Phase 7 sections: `01-Agency-Department/sections/`, `02-Digital-Product-Department/sections/`, `03-Content-Creation-Department/sections/` |
+| Real state | BUILT (Phase 1, DRAFT — for Boss's review). The registry's 43 ROLE-ONLY entries are now 0 — every role has worker code (43 Phase 3 specialists + 4 GAP workers, 2026-11-21). |
 
-## 5. Memory Management — store/ + vault/ (central) + per-department ফোল্ডার
+## 5. Memory Management — store/ + vault/ (central) + per-department folders
 
-| বিষয় | বিবরণ |
+| Item | Details |
 |---|---|
-| আসলে কী | কেন্দ্রীয় task/approval record + shared vault; প্রতিটি department-এর নিজের ফোল্ডারে তার নিজের record। |
-| কোথায় থাকে | Central: `store/tasks.json`, `store/approvals.json`, `store/vault/README.md`; Agency: `01-Agency-Department/`; Commerce: `02-Digital-Product-Department/`; Media: `03-Content-Creation-Department/` |
-| আসল অবস্থা | BUILT (JSON store files)। আলাদা database নেই। কোনো business অন্য business-এর record পড়ে না — নিয়ম `data-isolation.md`-এ। |
+| What it really is | Central task/approval records + shared vault; each department's own records in its own folder. |
+| Where it lives | Central: `store/tasks.json`, `store/approvals.json`, `store/vault/README.md`; Agency: `01-Agency-Department/`; Commerce: `02-Digital-Product-Department/`; Media: `03-Content-Creation-Department/` |
+| Real state | BUILT (JSON store files). No separate database. No business reads another business's records — rules in `data-isolation.md`. |
 
 ## 6. Automation Engineering — n8n workflows READY NOT LIVE + run_office.py
 
-| বিষয় | বিবরণ |
+| Item | Details |
 |---|---|
-| আসলে কী | Cross-business workflow-এর জায়গা: n8n wiring doc + office runner। |
-| কোথায় থাকে | `dashboards/n8n-wiring.md` (wiring doc); `scripts/run_office.py` (runner — Main CEO Bot দিয়ে route করে, ApprovalGateway দিয়ে gate করে); `scripts/sync_status.py` |
-| আসল অবস্থা | READY NOT LIVE — n8n workflow Boss-এর import + test বাকি। Runner mock brain দিয়ে চলে; gated action voice-এ শুধু PENDING হয়, execute হয় না। |
+| What it really is | The place for cross-business workflows: n8n wiring doc + office runner. |
+| Where it lives | `dashboards/n8n-wiring.md` (wiring doc); `scripts/run_office.py` (runner — routes via Main CEO Bot, gates via ApprovalGateway); `scripts/sync_status.py` |
+| Real state | READY NOT LIVE — n8n workflow import + test remaining for Boss. The runner runs on the mock brain; a gated action only becomes PENDING by voice, never executes. |
 
-## 7. Finance Intelligence — আসল সংখ্যা (কোনো estimate নয়)
+## 7. Finance Intelligence — real numbers (no estimates)
 
-| বিষয় | বিবরণ |
+| Item | Details |
 |---|---|
-| আসলে কী | তিনটি business-এর একত্রিত আর্থিক ছবি — শুধু যা সত্যি তাই। |
-| কোথায় থাকে | `00-CEO-Core/config.json` (honest_status); Agency finance: `01-Agency-Department/sections/ops/agents/billing_invoice_agent.py` (invoice — paying client ছাড়া বানানো হয় না); reporting: `ReportCompiler` (`01-Agency-Department/engine/workers/src/workers/admin.py`) |
-| আসল অবস্থা | BUILT (reporting draft-only)। আসল সংখ্যা: paying client 0, revenue $0, spend cap $0, প্রথম মেইল 162, Vet Kit বিক্রি 0। Pricing LOCKED (internal only): Starter $547/mo + $597 build; Growth $1,109/mo + $1,297 build; Scale $1,672/mo + $1,997 build — prospect-কে কখনো quote নয়। |
+| What it really is | The combined financial picture of the three businesses — only what is true. |
+| Where it lives | `00-CEO-Core/config.json` (honest_status); Agency finance: `01-Agency-Department/sections/ops/agents/billing_invoice_agent.py` (invoices — never made without a paying client); reporting: `ReportCompiler` (`01-Agency-Department/engine/workers/src/workers/admin.py`) |
+| Real state | BUILT (reporting draft-only). Real numbers: paying clients 0, revenue $0, spend cap $0, first mails 162, Vet Kit sales 0. Pricing LOCKED (internal only): Starter $547/mo + $597 build; Growth $1,109/mo + $1,297 build; Scale $1,672/mo + $1,997 build — never quote to a prospect. |
 
-## 8. Security & Governance — Agency governance (4 ফাইল) + Gates
+## 8. Security & Governance — Agency governance (4 files) + Gates
 
-| বিষয় | বিবরণ |
+| Item | Details |
 |---|---|
-| আসলে কী | Access, approval, audit — governance-এর ভিত্তি। |
-| কোথায় থাকে | `01-Agency-Department/governance/office-charter.md`, `approval-policy.md`, `security-policy.md`, `agent-permissions.md`; gate: `00-CEO-Core/human_approval_gateway.py` |
-| আসল অবস্থা | BUILT (Phase 1 foundation, DRAFT)। Gate ON: send / publish / spend / delete — Boss-এর exact word ছাড়া কিছু হয় না, কোনো auto-approve path নেই। এই governance এখন Agency-র; Commerce/Media-র জন্য আলাদা governance এখনো বানানো হয়নি — GAP। |
+| What it really is | Access, approval, audit — the foundation of governance. |
+| Where it lives | `01-Agency-Department/governance/office-charter.md`, `approval-policy.md`, `security-policy.md`, `agent-permissions.md`; gate: `00-CEO-Core/human_approval_gateway.py` |
+| Real state | BUILT (Phase 1 foundation, DRAFT). Gate ON: send / publish / spend / delete — nothing happens without Boss's exact word, no auto-approve path. This governance is the Agency's for now; separate governance for Commerce/Media is not built yet — GAP. |
 
 ## 9. Performance Analytics — dashboards/status.html + ReportCompiler
 
-| বিষয় | বিবরণ |
+| Item | Details |
 |---|---|
-| আসলে কী | কী হয়েছে, কী ভালো/খারাপ চলছে — শুধু যা দেখা যায় তাই। |
-| কোথায় থাকে | `dashboards/status.html` (sync: `scripts/sync_status.py`); `ReportCompiler` — `01-Agency-Department/engine/workers/src/workers/admin.py` (`report_compile`) |
-| আসল অবস্থা | BUILT (status view — live dashboard নয়)। ReportCompiler visible metrics only — কখনো estimate/invent নয়। Platform-এর আসল number দেখা না গেলে Boss-কে paste করতে বলা হয়। |
+| What it really is | What happened, what is going well/badly — only what can be seen. |
+| Where it lives | `dashboards/status.html` (sync: `scripts/sync_status.py`); `ReportCompiler` — `01-Agency-Department/engine/workers/src/workers/admin.py` (`report_compile`) |
+| Real state | BUILT (status view — not a live dashboard). ReportCompiler uses visible metrics only — never estimates/invents. If a platform's real numbers cannot be seen, Boss is asked to paste them. |
 
 ## 10. Research Intelligence — ~/workspace/research_notes/ (shared, read-only source)
 
-| বিষয় | বিবরণ |
+| Item | Details |
 |---|---|
-| আসলে কী | তিনটি business-এর জন্য shared market research — এক জায়গা থেকে পড়া হয়, কেউ নিজের মতো বদলায় না। |
-| কোথায় থাকে | `~/workspace/research_notes/` (repo-র বাইরে, shared, read-only source হিসেবে ব্যবহার) |
-| আসল অবস্থা | BUILT (notes আছে)। Research থেকে পাওয়া তথ্য audit ছাড়া সিদ্ধান্তে নেওয়া হয় না — বাইরের research-এ ভুল brand/price/niche ঢুকতে পারে, তাই LOCKED FACTS-এর সাথে মিলিয়ে নিতে হয়। |
+| What it really is | Shared market research for the three businesses — read from one place, nobody changes it their own way. |
+| Where it lives | `~/workspace/research_notes/` (outside the repo, shared, used as a read-only source) |
+| Real state | BUILT (notes exist). Information from research is not used in decisions without an audit — outside research can smuggle in a wrong brand/price/niche, so it must be checked against LOCKED FACTS. |
 
 ---
 
-## যা এই shared services-এ নেই
+## What is not in these shared services
 
-- কোনো আলাদা live brain নেই (একটাই BrainFactory, mock)।
-- কোনো live CRM নেই (n8n Data Tables PLANNED)।
-- কোনো live automation নেই (n8n READY NOT LIVE)।
-- কোনো paid ad / paid tool নেই (spend cap $0)।
+- No separate live brain (one BrainFactory, mock).
+- No live CRM (n8n Data Tables PLANNED).
+- No live automation (n8n READY NOT LIVE).
+- No paid ads / paid tools (spend cap $0).

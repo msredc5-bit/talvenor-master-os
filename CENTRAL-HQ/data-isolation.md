@@ -1,51 +1,51 @@
 # Data Isolation Policy — Talvenor Unified OS
 
-> Status: DRAFT — Boss-এর অনুমোদনের অপেক্ষায়
-> তারিখ: 2026-11-19
-> ধরন: POLICY ONLY — এই ফাইল কোনো নতুন data বানায় না, কোনো data move করে না, কোনো ফাইল বদলায় না। শুধু নিয়ম লেখা।
-> ভিত্তি: brief-এর architecture rule — "একটি কেন্দ্রীয় HQ থাকবে, কিন্তু কোনো Business Unit অন্য Business Unit-এর ব্যক্তিগত Client Data, Orders বা Financial Records-এ অনুমতি ছাড়া প্রবেশ করতে পারবে না।"
+> Status: DRAFT — awaiting Boss's approval
+> Date: 2026-11-19
+> Type: POLICY ONLY — this file creates no new data, moves no data, changes no file. Rules only.
+> Basis: the brief's architecture rule — "There will be one central HQ, but no Business Unit may enter another Business Unit's private Client Data, Orders, or Financial Records without permission."
 
-## 1. DATA এলাকা — 4টি
+## 1. DATA areas — 4
 
-| DATA এলাকা | ফোল্ডার / ফাইল | মালিক (কে পড়ে/লেখে) | ভেতরে কী থাকে |
+| DATA area | Folder / file | Owner (who reads/writes) | What is inside |
 |---|---|---|---|
 | DATA/central | `store/tasks.json`, `store/approvals.json`, `store/vault/`, `00-CEO-Core/config.json` | HQ only (Main CEO Bot + Boss) | Task record, approval record, shared vault, system config |
 | DATA/agency | `01-Agency-Department/` | Agency Chief only | Lead, prospect research, outreach draft, client intake, delivery, finance record |
 | DATA/commerce | `02-Digital-Product-Department/` | Products Chief only | PA vet list (`pa-vet-list/pa-vet-clinics.csv`), kit blueprint (`kit-outline.md`), gate0-status (`gate0-status.md`) |
 | DATA/media | `03-Content-Creation-Department/` | Content Chief only | Pipeline (`pipeline.md`), VOICE.md, ToolPilot status (`toolpilot-status.md`), Creator OS worker output |
 
-## 2. পড়ার নিয়ম
+## 2. Reading rules
 
-1. **একটি business শুধু নিজের department + shared vault পড়ে।** Agency পড়ে `01-Agency-Department/` + `store/vault/`। Commerce পড়ে `02-Digital-Product-Department/` + `store/vault/`। Media পড়ে `03-Content-Creation-Department/` + `store/vault/`।
-2. **HQ (Main CEO Bot) সব পড়তে পারে** — কারণ routing, approval ও reporting HQ-র কাজ। কিন্তু HQ-ও কোনো gated action নিজে execute করে না।
-3. **Boss সব পড়তে পারেন** — Founder, চূড়ান্ত সিদ্ধান্তকারী।
+1. **A business reads only its own department + the shared vault.** Agency reads `01-Agency-Department/` + `store/vault/`. Commerce reads `02-Digital-Product-Department/` + `store/vault/`. Media reads `03-Content-Creation-Department/` + `store/vault/`.
+2. **HQ (Main CEO Bot) can read everything** — because routing, approval, and reporting are HQ's jobs. But HQ also never executes a gated action itself.
+3. **Boss can read everything** — Founder, final decision-maker.
 
-## 3. Isolation নিয়ম (কঠোর)
+## 3. Isolation rules (strict)
 
-| নিয়ম | বিবরণ |
+| Rule | Details |
 |---|---|
-| Client record আলাদা | Agency-র lead/client record শুধু Agency-র। Commerce বা Media তা পড়তে পারে না। |
-| Financial record আলাদা | প্রতিটি business-এর revenue, expense, invoice record শুধু তার নিজের। একত্রিত ছবি শুধু HQ-র Finance Intelligence-এ (আসল সংখ্যা দিয়ে, `shared-services.md` §7)। |
-| Order / sale record আলাদা | Commerce-র order/sale record শুধু Commerce-র। |
-| অন্য business-এর data পড়তে হলে | Boss-এর explicit permission লাগবে — মৌখিক ইঙ্গিত নয়, স্পষ্ট অনুমতি। অনুমতি ছাড়া কোনো cross-read নয়। |
-| Cross-business read হলে | তা internal project হিসেবে log করতে হবে — কোন business, কী পড়ল, কেন, Boss-এর কোন অনুমতিতে। Log ছাড়া cross-read নয়। |
-| Shared vault-এ কী যায় | শুধু যা তিনটি business-এর সবার কাজে লাগে (যেমন booking link, brand line, gate word-এর নিয়ম)। কোনো client-এর ব্যক্তিগত তথ্য vault-এ নয়। |
-| Research notes | `~/workspace/research_notes/` shared, read-only source — সবাই পড়তে পারে, কেউ বদলাতে পারে না। |
+| Client records separate | The Agency's lead/client records belong to the Agency only. Commerce or Media cannot read them. |
+| Financial records separate | Each business's revenue, expense, and invoice records are its own only. A combined picture exists only in HQ's Finance Intelligence (with real numbers, `shared-services.md` §7). |
+| Order / sale records separate | Commerce's order/sale records belong to Commerce only. |
+| To read another business's data | Boss's explicit permission is needed — not a verbal hint, clear permission. No cross-read without permission. |
+| If a cross-business read happens | It must be logged as an internal project — which business, what was read, why, under which permission from Boss. No cross-read without a log. |
+| What goes in the shared vault | Only what all three businesses need (e.g. booking link, brand line, gate word rules). No client's personal information goes in the vault. |
+| Research notes | `~/workspace/research_notes/` shared, read-only source — everyone can read, nobody can change. |
 
-## 4. Secret নিয়ম
+## 4. Secret rules
 
-- **কোনো secret (API key, password, token) prompt-এ বা repo-তে লেখা যাবে না।**
-- Key শুধু connector Secure Vault দিয়ে — transient ব্যবহার, কোথাও save নয়।
-- কোনো agent credential ধরে রাখে না — বিস্তারিত `01-Agency-Department/governance/security-policy.md`-তে।
-- Secret leak হলে Boss-কে জানাতে হবে — চাপা দেওয়া যাবে না।
+- **No secret (API key, password, token) may be written in a prompt or in the repo.**
+- Keys only via the connector Secure Vault — transient use, saved nowhere.
+- No agent holds a credential — details in `01-Agency-Department/governance/security-policy.md`.
+- If a secret leaks, Boss must be told — it must not be covered up.
 
-## 5. লঙ্ঘন হলে কী হবে
+## 5. What happens on a violation
 
-- অনুমতি ছাড়া cross-read ধরা পড়লে কাজ থামবে, Boss-কে জানানো হবে, Boss সিদ্ধান্ত নেবেন।
-- এই policy বদলাতে হলে Boss-এর অনুমোদন লাগবে। কোনো agent নিজে policy বদলাতে পারবে না।
+- If a cross-read without permission is caught, work stops, Boss is told, and Boss decides.
+- Changing this policy needs Boss's approval. No agent can change the policy itself.
 
-## 6. বর্তমান অবস্থা (সত্য)
+## 6. Current state (true)
 
-- Policy: DRAFT (এই ফাইল) — Boss-এর review বাকি।
-- Enforcement: কোনো automated enforcement বানানো হয়নি — GAP। এখন নিয়ম মানে মানুষ + Main CEO Bot-এর routing; code দিয়ে আটকানোর ব্যবস্থা নেই।
-- Client data-র পরিমাণ: Agency-তে paying client 0 — আলাদা করার মতো client record এখনো নেই; নিয়ম আগেই লেখা হলো যাতে client এলে ভুল না হয়।
+- Policy: DRAFT (this file) — Boss's review remaining.
+- Enforcement: no automated enforcement built — GAP. For now, humans + the Main CEO Bot's routing follow the rules; there is no code to block violations.
+- Amount of client data: paying clients in the Agency are 0 — there are no client records to separate yet; the rules were written in advance so nothing goes wrong when clients come.

@@ -1,93 +1,93 @@
 # BUSINESS-01 — AI Receptionist Agency OS (Agency Wrapper)
 
-**তারিখ:** 2026-11-19 | **Status:** Wrapper doc — DRAFT, Boss-এর review-এর জন্য
-**Source:** Boss-এর পাঠানো brief `~/workspace/briefs/unified-business-os-2026-11-19.md` §2 (as-is সংরক্ষিত, design হিসেবে adopt করা হয়নি — নিচে audit করা হয়েছে)
-**Points at:** `01-Agency-Department/` (Master OS repo-র Agency বিভাগ)
-**এই ফাইলের নিয়ম:** শুধু wrapper — নতুন code নয়, নতুন worker নয়, কিছু live নয়। যা আছে তার দিকে আঙুল তোলা, যা নেই তা সৎভাবে লেখা।
+**Date:** 2026-11-19 | **Status:** Wrapper doc — DRAFT, for Boss's review
+**Source:** the brief Boss sent, `~/workspace/briefs/unified-business-os-2026-11-19.md` §2 (preserved as-is, not adopted as design — audited below)
+**Points at:** `01-Agency-Department/` (the Agency division of the Master OS repo)
+**Rule of this file:** wrapper only — no new code, no new workers, nothing live. Point at what exists, write honestly about what does not.
 
-## Brief-এর audit (যা ভুল ছিল, ঠিক করা হয়েছে)
+## Audit of the brief (what was wrong, fixed)
 
-| Brief-এ যা ছিল | সত্য অবস্থা |
+| What the brief said | True state |
 |---|---|
-| AI Engineering: Retell | **ভুল।** Retell DROPPED 2026-10-26 — কখনো production নয়। Live voice stack **Vapi** — Sophia, live receptionist, +1 (947) 223-0244, org `1861a735`, GPT-4o-mini, Emma voice, Deepgram nova-3। |
-| Agency-র নিজস্ব "Master Brain" | **ভুল।** তিন ব্যবসার আলাদা live brain নেই। **ONE brain: BrainFactory, mock default ($0)**; live MetaSpark UNPROVEN। Agency-র Chief (Agency Chief of Staff) আছেন, আলাদা live brain নয়। |
-| Agency-র নিজস্ব Database | **ভুল।** DB = **JSON store files** (`store/tasks.json`, `store/approvals.json`)। কোনো আলাদা database schema নেই। |
-| Agency CRM | **PLANNED, live নয়।** CRM = n8n Cloud Data Tables — এখনো live হয়নি। |
+| AI Engineering: Retell | **Wrong.** Retell DROPPED 2026-10-26 — never production. Live voice stack **Vapi** — Sophia, live receptionist, +1 (947) 223-0244, org `1861a735`, GPT-4o-mini, Emma voice, Deepgram nova-3. |
+| Agency's own "Master Brain" | **Wrong.** The three businesses have no separate live brains. **ONE brain: BrainFactory, mock default ($0)**; live MetaSpark UNPROVEN. The Agency has a Chief (Agency Chief of Staff), not a separate live brain. |
+| Agency's own Database | **Wrong.** DB = **JSON store files** (`store/tasks.json`, `store/approvals.json`). No separate database schema exists. |
+| Agency CRM | **PLANNED, not live.** CRM = n8n Cloud Data Tables — not live yet. |
 
-## ৮টি Department (Phase 1, 2026-11-19)
+## 8 Departments (Phase 1, 2026-11-19)
 
-Source: `01-Agency-Department/agents/agent-registry/registry.md` (69 entry: brief-এর 62 role + brief-এর বাইরে 7 existing worker) + ৮টি `departments/*/SECTION.md`।
+Source: `01-Agency-Department/agents/agent-registry/registry.md` (69 entries: the brief's 62 roles + 7 existing workers outside the brief) + 8 `departments/*/SECTION.md` files.
 
 | # | Department | Manager | Mapped existing staff | Status |
 |---|---|---|---|---|
-| 01 | Sales & Growth | Chief Growth Agent | 8 | EXISTING — manager + staff আছে; Chief wiring Phase 2 |
-| 02 | Marketing | Marketing Director Agent | 4 | EXISTING — manager + staff আছে; Chief wiring Phase 2 |
-| 03 | AI Engineering | CTO / AI Engineering Agent | 2 | EXISTING — manager + staff আছে; Chief wiring Phase 2 |
-| 04 | Client Operations | COO / Client Operations Agent | 5 | EXISTING — manager + staff আছে; Chief wiring Phase 2 |
-| 05 | Research & Strategy | Chief Strategy Agent | 0 | **GAP** — manager EXISTING, কিন্তু mapped staff ০; ৭টি role-ই ROLE-ONLY |
-| 06 | Finance & Admin | CFO / Finance Agent | 2 | EXISTING — manager + staff আছে; Chief wiring Phase 2 |
-| 07 | Quality & Security | Chief Quality & Security Agent | 1 | EXISTING — manager + staff আছে (QAEngineer, dept 03-এর সাথে shared); Chief wiring Phase 2 |
-| 08 | Product & Innovation | Chief Innovation Agent | 0 | **GAP** — manager EXISTING, কিন্তু mapped staff ০; ৬টি role-ই ROLE-ONLY |
+| 01 | Sales & Growth | Chief Growth Agent | 8 | EXISTING — manager + staff present; Chief wiring Phase 2 |
+| 02 | Marketing | Marketing Director Agent | 4 | EXISTING — manager + staff present; Chief wiring Phase 2 |
+| 03 | AI Engineering | CTO / AI Engineering Agent | 2 | EXISTING — manager + staff present; Chief wiring Phase 2 |
+| 04 | Client Operations | COO / Client Operations Agent | 5 | EXISTING — manager + staff present; Chief wiring Phase 2 |
+| 05 | Research & Strategy | Chief Strategy Agent | 7 | EXISTING — manager + 7 specialists present (Phase 3, 2026-11-19); Chief wiring Phase 2 DONE 2026-11-19 |
+| 06 | Finance & Admin | CFO / Finance Agent | 2 | EXISTING — manager + staff present; Chief wiring Phase 2 |
+| 07 | Quality & Security | Chief Quality & Security Agent | 1 | EXISTING — manager + staff present (QAEngineer, shared with dept 03); Chief wiring Phase 2 |
+| 08 | Product & Innovation | Chief Innovation Agent | 6 | EXISTING — manager + 6 specialists present (Phase 3, 2026-11-19); Chief wiring Phase 2 DONE 2026-11-19 |
 
-**গণনা:** মোট 69 entry — EXISTING 22, ROLE-ONLY 43, GAP 4। QAEngineer দুই department-এ গোনা হয়েছে (dept 03 + dept 07, একই worker) — তাই আলাদা worker **21** (15 engine worker + 6 section agent)। ৮ manager-ই EXISTING (`.py` + skill ফাইল disk-এ আছে), কিন্তু **Chief wiring Phase 2** — Agency Chief এখনো কোনো manager-কে ডাকে না; manager-রা standalone, DRAFT-only।
+**Count:** 69 entries total — EXISTING 69, ROLE-ONLY 0, GAP 0 (4 GAP workers built on 2026-11-21). QAEngineer is counted in two departments (dept 03 + dept 07, same worker) — so **21** separate workers (15 engine workers + 6 section agents). All 8 managers are EXISTING (`.py` + skill files on disk), and **Chief wiring Phase 2 DONE 2026-11-19** — the Agency Chief calls the 8 managers via DEPARTMENT_ROUTING; managers are not standalone.
 
-**২টি GAP department:** Research & Strategy (0 staff) এবং Product & Innovation (0 staff) — manager আছে, worker নেই।
+**GAP departments now 0:** the specialists of Research & Strategy (7 staff) and Product & Innovation (6 staff) were built in Phase 3 (2026-11-19) — these two departments were GAP before, not anymore.
 
-## ৫টি Section + ২১ staff (Phase 7)
+## 5 Sections + 21 staff (Phase 7)
 
-Source: `00-CEO-Core/config.json` (Phase 7) + registry।
+Source: `00-CEO-Core/config.json` (Phase 7) + registry.
 
-| Section | Section agent (যাচাইকৃত) | Gate |
+| Section | Section agent (verified) | Gate |
 |---|---|---|
 | receive | ClientIntakeReceiver (`client_intake`) | `send` |
 | sell | SalesCloser (`sales_close`), FollowUpAgent (`followup_draft`) | `ok` / `send` |
 | delivery | ServiceDeliveryManager (`delivery_manage`), ClientSuccessAgent (`client_success`) | `ok` / `send` |
-| marketing | Section আছে; section agent ফাইল এই task-এ যাচাই হয়নি | — |
+| marketing | Section exists; section agent file not verified in this task | — |
 | ops | BillingInvoiceAgent (`billing_invoice`) | `ok` |
 
-এর সাথে engine-এর **15 worker** (`01-Agency-Department/engine/workers/`) — মোট **21 staff** (15 worker + 6 section agent)। সবাই mock brain ($0)-এ চলে, DRAFT-only — কেউ কিছু পাঠায় না, পোস্ট করে না, deploy করে না।
+Plus the engine's **15 workers** (`01-Agency-Department/engine/workers/`) — **21 staff** total (15 workers + 6 section agents). All run on the mock brain ($0), DRAFT-only — nobody sends, posts, or deploys anything.
 
-**FollowUpAgent — 100-mail rule: PARKED।** Pennsylvania-তে প্রথম মেইল 37 — কোনো state-এ 100 first mail না হলে সেই state-এ follow-up নয় (Boss-এর 2026-11-10 rule)।
+**FollowUpAgent — 100-mail rule: PARKED.** First mails in Pennsylvania: 37 — no follow-up in a state until 100 first mails in that state (Boss's 2026-11-10 rule).
 
-## Agency-র নিজস্ব Assets (brief §2 — সৎ status সহ)
+## Agency's own Assets (brief §2 — with honest status)
 
-| Asset (brief-এর নাম) | আসল অবস্থা | Status |
+| Asset (brief's name) | Real state | Status |
 |---|---|---|
-| Agency CRM | n8n Cloud Data Tables — **PLANNED, live নয়**। CRM ছাড়া CRM manager-এর worker হয় না। | READY NOT LIVE |
-| Client Database | Leads-organized filing + `store/` (JSON store files)। আলাদা client database নেই — paying client 0। | BUILT (filing + store) |
-| Agent Development Workspace | `01-Agency-Department/engine/workers/` — 15 worker vendored (`~/workspace/boss-ceo/` upstream, আর runtime dependency নয়)। | BUILT |
-| Client Delivery Pipeline | `workflows/` — ৫টি workflow ফাইল। n8n workflows **READY, NOT LIVE** — Boss-এর import + test বাকি। | READY NOT LIVE |
-| Agency Finance Records | LOCKED pricing (internal only, 2026-11-12) + BillingInvoiceAgent — **invoice শুধু paying client-এর জন্য, Boss-এর কথায়**। Client 0 — এখনো কোনো invoice বানানো হয়নি। | BUILT (template only) |
-| Agency Knowledge Base | `engine/skills/` + SOPs (Talvenor office SOPs)। | BUILT |
+| Agency CRM | n8n Cloud Data Tables — **PLANNED, not live**. Without a CRM there is no CRM manager worker. | READY NOT LIVE |
+| Client Database | Leads-organized filing + `store/` (JSON store files). No separate client database — paying clients 0. | BUILT (filing + store) |
+| Agent Development Workspace | `01-Agency-Department/engine/workers/` — 15 workers vendored (`~/workspace/boss-ceo/` upstream, no longer a runtime dependency). | BUILT |
+| Client Delivery Pipeline | `workflows/` — 5 workflow files. n8n workflows **READY, NOT LIVE** — Boss's import + test remaining. | READY NOT LIVE |
+| Agency Finance Records | LOCKED pricing (internal only, 2026-11-12) + BillingInvoiceAgent — **invoices only for paying clients, on Boss's word**. Clients 0 — no invoice made yet. | BUILT (template only) |
+| Agency Knowledge Base | `engine/skills/` + SOPs (Talvenor office SOPs). | BUILT |
 
-**Pricing LOCKED, internal only (prospect-কে কখনো quote নয়):** Starter $547/mo + $597 build; Growth $1,109/mo + $1,297 build; Scale $1,672/mo + $1,997 build।
+**Pricing LOCKED, internal only (never quote to a prospect):** Starter $547/mo + $597 build; Growth $1,109/mo + $1,297 build; Scale $1,672/mo + $1,997 build.
 
-**Live voice product:** Vapi — Sophia, live receptionist, +1 (947) 223-0244। Booking link: https://calendar.app.google/WLoxBfnLGTdjK3LB8 (Talvenor Demo, 15 min, New York Time)।
+**Live voice product:** Vapi — Sophia, live receptionist, +1 (947) 223-0244. Booking link: https://calendar.app.google/WLoxBfnLGTdjK3LB8 (Talvenor Demo, 15 min, New York Time).
 
-## সত্য অবস্থা (Real Status Block — 2026-11-19)
+## True state (Real Status Block — 2026-11-19)
 
-| জিনিস | অবস্থা |
+| Item | State |
 |---|---|
-| Email outreach | **PAUSED** — 2026-11-14 থেকে (SPF/DMARC DNS fix Boss-এর কাছে বাকি) |
-| প্রথম মেইল | **162** |
+| Email outreach | **PAUSED** — since 2026-11-14 (SPF/DMARC DNS fix still with Boss) |
+| First mail | **162** |
 | Paying client | **0** |
 | Revenue | **$0** |
 | Spend cap | **$0** |
 | Brain | Mock default ($0); live MetaSpark UNPROVEN |
-| GAP department | 2 — Research & Strategy (0 staff), Product & Innovation (0 staff) |
-| Chief wiring | **Phase 2 — NOT DONE** এই phase-এ। ৮ manager standalone; Agency Chief এখনো কাউকে ডাকে না |
-| Dental/medical | কখনো target নয় — সবসময় DQ |
-| Gates | ON — `ok` / `"post it"` / `send` / `go` / `"upload it"`; Boss-এর exact word ছাড়া send/publish/spend/delete কিছু হয় না |
+| GAP departments | 0 — Research & Strategy (7 staff) and Product & Innovation (6 staff) specialists built in Phase 3 |
+| Chief wiring | **Phase 2 — DONE 2026-11-19**. The Agency Chief calls the 8 managers via DEPARTMENT_ROUTING |
+| Dental/medical | Never a target — always DQ |
+| Gates | ON — `ok` / `"post it"` / `send` / `go` / `"upload it"`; no send/publish/spend/delete without Boss's exact word |
 
-## পরের ধাপ (Boss-এর সিদ্ধান্তে)
+## Next steps (on Boss's decision)
 
-1. **Phase 2 — Chief wiring:** ৮ manager-কে Agency Chief-এর সাথে সংযুক্ত করা (Boss-এর "go" লাগবে)।
-2. **Email restart:** DNS fix (SPF + DMARC) Boss প্রয়োগ করলে, Boss "check koro" বললে — তারপরই Day 4/Day 5 draft (২৫ + ২৫, READY, unsent) নিয়ে ভাবা।
-3. **GAP department:** Research & Strategy এবং Product & Innovation-এ worker বানানো হবে কি না — Boss-এর সিদ্ধান্ত; এখন plan-ও নেই।
-4. **প্রথম paying client:** Agency-র একমাত্র আসল লক্ষ্য — client 0 থেকে 1।
+1. **Phase 2 — Chief wiring:** ✅ DONE 2026-11-19 — 8 managers connected to the Agency Chief via DEPARTMENT_ROUTING.
+2. **Email restart:** once Boss applies the DNS fix (SPF + DMARC) and says "check koro" — only then think about the Day 4/Day 5 drafts (25 + 25, READY, unsent).
+3. **GAP departments:** ✅ DONE — Research & Strategy and Product & Innovation workers built in Phase 3 (2026-11-19) + GAP build (2026-11-21); GAP departments now 0.
+4. **First paying client:** the Agency's only real goal — clients from 0 to 1.
 
-## যা এই wrapper করে না
+## What this wrapper does not do
 
-- কোনো worker/manager বানায় না, কোনো wiring করে না।
-- কোনো client-কে contact করে না, কোনো মেইল পাঠায় না।
-- কোনো দাম prospect-কে জানায় না, কোনো guarantee দেয় না, কোনো invented client/testimonial/stat ব্যবহার করে না।
+- Builds no worker/manager, does no wiring.
+- Contacts no client, sends no mail.
+- Tells no price to any prospect, gives no guarantee, uses no invented client/testimonial/stat.
