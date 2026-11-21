@@ -1,34 +1,34 @@
 #!/usr/bin/env python3
 """Phase 2 self-check — Agency Chief -> 8 department managers wiring.
 
-যাচাই করে:
-  1. ৮টা department-এর SECTION.md আছে
-  2. ৮টা manager file আছে + python3 -I-তে standalone import হয়
-     (stdlib only) + class attrs ঠিক (task_kind / gate / department / role)
-  3. ৮টা manager skill file আছে (প্রতি manager-এর একটা করে)
-  4. Chief-এর DEPARTMENT_ROUTING-এ ৮টা entry — file/class/gate
-     registry manager table + manager class-এর সাথে মেলে
-  5. Chief ৮টা dept type-ই route করে (run_office.py, TEMP store):
-     প্রতিটা valid task_kind-এ draft-ready, [MOCK DRAFT];
-     dept_sales kind ছাড়া overview দেয়
-  6. Gated action -> PENDING, execute হয় না (TEMP store):
-     dept_sales + send, dept_strategy + send — প্রতিটায় ঠিক ১
+Verifies:
+  1. The 8 departments' SECTION.md files exist
+  2. The 8 manager files exist + import standalone under python3 -I
+     (stdlib only) + class attrs correct (task_kind / gate / department / role)
+  3. The 8 manager skill files exist (one per manager)
+  4. The Chief's DEPARTMENT_ROUTING has 8 entries — file/class/gate
+     match the registry manager table + manager class
+  5. The Chief routes all 8 dept types (run_office.py, TEMP store):
+     each valid task_kind is draft-ready, [MOCK DRAFT];
+     dept_sales kind gives an overview instead
+  6. Gated action -> PENDING, never executes (TEMP store):
+     dept_sales + send, dept_strategy + send — exactly 1 in each
      pending approval
-  7. Unknown task kind -> status "unknown-task", known kind-গুলোর
-     তালিকা সহ (draft-ready বলে ভুল লেবেল নয়)
-  8. departments/ + registry.md-এ কোনো stale wiring দাবি নেই
-     ("Chief এখনো call করে না" / "এখনো Agency Chief ডাকে না")
-  9. ROUTING (১৫) ও SECTION_ROUTING (৬) অপরিবর্তিত
- 10. departments/ + chief file-এ forbidden term নেই
+  7. Unknown task kind -> status "unknown-task", with the list of known kinds
+     (not mislabelled as draft-ready)
+  8. No stale wiring claims in departments/ + registry.md
+     ("Chief still does not call" / "Agency Chief still does not call")
+  9. ROUTING (15) and SECTION_ROUTING (6) unchanged
+ 10. No forbidden terms in departments/ + chief file
      (Retell Integration / PostgreSQL / Sophia Demo / Paperclip /
      UroNex / NexaFlow / 90-second demo)
  11. Real store unchanged by this run (Phase 9: live queue)
- 12. পুরনো check (phase0/1/2/3/4 + engines + phase6 + phase7) এখনো PASS
+ 12. Old checks (phase0/1/2/3/4 + engines + phase6 + phase7) still PASS
 
-Chief-level test run_office.py subprocess-এ চলে। Manager run() test
-in-process নয় — Chief-এর DEPARTMENT_ROUTING branch-ই আসল path।
-সব store-touching step TEMP file-এ। Stdlib only, no network,
-no send, no publish, no spend, no delete। Exit 0 = PASS.
+Chief-level tests run in a run_office.py subprocess. Manager run() tests
+are not in-process — the Chief's DEPARTMENT_ROUTING branch is the real path.
+All store-touching steps use TEMP files. Stdlib only, no network,
+no send, no publish, no spend, no delete. Exit 0 = PASS.
 """
 
 import ast
@@ -91,7 +91,7 @@ def _load_manager_file(path):
 
 
 def _count_dict_keys(path, name):
-    """একটা module-level dict-এর key সংখ্যা (value literal না হলেও চলে)।"""
+    """The number of keys in a module-level dict (value need not be a literal)."""
     with open(path, encoding="utf-8") as f:
         tree = ast.parse(f.read())
     for node in ast.walk(tree):
@@ -105,7 +105,7 @@ def _count_dict_keys(path, name):
 
 
 def _parse_dict_from_file(path, name):
-    """একটা module-level dict literal ast দিয়ে পড়া (import ছাড়া)।"""
+    """Read a module-level dict literal via ast (without importing)."""
     with open(path, encoding="utf-8") as f:
         tree = ast.parse(f.read())
     for node in ast.walk(tree):
@@ -117,9 +117,9 @@ def _parse_dict_from_file(path, name):
 
 
 def _snapshot_store():
-    """Real store-এর snapshot (Phase 9: store এখন live queue — taskboard /
-    bridge সত্যিই task লেখে, তাই 'খালি' আর invariant নয়)। Check-এর
-    কাজ শুধু প্রমাণ করা যে এই run store বদলায়নি।"""
+    """Snapshot of the real store (Phase 9: store is now a live queue — taskboard /
+    bridge really writes tasks, so 'empty' is no longer an invariant). The check's
+    only job is to prove this run did not change the store."""
     snap = {}
     for name in ("store/tasks.json", "store/approvals.json"):
         try:
@@ -312,8 +312,8 @@ def main():
     # 8. No stale wiring claims in departments/ + registry.md
     try:
         stale = []
-        needles = ("Chief এখনো", "এখনো Agency Chief", "wiring Phase 2 —",
-                   "handoff এখন manual", "manager-রা standalone")
+        needles = ("Chief still", "Agency Chief still", "wiring Phase 2 —",
+                   "handoff still manual", "managers standalone")
         targets = []
         for root, dirs, files in os.walk(DEPARTMENTS_DIR):
             dirs[:] = [d for d in dirs if d != "__pycache__"]
@@ -328,15 +328,15 @@ def main():
             for needle in needles:
                 if needle in text:
                     stale.append(f"{os.path.relpath(path, BASE)}: {needle}")
-        check("no stale wiring claims (Chief এখনো / ডাকে না / manual)",
+        check("no stale wiring claims (Chief still / does not call / manual)",
               not stale, "; ".join(stale[:5]) if stale else "clean")
     except Exception as e:  # noqa: BLE001
-        check("no stale wiring claims (Chief এখনো / ডাকে না / manual)",
+        check("no stale wiring claims (Chief still / does not call / manual)",
               False, str(e))
 
     # 9. ROUTING (15) + SECTION_ROUTING (6) unchanged
-    # ROUTING-এর value-তে class name (ast.Name) আছে, তাই literal_eval
-    # নয় — শুধু key সংখ্যা গোনা হয়।
+    # ROUTING's value has class names (ast.Name), so literal_eval
+    # does not apply — only the key count is counted.
     try:
         routing_count = _count_dict_keys(CHIEF_PATH, "ROUTING")
         section_count = _count_dict_keys(CHIEF_PATH, "SECTION_ROUTING")

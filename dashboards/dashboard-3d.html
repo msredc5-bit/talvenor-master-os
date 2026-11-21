@@ -152,7 +152,7 @@
 
 <div id="main">
   <div id="topbar">
-    <div id="search"><span>🔍</span><input id="search-input" placeholder="Ask your workspace — worker, node বা topic লিখুন…" autocomplete="off"><span id="search-count" style="font-size:12px;color:#6b7280"></span></div>
+    <div id="search"><span>🔍</span><input id="search-input" placeholder="Ask your workspace — write a worker, node, or topic…" autocomplete="off"><span id="search-count" style="font-size:12px;color:#6b7280"></span></div>
     <span class="top-chip">Phase <b id="chip-phase">9 · v0.9.0</b></span>
     <span class="top-chip">Brain: <b>mock</b></span>
     <span class="top-chip">Gates: <b>ON</b></span>
@@ -160,23 +160,23 @@
 
   <div id="content">
     <h1 id="greet">Good evening, Boss.</h1>
-    <p id="greet-sub">লোড হচ্ছে…</p>
+    <p id="greet-sub">Loading…</p>
     <div class="btn-row">
       <button class="btn primary" id="btn-talk">🎙️ Talk to Jarvis</button>
       <button class="btn" id="btn-ask">Ask a question</button>
       <button class="btn" id="btn-refresh">Refresh</button>
     </div>
-    <p class="honest">⚠️ <b>Visualization — এই page অফিস চালায় না।</b> আসল কাজ করে <code>run_office.py</code>। Brain এখনো <b>mock</b> — ভাবনা DRAFT। Live দাবি করা হয় না।</p>
-    <div id="strip">লোড হচ্ছে…</div>
+    <p class="honest">⚠️ <b>Visualization — this page does not run the office.</b> The real work is done by <code>run_office.py</code>. The brain is still <b>mock</b> — thinking is DRAFT. Nothing is claimed live.</p>
+    <div id="strip">Loading…</div>
 
     <div id="core-panel">
       <div id="core-head"><span class="t">JARVIS CORE</span><span class="st"><span class="dot">●</span> CORE — mock brain · voice REAL</span><button class="fit-btn" id="fit-btn">◎ Fit</button></div>
-      <div id="lib-warn">3D লাইব্রেরি (Three.js) লোড হয়নি — ইন্টারনেট লাগবে। নিচের node বাটন আর বিস্তারিত তবুও কাজ করবে।</div>
+      <div id="lib-warn">The 3D library (Three.js) did not load — internet is needed. The node buttons and details below will still work.</div>
       <div id="scene-wrap">
         <canvas id="scene"></canvas>
-        <div id="scene-hint">ড্র্যাগ = গোল করে ঘোরান · যেদিকে ঘোরাবেন, সেই side দেখা যাবে · স্ক্রল = জুম</div>
+        <div id="scene-hint">Drag = rotate in a circle · whichever way you rotate, that side shows · Scroll = zoom</div>
       </div>
-      <div id="core-foot"><span>● JARVIS — LISTENING (mic test Boss-এর PC-তে বাকি)</span><span>TAP TO TALK → নিচের Talk to Jarvis</span></div>
+      <div id="core-foot"><span>● JARVIS — LISTENING (mic test still remaining on Boss's PC)</span><span>TAP TO TALK → Talk to Jarvis below</span></div>
       <div id="node-chips"></div>
       <div id="ask-bar">
         <button class="ask-mic" id="ask-mic" title="Talk to Jarvis">🎙️</button>
@@ -187,71 +187,71 @@
           <button data-ask="jarvis">Jarvis</button>
           <button data-ask="revenue">revenue</button>
         </div>
-        <span class="ask-hint">Ask "show…" · "Gate 0" · "leads" — node-এ ক্লিক = বিস্তারিত</span>
+        <span class="ask-hint">Ask "show…" · "Gate 0" · "leads" — clicking a node = details</span>
       </div>
     </div>
 
-    <div id="detail"><h2>👆 একটা node-এ ক্লিক করুন</h2><p>এটা এখন একটা <b>গোলক (sphere)</b> — মাঝখানে Main CEO Bot core, উপরে Jarvis, তিন দিকে তিনটা office — Agency, Vet Kit, Content। গোল করে ঘোরান: যেদিকে ঘোরাবেন, সেই side-টাই সামনে আসবে। কোনো node-এ ক্লিক করলে এখানে তার আসল অবস্থা দেখাবে।</p></div>
+    <div id="detail"><h2>👆 Click a node</h2><p>This is now a <b>sphere</b> — Main CEO Bot core in the middle, Jarvis on top, three offices on three sides — Agency, Vet Kit, Content. Rotate in a circle: whichever way you rotate, that side comes to the front. Clicking a node shows its real state here.</p></div>
 
     <footer id="foot">Talvenor Master OS · LOCAL dashboard · repo: talvenor-master-os · status: —</footer>
   </div>
 </div>
 
 <script>
-// ---------- Fallback snapshot (fetch না হলে এটা দেখাবে; 2026-11-20-এর আসল সংখ্যা) ----------
+// ---------- Fallback snapshot (shows if fetch fails; real numbers from 2026-11-20) ----------
 const FALLBACK = {
   phase: 9, version: "0.9.0", gates_enabled: true, spend_cap_usd: 0,
   first_mails: 162, paying_clients: 0, email: "PAUSED", gate0: "NOT PASSED",
   pa_list: 39, pipeline: { real: 0, mock: 10, stub: 0, blocked: 3 },
   toolpilot_subs: 0, tasks_count: 1, approvals_pending: 0, approvals_approved: 0,
-  voice: { label: "REAL", detail: "Jarvis voice — Piper TTS + Vosk/sherpa STT, offline, $0 (mic test Boss-এর PC-তে বাকি)" },
+  voice: { label: "REAL", detail: "Jarvis voice — Piper TTS + Vosk/sherpa STT, offline, $0 (mic test still remaining on Boss's PC)" },
   workflow_auto_send: { status: "NOT LIVE", nodes: 8, name: "Talvenor Tier 2 Auto-Send" },
   workflow_callback: { status: "NOT LIVE", nodes: 3, name: "Talvenor Callback" }
 };
 
 const DETAILS = {
   jarvis: { title: "🎙️ Jarvis — Voice", tag: "REAL · offline · $0",
-    body: "<p><b>Boss-এর কণ্ঠ।</b> বাংলায় শুনে, বাংলায় বলে। Piper TTS (bn_BD-google-medium) + sherpa-onnx বাংলা শোনা। Mic test Boss-এর PC-তে বাকি — এই VM-এ mic নেই।</p><p>Voice brain-কে চালাক করে না — brain এখনো <b>mock</b>। মুখে 'send করো' বললেও কাজ হয় না, শুধু <b>PENDING</b> হয় Approval Gate-এ।</p><p>চালাতে: <code>python scripts\\jarvis_voice_loop.py</code> — পুরো নির্দেশনা আলাদা page-এ (Local Run Guide)।</p>" },
+    body: "<p><b>Boss's voice.</b> Listens in Bengali, speaks in Bengali. Piper TTS (bn_BD-google-medium) + sherpa-onnx Bengali listening. Mic test still remaining on Boss's PC — this VM has no mic.</p><p>Voice does not make the brain smart — the brain is still <b>mock</b>. Saying 'send koro' aloud does no work, it only becomes <b>PENDING</b> in the Approval Gate.</p><p>To run: <code>python scripts\\jarvis_voice_loop.py</code> — full instructions on a separate page (Local Run Guide).</p>" },
   ceo: { title: "🧠 Main CEO Bot — Brain", tag: "mock · $0",
-    body: "<p><b>সুপার-ইন্টেলিজেন্ট সেকেন্ড ব্রেন</b> — এখনো mock। ভাবনা DRAFT লেবেল নিয়ে আসে। Live brain (MetaSpark) ফ্লিপ করা হয়নি — প্রথম live test 2026-11-06-এ timeout হয়েছিল, key path এখনো UNPROVEN।</p><p>কাজের ধারা: Boss → Jarvis → Main CEO Bot → ৩ Chief → worker → ফল Main CEO Bot-এ → Boss-এর approval যেখানে দরকার।</p><p>৩টা office: Agency (MAIN) · Digital Product (Vet Kit) · Content Engine (Creator OS)। ৩১ worker/agent, ২৩ section skill।</p>" },
-  ai_chat: { title: "💬 AI Chat — Main CEO Bot-এর সাথে কথা", tag: "২ রাস্তা · brain mock",
-    body: "<p><b>১) Jarvis voice</b> — বাংলায় বলুন, Jarvis শুনে CEO Bot-কে দেয়। <b>২) run_office.py</b> দিয়ে লিখে কাজ দেওয়া।</p><p>Brain এখনো <b>mock</b> — উত্তর DRAFT আসে, সত্যিকারের ভাবনা নয়। Live brain ফ্লিপ করা হয়নি।</p>" },
+    body: "<p><b>Super-intelligent second brain</b> — still mock. Thinking comes with a DRAFT label. The live brain (MetaSpark) has not been flipped on — the first live test timed out on 2026-11-06, the key path is still UNPROVEN.</p><p>Work flow: Boss → Jarvis → Main CEO Bot → 3 Chiefs → worker → results to the Main CEO Bot → Boss's approval where needed.</p><p>3 offices: Agency (MAIN) · Digital Product (Vet Kit) · Content Engine (Creator OS). 31 workers/agents, 23 section skills.</p>" },
+  ai_chat: { title: "💬 AI Chat — talk with the Main CEO Bot", tag: "2 ways · brain mock",
+    body: "<p><b>1) Jarvis voice</b> — speak in Bengali, Jarvis hears it and gives it to the CEO Bot. <b>2) run_office.py</b> — give work in writing.</p><p>The brain is still <b>mock</b> — answers come as DRAFT, not real thinking. The live brain has not been flipped on.</p>" },
   gate: { title: "🛡️ Approval Gate — ON", tag: "gated: send · publish · spend · delete",
-    body: "<p><b>Gate words:</b> <code>ok</code> = plan/asset approval · <code>go</code> = build phase এগোনো · <code>post it</code> = publish · <code>send</code> = পাঠানো · <code>upload it</code> = video upload।</p><p>Auto-approve-এর কোনো রাস্তা নেই। Gated কাজ gate word ছাড়া <b>PENDING</b>-এ আটকে যায় — কখনো নিজে থেকে চলে না।</p><p>Spend cap: <b>$0</b>।</p>" },
+    body: "<p><b>Gate words:</b> <code>ok</code> = plan/asset approval · <code>go</code> = move a build phase forward · <code>post it</code> = publish · <code>send</code> = send · <code>upload it</code> = video upload.</p><p>There is no auto-approve path. Gated work without a gate word gets stuck in <b>PENDING</b> — it never runs by itself.</p><p>Spend cap: <b>$0</b>.</p>" },
   agency: { title: "🏢 Agency — Talvenor AI Receptionist", tag: "MAIN · 5 section · 15 worker + 6 agent",
-    body: "<p><b>৫ section:</b> receive · sell · delivery · marketing · ops।</p><p><b>১৫ worker:</b> ProspectResearcher, OutreachDrafter, ReplyHandler, NegotiationCoach, RetellBuilder, QAEngineer, OnboardingAgent, ContentPlanner, VideoProducer, CaptionWriter, PublishPrep, ObjectionSimulator, InboxTriager, ReportCompiler, SchedulerAssistant।</p><p><b>৬ section agent:</b> ClientIntakeReceiver, SalesCloser, FollowUpAgent, ServiceDeliveryManager, ClientSuccessAgent, BillingInvoiceAgent।</p><p>Chief সত্যিই worker ডাকে — mock brain, DRAFT ONLY। প্রথম মেইল <b>১৬২</b> · paying client <b>০</b> · Email <b>PAUSED</b>।</p><p>নিশ: US home-service (plumbing, HVAC, roofing…) · dental/medical বাদ।</p>" },
+    body: "<p><b>5 sections:</b> receive · sell · delivery · marketing · ops.</p><p><b>15 workers:</b> ProspectResearcher, OutreachDrafter, ReplyHandler, NegotiationCoach, RetellBuilder, QAEngineer, OnboardingAgent, ContentPlanner, VideoProducer, CaptionWriter, PublishPrep, ObjectionSimulator, InboxTriager, ReportCompiler, SchedulerAssistant.</p><p><b>6 section agents:</b> ClientIntakeReceiver, SalesCloser, FollowUpAgent, ServiceDeliveryManager, ClientSuccessAgent, BillingInvoiceAgent.</p><p>The Chief really calls workers — mock brain, DRAFT ONLY. First mail <b>162</b> · paying clients <b>0</b> · Email <b>PAUSED</b>.</p><p>Niche: US home-service (plumbing, HVAC, roofing…) · dental/medical excluded.</p>" },
   products: { title: "📦 Digital Product — Vet No-Show Recovery Kit", tag: "Gate 0 NOT PASSED · 6 section · 7 agent",
-    body: "<p><b>৬ section:</b> product · research · launch · sales · support · finance।</p><p><b>৭ agent:</b> KitBuilder, KitQA, ClinicResearcher, LaunchManager, KitSales, SupportDrafter, PaymentRailsChecker।</p><p>Kit-এর blueprint আছে — kit নিজে নয়। <b>Gate 0 NOT PASSED</b> — Lemon Squeezy signup test (~১৫ মিনিট) Boss-এর step। পাস না হলে kit বানানো/বেচা যাবে না — code fail-closed।</p><p>PA vet list <b>৩৯/১০০</b> (যাচাই করা) · দাম $49 one-time · বিক্রি ০।</p>" },
+    body: "<p><b>6 sections:</b> product · research · launch · sales · support · finance.</p><p><b>7 agents:</b> KitBuilder, KitQA, ClinicResearcher, LaunchManager, KitSales, SupportDrafter, PaymentRailsChecker.</p><p>The kit's blueprint exists — not the kit itself. <b>Gate 0 NOT PASSED</b> — Lemon Squeezy signup test (~15 minutes) is Boss's step. If it does not pass, the kit cannot be built/sold — code fail-closed.</p><p>PA vet list <b>39/100</b> (verified) · price $49 one-time · sales 0.</p>" },
   content: { title: "🎬 Content Engine — Creator OS / ToolPilot", tag: "13 stage: REAL 0 · MOCK 10 · BLOCKED 3",
-    body: "<p><b>৫ section:</b> plan · produce · publish · analyze · growth।</p><p><b>৬ worker:</b> TopicResearcher, ScriptWriter, VisualProducer, CaptionWriter, PublishPrep, PerformanceTracker।</p><p><b>১০ section agent:</b> ContentPlanner, PerformanceAnalyst, Growth, Repurpose + ৬ wrapper (TopicResearcher, ScriptWriter, VisualProducer, CaptionWriter, PublishPrep, PerformanceTracker)।</p><p>Upload <b>OFF</b> (stage 9) — Boss-এর 'upload it' + credential লাগে। Video file বানায় না — footage/GPU নেই।</p><p>ToolPilot: video ০ · subs ০ · VOICE.md DRAFT · GPU AMD Radeon integrated 496 MB VRAM (FramePack/WanGP চলবে না)।</p>" },
-  team: { title: "∴ AI Team — ৩ Chief, ৩১ worker/agent", tag: "পুরো roster · brain mock · DRAFT ONLY",
-    body: "<p><b>Agency Chief:</b> ১৫ worker — ProspectResearcher, OutreachDrafter, ReplyHandler, NegotiationCoach, RetellBuilder, QAEngineer, OnboardingAgent, ContentPlanner, VideoProducer, CaptionWriter, PublishPrep, ObjectionSimulator, InboxTriager, ReportCompiler, SchedulerAssistant — + ৬ section agent — ClientIntakeReceiver, SalesCloser, FollowUpAgent, ServiceDeliveryManager, ClientSuccessAgent, BillingInvoiceAgent।</p><p><b>Products Chief:</b> ৭ agent — KitBuilder, KitQA, ClinicResearcher, LaunchManager, KitSales, SupportDrafter, PaymentRailsChecker।</p><p><b>Content Chief:</b> ৬ worker — TopicResearcher, ScriptWriter, VisualProducer, CaptionWriter, PublishPrep, PerformanceTracker — + ১০ section agent — ContentPlanner, PerformanceAnalyst, Growth, Repurpose + ৬ wrapper।</p><p>সব output DRAFT লেবেল নিয়ে আসে — brain mock বলে।</p>" },
-  leads: { title: "🎯 Leads — প্রথম মেইল ১৬২", tag: "উত্তর ০ · বাকি ৩৭৪",
-    body: "<p>প্রথম মেইল <b>১৬২</b> পাঠানো হয়েছে, উত্তর <b>০</b>। Pool-এ আরও <b>৩৭৪</b>টি not-emailed row বাকি। hello@-এর উত্তর Zoho-তে যায় — Boss নিজে চেক করেন।</p><p>Follow-up নিয়ম: কোনো state-এ ১০০টা প্রথম মেইল না হলে follow-up নয়। কোনো state-ই ১০০-তে নেই।</p>" },
+    body: "<p><b>5 sections:</b> plan · produce · publish · analyze · growth.</p><p><b>6 workers:</b> TopicResearcher, ScriptWriter, VisualProducer, CaptionWriter, PublishPrep, PerformanceTracker.</p><p><b>10 section agents:</b> ContentPlanner, PerformanceAnalyst, Growth, Repurpose + 6 wrappers (TopicResearcher, ScriptWriter, VisualProducer, CaptionWriter, PublishPrep, PerformanceTracker).</p><p>Upload <b>OFF</b> (stage 9) — needs Boss's 'upload it' + credential. Makes no video files — no footage/GPU.</p><p>ToolPilot: videos 0 · subs 0 · VOICE.md DRAFT · GPU AMD Radeon integrated 496 MB VRAM (FramePack/WanGP will not run).</p>" },
+  team: { title: "∴ AI Team — 3 Chiefs, 31 workers/agents", tag: "full roster · brain mock · DRAFT ONLY",
+    body: "<p><b>Agency Chief:</b> 15 workers — ProspectResearcher, OutreachDrafter, ReplyHandler, NegotiationCoach, RetellBuilder, QAEngineer, OnboardingAgent, ContentPlanner, VideoProducer, CaptionWriter, PublishPrep, ObjectionSimulator, InboxTriager, ReportCompiler, SchedulerAssistant — + 6 section agents — ClientIntakeReceiver, SalesCloser, FollowUpAgent, ServiceDeliveryManager, ClientSuccessAgent, BillingInvoiceAgent.</p><p><b>Products Chief:</b> 7 agents — KitBuilder, KitQA, ClinicResearcher, LaunchManager, KitSales, SupportDrafter, PaymentRailsChecker.</p><p><b>Content Chief:</b> 6 workers — TopicResearcher, ScriptWriter, VisualProducer, CaptionWriter, PublishPrep, PerformanceTracker — + 10 section agents — ContentPlanner, PerformanceAnalyst, Growth, Repurpose + 6 wrappers.</p><p>All output comes with a DRAFT label — because the brain is mock.</p>" },
+  leads: { title: "🎯 Leads — first mail 162", tag: "replies 0 · remaining 374",
+    body: "<p>First mail <b>162</b> sent, replies <b>0</b>. <b>374</b> more not-emailed rows remain in the pool. Replies to hello@ go to Zoho — Boss checks them himself.</p><p>Follow-up rule: no follow-up in a state until 100 first mails in that state. No state is at 100.</p>" },
   calls: { title: "📞 Calls — Sophia", tag: "+1 (947) 223-0244",
-    body: "<p>Sophia (AI receptionist) এই নম্বরে ধরে: <b>+1 (947) 223-0244</b>। ৬০ সেকেন্ডের live demo আছে। Booking: ১৫ মিনিটের demo call — <code>https://calendar.app.google/WLoxBfnLGTdjK3LB8</code></p><p>Cold calling পুরোপুরি বন্ধ — US নম্বর ছাড়া করা যায় না।</p>" },
-  emails: { title: "✉️ Emails — PAUSED", tag: "2026-11-14 থেকে বন্ধ",
-    body: "<p>Email পাঠানো <b>PAUSED</b> — Boss-এর নির্দেশ। কারণ: SPF-এ Gmail include নেই, DMARC record নেই, DKIM align নয়। Bounce ৬/১৮৬ ≈ ৩.২%।</p><p>DNS fix Boss-এর হাতে বাকি — ২টা record বসালেই 'check koro' বলে যাচাই, তারপর seed test, তারপর restart।</p>" },
-  approvals: { title: "✓ Approvals — pending ০", tag: "Gate ON · auto-approve নেই",
-    body: "<p>Pending approval: <b>০</b>। Gate words: <code>ok</code> / <code>go</code> / <code>post it</code> / <code>send</code> / <code>upload it</code> — আপনার exact word ছাড়া send/publish/spend/delete কিছুই হয় না।</p>" },
-  revenue: { title: "💰 Revenue — $0", tag: "paying client ০",
-    body: "<p>Paying client: <b>০</b>। Revenue <b>$0</b>। Kit বিক্রি ০ (Gate 0)।</p><p>Pricing LOCKED: Starter $547 / Growth $1,109 / Scale $1,672 প্রতি মাসে — prospect-কে কখনো দাম বলা হয় না, Boss-এর word ছাড়া।</p>" },
-  gate0: { title: "🚩 Gate 0 — NOT PASSED", tag: "Vet Kit আটকে আছে",
-    body: "<p><b>Gate 0 NOT PASSED</b> — Lemon Squeezy signup test (~১৫ মিনিট) Boss-এর step। পাস না হলে kit বানানো/বেচা যাবে না — code fail-closed।</p><p>PA vet list <b>৩৯/১০০</b> (যাচাই করা)। Fail হলে Polar, তারপর Gumroad — এটাই পরের ধাপ।</p>" },
-  goals: { title: "🎯 Goals — তিনটা track একসাথে", tag: "2026-11-12 FINAL",
-    body: "<p>(1) <b>Receptionist agency — MAIN</b> · (2) <b>Digital product</b> — Vet Kit $49 · (3) <b>YouTube channel</b> — ToolPilot (@ToolPilotai69, ready, OBS recording বাকি) নাকি নতুন চ্যানেল — আপনার উত্তর বাকি।</p>" },
-  research: { title: "🔍 Research — PA vet list ৩৯/১০০", tag: "যাচাই করা",
-    body: "<p>PA-র ৩৯টি independent vet clinic যাচাই করা — ৮টার public email পাওয়া গেছে, বাকি ৩১টা 'Not publicly listed'। Chain (Banfield, VCA) বাদ।</p><p>Prospect research নিয়ম: website + need signal দেখে, email/phone/address কখনো আন্দাজে লেখা হয় না।</p>" },
-  posts: { title: "🗎 Posts — এই সপ্তাহ (Nov 16–22)", tag: "Mon ✅ Thu ✅",
-    body: "<p>Mon Reel <b>POSTED</b> (FB+IG) · Thu carousel <b>POSTED</b> (FB+IG) · Tue/Wed ready, পোস্ট হয়নি · Fri LinkedIn — Boss নিজে পোস্ট করেন (text দেওয়া হয়েছে)।</p><p>নিয়ম: 'post it' ছাড়া কিছু পোস্ট হয় না।</p>" },
+    body: "<p>Sophia (AI receptionist) answers on this number: <b>+1 (947) 223-0244</b>. There is a 60-second live demo. Booking: a 15-minute demo call — <code>https://calendar.app.google/WLoxBfnLGTdjK3LB8</code></p><p>Cold calling is fully stopped — it cannot be done without a US number.</p>" },
+  emails: { title: "✉️ Emails — PAUSED", tag: "stopped since 2026-11-14",
+    body: "<p>Sending email is <b>PAUSED</b> — Boss's order. Reason: SPF has no Gmail include, no DMARC record, DKIM not aligned. Bounce 6/186 ≈ 3.2%.</p><p>The DNS fix is still in Boss's hands — once the 2 records are set, say 'check koro' to verify, then a seed test, then restart.</p>" },
+  approvals: { title: "✓ Approvals — pending 0", tag: "Gate ON · no auto-approve",
+    body: "<p>Pending approvals: <b>0</b>. Gate words: <code>ok</code> / <code>go</code> / <code>post it</code> / <code>send</code> / <code>upload it</code> — without your exact word, nothing is sent/published/spent/deleted.</p>" },
+  revenue: { title: "💰 Revenue — $0", tag: "paying clients 0",
+    body: "<p>Paying clients: <b>0</b>. Revenue <b>$0</b>. Kit sales 0 (Gate 0).</p><p>Pricing LOCKED: Starter $547 / Growth $1,109 / Scale $1,672 per month — prices are never told to a prospect without Boss's word.</p>" },
+  gate0: { title: "🚩 Gate 0 — NOT PASSED", tag: "Vet Kit is stuck",
+    body: "<p><b>Gate 0 NOT PASSED</b> — Lemon Squeezy signup test (~15 minutes) is Boss's step. If it does not pass, the kit cannot be built/sold — code fail-closed.</p><p>PA vet list <b>39/100</b> (verified). If it fails, Polar, then Gumroad — that is the next step.</p>" },
+  goals: { title: "🎯 Goals — three tracks together", tag: "2026-11-12 FINAL",
+    body: "<p>(1) <b>Receptionist agency — MAIN</b> · (2) <b>Digital product</b> — Vet Kit $49 · (3) <b>YouTube channel</b> — ToolPilot (@ToolPilotai69, ready, OBS recording remaining) or a new channel — your answer is still pending.</p>" },
+  research: { title: "🔍 Research — PA vet list 39/100", tag: "verified",
+    body: "<p>39 independent PA vet clinics verified — public emails found for 8, the other 31 are 'Not publicly listed'. Chains (Banfield, VCA) excluded.</p><p>Prospect research rule: look at the website + need signals; email/phone/address are never written by guessing.</p>" },
+  posts: { title: "🗎 Posts — this week (Nov 16–22)", tag: "Mon ✅ Thu ✅",
+    body: "<p>Mon Reel <b>POSTED</b> (FB+IG) · Thu carousel <b>POSTED</b> (FB+IG) · Tue/Wed ready, not posted · Fri LinkedIn — Boss posts himself (text given).</p><p>Rule: nothing posts without 'post it'.</p>" },
   graphics: { title: "🖼️ Graphics — Brand kit", tag: "navy + teal",
-    body: "<p>Brand: navy #0B1D33 + teal #14B8A6 + white। FINAL logo: gradient V + WAVE 'Talvenor' wordmark — <b>কখনো regenerate/redraw নয়</b>।</p><p>এক image-এ একটাই symbol — lockup-এ V already আছে।</p>" },
+    body: "<p>Brand: navy #0B1D33 + teal #14B8A6 + white. FINAL logo: gradient V + WAVE 'Talvenor' wordmark — <b>never regenerate/redraw</b>.</p><p>One image has one symbol only — the lockup already has the V.</p>" },
   video: { title: "▶ Video editor — Reel Factory", tag: "real footage only",
-    body: "<p>Real footage + TTS voiceover + karaoke caption + end card। AI video generation region-blocked (403) — retry নয়। GPU video বন্ধ (496 MB VRAM)।</p><p>UGC demo v2 (২৮.১s) Mon-এ FB+IG-তে পোস্ট হয়েছে।</p>" },
+    body: "<p>Real footage + TTS voiceover + karaoke caption + end card. AI video generation region-blocked (403) — no retry. GPU video closed (496 MB VRAM).</p><p>UGC demo v2 (28.1s) was posted on Mon on FB+IG.</p>" },
   playbook: { title: "📖 Playbook — SOP + Office", tag: "Content Standard LOCKED",
-    body: "<p>অফিস system: <code>~/workspace/talvenor-office/</code> · Agency Skill OS: <code>~/workspace/agency-os/</code> · Content Production Standard LOCKED (2026-10-05)।</p><p>Approval gate: 'ok' = plan/asset · 'post it' = publish · exact word ছাড়া send/schedule/spend/delete নয়।</p>" },
+    body: "<p>Office system: <code>~/workspace/talvenor-office/</code> · Agency Skill OS: <code>~/workspace/agency-os/</code> · Content Production Standard LOCKED (2026-10-05).</p><p>Approval gate: 'ok' = plan/asset · 'post it' = publish · no send/schedule/spend/delete without the exact word.</p>" },
   settings: { title: "⚙️ Settings — config", tag: "Phase 9 · v0.9.0",
-    body: "<p>Brain: <b>mock</b> · Gates: <b>ON</b> · Spend cap: <b>$0</b> · Timezone: Asia/Dhaka · Booking: 15 min, New York Time।</p><p>Live brain ফ্লিপ করা হয়নি — প্রথম live test 2026-11-06-এ timeout হয়েছিল, key path UNPROVEN।</p><p>PC-তে চালানোর পুরো নির্দেশনা আলাদা page-এ (Local Run Guide)।</p>" }
+    body: "<p>Brain: <b>mock</b> · Gates: <b>ON</b> · Spend cap: <b>$0</b> · Timezone: Asia/Dhaka · Booking: 15 min, New York Time.</p><p>The live brain has not been flipped on — the first live test timed out on 2026-11-06, the key path is UNPROVEN.</p><p>Full instructions for running on your PC are on a separate page (Local Run Guide).</p>" }
 };
 
 let S = FALLBACK;
@@ -291,7 +291,7 @@ function renderAll() {
     pill("n8n callback", (S.workflow_callback && S.workflow_callback.status) || "?", "hold");
   document.getElementById("foot").textContent =
     "Talvenor Master OS · LOCAL dashboard · repo: talvenor-master-os · Phase " + S.phase + " · v" + S.version +
-    " · sync: " + (window.__statusSource || "fallback snapshot 2026-11-19") + " · সংখ্যা আসল ফাইল থেকে আসে (sync_status.py)। PC-তে চালানোর নির্দেশনা আলাদা page-এ (Local Run Guide)।";
+    " · sync: " + (window.__statusSource || "fallback snapshot 2026-11-20") + " · numbers come from the real files (sync_status.py). Instructions for running on your PC are on a separate page (Local Run Guide).";
 }
 function showDetail(key) {
   const o = DETAILS[key];
@@ -310,7 +310,7 @@ async function loadStatus() {
     window.__statusSource = "status.json (live, " + new Date().toLocaleString("bn-BD") + ")";
   } catch (e) {
     S = FALLBACK;
-    window.__statusSource = "fallback snapshot 2026-11-19 — status.json পড়া যায়নি (run_local.bat দিয়ে খুলুন, বা python scripts\\sync_status.py চালান)";
+    window.__statusSource = "fallback snapshot 2026-11-20 — status.json could not be read (open with run_local.bat, or run python scripts\\sync_status.py)";
   }
   renderAll();
 }
@@ -346,7 +346,7 @@ document.getElementById("search-input").addEventListener("input", e => {
   }
 });
 
-// ---------- 3D sphere graph (গোলক: CEO মাঝখানে, Jarvis উপরে, তিন office তিন দিকে) ----------
+// ---------- 3D sphere graph (sphere: CEO in the middle, Jarvis on top, three offices on three sides) ----------
 const AGENCY_WORKERS = ["ProspectResearcher", "OutreachDrafter", "ReplyHandler", "NegotiationCoach", "RetellBuilder", "QAEngineer", "OnboardingAgent", "ContentPlanner", "VideoProducer", "CaptionWriter", "PublishPrep", "ObjectionSimulator", "InboxTriager", "ReportCompiler", "SchedulerAssistant"];
 const AGENCY_AGENTS = ["ClientIntakeReceiver", "SalesCloser", "FollowUpAgent", "ServiceDeliveryManager", "ClientSuccessAgent", "BillingInvoiceAgent"];
 const PRODUCT_STAFF = ["KitBuilder", "KitQA", "ClinicResearcher", "LaunchManager", "KitSales", "SupportDrafter", "PaymentRailsChecker"];
@@ -448,7 +448,7 @@ function initGraph() {
     return new THREE.Vector3().copy(d).multiplyScalar(Math.cos(t)).add(off).normalize();
   }
 
-  // Core: CEO Bot মাঝখানে, Jarvis উপরে (উত্তর মেরু), Gate ring বিষুবরেখায়
+  // Core: CEO Bot in the middle, Jarvis on top (north pole), Gate ring on the equator
   const jarvis = node("jarvis", "Jarvis", 0xf0b429, 0.85, 0, 6.4, 0, "Jarvis — voice · REAL", "#fde68a");
   const ceo = node("ceo", "Main CEO Bot", 0x14b8a6, 1.25, 0, 0.6, 0, "Main CEO Bot — mock", "#5eead4");
   edge(jarvis, ceo);
@@ -464,7 +464,7 @@ function initGraph() {
   gLabel.position.set(0, -1.6, 3.6); world.add(gLabel);
   labelSprites.push({ sprite: gLabel, mesh: gate });
 
-  // তিন office তিন দিকে (azimuth ১২০° করে)
+  // Three offices in three directions (120° azimuth each)
   function cluster(chiefKey, chiefName, chiefColor, azDeg, elDeg, members, memberColor, memberR, label, labelColor) {
     const d = dirFromAngles(azDeg, elDeg);
     const chiefPos = d.clone().multiplyScalar(6.5).add(CENTER);
@@ -486,7 +486,7 @@ function initGraph() {
   const products = cluster("products", "Products Chief", 0xea580c, 130, 5, PRODUCT_STAFF, 0xfb923c, 0.2, "Vet Kit · Gate 0 ✕", "#fdba74");
   const content = cluster("content", "Content Chief", 0x22c55e, 250, 10, CONTENT_WORKERS.concat(CONTENT_AGENTS), 0x4ade80, 0.2, "Content · upload OFF", "#86efac");
 
-  // Cross-cluster chord (গোলকের ভেতর দিয়ে লাইন)
+  // Cross-cluster chord (a line through the sphere)
   edge(agency.chief, products.chief);
   edge(agency.chief, content.chief);
   edge(products.chief, content.chief);
@@ -495,7 +495,7 @@ function initGraph() {
   edge(content.members[0], products.members[0]);
   edge(agency.members[8], content.members[4]);
 
-  // Task dots: প্রতিটা worker-এর চারপাশে ৩টা ছোট node (গোলকের গায়ে)
+  // Task dots: 3 small nodes around each worker (on the sphere's surface)
   const rand = seededRand(42);
   const allMembers = agency.members.concat(products.members, content.members);
   allMembers.forEach((m, i) => {
@@ -509,7 +509,7 @@ function initGraph() {
     }
   });
 
-  // Background stars — দূরের গোলক shell
+  // Background stars — a distant sphere shell
   const rand2 = seededRand(7);
   for (let i = 0; i < 42; i++) {
     const a = rand2() * Math.PI * 2;
@@ -519,7 +519,7 @@ function initGraph() {
       0.04 + rand2() * 0.04, rand2() > 0.5 ? 0xe5e7eb : 0x9ca3af, 0.35 + rand2() * 0.25);
   }
 
-  // Satellites — গোলকের গায়ে নানা দিকে
+  // Satellites — in many directions on the sphere
   function satellite(key, name, color, azDeg, elDeg, r, label, labelColor) {
     const d = dirFromAngles(azDeg, elDeg);
     const p = d.multiplyScalar(10.6).add(CENTER);
@@ -538,7 +538,7 @@ function initGraph() {
   const edgeLines = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: 0x33507a, transparent: true, opacity: 0.5 }));
   world.add(edgeLines);
 
-  // Selection ring — scene-এ, camera-র দিকে মুখ করে
+  // Selection ring — in the scene, facing the camera
   const selRing = new THREE.Mesh(
     new THREE.TorusGeometry(1, 0.05, 12, 60),
     new THREE.MeshBasicMaterial({ color: 0x14b8a6 })
@@ -621,7 +621,7 @@ function initGraph() {
     jarvis.position.y = 6.4 + Math.sin(t * 1.5) * 0.12;
     gate.rotation.z = t * 0.3;
     gate0.material.emissiveIntensity = 1 + Math.sin(t * 4) * 0.8;
-    // পেছনের দিকের label লুকাও — সামনের side-টাই শুধু দেখা যাবে
+    // Hide the labels on the back side — only the front side shows
     labelSprites.forEach(o => {
       o.mesh.getWorldPosition(tmpV);
       const toNode = tmpV.clone().sub(CENTER).normalize();

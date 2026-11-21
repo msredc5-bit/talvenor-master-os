@@ -18,13 +18,16 @@
   table { width: 100%; border-collapse: collapse; }
   td, th { text-align: left; padding: 8px 6px; border-bottom: 1px solid #eee; vertical-align: top; }
   label { display: block; font-size: 13px; font-weight: 700; margin: 10px 0 4px; }
-  input, select { width: 100%; padding: 9px 10px; border: 1px solid #ddd5c6; border-radius: 8px; font-size: 14px; background: #fff; color: #0B1D33; }
+  input, select, textarea { width: 100%; padding: 9px 10px; border: 1px solid #ddd5c6; border-radius: 8px; font-size: 14px; background: #fff; color: #0B1D33; }
+  textarea { font-family: ui-monospace, monospace; min-height: 64px; resize: vertical; }
   button { background: #EA580C; color: #fff; border: 0; border-radius: 8px; padding: 10px 18px; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 14px; }
   button:hover { background: #c2410c; }
   #msg { font-size: 13px; margin-top: 10px; }
   #msg.err { color: #991b1b; }
   #msg.ok { color: #065f46; }
-  .note { font-size: 13px; color: #666; }
+  .result { font-size: 12px; color: #555; max-width: 240px; overflow-wrap: anywhere; }
+  .cancel { background: #fff; color: #991b1b; border: 1px solid #fecaca; padding: 5px 10px; margin-top: 0; font-size: 12px; }
+  .cancel:hover { background: #fee2e2; }
   .status-line { font-size: 14px; }
   .status-line b { color: #0B1D33; }
 </style>
@@ -32,19 +35,19 @@
 <body>
 <div class="wrap">
   <h1>🎬 Talvenor Master OS — Task Board</h1>
-  <p class="sub">Task দাও — bridge প্রতি ১০ মিনিটে queue থেকে নেবে (সর্বোচ্চ ২টা), draft/result বানাবে। Send / publish / spend / delete কখনো নয়।</p>
+  <p class="sub">Give a task — the bridge takes from the queue every 10 minutes (max 2), makes drafts/results. Never send / publish / spend / delete.</p>
 
   <div class="card">
-    <h2>অবস্থা (status.json থেকে)</h2>
-    <p class="status-line" id="status">লোড হচ্ছে…</p>
+    <h2>State (from status.json)</h2>
+    <p class="status-line" id="status">Loading…</p>
   </div>
 
   <div class="card">
-    <h2>নতুন task</h2>
+    <h2>New task</h2>
     <form id="task-form">
-      <label for="title">Title (কী করতে হবে)</label>
+      <label for="title">Title (what to do)</label>
       <input id="title" type="text" maxlength="200" required
-             placeholder="যেমন: verify the Talvenor booking link is live">
+             placeholder="e.g.: verify the Talvenor booking link is live">
       <label for="type">Type</label>
       <input id="type" type="text" list="types" required
              placeholder="research" value="research">
@@ -54,6 +57,7 @@
         <option value="script_write"></option>
         <option value="outreach_draft"></option>
         <option value="gate0_check"></option>
+        <option value="find_skill"></option>
       </datalist>
       <label for="business">Business</label>
       <select id="business">
@@ -61,19 +65,21 @@
         <option value="digital-product">Digital Product — Vet Kit</option>
         <option value="content">Content — Creator OS</option>
       </select>
-      <button type="submit">Queue-তে দাও</button>
+      <label for="payload">Payload (JSON object, optional)</label>
+      <textarea id="payload" placeholder='{"query": "backup"} — query for find_skill goes here'>{}</textarea>
+      <button type="submit">Add to queue</button>
       <p id="msg"></p>
     </form>
-    <p class="note">Task queue-তে গেলে status "queued" হয়। Bridge (প্রতি ১০
-    মিনিট) সেটা নিয়ে আসল কাজ করে, result লিখে "done" করে। এই board
-    শুধু task দেয় আর দেখায় — নিজে কিছু চালায় না।</p>
+    <p class="note">When a task goes to the queue, its status becomes "queued". The bridge (every 10
+    minutes) takes it, does the real work, writes the result and marks it "done". This board
+    only gives and shows tasks — it runs nothing itself.</p>
   </div>
 
   <div class="card">
     <h2>Queue</h2>
     <table>
-      <thead><tr><th>Title</th><th>Type</th><th>Business</th><th>Status</th><th>Queued</th></tr></thead>
-      <tbody id="tasks"><tr><td colspan="5">লোড হচ্ছে…</td></tr></tbody>
+      <thead><tr><th>Title</th><th>Type</th><th>Business</th><th>Status</th><th>Queued</th><th>Result</th><th></th></tr></thead>
+      <tbody id="tasks"><tr><td colspan="7">Loading…</td></tr></tbody>
     </table>
     <p><button type="button" id="refresh">Refresh</button></p>
   </div>
@@ -91,7 +97,7 @@ async function loadStatus() {
       ' · Gate 0 <b>' + s.gate0 + '</b>' +
       ' · Tasks <b>' + s.tasks_count + '</b>';
   } catch (e) {
-    document.getElementById('status').textContent = 'Status পড়া যায়নি: ' + e;
+    document.getElementById('status').textContent = 'Could not read status: ' + e;
   }
 }
 async function loadTasks() {
@@ -101,19 +107,28 @@ async function loadTasks() {
     const rows = (d.records || []).slice().reverse();
     const tb = document.getElementById('tasks');
     if (!rows.length) {
-      tb.innerHTML = '<tr><td colspan="5">Queue খালি — কোনো task নেই।</td></tr>';
+      tb.innerHTML = '<tr><td colspan="7">Queue empty — no tasks.</td></tr>';
       return;
     }
     tb.innerHTML = rows.map(function (t) {
       const cls = t.status === 'done' ? 'done' : (t.status === 'failed' ? 'failed' : 'queued');
+      const result = (t.status === 'done' || t.status === 'failed') && t.result != null
+        ? esc(truncateResult(t.result)) : '—';
+      const action = t.status === 'queued'
+        ? '<button type="button" class="cancel" data-id="' + esc(t.id) + '">Cancel</button>' : '';
       return '<tr><td>' + esc(t.title) + '</td><td>' + esc(t.type) + '</td><td>' +
         esc(t.business) + '</td><td><span class="badge ' + cls + '">' + esc(t.status) +
-        '</span></td><td>' + esc((t.queued_at || '').slice(0, 19).replace('T', ' ')) + '</td></tr>';
+        '</span></td><td>' + esc((t.queued_at || '').slice(0, 19).replace('T', ' ')) +
+        '</td><td class="result">' + result + '</td><td>' + action + '</td></tr>';
     }).join('');
   } catch (e) {
     document.getElementById('tasks').innerHTML =
-      '<tr><td colspan="5">Task পড়া যায়নি: ' + esc(String(e)) + '</td></tr>';
+      '<tr><td colspan="7">Could not read tasks: ' + esc(String(e)) + '</td></tr>';
   }
+}
+function truncateResult(result) {
+  const text = typeof result === 'string' ? result : JSON.stringify(result);
+  return text.length > 200 ? text.slice(0, 200) + '…' : text;
 }
 function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -123,12 +138,24 @@ function esc(s) {
 document.getElementById('task-form').addEventListener('submit', async function (ev) {
   ev.preventDefault();
   const msg = document.getElementById('msg');
-  msg.className = ''; msg.textContent = 'পাঠানো হচ্ছে…';
+  msg.className = ''; msg.textContent = 'Sending…';
+  let payload = {};
+  const rawPayload = document.getElementById('payload').value.trim();
+  if (rawPayload) {
+    try {
+      payload = JSON.parse(rawPayload);
+    } catch (e) {
+      msg.className = 'err'; msg.textContent = 'Payload JSON is not valid: ' + e.message; return;
+    }
+    if (typeof payload !== 'object' || Array.isArray(payload)) {
+      msg.className = 'err'; msg.textContent = 'Payload JSON must be an object.'; return;
+    }
+  }
   const body = {
     title: document.getElementById('title').value,
     type: document.getElementById('type').value,
     business: document.getElementById('business').value,
-    payload: {}
+    payload: payload
   };
   try {
     const r = await fetch('/api/tasks', {
@@ -137,15 +164,30 @@ document.getElementById('task-form').addEventListener('submit', async function (
       body: JSON.stringify(body)
     });
     const d = await r.json();
-    if (!r.ok) { msg.className = 'err'; msg.textContent = 'হয়নি: ' + (d.error || r.status); return; }
-    msg.className = 'ok'; msg.textContent = 'Queue-তে গেছে — id ' + d.id + ' (queued)।';
+    if (!r.ok) { msg.className = 'err'; msg.textContent = 'Failed: ' + (d.error || r.status); return; }
+    msg.className = 'ok'; msg.textContent = 'Added to queue — id ' + d.id + ' (queued).';
     document.getElementById('title').value = '';
     loadTasks(); loadStatus();
   } catch (e) {
-    msg.className = 'err'; msg.textContent = 'হয়নি: ' + e;
+    msg.className = 'err'; msg.textContent = 'Failed: ' + e;
   }
 });
 document.getElementById('refresh').addEventListener('click', function () { loadTasks(); loadStatus(); });
+document.getElementById('tasks').addEventListener('click', async function (ev) {
+  const btn = ev.target.closest('.cancel');
+  if (!btn) return;
+  const id = btn.getAttribute('data-id');
+  btn.disabled = true; btn.textContent = 'Cancelling…';
+  try {
+    const r = await fetch('/api/tasks/' + encodeURIComponent(id), { method: 'DELETE' });
+    const d = await r.json();
+    if (!r.ok) { alert('Cancel failed: ' + (d.error || r.status)); btn.disabled = false; btn.textContent = 'Cancel'; return; }
+    loadTasks(); loadStatus();
+  } catch (e) {
+    alert('Cancel failed: ' + e);
+    btn.disabled = false; btn.textContent = 'Cancel';
+  }
+});
 loadStatus(); loadTasks();
 setInterval(function () { loadTasks(); loadStatus(); }, 30000);
 </script>

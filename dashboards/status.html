@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Talvenor Master OS — Status (Phase 9)</title>
+<title>Talvenor Master OS — Status (Phase 11)</title>
 <style>
   body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: #FFFBF5; color: #0B1D33; margin: 0; padding: 24px; }
   .wrap { max-width: 860px; margin: 0 auto; }
@@ -25,24 +25,24 @@
 <body>
 <div class="wrap">
   <h1>🎬 Talvenor Master OS</h1>
-  <p class="sub">Status dashboard — Phase 9 (এই page scripts/sync_status.py দিয়ে বানানো — সংখ্যা আসল ফাইল থেকে আসে, হাতে লেখা নয়)</p>
+  <p class="sub">Status dashboard — Phase 11 (this page is built by scripts/sync_status.py — numbers come from the real files, not hand-written)</p>
 
   <div class="card">
-    <h2>৩ ব্যবসা — শুধু এই ৩টাই (১৩৬ নয়)</h2>
+    <h2>3 businesses — only these 3 (136 DROPPED)</h2>
     <table>
-      <tr><th>ব্যবসা</th><th>অবস্থা</th><th>সত্য কথা</th></tr>
-      <tr><td><strong>1. Agency</strong> — Talvenor AI Receptionist</td><td><span class="badge built">MAIN · Phase 1 REAL</span></td><td>প্রথম মেইল 162, paying client 0 · Chief সত্যিই 15 worker ডাকে (mock brain, DRAFT ONLY) · Email PAUSED</td></tr>
-      <tr><td><strong>2. Digital Product</strong> — Vet No-Show Recovery Kit ($49)</td><td><span class="badge built">Phase 2 REAL*</span></td><td><strong>Gate 0 NOT PASSED</strong> — Lemon Squeezy test Boss-এর step, হয়নি · Kit blueprint আছে (kit নিজে নয়) · PA list 39 / 100 (যাচাই করা) · Sale 0 · *Gate 0-তে আটকে</td></tr>
-      <tr><td><strong>3. Content Engine</strong> — Creator OS / ToolPilot</td><td><span class="badge built">Phase 3 REAL</span></td><td>Chief সত্যিই 6 worker ডাকে (mock brain, DRAFT ONLY) · 13 stage: REAL 0 / MOCK 10 / BLOCKED 3 · Upload OFF · VOICE.md DRAFT · GPU AMD Radeon integrated 496 MB VRAM (FramePack/WanGP চলবে না) · ToolPilot video 0 (subs 0)</td></tr>
+      <tr><th>Business</th><th>State</th><th>True Story</th></tr>
+      <tr><td><strong>1. Agency</strong> — Talvenor AI Receptionist</td><td><span class="badge built">MAIN · Phase 1 REAL</span></td><td>First mail 162, paying client 0 · Chief really calls 15 workers (mock brain, DRAFT ONLY) · Email PAUSED</td></tr>
+      <tr><td><strong>2. Digital Product</strong> — Vet No-Show Recovery Kit ($49)</td><td><span class="badge built">Phase 2 REAL*</span></td><td><strong>Gate 0 NOT PASSED</strong> — Lemon Squeezy test is Boss's step, not done · Kit blueprint exists (not the kit itself) · PA list 39 / 100 (verified) · Sale 0 · *Stuck at Gate 0</td></tr>
+      <tr><td><strong>3. Content Engine</strong> — Creator OS / ToolPilot</td><td><span class="badge built">Phase 3 REAL</span></td><td>Chief really calls 6 workers (mock brain, DRAFT ONLY) · 13 stages: REAL 0 / MOCK 10 / BLOCKED 3 · Upload OFF · VOICE.md DRAFT · GPU AMD Radeon integrated 496 MB VRAM (FramePack/WanGP will not run) · ToolPilot videos 0 (subs 0)</td></tr>
     </table>
   </div>
 
   <div class="card">
     <h2>Unified OS — 3 Business OS</h2>
     <table>
-      <tr><th>Business OS</th><th>অবস্থা</th><th>আসল সংখ্যা</th></tr>
+      <tr><th>Business OS</th><th>State</th><th>Real Numbers</th></tr>
       <tr><td><strong>Agency</strong> — AI Receptionist</td><td><span class="badge paused">email PAUSED</span></td><td>8 departments · 8 managers · 69 registry entries · 21 staff (15 workers + 6 section agents) · email PAUSED · clients 0</td></tr>
-      <tr><td><strong>Commerce</strong> — Vet Kit ($49)</td><td><span class="badge paused">Gate 0 NOT PASSED</span></td><td>Vet Kit Gate 0 NOT PASSED · kit 0/6 · PA 39/100 · sale 0 · Amazon GATED · Etsy CLOSED · Shopify PARKED (Boss direct) · Dropshipping RESEARCH-ONLY</td></tr>
+      <tr><td><strong>Commerce</strong> — Vet Kit ($49)</td><td><span class="badge paused">Gate 0 NOT PASSED</span></td><td>Vet Kit Gate 0 NOT PASSED · kit unknown/unknown · PA 39/100 · sale 0 · Amazon GATED · Etsy CLOSED · Shopify PARKED (Boss direct) · Dropshipping RESEARCH-ONLY</td></tr>
       <tr><td><strong>Media</strong> — Content Engine / ToolPilot</td><td><span class="badge stub">upload OFF</span></td><td>5 sections · 10 agents · 13 stages REAL 0 / MOCK 10 / BLOCKED 3 · upload OFF · ToolPilot subs 0 · videos 0</td></tr>
     </table>
   </div>
@@ -51,55 +51,66 @@
     <h2>Phase</h2>
     <table>
       <tr><td><strong>Phase 0</strong> — folder + CEO Core + approval gateway + dashboard</td><td><span class="badge built">BUILT</span></td></tr>
-      <tr><td><strong>Phase 1</strong> — Agency department (vendored worker, draft-only, gate ধরে)</td><td><span class="badge built">BUILT</span></td></tr>
-      <tr><td><strong>Phase 2</strong> — Digital Product (Chief REAL, kit blueprint, PA list 39/100 — launch/sale Gate 0-তে আটকে)</td><td><span class="badge built">BUILT</span></td></tr>
+      <tr><td><strong>Phase 1</strong> — Agency department (vendored worker, draft-only, holds the gate)</td><td><span class="badge built">BUILT</span></td></tr>
+      <tr><td><strong>Phase 2</strong> — Digital Product (Chief REAL, kit blueprint, PA list 39/100 — launch/sale stuck at Gate 0)</td><td><span class="badge built">BUILT</span></td></tr>
       <tr><td><strong>Phase 3</strong> — Creator OS department (Chief REAL, 6 worker wired, 13 stage REAL 0 / MOCK 10 / BLOCKED 3, upload OFF)</td><td><span class="badge built">BUILT</span></td></tr>
       <tr><td><strong>Phase 4</strong> — n8n wiring (Gmail, Vapi, Sheets — workflows READY, NOT LIVE)</td><td><span class="badge built">BUILT</span></td></tr>
       <tr><td><strong>Phase 5</strong> — Three Engines (shared tool-calling core + 3 engines: Agency 15 / Products 5 / Content 8 staff)</td><td><span class="badge built">BUILT</span></td></tr>
       <tr><td><strong>Phase 6</strong> — Brain + Runner (BrainFactory mock default, run_office.py — workers vendored)</td><td><span class="badge built">BUILT</span></td></tr>
       <tr><td><strong>Phase 7</strong> — Full Offices: 16 sections, 23 section agents, 23 section skills (Agency 5 / Products 6 / Content 5 sections)</td><td><span class="badge built">BUILT</span></td></tr>
+      <tr><td><strong>Agentic Phase 1</strong> — 8 departments inside Agency</td><td><span class="badge built">BUILT</span></td></tr>
+      <tr><td><strong>Agentic Phase 2</strong> — Chief DEPARTMENT_ROUTING (8 managers)</td><td><span class="badge built">BUILT</span></td></tr>
+      <tr><td><strong>Agentic Phase 3</strong> — 43 ROLE-ONLY specialists built as worker code</td><td><span class="badge built">BUILT</span></td></tr>
+      <tr><td><strong>Unified OS</strong> — CENTRAL-HQ (one brain + 3 Chiefs)</td><td><span class="badge built">BUILT</span></td></tr>
+      <tr><td><strong>Phase 9</strong> — taskboard + MCP stdio + live-ready tool code</td><td><span class="badge built">BUILT</span></td></tr>
+      <tr><td><strong>Phase 10</strong> — live brain probe (NOT PROVEN LIVE — brain mock)</td><td><span class="badge paused">NOT PROVEN LIVE</span></td></tr>
+      <tr><td><strong>Phase 11</strong> — 7 LLM providers + fallback chain (brain still mock)</td><td><span class="badge built">BUILT</span></td></tr>
+      <tr><td><strong>Improvement P1</strong> — trust gate as code</td><td><span class="badge built">BUILT</span></td></tr>
+      <tr><td><strong>Improvement P2</strong> — owner memory + usage ledger ($0)</td><td><span class="badge built">BUILT</span></td></tr>
+      <tr><td><strong>Improvement P3</strong> — quiet schedules (change-only watches)</td><td><span class="badge built">BUILT</span></td></tr>
     </table>
   </div>
 
   <div class="card">
-    <h2>n8n Wiring — বাইরের দুনিয়ার সাথে সংযোগ</h2>
+    <h2>n8n Wiring — Connection to the Outside World</h2>
     <table>
-      <tr><th>Workflow</th><th>অবস্থা</th><th>সত্য কথা</th></tr>
-      <tr><td><strong>Auto-send</strong> — Talvenor Tier 2 — Daily auto-send 18:00 Dhaka (8 nodes)</td><td><span class="badge pending">READY · NOT LIVE</span></td><td>Schedule 18:00 Dhaka → Google Sheet Queue → Gmail send → Sheet-এ sent লেখা · Import + Gmail/Sheets connect + 1-mail test Boss-এর step · Email PAUSED থাকায় চালানো যাবে না</td></tr>
-      <tr><td><strong>Callback</strong> — Talvenor Callback - Website form to Vapi (3 nodes)</td><td><span class="badge pending">READY · NOT LIVE</span></td><td>Website form → n8n webhook → Vapi POST /call → Sophia callback · Twilio number (~$1.15/mo) import + workflow import + Vapi credential + webhook URL Boss-এর step</td></tr>
+      <tr><th>Workflow</th><th>State</th><th>True Story</th></tr>
+      <tr><td><strong>Auto-send</strong> — Talvenor Tier 2 — Daily auto-send 18:00 Dhaka (8 nodes)</td><td><span class="badge pending">READY · NOT LIVE</span></td><td>Schedule 18:00 Dhaka → Google Sheet Queue → Gmail send → sent written to Sheet · Import + Gmail/Sheets connect + 1-mail test are Boss's step · Cannot be run while Email is PAUSED</td></tr>
+      <tr><td><strong>Callback</strong> — Talvenor Callback - Website form to Vapi (3 nodes)</td><td><span class="badge pending">READY · NOT LIVE</span></td><td>Website form → n8n webhook → Vapi POST /call → Sophia callback · Twilio number (~$1.15/mo) import + workflow import + Vapi credential + webhook URL are Boss's step</td></tr>
     </table>
-    <p class="note">Host: Muse runtime + 10-min bridge cron ($0) — ২৪/৭ always-on server নেই, ওটা পরে টাকা দিয়ে করতে হবে। কোনো workflow-ই LIVE নয় — LIVE দাবি করা হয় না। দুই send system একসাথে চলবে না (double mail যাবে)।</p>
+    <p class="note">Host: Muse runtime + 10-min bridge cron ($0) — no 24/7 always-on server, that will have to be paid for later. No workflow is LIVE — LIVE is not claimed. Two send systems will not run together (double mail would go out).</p>
   </div>
 
   <div class="card">
-    <h2>Gate ও সীমা</h2>
-    <p>Gates: <span class="gate-on">ON</span> — send / publish / spend / delete, কোনোটাই Boss-এর gate word ছাড়া হয় না। Auto-approve নেই।</p>
+    <h2>Gates and Limits</h2>
+    <p>Gates: <span class="gate-on">ON</span> — send / publish / spend / delete, none of them happen without Boss's gate word. No auto-approve.</p>
     <p>Spend cap: <strong>$0</strong></p>
-    <p>Email: <span class="badge paused">PAUSED</span> 2026-11-14 থেকে — SPF/DMARC DNS fix Boss-এর হাতে বাকি।</p>
-    <p>Paying clients: <strong>0</strong> · Kit sales: <strong>0</strong> (Gate 0 NOT PASSED) · ToolPilot videos: <strong>0</strong> · Upload: <span class="badge paused">OFF</span> (stage 9, Boss-এর "upload it" + credential লাগে)</p>
-    <p>Gate 0: <span class="badge paused">NOT PASSED</span> — Lemon Squeezy signup test (~15 min) Boss-এর step। পাস হলে PA list 100-এ পূর্ণ হবে, তারপর kit বানানো।</p>
+    <p>Email: <span class="badge paused">PAUSED</span> since 2026-11-14 — the SPF/DMARC DNS fix is still in Boss's hands.</p>
+    <p>Paying clients: <strong>0</strong> · Kit sales: <strong>0</strong> (Gate 0 NOT PASSED) · ToolPilot videos: <strong>0</strong> · Upload: <span class="badge paused">OFF</span> (stage 9, needs Boss's "upload it" + credential)</p>
+    <p>Gate 0: <span class="badge paused">NOT PASSED</span> — Lemon Squeezy signup test (~15 min) is Boss's step. If it passes, the PA list will fill to 100, then the kit is built.</p>
     <p>Store: tasks 1 · approvals pending 0 / approved 0</p>
+    <p>Usage ledger: 64 calls · $0.0 this month (cap $0.0/mo) · over cap: False</p>
   </div>
 
   <div class="card">
     <h2>REAL vs STUB vs REUSED</h2>
     <table>
-      <tr><td><strong>REAL</strong></td><td>Approval gateway (approve/reject সত্যিই record করে), Main CEO Bot router, config.json, এই dashboard (sync দিয়ে বানানো), <strong>Agency Chief of Staff (15 worker routing, draft-only, gated কাজ PENDING-এ আটকায়)</strong>, <strong>Products Chief of Staff (kit blueprint, PA list 39/100, launch/sale Gate 0-তে আটকায়)</strong>, <strong>Content Chief of Staff (6 Creator OS worker routing, draft-only, upload OFF-এ আটকায়, video file বানায় না)</strong></td></tr>
-      <tr><td><strong>READY (NOT LIVE)</strong></td><td>n8n auto-send workflow + callback workflow — import file তৈরি, Boss-এর import + connect + test বাকি, কোনোটাই LIVE নয়</td></tr>
-      <tr><td><strong>REAL</strong></td><td>Jarvis voice — Piper TTS + Vosk/sherpa STT, offline, $0 (mic test Boss-এর PC-তে বাকি)</td></tr>
-      <tr><td><strong>VENDORED (Phase 6)</strong></td><td>boss-ceo engine (15 worker) + Creator OS (6 worker) — copy এখন repo-র ভিতরে; talvenor-office, jarvis-ceo-os-concept — reference only</td></tr>
+      <tr><td><strong>REAL</strong></td><td>Approval gateway (approve/reject really records), Main CEO Bot router, config.json, this dashboard (built by sync), <strong>Agency Chief of Staff (15 worker routing, draft-only, gated work gets stuck in PENDING)</strong>, <strong>Products Chief of Staff (kit blueprint, PA list 39/100, launch/sale stuck at Gate 0)</strong>, <strong>Content Chief of Staff (6 Creator OS worker routing, draft-only, stuck at upload OFF, does not make video files)</strong></td></tr>
+      <tr><td><strong>READY (NOT LIVE)</strong></td><td>n8n auto-send workflow + callback workflow — import files ready, Boss's import + connect + test remaining, neither is LIVE</td></tr>
+      <tr><td><strong>REAL</strong></td><td>Jarvis voice — Piper TTS + Vosk/sherpa STT, offline, $0 (mic test still pending on Boss's PC)</td></tr>
+      <tr><td><strong>VENDORED (Phase 6)</strong></td><td>boss-ceo engine (15 workers) + Creator OS (6 workers) — copies now inside the repo; talvenor-office, jarvis-ceo-os-concept — reference only</td></tr>
     </table>
-    <p class="note">Gemini-র map-এর ৪ ভুল এখানে ঠিক করা হয়েছে: (1) Jarvis ≠ Main CEO Bot, আলাদা; (2) approval/gate layer আছে; (3) store/Vault আছে; (4) digital product = Vet Kit $49, generic "Notion Kits" নয়।</p>
+    <p class="note">Gemini's map had 4 errors, fixed here: (1) Jarvis ≠ Main CEO Bot, separate; (2) an approval/gate layer exists; (3) store/Vault exists; (4) digital product = Vet Kit $49, not generic "Notion Kits".</p>
   </div>
 
   <div class="card">
-    <h2>যোগাযোগ (আসল)</h2>
+    <h2>Contact (real)</h2>
     <p>Booking: https://calendar.app.google/WLoxBfnLGTdjK3LB8 (15 min, New York Time)<br>
-    ফোন: +1 (947) 223-0244<br>
-    ইমেইল: hello@talvenorai.agency (outreach) · contact@talvenorai.agency (main)</p>
+    Phone: +1 (947) 223-0244<br>
+    Email: hello@talvenorai.agency (outreach) · contact@talvenorai.agency (main)</p>
   </div>
 
-  <footer>Built: 2026-11-16 (Phase 0 + Phase 1 Agency + Phase 2 Digital Product* + Phase 3 Creator OS + Phase 4 n8n wiring) · Folder: ~/workspace/talvenor-master-os/ · Version 0.9.0 · *Phase 2 Gate 0-তে আটকে — kit blueprint + PA list 39/100 শুধু। Content: 13 stage REAL 0 / MOCK 10 / BLOCKED 3, upload OFF। n8n workflows READY, NOT LIVE। কোনো সংখ্যা বানানো নয় — সব আসল ফাইল থেকে sync করা।</footer>
+  <footer>Built: 2026-11-21 (Phase 11) · Folder: ~/workspace/talvenor-master-os/ · Version 0.9.0 · Phase 2 stuck at Gate 0 — kit blueprint + PA list 39/100 only. Content: 13 stages REAL 0 / MOCK 10 / BLOCKED 3, upload OFF. n8n workflows READY, NOT LIVE. No number invented — all synced from the real files.</footer>
 </div>
 </body>
 </html>

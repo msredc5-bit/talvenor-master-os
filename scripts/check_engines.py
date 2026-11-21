@@ -1,14 +1,14 @@
 """Phase 5 check — Three Engines (shared tool-calling core + 3 engines).
 
-যাচাই করে:
-  1. Shared core (00-CEO-Core/tool_calling.py) — registry, 6 handler,
+Verifies:
+  1. Shared core (00-CEO-Core/tool_calling.py) — registry, 7 handler,
      mock -> draft-ready, gated -> pending-approval, bad args -> error.
-  2. প্রতিটা engine — tools.json, wrapper end-to-end (TEMP file-এ),
-     STAFF.md-র role, প্রতিটা role-এর skill file (আসল content, no [FILL])।
-  3. আসল store এই run-এ বদলায়নি (Phase 9: live queue)।
-  4. Phase 0–4-র check-গুলো এখনো PASS।
+  2. Each engine — tools.json, wrapper end-to-end (in TEMP files),
+     STAFF.md roles, each role's skill file (real content, no [FILL]).
+  3. The real store did not change in this run (Phase 9: live queue).
+  4. Phase 0–4 checks still PASS.
 
-সব store-ছোঁয়া call TEMP file-এ চলে — আসল store কখনো লেখা হয় না।
+All store-touching calls run in TEMP files — the real store is never written.
 """
 
 import importlib.util
@@ -41,7 +41,7 @@ def load_module(name, path):
 
 
 def dummy_args(tool):
-    """Tool-এর schema থেকে valid dummy args বানানো (type অনুযায়ী)।"""
+    """Make valid dummy args from a tool's schema (by type)."""
     props = tool.get("params", {}).get("properties", {})
     required = tool.get("params", {}).get("required", [])
     args = {}
@@ -57,9 +57,9 @@ def dummy_args(tool):
 
 
 def _snapshot_store():
-    """Real store-এর snapshot (Phase 9: store এখন live queue — taskboard /
-    bridge সত্যিই task লেখে, তাই 'খালি' আর invariant নয়)। Check-এর
-    কাজ শুধু প্রমাণ করা যে এই run store বদলায়নি।"""
+    """Snapshot of the real store (Phase 9: store is now a live queue — taskboard /
+    bridge really writes tasks, so 'empty' is no longer an invariant). The check's
+    only job is to prove this run did not change the store."""
     snap = {}
     for name in ("tasks.json", "approvals.json"):
         try:
@@ -164,14 +164,16 @@ def main():
             "Caption Writer", "Publish Prep", "Objection Simulator",
             "Inbox Triager", "Report Compiler", "Scheduler",
         ]),
-        ("02-Digital-Product-Department", "products", 5, 8, 6, 2, [
+        ("02-Digital-Product-Department", "products", 7, 8, 7, 1, [
             "Kit Builder", "Clinic Researcher", "Launch Manager",
             "Payment-Rails Checker", "Support Drafter",
+            "Kit QA", "Kit Sales",
         ]),
-        ("03-Content-Creation-Department", "content", 8, 8, 5, 3, [
+        ("03-Content-Creation-Department", "content", 10, 8, 6, 2, [
             "Topic Researcher", "Script Writer", "Visual Producer",
             "Caption Writer", "Publish Prep", "Performance Tracker",
             "Content Planner", "Performance Analyst",
+            "Growth Agent", "Repurpose Agent",
         ]),
     ]
     for dept, key, n_roles, n_tools, n_mock, n_gated, roles in engines:
@@ -216,9 +218,9 @@ def main():
             for fname in skill_files:
                 with open(os.path.join(skills_dir, fname), "r", encoding="utf-8") as f:
                     text = f.read()
-                # "[FILL AFTER TEST]" হলো ToolPilot Week 1 verdict-এর LOCKED
-                # placeholder (Boss-এর OBS recording না দেখে verdict লেখা হয় না)
-                # — এটা আসল content, placeholder নয়। বাকি [FILL ধরা হবে।
+                # "[FILL AFTER TEST]" is the LOCKED placeholder for the ToolPilot Week 1 verdict
+                # (no verdict is written without seeing Boss's OBS recording)
+                # — this is real content, not a placeholder. Other [FILLs are caught.
                 text_checked = text.replace("[FILL AFTER TEST]", "")
                 if len(text) < 200 or "[FILL" in text_checked:
                     bad.append(fname)
@@ -240,17 +242,23 @@ def main():
             lg = os.path.join(tmp, "calls.json")
             mock_tool = next(t for t in tools if not t.get("gated"))
             r = wrapper.call(mock_tool["name"], dummy_args(mock_tool),
-                             approvals_path=ap, calls_log_path=lg)
+                             approvals_path=ap, calls_log_path=lg,
+                             ledger_path=os.path.join(tmp, "ledger.json"))
             check(f"{key}: wrapper mock call -> draft-ready",
                   r.get("status") == "draft-ready",
                   f"{mock_tool['name']} -> {r.get('status')}")
             gated_tool = next(t for t in tools if t.get("gated"))
             r = wrapper.call(gated_tool["name"], dummy_args(gated_tool),
-                             approvals_path=ap, calls_log_path=lg)
-            check(f"{key}: wrapper gated call -> pending-approval",
-                  r.get("status") == "pending-approval",
+                             approvals_path=ap, calls_log_path=lg,
+                             ledger_path=os.path.join(tmp, "ledger.json"))
+            # Gated call must refuse — pending-approval (trust "ask") or
+            # blocked-trust (standing rule denies, e.g. $0 spend cap).
+            # Either way nothing executes.
+            check(f"{key}: wrapper gated call -> refused, nothing executed",
+                  r.get("status") in ("pending-approval", "blocked-trust"),
                   f"{gated_tool['name']} -> {r.get('status')}")
-            r = wrapper.call("no_such_tool", {}, approvals_path=ap, calls_log_path=lg)
+            r = wrapper.call("no_such_tool", {}, approvals_path=ap, calls_log_path=lg,
+                             ledger_path=os.path.join(tmp, "ledger.json"))
             check(f"{key}: wrapper unknown tool -> error",
                   r.get("status") == "error", r.get("status", "?"))
         except Exception as exc:  # noqa: BLE001
