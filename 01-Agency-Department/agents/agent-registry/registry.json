@@ -145,12 +145,12 @@
   },
   {
     "department": "02 Marketing",
-    "gate": null,
-    "notes": "Not built and not planned: paid ads are blocked by the $0 spend cap. No budget, no worker.",
+    "gate": "ok",
+    "notes": "Built 2026-11-21 — skill + worker EXISTING (DRAFT only, mock brain). Paid ad DRAFT plan + analysis only; live ads never run, $0 spend cap, no ad account connected.",
     "role": "Ad Campaign Agent",
-    "skill_file": null,
-    "status": "GAP",
-    "worker_file": null
+    "skill_file": "01-Agency-Department/departments/02-marketing/skills/ad-campaign-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/02-marketing/specialists/ad_campaign_agent.py"
   },
   {
     "department": "02 Marketing",
@@ -244,12 +244,12 @@
   },
   {
     "department": "03 AI Engineering",
-    "gate": null,
-    "notes": "Not built and not planned: CRM is not live (n8n Cloud Data Tables PLANNED), so there is no CRM to integrate.",
+    "gate": "ok",
+    "notes": "Built 2026-11-21 — skill + worker EXISTING (DRAFT only, mock brain). CRM integration DRAFT plan only; CRM (n8n Cloud Data Tables) PLANNED, not live — no live record, no sync.",
     "role": "CRM Integration Agent",
-    "skill_file": null,
-    "status": "GAP",
-    "worker_file": null
+    "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/crm-integration-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/03-ai-engineering/specialists/crm_integration_agent.py"
   },
   {
     "department": "03 AI Engineering",
@@ -443,11 +443,11 @@
   {
     "department": "06 Finance & Admin",
     "gate": null,
-    "notes": "Not built and not planned: $0 spend cap means there are no expenses to track.",
+    "notes": "Built 2026-11-21 — skill + worker EXISTING (DRAFT only, mock brain). Expense entry DRAFT + monthly report only; ledger empty ($0 spent); never approves spend.",
     "role": "Expense Tracking Agent",
-    "skill_file": null,
-    "status": "GAP",
-    "worker_file": null
+    "skill_file": "01-Agency-Department/departments/06-finance-admin/skills/expense-tracking-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/06-finance-admin/specialists/expense_tracking_agent.py"
   },
   {
     "department": "06 Finance & Admin",
@@ -550,12 +550,12 @@
   },
   {
     "department": "07 Quality & Security",
-    "gate": null,
-    "notes": "Not built and not planned: there is no backup system in the repo.",
+    "gate": "ok",
+    "notes": "Built 2026-11-21 — skill + worker EXISTING (DRAFT only, mock brain). Backup DRAFT plan + DR runbook only; no backup system yet, restore test never run — NOT VERIFIED, it cannot be called protected.",
     "role": "Backup & Recovery Agent",
-    "skill_file": null,
-    "status": "GAP",
-    "worker_file": null
+    "skill_file": "01-Agency-Department/departments/07-quality-security/skills/backup-recovery-agent.md",
+    "status": "EXISTING",
+    "worker_file": "01-Agency-Department/departments/07-quality-security/specialists/backup_recovery_agent.py"
   },
   {
     "department": "07 Quality & Security",

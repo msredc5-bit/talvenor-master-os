@@ -1,45 +1,45 @@
 """Chief of Staff — Agency Department (REAL, Phase 1).
 
-Talvenor AI Receptionist Agency — Boss-এর প্রথম ব্যবসা, MAIN।
+Talvenor AI Receptionist Agency — Boss's first business, MAIN.
 
-কাজ: Main CEO Bot থেকে আসা task-টা পড়ে এই office-এর ভেতরে vendored
-engine-এর আসল worker-এর দিকে পাঠানো, ফলাফল DRAFT হিসেবে ফেরত
-দেওয়া, আর gated কাজ (send / publish / spend / delete) হলে
-ApprovalGateway দিয়ে আটকে রাখা। Workers এখন office-এর ভেতরে
-vendored (engine/workers/) — বাইরের কোনো checkout-এর ওপর
-আর কোনো নির্ভরতা নেই (দেখুন engine/workers/SOURCE.md)।
+Job: read the task coming from the Main CEO Bot and send it to the real worker of the vendored
+engine inside this office, return the result as a DRAFT,
+and if it is a gated job (send / publish / spend / delete),
+hold it back with ApprovalGateway. Workers are now vendored inside the office
+(engine/workers/) — no longer dependent on any outside checkout
+(see engine/workers/SOURCE.md).
 
-নিয়ম (কোডে লেখা):
-  - এই Chief কখনো মেইল/মেসেজ পাঠায় না, publish করে না, খরচ করে
-    না, delete করে না। পাঠানো/পাবলিশ শুধু Boss-এর gate word-এ হয়,
-    আর সেটাও Boss নিজে করেন (এই সিস্টেম শুধু DRAFT বানায়)।
-  - Email পাঠানো PAUSED (Boss-এর নির্দেশ 2026-11-14) — draft-ই শেষ
-    কথা, send-এর চেষ্টাও করা হয় না।
-  - Worker-রা BrainFactory-র brain দিয়ে চলে — config.json-এর
-    "brain" flag "mock" (DEFAULT, $0) হলে vendored MockLLMProvider,
-    "live" হলে vendored MetaSparkProvider। ফলাফল DRAFT / MOCK হিসেবে
-    লেবেল করা থাকে। Live brain শুধু Boss-এর আলাদা অনুমোদনে, এখানে নয়;
-    Phase 6 কোনো live call করে না (দেখুন 00-CEO-Core/brain.py)।
-  - RetellBuilder: engine-এর DEL worker-এর আসল নাম। কিন্তু
-    Talvenor-এর live stack Vapi/Sophia (Boss Retell-এর জন্য টাকা
-    দেবেন না) — তাই RetellBuilder-এর output শুধু DRAFT build plan,
-    কখনো live build নয়।
-  - Phase 2 wiring (2026-11-19): DEPARTMENT_ROUTING — ৮ department
-    manager-কে Chief এখন call করে (dept_sales / dept_marketing /
+Rules (written in code):
+  - This Chief never sends mail/messages, publishes, spends,
+    or deletes. Sending/publishing happens only on Boss's gate word,
+    and even that Boss does himself (this system only makes DRAFTs).
+  - Email sending PAUSED (Boss's instruction 2026-11-14) — the draft is the final
+    word, not even an attempt to send is made.
+  - Workers run on BrainFactory's brain — if the "brain" flag in config.json is
+    "mock" (DEFAULT, $0), the vendored MockLLMProvider,
+    if "live", the vendored MetaSparkProvider. Results are labelled DRAFT / MOCK.
+    A live brain only with Boss's separate approval, not here;
+    Phase 6 makes no live call (see 00-CEO-Core/brain.py).
+  - RetellBuilder: the real name of the engine's DEL worker. But
+    Talvenor's live stack is Vapi/Sophia (Boss will not pay money for Retell)
+    — so RetellBuilder's output is only a DRAFT build plan,
+    never a live build.
+  - Phase 2 wiring (2026-11-19): DEPARTMENT_ROUTING — the Chief now calls 8 department
+    managers (dept_sales / dept_marketing /
     dept_engineering / dept_operations / dept_strategy / dept_finance /
-    dept_quality / dept_innovation)। Manager-রা শুধু delegation plan-এর
-    DRAFT বানায়; কোনো worker execute করে না। Manager-এর task_kind
-    payload-এ থাকলে তা top-level-এ বসানো হয় (manager task.get
-    ("task_kind") পড়ে); না থাকলে M1–M4 overview দেয়, M5–M8
-    "unknown-task" ফেরত দেয় (known kind-গুলোর তালিকা সহ)।
+    dept_quality / dept_innovation). Managers only make a DRAFT of the delegation plan;
+    no worker is executed. The manager's task_kind,
+    if it is in the payload, is placed at top level (the manager reads task.get
+    ("task_kind")); if missing, M1–M4 give an overview, M5–M8
+    return "unknown-task" (with a list of known kinds).
 - Memory wiring (2026-11-21, MEMORY-STRUCTURE-DECISION-2026-11-21.md):
-    handle_task() প্রত্যেক task-এ memory পড়ে — context_for(
-    "chief_of_staff_agency") result-এ "memory" হিসেবে attach হয়
-    (shared Boss-কথা + নিজের box)। Chief memory-তে note লেখে না —
-    routing log tasks.json-এ থাকে; memory Boss-এর কথা + lesson-এর
-    জন্য। Boss-এর কথা শেখা / ভুলে যাওয়া Chief করে না — সেটা Main
-    CEO Bot-এর কাজ (record_owner_message /
-    request_forget_owner_entry)।
+    handle_task() reads memory on every task — context_for(
+    "chief_of_staff_agency") is attached to the result as "memory"
+    (shared Boss-words + its own box). The Chief writes no note to memory —
+    the routing log stays in tasks.json; memory is for Boss's words + lessons.
+    Learning / forgetting Boss's words is not the Chief's job — that is the Main
+    CEO Bot's job (record_owner_message /
+    request_forget_owner_entry).
 
 Routing table: TASK_TYPE -> (worker class, division, gate word)
 """
@@ -51,7 +51,7 @@ import sys
 import uuid
 from datetime import datetime, timezone
 
-# --- paths (VENDORED engine — এই office-এর ভেতরে, বাইরের checkout নয়) --
+# --- paths (VENDORED engine — inside this office, not an outside checkout) --
 MASTER_OS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CEO_CORE_DIR = os.path.join(MASTER_OS_DIR, "00-CEO-Core")
 ENGINE_WORKERS_DIR = os.path.join(
@@ -90,26 +90,26 @@ from src.workers.marketing import (  # noqa: E402
 
 DEPARTMENT = "agency"
 BUSINESS = "Talvenor AI Receptionist Agency"
-ENGINE_PATH = ENGINE_WORKERS_DIR  # vendored engine, এই office-এর ভেতরে
+ENGINE_PATH = ENGINE_WORKERS_DIR  # vendored engine, inside this office
 AGENCY_OFFICE_PATH = "~/workspace/talvenor-office/"
 BOOKING_LINK = "https://calendar.app.google/WLoxBfnLGTdjK3LB8"
 TALVENOR_PHONE = "+1 (947) 223-0244"
 DEMO_VIDEO = "https://facebook.com/reel/2947321012290705/"
 
 PIPELINE_STAGES = [
-    "research",    # ProspectResearcher — US home-service SMB খোঁজা
+    "research",    # ProspectResearcher — finding US home-service SMBs
     "draft",       # OutreachDrafter — cold email / IG DM draft (draft-only)
     "approve",     # Boss gate: send / ok
-    "send",        # Boss পাঠান (এখন PAUSED — DNS fix বাকি)
+    "send",        # Boss sends (now PAUSED — DNS fix pending)
     "reply",       # ReplyHandler — reply triage
     "book",        # 15-min call — BOOKING_LINK
-    "build",       # Vapi Sophia — receptionist বানানো (RetellBuilder = DRAFT plan only)
-    "launch",      # QA + onboarding, চালু
+    "build",       # Vapi Sophia — building the receptionist (RetellBuilder = DRAFT plan only)
+    "launch",      # QA + onboarding, launch
 ]
 
 # task type -> (worker class, division, gate word for the OUTPUT's onward use)
-# gate word = output পাঠাতে/ব্যবহার করতে Boss-এর যে শব্দ লাগবে।
-# None = draft নিজেই নিরাপদ, কোনো gate নেই।
+# gate word = the word from Boss needed to send/use the output.
+# None = the draft itself is safe, no gate.
 ROUTING = {
     "prospect_research": (ProspectResearcher, "ACQ", None),
     "outreach_draft": (OutreachDrafter, "ACQ", "send"),
@@ -137,7 +137,7 @@ SECTIONS_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "sections")
 
 # task type -> (agent module file, relative to sections/, class name, gate word)
-# Phase 7 NEW staff — ROUTING-এর ১৫টা অপরিবর্তিত; এই ৬টা শুধু যোগ করা।
+# Phase 7 NEW staff — ROUTING's 15 unchanged; only these 6 added.
 SECTION_ROUTING = {
     "client_intake": ("receive/agents/client_intake_receiver.py", "ClientIntakeReceiverAgent", "send"),
     "sales_close": ("sell/agents/sales_closer.py", "SalesCloserAgent", "ok"),
@@ -152,8 +152,8 @@ DEPARTMENTS_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "departments")
 
 # task type -> (manager module file, relative to departments/, class name, gate word)
-# Phase 2 wiring — ROUTING (১৫) ও SECTION_ROUTING (৬) অপরিবর্তিত; এই ৮টা শুধু যোগ করা।
-# Manager-রা delegation plan-এর DRAFT বানায়; কোনো worker execute করে না।
+# Phase 2 wiring — ROUTING (15) and SECTION_ROUTING (6) unchanged; only these 8 added.
+# Managers make a DRAFT of the delegation plan; no worker is executed.
 DEPARTMENT_ROUTING = {
     "dept_sales": ("01-sales-growth/manager/chief_growth_agent.py", "ChiefGrowthAgent", "ok"),
     "dept_marketing": ("02-marketing/manager/marketing_director_agent.py", "MarketingDirectorAgent", "ok"),
@@ -171,8 +171,8 @@ def _now_iso():
 
 
 def _log_task(record, tasks_path=None):
-    """প্রতিটা routed task store/tasks.json-এ append করে। অন্য
-    department-এর entry কখনো মুছে না — read-modify-write।"""
+    """Appends every routed task to store/tasks.json. Never deletes another
+    department's entry — read-modify-write."""
     path = tasks_path or DEFAULT_TASKS_PATH
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -188,13 +188,13 @@ def _log_task(record, tasks_path=None):
 
 
 def handle_task(task, tasks_path=None, approvals_path=None, memory_path=None):
-    """Main CEO Bot থেকে আসা একটা agency task চালানো + memory wiring।
+    """Run one agency task coming from the Main CEO Bot + memory wiring.
 
-    Memory: প্রত্যেক task-এ Chief নিজের box-এর context পড়ে
-    (context_for("chief_of_staff_agency") — shared Boss-কথা + নিজের
-    note) আর result-এ "memory" হিসেবে attach করে। Memory-তে কিছু
-    লেখা হয় না — routing log tasks.json-এ থাকে।
-    আসল কাজ _handle_task_inner()-এ — এই wrapper শুধু memory পড়া জোড়ে।
+    Memory: on every task the Chief reads its own box's context
+    (context_for("chief_of_staff_agency") — shared Boss-words + its own
+    note) and attaches it to the result as "memory". Nothing is written to memory —
+    the routing log stays in tasks.json.
+    The real work is in _handle_task_inner() — this wrapper only adds the memory read.
     """
     mem = (OwnerMemory(memory_path=memory_path)
            if memory_path else OwnerMemory())
@@ -206,36 +206,36 @@ def handle_task(task, tasks_path=None, approvals_path=None, memory_path=None):
 
 
 def _handle_task_inner(task, tasks_path=None, approvals_path=None):
-    """Main CEO Bot থেকে আসা একটা agency task চালানো।
+    """Run one agency task coming from the Main CEO Bot.
 
     task = {
       "type": "outreach_draft" | "prospect_research" | ... (ROUTING keys)
              | "client_intake" | ... (SECTION_ROUTING keys)
              | "dept_sales" | ... (DEPARTMENT_ROUTING keys),
       "title": "...",
-      "payload": {...},           # worker-কে দেওয়া input
+      "payload": {...},           # input given to the worker
       "gated_action": "send" | "publish" | "spend" | "delete" (optional),
-      "approval_id": "..." (optional — আগে নেওয়া approval),
+      "approval_id": "..." (optional — approval taken earlier),
       "requested_by": "Main CEO Bot" (optional),
     }
 
     Returns: {"status": "draft-ready" | "pending-approval" | "route-only" | "error", ...}
-    - gated_action থাকলে worker একদম চালানো হয় না — gateway-এ PENDING
-      approval request লেখা হয়, আর এখানেই থেমে যায়।
-    - worker চালালেও ফলাফল শুধু DRAFT — পাঠানো/পাবলিশ এই Chief করে না।
+    - If there is a gated_action, the worker is not run at all — a PENDING
+      approval request is written to the gateway, and it stops right here.
+    - Even when a worker runs, the result is only a DRAFT — this Chief does not send/publish.
     """
     title = task.get("title", "")
     task_type = task.get("type")
     requested_by = task.get("requested_by", "Main CEO Bot")
     gated_action = task.get("gated_action")
 
-    # 1. Gated action — worker চালানো যাবে না, approval-এ আটকাতে হবে।
+    # 1. Gated action — the worker must not run, it must be held at approval.
     if gated_action:
         gateway = ApprovalGateway(approvals_path=approvals_path) if approvals_path else ApprovalGateway()
         approval_id = task.get("approval_id")
         if approval_id and gateway.is_approved(approval_id):
-            # অনুমোদন থাকলেও এই Chief send/publish/spend/delete করে না —
-            # শুধু জানায় যে Boss অনুমোদন দিয়েছেন, কাজটা Boss নিজে করবেন।
+            # Even with approval, this Chief does not send/publish/spend/delete —
+            # it only reports that Boss has approved, and Boss himself will do the work.
             result = {
                 "status": "approved-not-executed",
                 "department": DEPARTMENT,
@@ -269,9 +269,9 @@ def _handle_task_inner(task, tasks_path=None, approvals_path=None):
         }, tasks_path=tasks_path)
         return result
 
-    # 1b. Phase 7 section agents — ROUTING-এর পাশাপাশি, gated block-এর পরে।
-    # Gated action থাকলে উপরের block-ই ফিরেছে, তাই এখানে task-এ
-    # gated_action নেই — agent শুধু DRAFT বানায়।
+    # 1b. Phase 7 section agents — alongside ROUTING, after the gated block.
+    # If a gated action was present the block above already returned, so here the task
+    # No gated_action — the agent only makes a DRAFT.
     if task_type in SECTION_ROUTING:
         module_file, class_name, gate_word = SECTION_ROUTING[task_type]
         agent_path = os.path.join(SECTIONS_DIR, module_file)
@@ -302,9 +302,9 @@ def _handle_task_inner(task, tasks_path=None, approvals_path=None):
         else:
             note = "DRAFT ONLY — mock brain ($0). "
             if gate_word:
-                note += f"Output পাঠাতে/ব্যবহার করতে Boss-এর gate word লাগবে: '{gate_word}'."
+                note += f"Boss's gate word is needed to send/use the output: '{gate_word}'."
             else:
-                note += "এই draft-এ কোনো gate নেই।"
+                note += "This draft has no gate."
             result = {
                 "status": "draft-ready",
                 "department": DEPARTMENT,
@@ -331,11 +331,11 @@ def _handle_task_inner(task, tasks_path=None, approvals_path=None):
         }, tasks_path=tasks_path)
         return result
 
-    # 1c. Phase 2 department managers — SECTION_ROUTING-এর মতোই, gated block-এর পরে।
-    # Gated action থাকলে উপরের block-ই ফিরেছে, তাই এখানে task-এ
-    # gated_action নেই — manager শুধু delegation plan-এর DRAFT বানায়।
-    # run_office.py input-এর payload-এ task_kind থাকলে তা manager-এর
-    # top-level task_kind-এ বসানো হয় (manager task.get("task_kind") পড়ে)।
+    # 1c. Phase 2 department managers — like SECTION_ROUTING, after the gated block.
+    # If a gated action was present the block above already returned, so here the task
+    # No gated_action — the manager only makes a DRAFT of the delegation plan.
+    # If the run_office.py input's payload has a task_kind, it is put into the manager's
+    # top-level task_kind (the manager reads task.get("task_kind")).
     if task_type in DEPARTMENT_ROUTING:
         module_file, class_name, gate_word = DEPARTMENT_ROUTING[task_type]
         manager_path = os.path.join(DEPARTMENTS_DIR, module_file)
@@ -386,9 +386,9 @@ def _handle_task_inner(task, tasks_path=None, approvals_path=None):
         else:
             note = "DRAFT ONLY — mock brain ($0). "
             if gate_word:
-                note += f"Output পাঠাতে/ব্যবহার করতে Boss-এর gate word লাগবে: '{gate_word}'."
+                note += f"Boss's gate word is needed to send/use the output: '{gate_word}'."
             else:
-                note += "এই draft-এ কোনো gate নেই।"
+                note += "This draft has no gate."
             result = {
                 "status": "draft-ready",
                 "department": DEPARTMENT,
@@ -415,7 +415,7 @@ def _handle_task_inner(task, tasks_path=None, approvals_path=None):
         }, tasks_path=tasks_path)
         return result
 
-    # 2. Type ছাড়া task — শুধু routing probe, worker চলে না।
+    # 2. Task without a type — only a routing probe, no worker runs.
     if not task_type:
         result = {
             "status": "route-only",
@@ -436,7 +436,7 @@ def _handle_task_inner(task, tasks_path=None, approvals_path=None):
         }, tasks_path=tasks_path)
         return result
 
-    # 3. অচেনা type — ভুল স্বীকার করে থামা, বানানো worker নয়।
+    # 3. Unknown type — admit the mistake and stop, no invented worker.
     if task_type not in ROUTING:
         result = {
             "status": "error",
@@ -456,7 +456,7 @@ def _handle_task_inner(task, tasks_path=None, approvals_path=None):
         }, tasks_path=tasks_path)
         return result
 
-    # 4. আসল routing — vendored worker, BrainFactory-র brain ($0 mock default)।
+    # 4. Real routing — vendored worker, BrainFactory's brain ($0 mock default).
     worker_cls, division, gate_word = ROUTING[task_type]
     llm = BrainFactory.get_brain("agency")
     worker = worker_cls(
@@ -478,11 +478,11 @@ def _handle_task_inner(task, tasks_path=None, approvals_path=None):
 
     note = "DRAFT ONLY — mock brain ($0). "
     if gate_word:
-        note += f"Output পাঠাতে/ব্যবহার করতে Boss-এর gate word লাগবে: '{gate_word}'."
+        note += f"Boss's gate word is needed to send/use the output: '{gate_word}'."
     else:
-        note += "এই draft-এ কোনো gate নেই।"
+        note += "This draft has no gate."
     if worker_cls is RetellBuilder:
-        note += " (RetellBuilder = DRAFT build plan only — live stack Vapi/Sophia, Boss Retell-এর জন্য টাকা দেবেন না।)"
+        note += " (RetellBuilder = DRAFT build plan only — live stack Vapi/Sophia, Boss will not pay money for Retell.)"
 
     result = {
         "status": "draft-ready",
@@ -495,7 +495,7 @@ def _handle_task_inner(task, tasks_path=None, approvals_path=None):
         "worker_status": worker_result.status,
         "output": worker_result.output,
         "notes": worker_result.notes,
-        "mock_revenue_usd": worker_result.mock_revenue_usd,  # MOCK ledger only — real money নয়
+        "mock_revenue_usd": worker_result.mock_revenue_usd,  # MOCK ledger only — not real money
         "mock_brain": True,
         "draft_only": True,
         "gate": gate_word,

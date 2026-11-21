@@ -1,18 +1,18 @@
-"""Chief Growth Agent — Sales & Growth department-এর manager (Phase 1).
+"""Chief Growth Agent — manager of the Sales & Growth department (Phase 1).
 
-ভূমিকা (role): Sales & Growth department-এর ১৩ জন existing specialist-কে
-delegate করা — prospect research, outreach draft, reply triage, negotiation
+Role: delegate to the 13 existing specialists of the Sales & Growth department —
+prospect research, outreach draft, reply triage, negotiation
 prep, objection sim, sales close, follow-up draft, schedule help, maps
-prospect find, business verify, lead score, CRM manage, sales intelligence। এই manager
-delegation plan-এর DRAFT বানায় + Phase 3 specialist-দের importlib দিয়ে load করে চালায় (DRAFT only); engine/section-এর পুরনো worker execute করে না।
-Gate: ok — delegation plan-এ Boss-এর "ok" লাগে; send/publish/spend/delete
-কোনো gated action এই manager নিজে করে না।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
-Agency Chief wiring Phase 2 DONE — Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে call করে।
-এই manager কখনো করে না: engine/section-এর পুরনো worker execute করে না, কিছু পাঠায় না,
-প্রকাশ করে না, খরচ করে না, মুছে না, client-এর তথ্য/দাম/পরিসংখ্যান
-বানায় না, কোনো guarantee দেয় না, dental/medical বা patient-health
-ব্যবসা নেয় না।
+prospect find, business verify, lead score, CRM manage, sales intelligence. This manager
+makes a DRAFT of the delegation plan + loads and runs the Phase 3 specialists with importlib (DRAFT only); does not execute the engine/section's old workers.
+Gate: ok — the delegation plan needs Boss's "ok"; send/publish/spend/delete
+This manager itself performs no gated action.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
+Agency Chief wiring Phase 2 DONE — the Chief now calls this manager via DEPARTMENT_ROUTING.
+This manager never: executes the engine/section's old workers, sends anything,
+publishes anything, spends anything, deletes anything, invents client facts/prices/statistics,
+gives any guarantee, takes dental/medical or patient-health
+businesses.
 """
 
 import importlib.util
@@ -113,7 +113,7 @@ DEPARTMENT_TASKS = {
 
 
 class ChiefGrowthAgent:
-    """Sales & Growth specialist-দের delegation plan DRAFT বানায় + Phase 3 specialist-দের load করে চালায় (DRAFT only)।"""
+    """Makes a DRAFT of the delegation plan for Sales & Growth specialists + loads and runs the Phase 3 specialists (DRAFT only)."""
 
     task_kind = "manage_sales_growth"
     gate = "ok"
@@ -121,7 +121,7 @@ class ChiefGrowthAgent:
     role = "Chief Growth Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -133,7 +133,7 @@ class ChiefGrowthAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -161,14 +161,14 @@ class ChiefGrowthAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Delegation plan DRAFT বানানো + Phase 3 specialist load+run (DRAFT only)। কোনো file লেখে না, network ছোঁয় না।"""
+        """Build a delegation plan DRAFT + Phase 3 specialist load+run (DRAFT only). Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Manage Sales & Growth"
         gated_action = task.get("gated_action")
         approval_id = task.get("approval_id")
 
-        # Gated action থাকলে আগে approval — অনুমোদন ছাড়া draft-ও নয়,
-        # PENDING record করে থামা।
+        # If there is a gated action, approval first — no draft without approval,
+        # record PENDING and stop.
         if gated_action:
             gw = gateway if gateway is not None else self._gateway(approvals_path)
             approved = False
@@ -212,15 +212,15 @@ class ChiefGrowthAgent:
                 )
             lines.append(
                 "Note: FollowUpAgent follow-ups PARKED — Pennsylvania 37 first "
-                "mails; 100-mail rule অনুযায়ী কোনো state-এ 100 first mail না "
-                "হলে follow-up নয়। Email PAUSED since 2026-11-14."
+                "mails; under the 100-mail rule, no follow-up in any state until 100 first mails "
+                "have been sent. Email PAUSED since 2026-11-14."
             )
             lines.append(f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}")
             lines.append(f"Brain note: {brain_text}")
             notes = (
-                "DRAFT ONLY — mock brain ($0). Overview delegation plan, কোনো "
-                "worker execute নয়। Agency Chief wiring Phase 2 DONE — Chief এখন "
-                "এই manager-কে DEPARTMENT_ROUTING দিয়ে call করে।"
+                "DRAFT ONLY — mock brain ($0). Overview delegation plan, no "
+                "not a worker execution. Agency Chief wiring Phase 2 DONE — the Chief now "
+                "calls this manager via DEPARTMENT_ROUTING."
             )
             return {
                 "status": "draft-ready",
@@ -235,13 +235,13 @@ class ChiefGrowthAgent:
         if entry is None:
             output = (
                 "[MOCK DRAFT] Sales & Growth — unknown task (DRAFT ONLY)\n"
-                f"Requested task_kind '{task_kind}' এই department-এ নেই।\n"
+                f"Requested task_kind '{task_kind}' is not in this department.\n"
                 "Known task kinds: " + ", ".join(known_kinds) + ".\n"
-                "কোনো worker execute হয়নি; সঠিক task_kind দিয়ে আবার চাইতে হবে।"
+                "No worker executed; ask again with the correct task_kind."
             )
             notes = (
-                "Unknown task — delegation plan বানানো হয়নি। এই department-এর "
-                "task kind-গুলো উপরে তালিকায় আছে।"
+                "Unknown task — no delegation plan was made. This department's "
+                "task kinds are listed above."
             )
             return {
                 "status": "unknown-task",
@@ -253,9 +253,9 @@ class ChiefGrowthAgent:
             }
 
         # Phase 3 — standalone specialist (departments/01-sales-growth/specialists/)
-        # থাকলে তাকে importlib দিয়ে load করে run করা (Chief-এর loader-এর মতো);
-        # plan-draft নয়, specialist-এর নিজের draft-ই ফেরত। 8 engine/section
-        # worker-এর plan-draft behavior অপরিবর্তিত।
+        # If present, load it with importlib and run it (like the Chief's loader);
+        # not a plan-draft, the specialist's own draft is returned. The 8 engine/section
+        # workers' plan-draft behaviour is unchanged.
         spec_file = entry.get("file") or ""
         spec_class = entry.get("class")
         if spec_class and spec_file.startswith("departments/01-sales-growth/specialists/"):
@@ -278,32 +278,32 @@ class ChiefGrowthAgent:
             f"Specialist: {entry['specialist']} | File/skill: {entry['file']}\n"
             f"Gate needed: {entry['gate'] or 'none'} | Status: {entry['status']}\n"
             "Plan (DRAFT):\n"
-            f"1. {entry['specialist']}-কে task দেওয়া হবে — manager নিজে কাজটি করে না।\n"
-            "2. Specialist-এর output DRAFT হিসেবে Boss-কে দেখানো হবে।\n"
+            f"1. {entry['specialist']} will be given the task — the manager does not do the work itself.\n"
+            "2. The specialist's output will be shown to Boss as a DRAFT.\n"
         )
         if entry["gate"]:
             output += (
-                f"3. Gate '{entry['gate']}' — Boss-এর exact word ছাড়া কিছু "
-                "পাঠানো/প্রকাশ/খরচ করা যাবে না।\n"
+                f"3. Gate '{entry['gate']}' — nothing without Boss's exact word "
+                "must not be sent/published/spent.\n"
             )
         if task_kind == "followup_draft":
             output += (
                 "4. Follow-up PARKED — 100-mail rule: Pennsylvania 37 first "
-                "mails; কোনো state-এ 100 first mail না হলে follow-up নয়।\n"
+                "mails; no follow-up in any state until 100 first mails.\n"
             )
         if entry["status"] == "ROLE-ONLY":
             output += (
-                "4. ROLE-ONLY — এই role-এর কোনো worker code নেই; skill doc "
-                "অনুযায়ী Boss/Elora হাতে কাজটি করবেন।\n"
+                "4. ROLE-ONLY — this role has no worker code; the skill doc "
+                "says Boss/Elora will do the work by hand.\n"
             )
         output += (
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Delegation plan মাত্র; worker "
-            "execute হয়নি, কিছু পাঠানো হয়নি। Agency Chief wiring Phase 2 DONE — "
-            "Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে call করে।"
+            "DRAFT ONLY — mock brain ($0). Delegation plan only; the worker "
+            "was not executed, nothing was sent. Agency Chief wiring Phase 2 DONE — "
+            "The Chief now calls this manager via DEPARTMENT_ROUTING."
         )
         return {
             "status": "draft-ready",

@@ -1,19 +1,19 @@
 # 01 — Sales & Growth Department
 
-## উদ্দেশ্য (Purpose)
+## Purpose
 
-Talvenor-এর client hunting-এর পুরো sales পথ এক জায়গায় রাখা: prospect খোঁজা,
-research করা, outreach draft করা, reply triage করা, negotiation-এর প্রস্তুতি,
-objection practice, close-এর plan, follow-up draft, আর call schedule-এ সাহায্য।
-এই department শুধু plan আর DRAFT বানায় — কিছু পাঠায় না, কিছু বিক্রি করে না।
+Talvenor's whole client-hunting sales path in one place: finding prospects,
+doing research, drafting outreach, triaging replies, preparing negotiation,
+objection practice, close plans, follow-up drafts, and help with call scheduling.
+This department only makes plans and DRAFTs — it sends nothing, sells nothing.
 
 ## Manager
 
 - **Chief Growth Agent** — `ChiefGrowthAgent`, task_kind `manage_sales_growth`, gate `ok`
 - Manager file: `01-Agency-Department/departments/01-sales-growth/manager/chief_growth_agent.py`
 - Skill file: `01-Agency-Department/departments/01-sales-growth/skills/chief-growth-agent.md`
-- Manager delegation plan-এর DRAFT বানায় + Phase 3 specialist-দের load করে চালায় (DRAFT only); engine/section-এর পুরনো worker execute করে না।
-- Agency Chief wiring **Phase 2 DONE** — Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে call করে।
+- Manager makes a DRAFT of the delegation plan + loads and runs the Phase 3 specialists (DRAFT only); does not execute the engine/section's old workers.
+- Agency Chief wiring **Phase 2 DONE** — the Chief now calls this manager via DEPARTMENT_ROUTING.
 
 ## Mapped Existing Staff (13)
 
@@ -33,9 +33,9 @@ objection practice, close-এর plan, follow-up draft, আর call schedule-এ
 | CRMManagerAgent | `crm_manage` | `01-Agency-Department/departments/01-sales-growth/specialists/crm_manager_agent.py` | none | EXISTING (Phase 3) |
 | SalesIntelligenceAgent | `sales_intelligence` | `01-Agency-Department/departments/01-sales-growth/specialists/sales_intelligence_agent.py` | none | EXISTING (Phase 3) |
 
-Note: ObjectionSimulator-এর file `marketing.py` — acquisition worker নয়, marketing
-worker file-এ থাকে। FollowUpAgent-এর 100-mail rule: Pennsylvania-তে 37 first mail
-হয়েছে, তাই follow-up **PARKED** — কোনো state-এ 100 first mail না হলে follow-up নয়।
+Note: ObjectionSimulator's file is `marketing.py` — not an acquisition worker, it is in the marketing
+worker file. FollowUpAgent's 100-mail rule: 37 first mails in Pennsylvania,
+so follow-up is **PARKED** — no follow-up in any state until 100 first mails.
 
 ## Brief Roles → Mapping
 
@@ -45,29 +45,29 @@ worker file-এ থাকে। FollowUpAgent-এর 100-mail rule: Pennsylvania
 | Google Maps Prospect Finder | EXISTING — GoogleMapsProspectFinder | `maps_prospect_find`, gate none — Phase 3, `departments/01-sales-growth/specialists/google_maps_prospect_finder.py` |
 | Business Verification Agent | EXISTING — BusinessVerificationAgent | `business_verify`, gate none — Phase 3, `departments/01-sales-growth/specialists/business_verification_agent.py` |
 | Lead Scoring Agent | EXISTING — LeadScoringAgent | `lead_score`, gate none — Phase 3, `departments/01-sales-growth/specialists/lead_scoring_agent.py` |
-| Email Outreach Agent | EXISTING — OutreachDrafter | `outreach_draft`, gate send — DRAFT only, Boss পাঠান |
-| Follow-up Agent | EXISTING — FollowUpAgent | `followup_draft`, gate send — 100-mail rule-এ PARKED |
-| CRM Manager Agent | EXISTING — CRMManagerAgent | `crm_manage`, gate none — Phase 3, `departments/01-sales-growth/specialists/crm_manager_agent.py`; CRM (n8n Cloud Data Tables) planned, not live — plan DRAFT মাত্র |
+| Email Outreach Agent | EXISTING — OutreachDrafter | `outreach_draft`, gate send — DRAFT only, Boss sends |
+| Follow-up Agent | EXISTING — FollowUpAgent | `followup_draft`, gate send — PARKED under the 100-mail rule |
+| CRM Manager Agent | EXISTING — CRMManagerAgent | `crm_manage`, gate none — Phase 3, `departments/01-sales-growth/specialists/crm_manager_agent.py`; CRM (n8n Cloud Data Tables) planned, not live — plan DRAFT only |
 | Sales Intelligence Agent | EXISTING — SalesIntelligenceAgent | `sales_intelligence`, gate none — Phase 3, `departments/01-sales-growth/specialists/sales_intelligence_agent.py` |
 
 ## Missing Roles
 
-- এই department-এ কোনো GAP role নেই — brief-এর ৮টি role-ই EXISTING হিসেবে covered।
-- Phase 3-এ ৫টি নতুন specialist বানানো হয়েছে (Google Maps Prospect Finder,
+- This department has no GAP role — all 8 roles in the brief are covered as EXISTING.
+- In Phase 3, 5 new specialists were built (Google Maps Prospect Finder,
   Business Verification Agent, Lead Scoring Agent, CRM Manager Agent,
-  Sales Intelligence Agent) — কোনো ROLE-ONLY role আর বাকি নেই।
+  Sales Intelligence Agent) — no ROLE-ONLY role is left.
 
 ## Honest Status
 
-- **Paying clients: 0** — এখনো কোনো paying client নেই।
-- **Email PAUSED since 2026-11-14** — SPF/DMARC fix না হওয়া পর্যন্ত কোনো email যায় না;
-  first mails 162-এ থেমে আছে।
-- **Follow-ups PARKED** — 100-mail rule; Pennsylvania 37 first mails।
-- **Brain: mock ($0)** — live MetaSpark UNPROVEN; সব output DRAFT।
-- **DB: JSON store files** (`store/tasks.json`, `store/approvals.json`) — এটাই DB, অন্য কোনো database নয়।
-- **CRM: n8n Cloud Data Tables PLANNED, not live।**
-- **$0 spend cap** — কিছু খরচ করা হয় না।
-- **Agency Chief wiring Phase 2 DONE** — Chief এখন DEPARTMENT_ROUTING দিয়ে এই department-এর manager-কে call করে।
-- **Pricing LOCKED, internal only** — prospect-কে কখনো দাম বলা হয় না।
-- **No dental/medical ever** — dental/medical বা patient-health ব্যবসা target নয়।
-- Brand **Talvenor only**। কোনো invented client, price, statistic, testimonial, guarantee নেই।
+- **Paying clients: 0** — there is still no paying client.
+- **Email PAUSED since 2026-11-14** — no email goes out until the SPF/DMARC fix;
+  first mails are stuck at 162.
+- **Follow-ups PARKED** — 100-mail rule; Pennsylvania 37 first mails.
+- **Brain: mock ($0)** — live MetaSpark UNPROVEN; all output is DRAFT.
+- **DB: JSON store files** (`store/tasks.json`, `store/approvals.json`) — this is the DB, no other database.
+- **CRM: n8n Cloud Data Tables PLANNED, not live.**
+- **$0 spend cap** — nothing is spent.
+- **Agency Chief wiring Phase 2 DONE** — the Chief now calls this department's manager via DEPARTMENT_ROUTING.
+- **Pricing LOCKED, internal only** — prices are never stated to a prospect.
+- **No dental/medical ever** — dental/medical or patient-health businesses are not a target.
+- Brand **Talvenor only**. No invented client, price, statistic, testimonial, or guarantee.
