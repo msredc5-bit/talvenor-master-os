@@ -1,29 +1,29 @@
-# Product Section — Vet Kit বানানো + QA
+# Product Section — Building the Vet Kit + QA
 
-**Purpose (উদ্দেশ্য):** Vet No-Show Recovery Kit-এর blueprint থেকে build order দেওয়া আর ৬ অংশের QA checklist DRAFT লেখা — kit নিজে বানানো নয় (Gate 0 পাসের আগে বানানো যাবে না)।
+**Purpose:** Give the build order from the Vet No-Show Recovery Kit's blueprint and write a QA checklist DRAFT for the 6 parts — not building the kit itself (it cannot be built before Gate 0 passes).
 
-## Staff roster (কর্মী তালিকা)
+## Staff roster
 
 | Staff | Agent file | Skill file | Gate | Status |
 |---|---|---|---|---|
-| Kit Builder | `agents/kit_builder.py` (`KitBuilderAgent`, task `kit_build`) | `skills/kit-builder.md` | `ok` | Existing role — section agent হিসেবে নতুন file |
+| Kit Builder | `agents/kit_builder.py` (`KitBuilderAgent`, task `kit_build`) | `skills/kit-builder.md` | `ok` | Existing role — new file as a section agent |
 | Kit QA | `agents/kit_qa.py` (`KitQAAgent`, task `kit_qa`) | `skills/kit-qa.md` | `ok` | **NEW** role (Phase 7) |
 
-## How work flows (কাজের ধারা)
+## How work flows
 
-1. Main CEO Bot → Products Chief (`chief_of_staff_products.py`) → task type দেখে routing।
-2. `kit_build` — Chief-এর existing ROUTING branch (blueprint ফেরত দেয়); section agent `KitBuilderAgent` একই blueprint সারাংশ + build order দেয়, Gate 0 NOT PASSED হলে status `blocked-gate0`।
-3. `kit_qa` — Chief-এর `SECTION_ROUTING` branch (Phase 7, নতুন) → `KitQAAgent` → "NOT BUILT — nothing to QA yet" + per-part QA checklist DRAFT।
-4. Gated কাজ (`send` / `publish` / `spend` / `delete`) হলে agent চালানো হয় না — ApprovalGateway-এ PENDING request লেখা হয়।
+1. Main CEO Bot → Products Chief (`chief_of_staff_products.py`) → routing by task type.
+2. `kit_build` — the Chief's existing ROUTING branch (returns the blueprint); section agent `KitBuilderAgent` gives the same blueprint summary + build order, and if Gate 0 is NOT PASSED, status is `blocked-gate0`.
+3. `kit_qa` — the Chief's `SECTION_ROUTING` branch (Phase 7, new) → `KitQAAgent` → "NOT BUILT — nothing to QA yet" + per-part QA checklist DRAFT.
+4. For gated work (`send` / `publish` / `spend` / `delete`), the agent is not run — a PENDING request is written to the ApprovalGateway.
 
-## Gates (গেট)
+## Gates
 
-- Build শুরু করতে / output ব্যবহার করতে Boss-এর `ok` লাগে।
-- Gate 0 পাস না হওয়া পর্যন্ত kit-এর কোনো অংশ বানানো যাবে না।
+- Boss's `ok` is needed to start building / use the output.
+- No part of the kit can be built until Gate 0 passes.
 
-## Honest limits (সৎ সীমা)
+## Honest limits
 
-- **Gate 0 NOT PASSED** — Lemon Squeezy signup test Boss-এর step, এখনো বাকি।
-- **Kit 0/6 built** — শুধু blueprint (`kit-outline.md`) আছে; QA করার মতো কিছু নেই।
-- **PA list 39/100, sale 0**, email **PAUSED** (2026-11-14 থেকে)।
-- কোনো agent file লেখে না, network ছোঁয় না, sale/launch চিহ্নিত করে না।
+- **Gate 0 NOT PASSED** — the Lemon Squeezy signup test is Boss's step, still pending.
+- **Kit 0/6 built** — only the blueprint (`kit-outline.md`) exists; there is nothing to QA.
+- **PA list 39/100, sale 0**, email **PAUSED** (since 2026-11-14).
+- No agent writes a file, touches the network, or marks anything as sold/launched.

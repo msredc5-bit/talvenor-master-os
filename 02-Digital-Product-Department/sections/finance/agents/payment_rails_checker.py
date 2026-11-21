@@ -1,16 +1,16 @@
-"""Payment-Rails Checker — Gate 0 test steps + Boss-এর ফলাফল record (section agent)।
+"""Payment-Rails Checker — Gate 0 test steps + record of Boss's result (section agent).
 
-Role (ভূমিকা): Gate 0 test-এর ধাপগুলো লেখা আর Boss-এর ফলাফল record করা —
-Lemon Squeezy signup (BD individual হিসেবে), ফেল হলে fallback order:
-Polar → Gumroad (individual হিসেবে, LLC নয়)।
-Gate (গেট): কোনো gate নেই — এটা শুধু যাচাই + record।
-Gate 0 status (গেট ০ অবস্থা): **NOT PASSED** — এই role-ই Gate 0 দেখে,
-কিন্তু নিজে কখনো "PASSED" লেখে না। Boss-এর ফলাফল শুধু Boss জানালে record
-হয় (verbatim quote হিসেবে); gate0-status.md-এর Status লাইন এই agent
-বদলায় না — কোনো file-ই লেখে না।
-যা কখনো করে না: নিজে Lemon Squeezy / Polar / Gumroad-এ signup করে না;
-নিজে থেকে Gate 0 PASSED বলে না; Etsy কখনো plan-এ আনে না (Bangladesh-এর
-জন্য বন্ধ — hard no); কোনো file লেখে না; network ছোঁয় না।
+Role: write the Gate 0 test steps and record Boss's result —
+Lemon Squeezy signup (as a BD individual), and if it fails, the fallback order:
+Polar → Gumroad (as an individual, not an LLC).
+Gate: no gate — this is only checking + recording.
+Gate 0 status: **NOT PASSED** — this role watches Gate 0,
+but never writes "PASSED" itself. Boss's result is recorded only when Boss
+reports it (as a verbatim quote); this agent does not change the Status line
+of gate0-status.md — it writes no file at all.
+Never does this: signs up on Lemon Squeezy / Polar / Gumroad itself;
+says Gate 0 PASSED on its own; brings Etsy into the plan (closed for
+Bangladesh — hard no); writes any file; touches the network.
 """
 
 import os
@@ -21,24 +21,24 @@ PHONE = "+1 (947) 223-0244"
 GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 GATE0_STEPS = [
-    "1. lemonsqueezy.com-এ যান — Individual হিসেবে signup করুন (MAINUDDIN LLC নয় — LLC US-registered, US bank নেই বলে individual-ই সঠিক পথ)।",
-    "2. Payout method দেখুন — BD bank payout দেখা যায় কি না।",
-    "3. ফলাফল Boss-কে জানান: পাস / ফেল / কী বলল (screenshot দিলে ভালো হয়)। Boss-এর step, ~15 min, $0।",
-    "4. Lemon Squeezy ফেল (triage/blocked) হলে backup rail test — Polar (BD seller/payout list-এ আছে, Stripe Connect Express)।",
-    "5. Polar-ও না হলে Gumroad — BD bank payout আছে, individual হিসেবে register করতে হবে (LLC নয়)।",
-    "6. সব rail বন্ধ হলে product track পুরো KILL — kit বানানো হবে না, Boss-কে জানানো হবে।",
+    "1. Go to lemonsqueezy.com — sign up as an individual (not MAINUDDIN LLC — the LLC is US-registered with no US bank, so individual is the right path).",
+    "2. Look at the payout method — check whether BD bank payout is available.",
+    "3. Tell Boss the result: pass / fail / what it said (a screenshot helps). Boss's step, ~15 min, $0.",
+    "4. If Lemon Squeezy fails (triage/blocked), test the backup rail — Polar (BD is on the seller/payout list, Stripe Connect Express).",
+    "5. If Polar also fails, Gumroad — BD bank payout exists, must register as an individual (not an LLC).",
+    "6. If all rails are closed, the product track is fully KILLed — the kit will not be built, Boss will be told.",
 ]
 
 RAIL_FEES = [
-    "Lemon Squeezy: 5% + $0.50, $50 min payout (research report §2, 2026-11-12)।",
-    "Polar: 5% + $0.50।",
-    "Gumroad: ~12.9% + $0.80 effective, $100 min payout।",
-    "Etsy: hard no — Bangladesh-এর জন্য বন্ধ, কখনো plan-এ নেই।",
+    "Lemon Squeezy: 5% + $0.50, $50 min payout (research report §2, 2026-11-12).",
+    "Polar: 5% + $0.50.",
+    "Gumroad: ~12.9% + $0.80 effective, $100 min payout.",
+    "Etsy: hard no — closed for Bangladesh, never in the plan.",
 ]
 
 
 def _dept_dir():
-    """kit-outline.md খুঁজে department dir বের করা (read-only source)।"""
+    """Finds the department dir by locating kit-outline.md (read-only source)."""
     here = os.path.dirname(os.path.abspath(__file__))
     node = here
     for _ in range(6):
@@ -57,26 +57,26 @@ def _read_dept_file(name):
 
 
 def _gate0_status():
-    """gate0-status.md-এর Status লাইন পড়া — PASSED না লেখা থাকলে NOT PASSED (fail-closed)।"""
+    """Reads the Status line of gate0-status.md — NOT PASSED unless PASSED is written (fail-closed)."""
     text = _read_dept_file("gate0-status.md")
     if text is None:
         return {"status": "NOT PASSED",
-                "note": "gate0-status.md পড়া যায়নি — fail-closed: NOT PASSED ধরা হয়েছে।"}
+                "note": "gate0-status.md could not be read — fail-closed: treated as NOT PASSED."}
     for line in text.splitlines():
         stripped = line.strip().lstrip("*").strip()
         if stripped.startswith("Status:"):
             value = stripped[len("Status:"):].strip().lstrip("*").strip()
             if value.startswith("PASSED"):
                 return {"status": "PASSED",
-                        "note": "gate0-status.md-এ Status: PASSED লেখা আছে।"}
+                        "note": "gate0-status.md says Status: PASSED."}
             return {"status": "NOT PASSED",
-                    "note": "Gate 0 পাস হয়নি — Lemon Squeezy signup test Boss-এর step, এখনো বাকি।"}
+                    "note": "Gate 0 has not passed — the Lemon Squeezy signup test is Boss's step, still pending."}
     return {"status": "NOT PASSED",
-            "note": "gate0-status.md-এ Status লাইন পাওয়া যায়নি — fail-closed: NOT PASSED ধরা হয়েছে।"}
+            "note": "No Status line found in gate0-status.md — fail-closed: treated as NOT PASSED."}
 
 
 def _load_gateway(gateway, approvals_path):
-    """ApprovalGateway lazy import — শুধু gated কাজে দরকার হলে।"""
+    """ApprovalGateway lazy import — only when gated work needs it."""
     if gateway is not None:
         return gateway
     ceo_core = os.path.join(os.path.dirname(_dept_dir()), "00-CEO-Core")
@@ -89,8 +89,8 @@ def _load_gateway(gateway, approvals_path):
 
 
 def _draft_with_brain(brain, prompt, static_text):
-    """brain থাকলে brain.complete(prompt) ব্যবহার করে [MOCK DRAFT] লেখা;
-    না থাকলে static DRAFT text। কখনো live call / network নয় — brain mock।"""
+    """If a brain exists, uses brain.complete(prompt) to write a [MOCK DRAFT];
+    otherwise static DRAFT text. Never a live call / network — the brain is mock."""
     if brain is not None:
         try:
             mock_text = brain.complete(prompt)
@@ -102,8 +102,8 @@ def _draft_with_brain(brain, prompt, static_text):
 
 
 def _gated_check(agent, task, gateway, approvals_path):
-    """gated_action থাকলে PENDING ফেরত দেয়; approved হলে None (শুধু DRAFT-এ
-    এগোনো যাবে — agent কখনো gated action execute করে না)।"""
+    """If a gated_action is present, returns PENDING; if approved, None (only the
+    DRAFT can proceed — the agent never executes a gated action)."""
     gated_action = (task or {}).get("gated_action")
     if not gated_action:
         return None
@@ -126,7 +126,7 @@ def _gated_check(agent, task, gateway, approvals_path):
 
 
 class PaymentRailsCheckerAgent:
-    """Gate 0 test steps লেখে + Boss-এর ফলাফল record করে — signup করে না।"""
+    """Writes Gate 0 test steps + records Boss's result — does not sign up."""
 
     task_kind = "gate0_check"
     gate = None
@@ -141,10 +141,10 @@ class PaymentRailsCheckerAgent:
         payload = task.get("payload") or {}
         gate0 = _gate0_status()
         lines = [
-            "Gate 0 — Lemon Squeezy Signup Test (test steps + record)।",
-            "Current status (gate0-status.md থেকে পড়া): %s।" % gate0["status"],
+            "Gate 0 — Lemon Squeezy Signup Test (test steps + record).",
+            "Current status (read from gate0-status.md): %s." % gate0["status"],
             "",
-            "Test steps (Boss-এর step, ~15 min, $0 — এই agent নিজে signup করে না):",
+            "Test steps (Boss's step, ~15 min, $0 — this agent never signs up itself):",
         ]
         lines.extend("  " + step for step in GATE0_STEPS)
         lines.append("")
@@ -153,12 +153,12 @@ class PaymentRailsCheckerAgent:
         boss_result = (payload.get("boss_result") or "").strip()
         if boss_result:
             lines.append("")
-            lines.append("Boss-এর জানানো ফলাফল (record only — verbatim quote, এই agent-এর verdict নয়):")
+            lines.append("Result reported by Boss (record only — verbatim quote, not this agent's verdict):")
             lines.append("  \"%s\"" % boss_result)
-            lines.append("এই agent নিজে Gate 0 PASSED লেখে না। gate0-status.md-এর Status লাইন বদলানো Boss-এর কথায় manual step — এই agent কোনো file লেখে না।")
+            lines.append("This agent never writes Gate 0 PASSED itself. Changing the Status line of gate0-status.md is a manual step on Boss's word — this agent writes no file.")
         else:
             lines.append("")
-            lines.append("Boss-এর ফলাফল এখনো আসেনি — Boss test করে জানালে তবেই record হবে। এই agent নিজে থেকে PASSED/FAILED লেখে না।")
+            lines.append("Boss's result has not arrived yet — it will be recorded only when Boss tests and reports it. This agent never writes PASSED/FAILED on its own.")
         static_text = "\n".join(lines)
         output = _draft_with_brain(
             brain, "Gate 0 payment rails test steps draft", static_text)
@@ -166,5 +166,5 @@ class PaymentRailsCheckerAgent:
                 "section": self.section, "gate0": gate0,
                 "boss_result_recorded": bool(boss_result),
                 "output": output,
-                "notes": "Gate 0-র সত্য অবস্থা gate0-status.md থেকে পড়া। Boss-এর ফলাফল ছাড়া কোনো verdict নেই।",
+                "notes": "Gate 0's true status, read from gate0-status.md. No verdict without Boss's result.",
                 "draft_only": True, "mock_brain": True, "gate": self.gate}

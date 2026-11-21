@@ -1,14 +1,14 @@
-"""Kit Builder — Vet No-Show Recovery Kit-এর ৬ অংশের builder (section agent)।
+"""Kit Builder — builder of the Vet No-Show Recovery Kit's 6 parts (section agent).
 
-Role (ভূমিকা): kit-outline.md-এর blueprint (নকশা) পড়ে kit-এর ৬ অংশের
-সারাংশ + build order ফেরত দেওয়া।
-Gate (গেট): build শুরু করতে / output ব্যবহার করতে Boss-এর `ok` লাগে।
-Gate 0 status (গেট ০ অবস্থা): **NOT PASSED** — Lemon Squeezy signup test
-Boss-এর step, এখনো বাকি। তাই এই agent kit-এর কোনো অংশ বানায় না; শুধু
-blueprint-এর সারাংশ + build order দেয়, status `blocked-gate0`।
-যা কখনো করে না: kit-এর কোনো অংশ (Sheets/Docs) বানায় না, কোনো file লেখে
-না, sale/launch হিসেবে কিছু চিহ্নিত করে না, client/testimonial/statistic
-বানায় না, $49-এর verified sale আছে বলে দাবি করে না, network ছোঁয় না।
+Role: read the blueprint (design) in kit-outline.md and return a summary
+of the kit's 6 parts + the build order.
+Gate: Boss's `ok` is needed to start building / use the output.
+Gate 0 status: **NOT PASSED** — the Lemon Squeezy signup test is
+Boss's step, still pending. So this agent builds no part of the kit; it only
+gives the blueprint's summary + build order, status `blocked-gate0`.
+Never does this: builds any part of the kit (Sheets/Docs), writes any file,
+marks anything as sold/launched, invents a client/testimonial/statistic,
+claims a verified $49 sale exists, touches the network.
 """
 
 import os
@@ -24,15 +24,15 @@ GATED_ACTIONS = ("send", "publish", "spend", "delete")
 KIT_PARTS = [
     ("reminder-cadence-pack", "Reminder Cadence Pack — T-72h / T-24h / T-2h SMS + email + call script"),
     ("same-day-rebooking", "Same-Day Rebooking Scripts — phone + in-person script"),
-    ("waitlist-fill-sop", "Waitlist-Fill SOP — এক পাতার SOP + call script"),
-    ("no-show-log-tracker", "No-Show Log + $ Tracker — Sheets, formula সহ"),
-    ("deposit-policy-template", "Deposit / No-Show Policy Template — attorney-review note সহ"),
-    ("front-desk-quick-card", "Front-Desk Quick Card — ৫ লাইন, এক পাতা"),
+    ("waitlist-fill-sop", "Waitlist-Fill SOP — one-page SOP + call script"),
+    ("no-show-log-tracker", "No-Show Log + $ Tracker — Sheets, with formulas"),
+    ("deposit-policy-template", "Deposit / No-Show Policy Template — with attorney-review note"),
+    ("front-desk-quick-card", "Front-Desk Quick Card — 5 lines, one page"),
 ]
 
 
 def _dept_dir():
-    """kit-outline.md খুঁজে department dir বের করা (read-only source)।"""
+    """Finds the department dir by locating kit-outline.md (read-only source)."""
     here = os.path.dirname(os.path.abspath(__file__))
     node = here
     for _ in range(6):
@@ -51,26 +51,26 @@ def _read_dept_file(name):
 
 
 def _gate0_status():
-    """gate0-status.md-এর Status লাইন পড়া — PASSED না লেখা থাকলে NOT PASSED (fail-closed)।"""
+    """Reads the Status line of gate0-status.md — NOT PASSED unless PASSED is written (fail-closed)."""
     text = _read_dept_file("gate0-status.md")
     if text is None:
         return {"status": "NOT PASSED",
-                "note": "gate0-status.md পড়া যায়নি — fail-closed: NOT PASSED ধরা হয়েছে।"}
+                "note": "gate0-status.md could not be read — fail-closed: treated as NOT PASSED."}
     for line in text.splitlines():
         stripped = line.strip().lstrip("*").strip()
         if stripped.startswith("Status:"):
             value = stripped[len("Status:"):].strip().lstrip("*").strip()
             if value.startswith("PASSED"):
                 return {"status": "PASSED",
-                        "note": "gate0-status.md-এ Status: PASSED লেখা আছে।"}
+                        "note": "gate0-status.md says Status: PASSED."}
             return {"status": "NOT PASSED",
-                    "note": "Gate 0 পাস হয়নি — Lemon Squeezy signup test Boss-এর step, এখনো বাকি।"}
+                    "note": "Gate 0 has not passed — the Lemon Squeezy signup test is Boss's step, still pending."}
     return {"status": "NOT PASSED",
-            "note": "gate0-status.md-এ Status লাইন পাওয়া যায়নি — fail-closed: NOT PASSED ধরা হয়েছে।"}
+            "note": "No Status line found in gate0-status.md — fail-closed: treated as NOT PASSED."}
 
 
 def _load_gateway(gateway, approvals_path):
-    """ApprovalGateway lazy import — শুধু gated কাজে দরকার হলে।"""
+    """ApprovalGateway lazy import — only when gated work needs it."""
     if gateway is not None:
         return gateway
     ceo_core = os.path.join(os.path.dirname(_dept_dir()), "00-CEO-Core")
@@ -83,8 +83,8 @@ def _load_gateway(gateway, approvals_path):
 
 
 def _draft_with_brain(brain, prompt, static_text):
-    """brain থাকলে brain.complete(prompt) ব্যবহার করে [MOCK DRAFT] লেখা;
-    না থাকলে static DRAFT text। কখনো live call / network নয় — brain mock।"""
+    """If a brain exists, uses brain.complete(prompt) to write a [MOCK DRAFT];
+    otherwise static DRAFT text. Never a live call / network — the brain is mock."""
     if brain is not None:
         try:
             mock_text = brain.complete(prompt)
@@ -96,8 +96,8 @@ def _draft_with_brain(brain, prompt, static_text):
 
 
 def _gated_check(agent, task, gateway, approvals_path):
-    """gated_action থাকলে PENDING ফেরত দেয়; approved হলে None (শুধু DRAFT-এ
-    এগোনো যাবে — agent কখনো gated action execute করে না)।"""
+    """If a gated_action is present, returns PENDING; if approved, None (only the
+    DRAFT can proceed — the agent never executes a gated action)."""
     gated_action = (task or {}).get("gated_action")
     if not gated_action:
         return None
@@ -120,7 +120,7 @@ def _gated_check(agent, task, gateway, approvals_path):
 
 
 class KitBuilderAgent:
-    """Kit-এর blueprint সারাংশ + build order দেয় — kit নিজে বানায় না।"""
+    """Gives the kit's blueprint summary + build order — does not build the kit itself."""
 
     task_kind = "kit_build"
     gate = "ok"
@@ -139,32 +139,32 @@ class KitBuilderAgent:
             "  %d. %s — %s" % (i, slug, name)
             for i, (slug, name) in enumerate(KIT_PARTS, 1))
         build_order = (
-            "Build order (kit-outline.md — Gate 0-র পরে, ৩–৪ সপ্তাহ, দিনে ১ ঘণ্টা, $0):\n"
-            "  Week 0 — Gate 0: Lemon Squeezy signup test (Boss-এর step)\n"
-            "  Week 1 — Validate + list: cadence AAHA/PetDesk যাচাই (Gate 1); PA list 100-এ পূর্ণ করা\n"
-            "  Week 2 — Build: ৬ অংশ Sheets/Docs-এ বানানো; $ tracker formula sample-এ test; policy-তে attorney-review note\n"
+            "Build order (kit-outline.md — after Gate 0, 3–4 weeks, 1 hour/day, $0):\n"
+            "  Week 0 — Gate 0: Lemon Squeezy signup test (Boss's step)\n"
+            "  Week 1 — Validate + list: check the cadence against AAHA/PetDesk (Gate 1); complete the PA list to 100\n"
+            "  Week 2 — Build: build the 6 parts in Sheets/Docs; test the $ tracker formula on a sample; attorney-review note in the policy\n"
             "  Week 3 — Store + sales page: Lemon Squeezy listing (primary) + Gumroad (backup); sales page (Boss review)\n"
-            "  Week 4 — Launch: দিনে ২৫ মেইল, 100 clinic-কে (৪ দিন); reply + sale sheet-এ লেখা")
+            "  Week 4 — Launch: 25 emails/day to 100 clinics (4 days); write replies + sales in a sheet")
         summary = (
-            "BLUEPRINT ONLY — Vet No-Show Recovery Kit ($49 one-time; প্রথম ৩০ buyer-এর জন্য launch price $39)।\n"
-            "Format: Google Sheets + Google Docs + copy-paste script। কোড নেই, app নেই, install করতে হয় না।\n"
-            "কার জন্য: independent companion-animal vet clinic, ১–৫ vet (corporate chain নয়, solo mobile vet নয়)।\n"
-            "Kit-এর ৬ অংশ (কোনোটা বানানো হয়নি — 0/6):\n" + parts_text + "\n" + build_order + "\n"
-            "Blueprint source: kit-outline.md (present: %s, chars: %d)।" % (
+            "BLUEPRINT ONLY — Vet No-Show Recovery Kit ($49 one-time; launch price $39 for the first 30 buyers).\n"
+            "Format: Google Sheets + Google Docs + copy-paste script. No code, no app, nothing to install.\n"
+            "For whom: independent companion-animal vet clinic, 1–5 vets (not a corporate chain, not a solo mobile vet).\n"
+            "The kit's 6 parts (none built — 0/6):\n" + parts_text + "\n" + build_order + "\n"
+            "Blueprint source: kit-outline.md (present: %s, chars: %d)." % (
                 blueprint is not None, len(blueprint) if blueprint else 0))
         if payload.get("mark_sold") or payload.get("mark_launched"):
             return {"status": "blocked-gate0", "task_kind": self.task_kind,
                     "section": self.section, "gate0": gate0, "output": summary,
-                    "notes": "Sale/launch দাবি Gate 0-তে আটকে আছে — কিছুই sold/launched হিসেবে লেখা হয়নি, sale এখনো 0।",
+                    "notes": "A sale/launch claim is blocked at Gate 0 — nothing was recorded as sold/launched, sales are still 0.",
                     "draft_only": True, "mock_brain": True, "gate": self.gate}
         if gate0["status"] != "PASSED":
             return {"status": "blocked-gate0", "task_kind": self.task_kind,
                     "section": self.section, "gate0": gate0, "output": summary,
-                    "notes": "Gate 0 NOT PASSED — kit-এর কোনো অংশ বানানো যাবে না। এটা blueprint-এর সারাংশ + build order, kit নিজে নয়।",
+                    "notes": "Gate 0 NOT PASSED — no part of the kit can be built. This is the blueprint's summary + build order, not the kit itself.",
                     "draft_only": True, "mock_brain": True, "gate": self.gate}
         output = _draft_with_brain(
             brain, "Vet No-Show Recovery Kit build order draft", summary)
         return {"status": "draft-ready", "task_kind": self.task_kind,
                 "section": self.section, "gate0": gate0, "output": output,
-                "notes": "Gate 0 পাস হয়েছে — build শুরু করতে Boss-এর 'ok' লাগবে। এই agent কোনো file বানায় না; build order plan দেয়।",
+                "notes": "Gate 0 has passed — starting the build needs Boss's 'ok'. This agent builds no file; it gives the build order plan.",
                 "draft_only": True, "mock_brain": True, "gate": self.gate}

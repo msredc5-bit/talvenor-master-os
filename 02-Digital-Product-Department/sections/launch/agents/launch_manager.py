@@ -1,15 +1,15 @@
-"""Launch Manager — Vet Kit launch checklist DRAFT (section agent)।
+"""Launch Manager — Vet Kit launch checklist DRAFT (section agent).
 
-Role (ভূমিকা): launch-এর checklist DRAFT বানানো — Gate 0, kit-এর ৬ অংশ,
-Gate 1 যাচাই, store listing, sales page, 100 clinic-কে মেইল, reply + sale
-sheet-এ লেখা।
-Gate (গেট): launch এগোতে Boss-এর `go` লাগে।
-Gate 0 status (গেট ০ অবস্থা): **NOT PASSED** — launch করা যাবে না। এই
-agent শুধু DRAFT checklist দেয়, status `blocked-gate0`; launch হিসেবে
-কিছু চিহ্নিত করে না, sale লেখে না।
-যা কখনো করে না: launch করে না; mark_launched / mark_sold মানে না; কোনো
-file লেখে না; মেইল পাঠায় না; client/testimonial/statistic বানায় না;
-network ছোঁয় না।
+Role: build the launch checklist DRAFT — Gate 0, the kit's 6 parts,
+Gate 1 check, store listing, sales page, emailing 100 clinics, writing
+replies + sales in a sheet.
+Gate: Boss's `go` is needed to move the launch forward.
+Gate 0 status: **NOT PASSED** — no launch can happen. This
+agent only gives a DRAFT checklist, status `blocked-gate0`; it marks
+nothing as launched, records no sale.
+Never does this: launches; honors mark_launched / mark_sold; writes any
+file; sends mail; invents a client/testimonial/statistic;
+touches the network.
 """
 
 import os
@@ -21,18 +21,18 @@ PHONE = "+1 (947) 223-0244"
 GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 LAUNCH_CHECKLIST = [
-    "Gate 0 পাস (Lemon Squeezy store খোলে কি না) — এখনো NOT PASSED",
-    "Kit-এর ৬ অংশ বানানো (Sheets + Docs + script) — এখনো হয়নি (0/6)",
-    "Cadence AAHA/PetDesk guidance-এর সাথে যাচাই (Gate 1) — এখনো হয়নি",
-    "Lemon Squeezy listing + Gumroad backup listing — এখনো হয়নি",
-    "Sales page — Boss review করবেন launch-এর আগে",
-    "100 clinic-কে ২৫টা করে মেইল (৪ দিন) — email channel এখন PAUSED (2026-11-14 থেকে)",
-    "প্রতিটা reply + sale sheet-এ লেখা — sale এখনো 0",
+    "Gate 0 passed (does the Lemon Squeezy store open?) — still NOT PASSED",
+    "The kit's 6 parts built (Sheets + Docs + script) — not done yet (0/6)",
+    "Cadence checked against AAHA/PetDesk guidance (Gate 1) — not done yet",
+    "Lemon Squeezy listing + Gumroad backup listing — not done yet",
+    "Sales page — Boss will review before launch",
+    "Email 100 clinics, 25 a day (4 days) — email channel is now PAUSED (since 2026-11-14)",
+    "Write every reply + sale in a sheet — sales are still 0",
 ]
 
 
 def _dept_dir():
-    """kit-outline.md খুঁজে department dir বের করা (read-only source)।"""
+    """Finds the department dir by locating kit-outline.md (read-only source)."""
     here = os.path.dirname(os.path.abspath(__file__))
     node = here
     for _ in range(6):
@@ -51,26 +51,26 @@ def _read_dept_file(name):
 
 
 def _gate0_status():
-    """gate0-status.md-এর Status লাইন পড়া — PASSED না লেখা থাকলে NOT PASSED (fail-closed)।"""
+    """Reads the Status line of gate0-status.md — NOT PASSED unless PASSED is written (fail-closed)."""
     text = _read_dept_file("gate0-status.md")
     if text is None:
         return {"status": "NOT PASSED",
-                "note": "gate0-status.md পড়া যায়নি — fail-closed: NOT PASSED ধরা হয়েছে।"}
+                "note": "gate0-status.md could not be read — fail-closed: treated as NOT PASSED."}
     for line in text.splitlines():
         stripped = line.strip().lstrip("*").strip()
         if stripped.startswith("Status:"):
             value = stripped[len("Status:"):].strip().lstrip("*").strip()
             if value.startswith("PASSED"):
                 return {"status": "PASSED",
-                        "note": "gate0-status.md-এ Status: PASSED লেখা আছে।"}
+                        "note": "gate0-status.md says Status: PASSED."}
             return {"status": "NOT PASSED",
-                    "note": "Gate 0 পাস হয়নি — Lemon Squeezy signup test Boss-এর step, এখনো বাকি।"}
+                    "note": "Gate 0 has not passed — the Lemon Squeezy signup test is Boss's step, still pending."}
     return {"status": "NOT PASSED",
-            "note": "gate0-status.md-এ Status লাইন পাওয়া যায়নি — fail-closed: NOT PASSED ধরা হয়েছে।"}
+            "note": "No Status line found in gate0-status.md — fail-closed: treated as NOT PASSED."}
 
 
 def _load_gateway(gateway, approvals_path):
-    """ApprovalGateway lazy import — শুধু gated কাজে দরকার হলে।"""
+    """ApprovalGateway lazy import — only when gated work needs it."""
     if gateway is not None:
         return gateway
     ceo_core = os.path.join(os.path.dirname(_dept_dir()), "00-CEO-Core")
@@ -83,8 +83,8 @@ def _load_gateway(gateway, approvals_path):
 
 
 def _draft_with_brain(brain, prompt, static_text):
-    """brain থাকলে brain.complete(prompt) ব্যবহার করে [MOCK DRAFT] লেখা;
-    না থাকলে static DRAFT text। কখনো live call / network নয় — brain mock।"""
+    """If a brain exists, uses brain.complete(prompt) to write a [MOCK DRAFT];
+    otherwise static DRAFT text. Never a live call / network — the brain is mock."""
     if brain is not None:
         try:
             mock_text = brain.complete(prompt)
@@ -96,8 +96,8 @@ def _draft_with_brain(brain, prompt, static_text):
 
 
 def _gated_check(agent, task, gateway, approvals_path):
-    """gated_action থাকলে PENDING ফেরত দেয়; approved হলে None (শুধু DRAFT-এ
-    এগোনো যাবে — agent কখনো gated action execute করে না)।"""
+    """If a gated_action is present, returns PENDING; if approved, None (only the
+    DRAFT can proceed — the agent never executes a gated action)."""
     gated_action = (task or {}).get("gated_action")
     if not gated_action:
         return None
@@ -120,7 +120,7 @@ def _gated_check(agent, task, gateway, approvals_path):
 
 
 class LaunchManagerAgent:
-    """Launch checklist DRAFT দেয় — launch নিজে করে না।"""
+    """Gives a launch checklist DRAFT — does not launch itself."""
 
     task_kind = "launch_prep"
     gate = "go"
@@ -138,22 +138,22 @@ class LaunchManagerAgent:
             "  %d. %s" % (i, item)
             for i, item in enumerate(LAUNCH_CHECKLIST, 1))
         summary = (
-            "Launch checklist DRAFT — Vet No-Show Recovery Kit ($49 one-time)।\n"
+            "Launch checklist DRAFT — Vet No-Show Recovery Kit ($49 one-time).\n"
             + checklist_text + "\n"
-            "Gate 0: %s। Kit বানানো: 0/6। PA list: 39/100। Sale: 0।" % gate0["status"])
+            "Gate 0: %s. Kit built: 0/6. PA list: 39/100. Sale: 0." % gate0["status"])
         if payload.get("mark_sold") or payload.get("mark_launched"):
             return {"status": "blocked-gate0", "task_kind": self.task_kind,
                     "section": self.section, "gate0": gate0, "output": summary,
-                    "notes": "Launch/sale দাবি Gate 0-তে আটকে আছে — কিছুই launched/sold হিসেবে লেখা হয়নি, sale এখনো 0।",
+                    "notes": "A launch/sale claim is blocked at Gate 0 — nothing was recorded as launched/sold, sales are still 0.",
                     "draft_only": True, "mock_brain": True, "gate": self.gate}
         if gate0["status"] != "PASSED":
             return {"status": "blocked-gate0", "task_kind": self.task_kind,
                     "section": self.section, "gate0": gate0, "output": summary,
-                    "notes": "DRAFT checklist only — launch করা হয়নি, করা যাবে না। Gate 0 পাস না হওয়া পর্যন্ত launch আটকে আছে।",
+                    "notes": "DRAFT checklist only — no launch has happened, and it cannot happen. Launch is blocked until Gate 0 passes.",
                     "draft_only": True, "mock_brain": True, "gate": self.gate}
         output = _draft_with_brain(
             brain, "Vet No-Show Recovery Kit launch checklist draft", summary)
         return {"status": "draft-ready", "task_kind": self.task_kind,
                 "section": self.section, "gate0": gate0, "output": output,
-                "notes": "Gate 0 পাস হয়েছে — launch এগোতে Boss-এর 'go' লাগবে। Checklist DRAFT only; launch এই agent করে না।",
+                "notes": "Gate 0 has passed — moving the launch forward needs Boss's 'go'. Checklist DRAFT only; this agent does not launch.",
                 "draft_only": True, "mock_brain": True, "gate": self.gate}

@@ -1,14 +1,14 @@
-"""Kit QA — Vet No-Show Recovery Kit-এর ৬ অংশের QA checklist (section agent, NEW)।
+"""Kit QA — QA checklist for the Vet No-Show Recovery Kit's 6 parts (section agent, NEW).
 
-Role (ভূমিকা): kit-outline.md-এর ৬ অংশের বিপরীতে QA checklist DRAFT
-লেখা — কোনো অংশ বানানো হয়েছে কি না, হলে কী যাচাই করতে হবে।
-Gate (গেট): QA ফলাফল ব্যবহার করতে Boss-এর `ok` লাগে।
-Gate 0 status (গেট ০ অবস্থা): **NOT PASSED** — kit-এর ৬ অংশের কোনোটা
-বানানো হয়নি (0/6), তাই QA করার মতো কিছু নেই। এই agent ফেরত দেয়:
-"NOT BUILT — nothing to QA yet" + প্রতিটা অংশের QA checklist DRAFT।
-যা কখনো করে না: কোনো অংশ pass বলে দাবি করে না (কিছু বানানোই হয়নি);
-kit বানায় না; কোনো file লেখে না; client/testimonial/statistic বানায়
-না; network ছোঁয় না।
+Role: write a QA checklist DRAFT against the 6 parts in kit-outline.md —
+whether any part has been built, and if so, what must be checked.
+Gate: Boss's `ok` is needed to use the QA result.
+Gate 0 status: **NOT PASSED** — none of the kit's 6 parts
+has been built (0/6), so there is nothing to QA. This agent returns:
+"NOT BUILT — nothing to QA yet" + a QA checklist DRAFT for each part.
+Never does this: claims any part passed (nothing has been built at all);
+builds the kit; writes any file; invents a client/testimonial/statistic;
+touches the network.
 """
 
 import os
@@ -19,34 +19,34 @@ BOOKING_LINK = "https://calendar.app.google/WLoxBfnLGTdjK3LB8"
 PHONE = "+1 (947) 223-0244"
 GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
-# (slug, QA checklist — kit-outline.md থেকে, Gate 0-র পরে যাচাই করতে হবে)
+# (slug, QA checklist — from kit-outline.md, to be checked after Gate 0)
 KIT_QA_ITEMS = [
     ("reminder-cadence-pack",
-     "T-72h / T-24h / T-2h তিনটে touch আছে কি না; [NAME] / [PET] / [TIME] field আছে কি না; "
-     "Gate 1: cadence + script AAHA/PetDesk-এর published guidance-এর সাথে মেলে কি না।"),
+     "Whether all three touches T-72h / T-24h / T-2h are present; whether [NAME] / [PET] / [TIME] fields exist; "
+     "Gate 1: whether the cadence + script match AAHA/PetDesk's published guidance."),
     ("same-day-rebooking",
-     "Phone script + in-person script দুটোই plain US English কি না; slot সেদিনই আবার ভরার কথা আছে কি না।"),
+     "Whether both the phone + in-person scripts are in plain US English; whether filling the slot the same day is covered."),
     ("waitlist-fill-sop",
-     "এক পাতা কি না; কাকে আগে ফোন করবে + কোন order-এ + exact call script আছে কি না।"),
+     "Whether it is one page; whether it says who to call first + in what order + the exact call script."),
     ("no-show-log-tracker",
-     "Formula auto-total করে কি না (sample সংখ্যা দিয়ে test); মাসের miss / আনুমানিক $ loss / recovery rate তিনটে দেখায় কি না।"),
+     "Whether the formulas auto-total (test with sample numbers); whether it shows all three: the month's misses / estimated $ loss / recovery rate."),
     ("deposit-policy-template",
-     "'have your own attorney review before using' লেখা আছে কি না; legal advice হিসেবে দেওয়া হয়নি তো।"),
+     "Whether 'have your own attorney review before using' is written; whether it is not presented as legal advice."),
     ("front-desk-quick-card",
-     "৫ লাইন কি না; এক পাতা কি না; reception desk-এ রাখার মতো কি না।"),
+     "Whether it is 5 lines; whether it is one page; whether it is fit to keep at the reception desk."),
 ]
 
 GLOBAL_QA_CHECKS = [
-    "'Talvenor' বানান সব জায়গায় ঠিক কি না।",
-    "কোনো invented client / testimonial / statistic নেই তো।",
-    "PIMS (practice-management software) replace করার দাবি নেই তো — kit PIMS-এর পাশে কাজ করে।",
-    "$49 price-এর verified sale আছে বলে দাবি নেই তো (price inference, observed traction নয়)।",
-    "কোনো clinic-কে দুইবার মেইল করার plan নেই তো।",
+    "Whether 'Talvenor' is spelled correctly everywhere.",
+    "Whether there is any invented client / testimonial / statistic.",
+    "Whether there is any claim to replace a PIMS (practice-management software) — the kit works alongside a PIMS.",
+    "Whether there is any claim of a verified $49 sale (the price is an inference, not observed traction).",
+    "Whether there is any plan to email a clinic twice.",
 ]
 
 
 def _dept_dir():
-    """kit-outline.md খুঁজে department dir বের করা (read-only source)।"""
+    """Finds the department dir by locating kit-outline.md (read-only source)."""
     here = os.path.dirname(os.path.abspath(__file__))
     node = here
     for _ in range(6):
@@ -65,7 +65,7 @@ def _read_dept_file(name):
 
 
 def _load_gateway(gateway, approvals_path):
-    """ApprovalGateway lazy import — শুধু gated কাজে দরকার হলে।"""
+    """ApprovalGateway lazy import — only when gated work needs it."""
     if gateway is not None:
         return gateway
     ceo_core = os.path.join(os.path.dirname(_dept_dir()), "00-CEO-Core")
@@ -78,8 +78,8 @@ def _load_gateway(gateway, approvals_path):
 
 
 def _draft_with_brain(brain, prompt, static_text):
-    """brain থাকলে brain.complete(prompt) ব্যবহার করে [MOCK DRAFT] লেখা;
-    না থাকলে static DRAFT text। কখনো live call / network নয় — brain mock।"""
+    """If a brain exists, uses brain.complete(prompt) to write a [MOCK DRAFT];
+    otherwise static DRAFT text. Never a live call / network — the brain is mock."""
     if brain is not None:
         try:
             mock_text = brain.complete(prompt)
@@ -91,8 +91,8 @@ def _draft_with_brain(brain, prompt, static_text):
 
 
 def _gated_check(agent, task, gateway, approvals_path):
-    """gated_action থাকলে PENDING ফেরত দেয়; approved হলে None (শুধু DRAFT-এ
-    এগোনো যাবে — agent কখনো gated action execute করে না)।"""
+    """If a gated_action is present, returns PENDING; if approved, None (only the
+    DRAFT can proceed — the agent never executes a gated action)."""
     gated_action = (task or {}).get("gated_action")
     if not gated_action:
         return None
@@ -115,7 +115,7 @@ def _gated_check(agent, task, gateway, approvals_path):
 
 
 class KitQAAgent:
-    """Kit-এর ৬ অংশের QA checklist DRAFT দেয় — কোনো অংশ pass বলে না।"""
+    """Gives a QA checklist DRAFT for the kit's 6 parts — never calls any part passed."""
 
     task_kind = "kit_qa"
     gate = "ok"
@@ -130,9 +130,9 @@ class KitQAAgent:
         blueprint = _read_dept_file("kit-outline.md")
         lines = [
             "NOT BUILT — nothing to QA yet",
-            "Vet No-Show Recovery Kit ($49 one-time) — ৬ অংশের কোনোটা বানানো হয়নি (0/6)।",
-            "QA করার মতো কিছু নেই। নিচের checklist DRAFT — Gate 0 পাস + build-এর পরে প্রতিটা অংশের বিপরীতে যাচাই করতে হবে।",
-            "Blueprint source: kit-outline.md (present: %s, chars: %d)।" % (
+            "Vet No-Show Recovery Kit ($49 one-time) — none of the 6 parts has been built (0/6).",
+            "There is nothing to QA. The checklist DRAFT below must be checked against each part after Gate 0 passes + build.",
+            "Blueprint source: kit-outline.md (present: %s, chars: %d)." % (
                 blueprint is not None, len(blueprint) if blueprint else 0),
             "",
             "Per-part QA checklist (DRAFT):",
@@ -141,11 +141,11 @@ class KitQAAgent:
             lines.append("  %d. %s — status: NOT BUILT" % (i, slug))
             lines.append("     Checks: %s" % checks)
         lines.append("")
-        lines.append("Global checks (সব অংশে):")
+        lines.append("Global checks (all parts):")
         for item in GLOBAL_QA_CHECKS:
             lines.append("  - %s" % item)
         lines.append("")
-        lines.append("Verdict: কোনো অংশ QA পাস করেনি — কিছু বানানোই হয়নি। Checklist DRAFT only।")
+        lines.append("Verdict: no part has passed QA — nothing has been built at all. Checklist DRAFT only.")
         static_text = "\n".join(lines)
         output = _draft_with_brain(
             brain, "Vet No-Show Recovery Kit QA checklist draft", static_text)
@@ -153,5 +153,5 @@ class KitQAAgent:
                 "section": self.section,
                 "parts_built": 0, "parts_total": len(KIT_QA_ITEMS),
                 "output": output,
-                "notes": "কোনো অংশ QA পাস করেনি — কিছু বানানোই হয়নি। Checklist DRAFT; build-এর পরে আবার QA করতে হবে।",
+                "notes": "No part has passed QA — nothing has been built at all. Checklist DRAFT; QA again after build.",
                 "draft_only": True, "mock_brain": True, "gate": self.gate}
