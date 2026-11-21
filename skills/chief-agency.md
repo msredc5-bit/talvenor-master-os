@@ -1,67 +1,67 @@
 # Skill: Chief of Staff — Agency (REAL, Phase 1)
 
-**Role:** Talvenor AI Receptionist Agency-র Chief — Boss-এর প্রথম ব্যবসা
-(MAIN)। ACQ / DEL / MKT / OPS worker-দের কাজ ভাগ করে দেওয়া, ফলাফল
-জমা নেওয়া, gate-এর কাজ Boss-এর কাছে পাঠানো।
+**Role:** Chief of the Talvenor AI Receptionist Agency — Boss's first business
+(MAIN). Splitting work among ACQ / DEL / MKT / OPS workers, collecting results,
+sending gated work to Boss.
 
-**Status: REAL (Phase 1, vendored Phase 6)** — `chief_of_staff_agency.py` সত্যিই vendored engine-এর worker ডাকে (mock brain, $0)। ফলাফল শুধু DRAFT।
+**Status: REAL (Phase 1, vendored Phase 6)** — `chief_of_staff_agency.py` really calls the vendored engine's workers (mock brain, $0). Results are DRAFT only.
 
-## Inputs (যা পড়ে)
+## Inputs (what it reads)
 
-- Main CEO Bot থেকে routed task: `{"business": "agency", "type": ..., "title": ..., "payload": {...}}`
-- `00-CEO-Core/config.json` — locked facts (booking link, ফোন, ইমেইল, $0 cap)
+- Routed task from the Main CEO Bot: `{"business": "agency", "type": ..., "title": ..., "payload": {...}}`
+- `00-CEO-Core/config.json` — locked facts (booking link, phone, email, $0 cap)
 - Talvenor office: `~/workspace/talvenor-office/` (SOP, pricing)
 - Lead universe: `~/workspace/talvenor/leads-organized/` (537 unique lead)
 
-## Outputs (যা বানায়)
+## Outputs (what it makes)
 
-- Draft (email / DM / plan / script) — ফলাফল task-এর সাথে ফেরত যায়, `store/vault/`-এ text file হিসেবে রাখা হয় শুধু Boss চাইলে
+- Draft (email / DM / plan / script) — the result returns with the task, kept as a text file in `store/vault/` only if Boss wants it
 - Reply triage + proposed reply (draft only)
 - Booking: https://calendar.app.google/WLoxBfnLGTdjK3LB8
-- ফোন: +1 (947) 223-0244 · Demo video (60-sec): https://facebook.com/reel/2947321012290705/
+- Phone: +1 (947) 223-0244 · Demo video (60-sec): https://facebook.com/reel/2947321012290705/
 
-## Routing table — task type → worker (আসল নাম, vendored engine থেকে)
+## Routing table — task type → worker (real names, from the vendored engine)
 
 | Task type | Worker | Division | Gate |
 |---|---|---|---|
-| `prospect_research` | ProspectResearcher | ACQ | নেই |
+| `prospect_research` | ProspectResearcher | ACQ | None |
 | `outreach_draft` | OutreachDrafter | ACQ | `send` |
 | `reply_triage` | ReplyHandler | ACQ | `send` |
 | `negotiation_prep` | NegotiationCoach | ACQ | `ok` |
 | `receptionist_build` | RetellBuilder | DEL | `ok` — DRAFT plan only; live stack Vapi/Sophia |
-| `receptionist_qa` | QAEngineer | DEL | নেই |
+| `receptionist_qa` | QAEngineer | DEL | None |
 | `onboarding_draft` | OnboardingAgent | DEL | `ok` |
 | `content_plan` | ContentPlanner | MKT | `ok` |
 | `video_produce` | VideoProducer | MKT | `ok` |
-| `caption_write` | CaptionWriter | MKT | নেই |
+| `caption_write` | CaptionWriter | MKT | None |
 | `publish_prep` | PublishPrep | MKT | `post it` |
 | `objection_sim` | ObjectionSimulator | MKT | `ok` |
-| `inbox_triage` | InboxTriager | OPS | নেই |
-| `report_compile` | ReportCompiler | OPS | নেই |
-| `schedule_help` | SchedulerAssistant | OPS | নেই |
+| `inbox_triage` | InboxTriager | OPS | None |
+| `report_compile` | ReportCompiler | OPS | None |
+| `schedule_help` | SchedulerAssistant | OPS | None |
 
-অচেনা task type এলে Chief ভুল স্বীকার করে থামে — বানানো worker ডাকে না।
+If an unknown task type arrives, the Chief admits the mistake and stops — it does not call an invented worker.
 
-## Files (যা পড়ে / লেখে)
+## Files (what it reads / writes)
 
-- পড়ে: `00-CEO-Core/config.json`, `01-Agency-Department/pipeline.md`, vendored engine (`01-Agency-Department/engine/workers/src/workers/`)
-- লেখে: `store/tasks.json` — প্রতিটা routed task append হয় (অন্য department-এর entry মোছা হয় না)
-- লেখে: `store/approvals.json` — gated action-এর PENDING request (gateway দিয়ে)
-- লেখে না: কোনো মেইল, কোনো Sent folder, কোনো publish, কোনো খরচ
+- Reads: `00-CEO-Core/config.json`, `01-Agency-Department/pipeline.md`, vendored engine (`01-Agency-Department/engine/workers/src/workers/`)
+- Writes: `store/tasks.json` — every routed task is appended (another department's entry is not deleted)
+- Writes: `store/approvals.json` — a gated action's PENDING request (via the gateway)
+- Does not write: any mail, any Sent folder, any publish, any spend
 
-## Gate — এখানেই থামে
+## Gate — stops here
 
-- Draft লেখা যায়; **পাঠানো যায় না** — `send` gate word লাগে, আর পাঠানোর কাজ Boss নিজে করেন।
-- Post publish করা যায় না — `post it` লাগে।
-- Video upload করা যায় না — `upload it` লাগে।
-- Price quote করা যায় না — Boss যে variant confirm করবেন সেটা ছাড়া।
-- Dental/medical কখনো target নয়।
-- Email PAUSED (2026-11-14 থেকে) — DNS fix + "check koro" না হলে send-এর কথাই ওঠে না।
+- Drafts can be written; **nothing can be sent** — the `send` gate word is needed, and Boss himself does the sending.
+- Posts cannot be published — `post it` is needed.
+- Videos cannot be uploaded — `upload it` is needed.
+- Prices cannot be quoted — except the variant Boss confirms.
+- Dental/medical are never a target.
+- Email PAUSED (since 2026-11-14) — without the DNS fix + "check koro", sending is not even discussed.
 
-## সত্য অবস্থা (Phase 1)
+## True State (Phase 1)
 
-- Email PAUSED — DNS fix Boss-এর হাতে বাকি।
-- প্রথম মেইল 162, paying client 0, Gmail-এ দেখা reply 0 (Zoho unchecked)।
-- Day 4/5/6 draft: ২৫টা করে READY, পাঠানো হয়নি (ফাইল থেকে যাচাই করা)।
-- Follow-up: কোথাও due নয় (100-mail rule; FL ceiling 98)।
-- Mock brain ($0) — ফলাফলে "MOCK" লেবেল থাকে; live brain এখানে নয়।
+- Email PAUSED — the DNS fix is still in Boss's hands.
+- First mail 162, paying clients 0, replies seen in Gmail 0 (Zoho unchecked).
+- Day 4/5/6 drafts: 25 each READY, not sent (verified from the files).
+- Follow-up: due nowhere (100-mail rule; FL ceiling 98).
+- Mock brain ($0) — results carry a "MOCK" label; the live brain is not here.

@@ -1,7 +1,7 @@
 # Skill: Main CEO Bot
 
-**Role:** Master OS-এর brain — Boss-এর (বা Jarvis-এর) task পড়ে ঠিক
-Chief of Staff-এর দিকে পাঠানো, আর gated কাজ approval-এ আটকে রাখা।
+**Role:** The Master OS brain — reads Boss's (or Jarvis's) task and sends it to the right
+Chief of Staff, and holds gated work in approval.
 
 ## Inputs
 
@@ -11,8 +11,8 @@ Chief of Staff-এর দিকে পাঠানো, আর gated কাজ ap
 
 ## Outputs
 
-- Routing decision: কোন Chief, কোন status (`routed-stub` / `routed-pending-approval`)
-- Gated task হলে: approval request (status `pending`) — আর কিছু নয়
+- Routing decision: which Chief, which status (`routed-stub` / `routed-pending-approval`)
+- If the task is gated: an approval request (status `pending`) — nothing more
 
 ## Tools
 
@@ -20,14 +20,23 @@ Chief of Staff-এর দিকে পাঠানো, আর gated কাজ ap
 - `human_approval_gateway.py` — approval record
 - VENDORED engine (Phase 6): `01-Agency-Department/engine/workers/` (upstream `~/workspace/boss-ceo/` canonical)
 
-## Gate — এখানেই থামে
+## Skill-finder — when a new capability is needed
 
-- Gated action (send / publish / spend / delete) থাকলে task এগোয় না।
-- approve() শুধু Boss-এর exact gate word-এ চলে। ভুল word = ValueError।
-- Auto-approve-এর কোনো পথ নেই — কোডেও নেই।
-- $0 spend cap — খরচের কাজ approval ছাড়া হয় না।
+- Skill: `skills/skill-finder.md` — the search procedure (local first →
+  skills.sh leaderboard → verify → shortlist → Boss confirm → adapt).
+- Code: `00-CEO-Core/skill_finder.py` — local search + DRAFT proposal
+  (`store/skill-proposals.json`). When a task of type `find_skill` arrives, the router
+  goes here — not to a Chief.
+- Searching is allowed; writing / installing a skill file is not — Boss's "ok" is needed.
 
-## সীমা (Phase 0)
+## Gate — stops here
 
-- Chief module-গুলো STUB — routing হয়, আসল কাজ এখনো হয় না।
-- Full live day (`boss_run.py --live`) Boss approve করেননি — চালানো যাবে না।
+- If a gated action (send / publish / spend / delete) is present, the task does not move forward.
+- approve() runs only on Boss's exact gate word. Wrong word = ValueError.
+- There is no path to auto-approve — not even in the code.
+- $0 spend cap — spending work does not happen without approval.
+
+## Limits (Phase 0)
+
+- The Chief modules are STUBs — routing happens, the real work does not yet.
+- The full live day (`boss_run.py --live`) has not been approved by Boss — it cannot be run.

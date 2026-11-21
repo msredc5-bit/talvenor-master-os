@@ -1,30 +1,30 @@
-"""Piper TTS — Jarvis-এর মুখ (REAL, offline, $0).
+"""Piper TTS — Jarvis's mouth (REAL, offline, $0).
 
-Boss-কে voice-এ উত্তর দেওয়ার কাজ: text -> WAV file -> speaker-এ বাজানো।
-Piper = free, পুরো offline, neural voice, CPU-তেই চলে (Raspberry Pi-তেও
-চলে)। কোনো API key, account, internet, খরচ — কিছুই লাগে না (voice file
-একবার download করার পর)।
+The job of answering Boss by voice: text -> WAV file -> played on the speaker.
+Piper = free, fully offline, neural voice, runs on CPU (even on a Raspberry Pi).
+No API key, account, internet, or cost — nothing is needed (after the voice file
+is downloaded once).
 
-Voice id — VERIFIED 2026-11-17, upstream voices.json থেকে
-(https://huggingface.co/rhasspy/piper-voices — piper-tts package-এর
-নিজের VOICES_JSON URL দিয়ে পড়া, 183 voice-এর catalog):
-  - bn: "bn_BD-google-medium" — catalog-এর একমাত্র Bengali voice।
-    bn_BD (বাংলা, Bangladesh) + bn_IN, 16 speaker, medium, 22,050 Hz,
-    ONNX 76,782,515 bytes। Dataset openSLR 37, licence CC-BY-SA-4.0।
-  - en: "en_US-lessac-medium" — 1 speaker, medium, 22,050 Hz।
-    Dataset Blizzard 2013 Lessac; licence CSTR Edinburgh-এর page-এ —
-    personal use OK, commercial use-এর আগে licence দেখে নিতে হবে।
+Voice id — VERIFIED 2026-11-17, from upstream voices.json
+(https://huggingface.co/rhasspy/piper-voices — read via the piper-tts package's
+own VOICES_JSON URL, a catalog of 183 voices):
+  - bn: "bn_BD-google-medium" — the catalog's only Bengali voice.
+    bn_BD (Bengali, Bangladesh) + bn_IN, 16 speaker, medium, 22,050 Hz,
+    ONNX 76,782,515 bytes. Dataset openSLR 37, licence CC-BY-SA-4.0.
+  - en: "en_US-lessac-medium" — 1 speaker, medium, 22,050 Hz.
+    Dataset Blizzard 2013 Lessac; licence on CSTR Edinburgh's page —
+    personal use OK; check the licence before commercial use.
 
-সৎ সীমা:
-  - Bengali voice-এর মান এখনো কোনো native listener শোনেনি — কেমন
-    শোনায়, সেটা Boss-ই প্রথম শুনে বলবে।
-  - Piper শুধু text -> speech; বুদ্ধি brain-এর (mock/small) — voice
-    Jarvis-কে বুদ্ধিমান বানায় না।
-  - piper-tts না থাকলে / voice file না থাকলে স্পষ্ট error দেয়,
-    চুপচাপ ভান করে না।
+Honest limits:
+  - No native listener has heard the quality of the Bengali voice yet — how it
+    sounds, Boss himself will be the first to hear and say.
+  - Piper is only text -> speech; the intelligence is the brain's (mock/small) — voice
+    does not make Jarvis intelligent.
+  - Without piper-tts / without the voice file, it gives a clear error;
+    it never silently pretends.
 
-Stdlib + piper-tts only (piper import function-এর ভেতরে — না থাকলেও
-এই module import হয়)।
+Stdlib + piper-tts only (the piper import is inside the functions — the module
+imports even without it).
 """
 
 import os
@@ -35,36 +35,36 @@ CEO_CORE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_VOICE_DIR = os.path.join(CEO_CORE_DIR, "voice", "models", "piper")
 DEFAULT_OUTPUT_DIR = os.path.join(CEO_CORE_DIR, "voice", "output")
 
-# VERIFIED 2026-11-17 — upstream rhasspy/piper-voices voices.json।
+# VERIFIED 2026-11-17 — upstream rhasspy/piper-voices voices.json.
 VOICE_IDS = {
     "bn": "bn_BD-google-medium",
     "en": "en_US-lessac-medium",
 }
 
 VOICE_LICENSE_NOTES = {
-    "bn": "CC-BY-SA-4.0 (openSLR 37) — free, personal use OK।",
-    "en": "Lessac — licence CSTR Blizzard 2013 page-এ; personal use OK, "
-          "commercial use-এর আগে licence দেখুন।",
+    "bn": "CC-BY-SA-4.0 (openSLR 37) — free, personal use OK.",
+    "en": "Lessac — licence on the CSTR Blizzard 2013 page; personal use OK, "
+          "check the licence before commercial use.",
 }
 
 SAMPLE_RATE = 22050
 
 
 def _require_piper():
-    """piper-tts lazy import — না থাকলে exact install command-সহ error।"""
+    """piper-tts lazy import — with an exact install command in the error if missing."""
     try:
         import piper  # noqa: PLC0415
     except ImportError as exc:
         raise RuntimeError(
-            "piper-tts ইনস্টল নেই। চালান:\n"
+            "piper-tts is not installed. Run:\n"
             "  pip install piper-tts\n"
-            "তারপর voice download করুন (VOICE-SETUP.md দেখুন)।"
+            "Then download the voice (see VOICE-SETUP.md)."
         ) from exc
     return piper
 
 
 def voice_file(lang, voice_dir=None):
-    """এই ভাষার .onnx voice file-এর path। না থাকলে download command-সহ error।"""
+    """The path of this language's .onnx voice file. With a download command in the error if missing."""
     lang = (lang or "bn").lower()
     if lang not in VOICE_IDS:
         raise ValueError(
@@ -74,24 +74,24 @@ def voice_file(lang, voice_dir=None):
     path = os.path.join(vdir, f"{voice_id}.onnx")
     if not os.path.exists(path):
         raise RuntimeError(
-            f"Piper voice file নেই: {path}\n"
-            f"Download করুন:\n"
+            f"Piper voice file missing: {path}\n"
+            f"Download:\n"
             f"  python -m piper.download_voices {voice_id} "
             f"--download-dir {vdir}\n"
-            f"(একবার download করলেই হবে; তারপর offline।)"
+            f"(Downloading once is enough; then offline.)"
         )
     return path
 
 
 def speak_to_wav(text, lang="bn", out_path=None, voice_dir=None,
                  speaker_id=0):
-    """Text -> WAV file। ফেরত দেয় WAV file-এর path।
+    """Text -> WAV file. Returns the WAV file's path.
 
-    lang: "bn" (default — Boss বাংলায় কথা বলে) বা "en"।
-    speaker_id: bn voice-এ 0-15 (16 speaker); en-এ 0।
+    lang: "bn" (default — Boss speaks Bengali) or "en".
+    speaker_id: 0-15 for the bn voice (16 speakers); 0 for en.
     """
     if not text or not str(text).strip():
-        raise ValueError("speak_to_wav: text খালি — বলার মতো কিছু নেই।")
+        raise ValueError("speak_to_wav: text is empty — nothing to say.")
     text = str(text)
     lang = (lang or "bn").lower()
     piper = _require_piper()
@@ -109,7 +109,7 @@ def speak_to_wav(text, lang="bn", out_path=None, voice_dir=None,
     voice = piper.PiperVoice.load(onnx_path)
     try:
         syn_config = piper.SynthesisConfig(speaker_id=int(speaker_id))
-    except Exception:  # noqa: BLE001 — পুরনো piper-এ speaker_id নাও থাকতে পারে
+    except Exception:  # noqa: BLE001 — an old piper may not have speaker_id
         syn_config = None
     chunks = (voice.synthesize(text, syn_config=syn_config)
               if syn_config is not None else voice.synthesize(text))
@@ -124,20 +124,20 @@ def speak_to_wav(text, lang="bn", out_path=None, voice_dir=None,
             wrote += len(chunk.audio_int16_bytes)
     if wrote == 0 or os.path.getsize(out_path) == 0:
         raise RuntimeError(
-            f"Piper WAV খালি হয়ে গেল: {out_path} — text: {text[:60]!r}")
+            f"Piper WAV came out empty: {out_path} — text: {text[:60]!r}")
     return out_path
 
 
 def _play_wav(wav_path):
-    """WAV বাজানো (Windows: winsound; Linux: aplay/ffplay চেষ্টা)।
+    """Play a WAV (Windows: winsound; Linux: try aplay/ffplay).
 
-    কোনো player না পেলে False — তখন caller path-টা print করে, চুপ থাকে না।
+    False if no player is found — then the caller prints the path; it never stays silent.
     """
     try:
         import winsound  # noqa: PLC0415 — Windows stdlib
         winsound.PlaySound(wav_path, winsound.SND_FILENAME)
         return True
-    except Exception:  # noqa: BLE001 — Windows নয়, বা winsound নেই
+    except Exception:  # noqa: BLE001 — not Windows, or no winsound
         pass
     import shutil
     import subprocess
@@ -150,16 +150,16 @@ def _play_wav(wav_path):
             subprocess.run([exe] + args, check=False,
                            capture_output=True, timeout=300)
             return True
-        except Exception:  # noqa: BLE001 — পরের player চেষ্টা করো
+        except Exception:  # noqa: BLE001 — try the next player
             continue
     return False
 
 
 def speak(text, lang="bn", play=True, out_path=None, voice_dir=None,
           speaker_id=0):
-    """Text -> voice। WAV লেখে, সম্ভব হলে বাজায়, WAV path ফেরত দেয়।
+    """Text -> voice. Writes the WAV, plays it if possible, returns the WAV path.
 
-    Player না থাকলেও WAV path print করে + ফেরত দেয় — কখনো চুপচাপ নয়।
+    Even without a player, it prints the WAV path + returns it — never silent.
     """
     wav_path = speak_to_wav(text, lang=lang, out_path=out_path,
                             voice_dir=voice_dir, speaker_id=speaker_id)
@@ -167,9 +167,9 @@ def speak(text, lang="bn", play=True, out_path=None, voice_dir=None,
     if play:
         played = _play_wav(wav_path)
     if played:
-        print(f"[Jarvis] বললাম ({lang}): {wav_path}")
+        print(f"[Jarvis] said it ({lang}): {wav_path}")
     else:
-        print(f"[Jarvis] WAV লেখা হয়েছে, player পাইনি — শুনুন: {wav_path}")
+        print(f"[Jarvis] WAV written, no player found — listen here: {wav_path}")
     return wav_path
 
 
@@ -178,6 +178,6 @@ if __name__ == "__main__":
     lang = sys.argv[1] if len(sys.argv) > 1 else "bn"
     text = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else None
     if text is None:
-        text = ("আমি জারভিস, শুনছি।" if lang == "bn"
+        text = ("I am Jarvis, listening." if lang == "bn"
                 else "Hello, I am Jarvis.")
     print(speak(text, lang=lang))

@@ -1,33 +1,33 @@
-"""Vosk (en) + sherpa-onnx (bn) — Jarvis-এর কান (REAL, offline, $0).
+"""Vosk (en) + sherpa-onnx (bn) — Jarvis's ears (REAL, offline, $0).
 
-Mic -> text (listen) আর WAV file -> text (transcribe_file)।
+Mic -> text (listen) and WAV file -> text (transcribe_file).
 
-Engine বাছাই — VERIFIED 2026-11-17 (অনুমান নয়):
+Engine choice — VERIFIED 2026-11-17 (not a guess):
   - English ("en"): Vosk, model "vosk-model-small-en-us-0.15" (40 MB,
     Apache-2.0) — official list https://alphacephei.com/vosk/models.html
-    (WER 9.85 librispeech test-clean)। Download:
+    (WER 9.85 librispeech test-clean). Download:
     https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip
   - Bengali ("bn"): sherpa-onnx, model "vosk-model-small-streaming-bn"
     (HF repo alphacep/vosk-model-small-streaming-bn, ~96 MB, Apache-2.0,
-    WER self-reported: Common Voice 17.9, Fleurs 20.6, Banspeech 32.9)।
-    কেন Vosk নয়: classic Vosk-এর official models.html list-এ কোনো
-    Bengali model নেই; যেটা আছে সেটা Zipformer2 streaming model
+    WER self-reported: Common Voice 17.9, Fleurs 20.6, Banspeech 32.9).
+    Why not Vosk: the classic Vosk official models.html list has no
+    Bengali model; the one that exists is a Zipformer2 streaming model
     (am-onnx/encoder.onnx + decoder.onnx + joiner.onnx, lang/tokens.txt)
-    — vosk.Model() এটা লোড করতে পারে না (am/final.mdl + graph/ নেই)।
-    sherpa-onnx-ই Bengali শোনার আসল পথ।
+    — vosk.Model() cannot load it (no am/final.mdl + graph/).
+    sherpa-onnx is the real way to hear Bengali.
 
-সৎ সীমা:
-  - Bengali নির্ভুলতা Boss নিজে কথা বলে যাচাই করবে (WER 17-33% মানে
-    ভুল হবেই — ছোট model, এটাই সত্য)।
-  - এই VM-এ PortAudio নেই (apt-এ candidate নেই) — sounddevice import
-    হয় না, তাই mic-এর live test এখানে হয় না; transcribe_file দিয়ে
-    WAV-এর test হয়। Windows-এ sounddevice wheel-এ PortAudio বান্ডেল
-    থাকে, সেখানে mic চলে।
-  - Piper-এর WAV 22,050 Hz; Vosk/sherpa 16,000 Hz চায় — resample
-    এখানেই (stdlib linear interpolation, কোনো extra dependency নয়)।
+Honest limits:
+  - Boss himself will verify Bengali accuracy by speaking to it (WER 17-33% means
+    there will be mistakes — a small model, that is the truth).
+  - This VM has no PortAudio (no apt candidate) — sounddevice does not
+    import, so there is no live mic test here; the WAV test runs via
+    transcribe_file. On Windows, the sounddevice wheel bundles PortAudio,
+    so the mic works there.
+  - Piper's WAV is 22,050 Hz; Vosk/sherpa want 16,000 Hz — resampling happens
+    here (stdlib linear interpolation, no extra dependency).
 
-Stdlib + vosk/sherpa_onnx/sounddevice only (ওগুলো function-এর ভেতরে
-lazy import — না থাকলেও এই module import হয়)।
+Stdlib + vosk/sherpa_onnx/sounddevice only (those are lazily imported inside
+the functions — the module imports even without them).
 """
 
 import json
@@ -41,7 +41,7 @@ DEFAULT_MODEL_DIR = os.path.join(CEO_CORE_DIR, "voice", "models")
 
 SAMPLE_RATE = 16000
 
-# VERIFIED 2026-11-17 — উপরের docstring-এর source দেখুন।
+# VERIFIED 2026-11-17 — see the sources in the docstring above.
 MODEL_IDS = {
     "en": {
         "engine": "vosk",
@@ -59,8 +59,8 @@ MODEL_IDS = {
         "size_mb": 96,
         "license": "Apache-2.0",
         "source": "https://huggingface.co/alphacep/"
-                  "vosk-model-small-streaming-bn — official Vosk "
-                  "models.html list-এ নেই; Zipformer2 streaming model, "
+                  "vosk-model-small-streaming-bn — not on the official Vosk "
+                  "models.html list; Zipformer2 streaming model, "
                   "sherpa-onnx only",
         "wer_self_reported": {"Common Voice": 17.9, "Fleurs": 20.6,
                               "Banspeech": 32.9},
@@ -73,7 +73,7 @@ def _require_vosk():
         import vosk  # noqa: PLC0415
     except ImportError as exc:
         raise RuntimeError(
-            "vosk ইনস্টল নেই। চালান:\n  pip install vosk"
+            "vosk is not installed. Run:\n  pip install vosk"
         ) from exc
     return vosk
 
@@ -83,7 +83,7 @@ def _require_sherpa():
         import sherpa_onnx  # noqa: PLC0415
     except ImportError as exc:
         raise RuntimeError(
-            "sherpa-onnx ইনস্টল নেই। চালান:\n  pip install sherpa-onnx"
+            "sherpa-onnx is not installed. Run:\n  pip install sherpa-onnx"
         ) from exc
     return sherpa_onnx
 
@@ -93,30 +93,30 @@ def _require_sounddevice():
         import sounddevice  # noqa: PLC0415
     except (ImportError, OSError) as exc:
         raise RuntimeError(
-            "sounddevice / PortAudio পাওয়া যায়নি — mic শোনা যাবে না।\n"
-            "Windows-এ চালান:  pip install sounddevice\n"
-            "(Windows wheel-এ PortAudio বান্ডেল থাকে। এই VM-এ PortAudio\n"
-            "নেই বলে এখানে mic test হয় না — WAV transcribe test হয়।)"
+            "sounddevice / PortAudio not found — the mic cannot be heard.\n"
+            "On Windows, run:  pip install sounddevice\n"
+            "(The Windows wheel bundles PortAudio. This VM has no PortAudio,\n"
+            "so there is no mic test here — a WAV transcribe test runs instead.)"
         ) from exc
     return sounddevice
 
 
 def _vosk_model_path(model_dir=None):
-    """English Vosk model dir — না থাকলে exact download command-সহ error।"""
+    """English Vosk model dir — with an exact download command in the error if missing."""
     base = model_dir or DEFAULT_MODEL_DIR
     path = os.path.join(base, "vosk", MODEL_IDS["en"]["model"])
     if not os.path.exists(os.path.join(path, "am", "final.mdl")):
         raise RuntimeError(
-            f"Vosk English model নেই: {path}\n"
-            f"Download + unzip করুন:\n"
+            f"Vosk English model missing: {path}\n"
+            f"Download + unzip:\n"
             f"  {MODEL_IDS['en']['download_url']}\n"
-            f"  -> unzip করে {os.path.join(base, 'vosk')} ফোল্ডারে রাখুন।"
+            f"  -> unzip into the {os.path.join(base, 'vosk')} folder."
         )
     return path
 
 
 def _sherpa_model_files(model_dir=None):
-    """Bengali sherpa model file-গুলো — না থাকলে exact download-সহ error।"""
+    """The Bengali sherpa model files — with an exact download in the error if missing."""
     base = model_dir or DEFAULT_MODEL_DIR
     mdir = os.path.join(base, "sherpa-bn")
     files = {
@@ -129,23 +129,23 @@ def _sherpa_model_files(model_dir=None):
     missing = [k for k, p in files.items() if not os.path.exists(p)]
     if missing:
         raise RuntimeError(
-            f"sherpa Bengali model অসম্পূর্ণ: নেই {missing} "
+            f"sherpa Bengali model incomplete: missing {missing} "
             f"({mdir})\n"
-            f"Download করুন:\n"
+            f"Download:\n"
             f"  pip install huggingface_hub\n"
             f"  python -c \"from huggingface_hub import snapshot_download; "
             f"snapshot_download('{MODEL_IDS['bn']['repo']}', "
             f"local_dir='{mdir}')\"\n"
-            f"(~96 MB, একবারই; তারপর offline।)"
+            f"(~96 MB, once; then offline.)"
         )
     return files
 
 
 def _read_wav_mono16(wav_path):
-    """WAV পড়ে (mono, 16-bit) -> (16000, pcm_bytes)।
+    """Read a WAV (mono, 16-bit) -> (16000, pcm_bytes).
 
-    Piper-এর 22,050 Hz হলে 16,000 Hz-এ resample করে (stdlib linear
-    interpolation) — Vosk/sherpa দুইজনেই 16 kHz চায়।
+    If Piper's 22,050 Hz, resample to 16,000 Hz (stdlib linear
+    interpolation) — both Vosk/sherpa want 16 kHz.
     """
     with wave.open(wav_path, "rb") as wav:
         nchannels = wav.getnchannels()
@@ -154,7 +154,7 @@ def _read_wav_mono16(wav_path):
         frames = wav.readframes(wav.getnframes())
     if nchannels != 1 or sampwidth != 2:
         raise ValueError(
-            f"WAV হতে হবে mono 16-bit PCM: {wav_path} "
+            f"WAV must be mono 16-bit PCM: {wav_path} "
             f"(channels={nchannels}, sampwidth={sampwidth})")
     if rate == SAMPLE_RATE:
         return SAMPLE_RATE, frames
@@ -162,7 +162,7 @@ def _read_wav_mono16(wav_path):
 
 
 def _resample_pcm16(pcm_bytes, src_rate, dst_rate):
-    """Linear-interpolation resample (16-bit PCM) — stdlib only।"""
+    """Linear-interpolation resample (16-bit PCM) — stdlib only."""
     n_in = len(pcm_bytes) // 2
     samples = struct.unpack(f"<{n_in}h", pcm_bytes)
     n_out = max(1, int(n_in * dst_rate / src_rate))
@@ -193,12 +193,12 @@ def _transcribe_vosk_file(wav_path, model_dir=None):
 
 def _transcribe_sherpa_file(wav_path, model_dir=None):
     sherpa_onnx = _require_sherpa()
-    import numpy as np  # noqa: PLC0415 — sherpa-onnx-এর dependency
+    import numpy as np  # noqa: PLC0415 — a sherpa-onnx dependency
     _rate, pcm = _read_wav_mono16(wav_path)
     files = _sherpa_model_files(model_dir)
-    # Zipformer2 streaming model — OfflineRecognizer দিয়ে লোড হয় না
-    # (encoder input int32/int64 চেক-এ C++ abort করে, sherpa-onnx 2.0.1)।
-    # তাই model-এর নিজের decode.py-র মতো OnlineRecognizer।
+    # Zipformer2 streaming model — it does not load with OfflineRecognizer
+    # (a C++ abort on the encoder input int32/int64 check, sherpa-onnx 2.0.1).
+    # So OnlineRecognizer, like the model's own decode.py.
     recognizer = sherpa_onnx.OnlineRecognizer.from_transducer(
         tokens=files["tokens"], encoder=files["encoder"],
         decoder=files["decoder"], joiner=files["joiner"],
@@ -217,30 +217,30 @@ def _transcribe_sherpa_file(wav_path, model_dir=None):
 
 
 def transcribe_file(wav_path, lang="bn", model_dir=None):
-    """WAV file -> text। Mic লাগে না — headless test-এর পথ।"""
+    """WAV file -> text. No mic needed — the headless test path."""
     lang = (lang or "bn").lower()
     if lang not in MODEL_IDS:
         raise ValueError(
             f"Unknown language {lang!r}. Known: {sorted(MODEL_IDS)}")
     if not os.path.exists(wav_path):
-        raise FileNotFoundError(f"WAV file নেই: {wav_path}")
+        raise FileNotFoundError(f"WAV file missing: {wav_path}")
     if lang == "en":
         return _transcribe_vosk_file(wav_path, model_dir)
     return _transcribe_sherpa_file(wav_path, model_dir)
 
 
 def listen(seconds=8, lang="bn", model_dir=None, device=None):
-    """Mic থেকে শোনা — `seconds` সেকেন্ড রেকর্ড করে text ফেরত দেয়।
+    """Listen from the mic — record `seconds` seconds and return text.
 
-    lang "bn" (default) বা "en"। Mic/sounddevice না থাকলে স্পষ্ট
-    RuntimeError — চুপচাপ খালি string নয়।
+    lang "bn" (default) or "en". Without a mic/sounddevice, a clear
+    RuntimeError — never a silent empty string.
     """
     lang = (lang or "bn").lower()
     if lang not in MODEL_IDS:
         raise ValueError(
             f"Unknown language {lang!r}. Known: {sorted(MODEL_IDS)}")
     sd = _require_sounddevice()
-    import numpy as np  # noqa: PLC0415 — sounddevice/sherpa-র সঙ্গী
+    import numpy as np  # noqa: PLC0415 — sounddevice/sherpa companion
 
     chunks = []
     q = queue.Queue()
@@ -263,8 +263,8 @@ def listen(seconds=8, lang="bn", model_dir=None, device=None):
                     continue
     except Exception as exc:
         raise RuntimeError(
-            f"Mic খুলতে পারলাম না ({type(exc).__name__}: {exc})। "
-            "Mic লাগানো/অনুমতি আছে কিনা দেখুন।"
+            f"Could not open the mic ({type(exc).__name__}: {exc}). "
+            "Check whether the mic is plugged in / permitted."
         ) from exc
     if not chunks:
         return ""
@@ -282,8 +282,8 @@ def listen(seconds=8, lang="bn", model_dir=None, device=None):
 
     sherpa_onnx = _require_sherpa()
     files = _sherpa_model_files(model_dir)
-    # model-এর নিজের decode.py-র config (Zipformer2) — modeling_unit /
-    # bpe_vocab ছাড়া, decode.py যেভাবে করে ঠিক সেভাবে।
+    # The model's own decode.py config (Zipformer2) — without modeling_unit /
+    # bpe_vocab, exactly as decode.py does it.
     recognizer = sherpa_onnx.OnlineRecognizer.from_transducer(
         tokens=files["tokens"], encoder=files["encoder"],
         decoder=files["decoder"], joiner=files["joiner"],
@@ -304,7 +304,7 @@ def listen(seconds=8, lang="bn", model_dir=None, device=None):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(
-        description="Mic থেকে শোনা (Vosk en / sherpa-onnx bn) — offline, $0")
+        description="Listen from the mic (Vosk en / sherpa-onnx bn) — offline, $0")
     parser.add_argument("--lang", default="bn", choices=["bn", "en"])
     parser.add_argument("--seconds", type=int, default=8)
     args = parser.parse_args()
