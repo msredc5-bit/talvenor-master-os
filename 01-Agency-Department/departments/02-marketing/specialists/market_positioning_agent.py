@@ -1,15 +1,15 @@
 """Market Positioning Agent — positioning/messaging draft (Dept 02 Marketing).
 
-ভূমিকা (role): Talvenor-এর positioning/messaging-এর DRAFT লেখা — AI
-receptionist, US home-service owner-দের জন্য। কখনো publish করে না,
-কাউকে পাঠায় না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: writing a DRAFT of Talvenor's positioning/messaging — AI
+receptionist, for US home-service owners. It never publishes,
+sends to nobody.
+Gate: none — the draft itself is safe, there is no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-এই agent কখনো করে না: কিছু publish/publish-prep করে না, দাম quote করে
-না, কোনো guarantee দেয় না, client-এর তথ্য/পরিসংখ্যান বানায় না,
-dental/medical নয়। Live voice stack Vapi/Sophia — অন্য কোনো stack-কে
-live বলা হয় না।
+This agent never: does any publish/publish-prep, quotes prices,
+gives any guarantee, invents client facts/statistics,
+no dental/medical. Live voice stack Vapi/Sophia — no other stack is
+called live.
 """
 
 import os
@@ -23,7 +23,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class MarketPositioningAgent:
-    """Positioning/messaging draft ONLY — কোনো বানানো দাবি নয়।"""
+    """Positioning/messaging draft ONLY — no invented claims."""
 
     task_kind = "market_position"
     gate = None
@@ -31,7 +31,7 @@ class MarketPositioningAgent:
     role = "Market Positioning Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -43,7 +43,7 @@ class MarketPositioningAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -72,7 +72,7 @@ class MarketPositioningAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Positioning DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Makes a positioning DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Market positioning draft"
         gated_action = task.get("gated_action")
@@ -114,20 +114,20 @@ class MarketPositioningAgent:
             "Audience: US home-service owners (plumbing, HVAC, roofing, "
             "garage door, septic, tree, foundation, restoration, pest, vet) "
             "— dental/medical never.\n"
-            "Problem: missed call = lost job — phone ধরতে না পারলে কাজ হাতছাড়া হয়।\n"
+            "Problem: missed call = lost job — if the phone is not answered, the job is lost.\n"
             "Solution: Talvenor AI receptionist answers 24/7 (live stack: "
             "Vapi — Sophia, +1 (947) 223-0244) and books the call.\n"
             "Differentiator: you run the jobs, we run the phone — "
-            "after-hours-ও কোনো call miss হয় না।\n"
+            "no call is missed, even after hours.\n"
             "Headline draft: \"Never miss a call. Never lose a job.\"\n"
             "Subline draft: \"AI receptionist for service businesses.\"\n"
             f"Book a 15-min call: {BOOKING_LINK} (New York Time)\n"
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Positioning draft ONLY, কখনো "
-            "publish/pাঠানো নয়। কোনো invented client, price, statistic, "
-            "testimonial, guarantee নেই। Gate: none।"
+            "DRAFT ONLY — mock brain ($0). Positioning draft ONLY, never "
+            "not publish/sending. No invented client, price, statistic, "
+            "testimonial, or guarantee. Gate: none."
         )
         return {
             "status": "draft-ready",

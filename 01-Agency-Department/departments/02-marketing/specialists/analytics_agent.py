@@ -1,17 +1,17 @@
 """Analytics Agent — analytics/report draft, visible metrics only (Dept 02 Marketing).
 
-ভূমিকা (role): Talvenor marketing-এর analytics/report-এর DRAFT লেখা — শুধু
-VISIBLE metric দিয়ে। যা দেখা যায় তাই; কখনো estimate করে না, সংখ্যা বানায় না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: writing a DRAFT of Talvenor marketing's analytics/report — only
+with VISIBLE metrics. Only what can be seen; never estimates, never invents numbers.
+Gate: none — the draft itself is safe, there is no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-আসল metric না থাকলে metric 0 — "No visible metrics yet — metrics 0 until
-real data exists." Weekly মূল report ReportCompiler-এর (Finance & Admin);
-এই agent শুধু marketing-এর draft দেয়।
+If there is no real metric, metric 0 — "No visible metrics yet — metrics 0 until
+real data exists." The main weekly report is ReportCompiler's (Finance & Admin);
+this agent only gives marketing's draft.
 
-এই agent কখনো করে না: metric estimate/bানানো নয়, কিছু publish/পাঠানো নয়,
-দাম quote করে না, কোনো guarantee দেয় না, client-এর তথ্য/পরিসংখ্যান বানায়
-না, dental/medical নয়।
+This agent never: estimates/invents a metric, publishes/sends anything,
+quotes no prices, gives no guarantee, invents no client facts/statistics,
+no dental/medical.
 """
 
 import os
@@ -25,7 +25,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class AnalyticsAgent:
-    """Analytics/report draft ONLY — visible metrics only, never estimates।"""
+    """Analytics/report draft ONLY — visible metrics only, never estimates."""
 
     task_kind = "analytics"
     gate = None
@@ -33,7 +33,7 @@ class AnalyticsAgent:
     role = "Analytics Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -45,7 +45,7 @@ class AnalyticsAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -72,7 +72,7 @@ class AnalyticsAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Analytics/report DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Makes an analytics/report DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Analytics report draft"
         gated_action = task.get("gated_action")
@@ -146,8 +146,8 @@ class AnalyticsAgent:
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Analytics draft ONLY, visible "
-            "metrics only — কখনো estimate/invent নয়, metric না থাকলে 0। "
-            "কোনো invented client, price, statistic, guarantee নেই। Gate: none।"
+            "metrics only — never estimate/invent; if there is no metric, 0. "
+            "No invented client, price, statistic, or guarantee. Gate: none."
         )
         return {
             "status": "draft-ready",

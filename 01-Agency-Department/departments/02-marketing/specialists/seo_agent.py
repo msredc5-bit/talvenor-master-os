@@ -1,14 +1,14 @@
 """SEO Agent — SEO draft (Dept 02 Marketing).
 
-ভূমিকা (role): Talvenor-এর SEO-র DRAFT লেখা — keyword suggestion, page
-title/meta draft, Google Business Profile suggestion। কোনো site/profile-এ
-কিছু বদলায় না, কিছু publish করে না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: write a DRAFT of Talvenor's SEO — keyword suggestions, page
+title/meta drafts, Google Business Profile suggestions. On no site/profile
+does it change anything or publish anything.
+Gate: none — the draft itself is safe, there is no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-এই agent কখনো করে না: ranking/traffic/position-এর সংখ্যা বানায় না, কোনো
-site বদলায় না, দাম quote করে না, কোনো guarantee দেয় না, client-এর
-তথ্য/পরিসংখ্যান বানায় না, dental/medical নয়।
+This agent never: invents ranking/traffic/position numbers,
+changes any site, quotes a price, gives any guarantee, invents client
+information/statistics — no dental/medical.
 """
 
 import os
@@ -22,7 +22,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class SEOAgent:
-    """SEO draft ONLY — suggestion মাত্র, কোনো invented ranking নয়।"""
+    """SEO draft ONLY — a suggestion only, no invented ranking."""
 
     task_kind = "seo"
     gate = None
@@ -30,7 +30,7 @@ class SEOAgent:
     role = "SEO Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -42,7 +42,7 @@ class SEOAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -71,7 +71,7 @@ class SEOAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """SEO DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Making an SEO DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "SEO draft"
         gated_action = task.get("gated_action")
@@ -131,9 +131,9 @@ class SEOAgent:
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). SEO draft ONLY, কোনো site বদলানো "
-            "নয়, কোনো publish নয়। কোনো ranking/traffic সংখ্যা বানানো হয়নি। "
-            "কোনো invented client, price, statistic, guarantee নেই। Gate: none।"
+            "DRAFT ONLY — mock brain ($0). SEO draft ONLY, no site changed "
+            "no publish. No ranking/traffic number was invented. "
+            "No invented client, price, statistic, or guarantee. Gate: none."
         )
         return {
             "status": "draft-ready",

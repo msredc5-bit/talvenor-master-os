@@ -1,15 +1,15 @@
 """Social Media Agent — social content planning draft ONLY (Dept 02 Marketing).
 
-ভূমিকা (role): Facebook, Instagram, LinkedIn-এর জন্য content planning-এর
-DRAFT লেখা — post idea, hook, caption outline। কখনো post/publish করে না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: write a DRAFT of content planning for Facebook, Instagram, LinkedIn —
+post ideas, hooks, caption outlines. It never posts/publishes.
+Gate: none — the draft itself is safe, there is no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-Posting Boss main chat থেকে নিজে করেন ("post it" gate); publish-এর prep
-PublishPrep-এর কাজ। এই agent comment-এ pitch করে না, group-এ post করে না।
+Boss does the posting himself from the main chat ("post it" gate); the prep for publishing
+is PublishPrep's job. This agent does not pitch in comments, does not post in groups.
 
-এই agent কখনো করে না: কিছু post/publish করে না, দাম quote করে না, কোনো
-guarantee দেয় না, client-এর তথ্য/পরিসংখ্যান বানায় না, dental/medical নয়।
+This agent never: posts/publishes anything, quotes a price,
+gives any guarantee, invents client information/statistics — no dental/medical.
 """
 
 import os
@@ -23,7 +23,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class SocialMediaAgent:
-    """Social content planning draft ONLY — NEVER posts/publishes।"""
+    """Social content planning draft ONLY — NEVER posts/publishes."""
 
     task_kind = "social_manage"
     gate = None
@@ -31,7 +31,7 @@ class SocialMediaAgent:
     role = "Social Media Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -43,7 +43,7 @@ class SocialMediaAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -72,7 +72,7 @@ class SocialMediaAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Social planning DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Making a social planning DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Social content plan draft"
         gated_action = task.get("gated_action")
@@ -130,9 +130,9 @@ class SocialMediaAgent:
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Social planning draft ONLY, "
-            "কখনো post/publish নয়। একই idea তিন platform-এ adapt করা। "
-            "কোনো invented client, price, statistic, guarantee নেই। "
-            "Gate: none।"
+            "Never post/publish. Adapt the same idea across three platforms. "
+            "No invented client, price, statistic, guarantee. "
+            "Gate: none."
         )
         return {
             "status": "draft-ready",
