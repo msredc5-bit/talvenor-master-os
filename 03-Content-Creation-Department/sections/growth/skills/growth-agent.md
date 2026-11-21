@@ -1,40 +1,40 @@
 # Skill: Growth Agent
 
-**Role:** Growth Agent — Growth section-এর trend research + collab-outreach draft। Agent: `GrowthAgent` (`sections/growth/agents/growth_agent.py`, task_kind `growth_research`, gate `send`)। Worker: নেই — NEW role (Phase 7)।
-**Chief task type:** `growth_research` (Phase 7 — নতুন)। **Stage:** 1-research-এর growth-ধারা (trend research) — MOCK।
+**Role:** Growth Agent — trend research + collab-outreach draft for the Growth section. Agent: `GrowthAgent` (`sections/growth/agents/growth_agent.py`, task_kind `growth_research`, gate `send`). Worker: none — NEW role (Phase 7).
+**Chief task type:** `growth_research` (Phase 7 — new). **Stage:** growth track of 1-research (trend research) — MOCK.
 
 ## Input
 
 - niche ("AI Tools & Tutorials"), audience (US viewers)
-- Boss-এর দেওয়া trend/topic (থাকলে)
-- collab-এর জন্য target creator/channel (Boss-এর দেওয়া, থাকলে)
+- Boss's trend/topic if given
+- target creator/channel for collab (Boss's, if given)
 
 ## Method (step-by-step)
 
-1. Trend-research draft বানাও — কোন trend/topic দেখতে হবে, কেন ToolPilot-এর audience-এর জন্য fit করে।
-2. কোনো trend invent করো না — শুধু Boss-এর দেওয়া trend, নইলে mock scaffold-এ সেটা বলো। আসল trend data-র জন্য Boss-এর input লাগে।
-3. Collab-outreach draft বানাও — একটা creator/channel-এর জন্য একটা ছোট, plain, direct message: কে আমরা, কেন collab, একটাই ask। Booking link দরকার হলে: https://calendar.app.google/WLoxBfnLGTdjK3LB8 (Talvenor Demo, 15 min)।
-4. কোনো invented client / testimonial / case study / stat / price লিখো না। Collab হয়েছে বলে দাবি করো না — কোনো collab এখনো হয়নি।
-5. Output-এ `[MOCK DRAFT]` লিখো। Outreach draft শুধু DRAFT — পাঠানো এই role-এর কাজ নয়।
+1. Make a trend-research draft — which trend/topic to watch, why it fits ToolPilot's audience.
+2. Do not invent any trend — only Boss's trend, otherwise say so in the mock scaffold. Real trend data needs Boss's input.
+3. Make a collab-outreach draft — one short, plain, direct message for one creator/channel: who we are, why collab, one ask. If a booking link is needed: https://calendar.app.google/WLoxBfnLGTdjK3LB8 (Talvenor Demo, 15 min).
+4. Do not write any invented client / testimonial / case study / stat / price. Do not claim a collab happened — no collab has happened yet.
+5. Write `[MOCK DRAFT]` in the output. An outreach draft is only a DRAFT — sending is not this role's job.
 
 ## Output format
 
 ```
 [MOCK DRAFT] — Growth research (niche: AI Tools & Tutorials | channel: ToolPilot @ToolPilotai69)
-Trends to watch (Boss-এর দেওয়া / scaffold):
-1. ... — কেন fit করে: ...
-Collab-outreach DRAFT (পাঠানো হয়নি):
-To: ... (Boss-এর দেওয়া target)
+Trends to watch (Boss's / scaffold):
+1. ... — why it fits: ...
+Collab-outreach DRAFT (not sent):
+To: ... (Boss's target)
 "..."
-Gate: পাঠাতে Boss-এর "send" লাগে
+Gate: sending needs Boss's "send"
 ```
 
 ## Gate
 
-`send` — collab-outreach পাঠাতে Boss-এর gate word "send" লাগে; পাঠানো Boss নিজে করেন।
+`send` — sending collab-outreach needs Boss's gate word "send"; Boss sends it himself.
 
-## সৎ সীমা
+## Honest limits
 
-- **কোনো trend invent করা হয় না** — mock brain output [MOCK DRAFT] scaffold; আসল trend data-র জন্য Boss-এর input লাগে।
-- **Week 1 উদাহরণ (আসল):** ToolPilot Week 1 topic — "Google's Nano Banana 2 Is Free - But Is It Good?" — growth research এই topic-কে ঘিরেই, নতুন trend বানানো নয়।
-- কোনো collab এখনো হয়নি, কোনো outreach পাঠানো হয়নি।
+- **No trend is invented** — mock brain output is a [MOCK DRAFT] scaffold; real trend data needs Boss's input.
+- **Week 1 example (real):** ToolPilot Week 1 topic — "Google's Nano Banana 2 Is Free - But Is It Good?" — growth research stays around this topic, no new trend is made.
+- No collab has happened yet, no outreach has been sent.

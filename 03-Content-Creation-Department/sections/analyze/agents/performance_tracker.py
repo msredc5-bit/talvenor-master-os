@@ -1,34 +1,34 @@
 """Performance Tracker Agent — analyze section (Phase 7).
 
-ভূমিকা (role): Performance report-এর template/setup বানানো — কোন metric
-কোথা থেকে নিতে হবে, best/worst comparison, পরের সপ্তাহে একটা change।
-Vendored worker: PerformanceTracker (Chief task performance_track, gate ok)।
-Channel: ToolPilot @ToolPilotai69 — AI Tools & Tutorials, faceless, US viewers।
-Pipeline stage: 8-report (yt-retention — retention CSV পড়ে hook leak খোঁজা) — MOCK।
-Status: DRAFT ONLY — mock brain ($0), সব output [MOCK DRAFT]।
-Gate: "ok" — Boss-এর "ok" ছাড়া report template ব্যবহার করা যাবে না।
+Role: make the performance report's template/setup — which metric
+to take from where, best/worst comparison, one change for next week.
+Vendored worker: PerformanceTracker (Chief task performance_track, gate ok).
+Channel: ToolPilot @ToolPilotai69 — AI Tools & Tutorials, faceless, US viewers.
+Pipeline stage: 8-report (yt-retention — reads a retention CSV to find the hook leak) — MOCK.
+Status: DRAFT ONLY — mock brain ($0), all output [MOCK DRAFT].
+Gate: "ok" — the report template may not be used without Boss's "ok".
 
-সৎ সত্য: কোনো video এখনো publish হয়নি — metric 0 (subs 0, hours 0,
-videos 0)। সংখ্যা কখনো estimate করা হয় না — শুধু Boss-এর পাঠানো আসল
-platform সংখ্যা ব্যবহার করা হয়। Performance Analyst-এর থেকে আলাদা:
-Tracker setup/template বানায়, Analyst আসল সংখ্যা বিশ্লেষণ করে।
+Honest truth: no video has been published yet — metrics 0 (subs 0, hours 0,
+videos 0). Numbers are never estimated — only Boss's real
+platform numbers are used. Different from Performance Analyst:
+the Tracker makes the setup/template, the Analyst analyzes the real numbers.
 
-কখনো করে না: publish করে না, upload করে না, send করে না, খরচ করে না,
-delete করে না। সংখ্যা invent/estimate করে না।
-Upload OFF — this agent never uploads।
+Never does: does not publish, upload, send, spend, or
+delete. Does not invent/estimate numbers.
+Upload OFF — this agent never uploads.
 """
 
 import os
 import sys
 import uuid
 
-# Import time-এ শুধু stdlib। Worker / brain / gateway — সব lazy, run()-এর ভিতরে
-# (দুই department-এর vendored tree-ই top-level `src` দেয় — module level-এ
-# src.creator_workers import করলে package collision হয়)।
+# Only stdlib at import time. Brain / gateway — all lazy, inside run().
+# (both departments' vendored trees give a top-level `src` — importing
+# src.creator_workers at module level causes a package collision).
 
 
 class PerformanceTrackerAgent:
-    """Performance Tracker — analyze section-এর report template agent।"""
+    """Performance Tracker — report template agent for the analyze section."""
 
     task_kind = "performance_track"
     gate = "ok"
@@ -102,12 +102,12 @@ class PerformanceTrackerAgent:
             "mock_brain": True,
             "gate": self.gate,
             "note": "Gated action — PENDING approval recorded. Nothing was "
-                    "sent/published/uploaded/spent/deleted. Boss-এর gate word "
-                    "ছাড়া এগোবে না।",
+                    "sent/published/uploaded/spent/deleted. Without Boss's gate word " 
+                    "it will not go ahead.",
         }
 
     def _gate_check(self, task, gateway, approvals_path):
-        """Gated action থাকলে worker চালানো যাবে না — PENDING-এ আটকাও।"""
+        """If there is a gated action, the draft may not run — hold it as PENDING."""
         gated_action = task.get("gated_action")
         if not gated_action:
             return None
@@ -120,8 +120,8 @@ class PerformanceTrackerAgent:
                 "draft_only": True,
                 "mock_brain": True,
                 "gate": self.gate,
-                "upload_stage": "OFF by default — needs Boss-এর 'upload it' + "
-                                "YOUTUBE_UPLOAD_ENABLED=1 + Boss-এর নিজের "
+                "upload_stage": "OFF by default — needs Boss's 'upload it' + " 
+                                "YOUTUBE_UPLOAD_ENABLED=1 + Boss's own " 
                                 "YouTube credential",
                 "note": "Upload stage 9 is OFF by default. This agent never uploads.",
             }
@@ -130,7 +130,7 @@ class PerformanceTrackerAgent:
         if approval_id:
             try:
                 if gw.is_approved(approval_id):
-                    return None  # approved — তবুও শুধু draft, action execute নয়
+                    return None  # approved — still only a draft, no action executed
             except KeyError:
                 pass
         if gated_action in ("send", "publish", "spend", "delete"):
@@ -146,20 +146,20 @@ class PerformanceTrackerAgent:
             "draft_only": True,
             "mock_brain": True,
             "gate": self.gate,
-            "note": f"Gate word '{self.gate}' ছাড়া এগোবে না — Boss-এর "
-                    f"অনুমোদন বাকি। Gated action {gated_action!r}-এর জন্য "
-                    "কোনো approval record বানানো যায়নি।",
+            "note": f"Gate word '{self.gate}' is needed to go ahead — Boss's " 
+                    f"approval is pending. For gated action {gated_action!r} " 
+                    "no approval record could be made.",
         }
 
     # -- run ---------------------------------------------------------------
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Report template DRAFT — vendored PerformanceTracker-কে delegate করে।
+        """Report template DRAFT — delegates to the vendored PerformanceTracker.
 
         task = {"type": "performance_track", "title": "...",
-                "payload": {"topic": ..., "metrics": ... (Boss-এর আসল সংখ্যা, থাকলে)},
+                "payload": {"topic": ..., "metrics": ... (Boss's real numbers, if any)},
                 "gated_action": ... (optional), "approval_id": ... (optional)}
-        Metrics 0 (কোনো video publish হয়নি) — সংখ্যা estimate করা হয় না।
-        কোনো file লেখে না, network ছোঁয় না, কিছু publish/upload করে না।
+        Metrics 0 (no video published) — numbers are not estimated.
+        It writes no file, touches no network, and publishes/uploads nothing.
         """
         task = dict(task or {})
         payload = dict(task.get("payload") or {})
@@ -186,11 +186,11 @@ class PerformanceTrackerAgent:
         worker_result = worker.execute(creator_task)
 
         notes = (worker_result.notes or "") + (
-            "\n[MOCK DRAFT] — mock brain ($0), DRAFT ONLY। Output পাঠাতে/ব্যবহার "
-            "করতে Boss-এর gate word লাগবে: 'ok'।\n"
-            "Metrics 0 — কোনো video publish হয়নি (subs 0, hours 0, videos 0)। "
-            "সংখ্যা estimate করা হয় না — শুধু Boss-এর পাঠানো আসল platform "
-            "সংখ্যা ব্যবহার করা হয়।")
+            "\n[MOCK DRAFT] — mock brain ($0), DRAFT ONLY. To send/use the output, "
+            "Boss's gate word is needed: 'ok'.\n"
+            "Metrics 0 — no video published (subs 0, hours 0, videos 0). "
+            "Numbers are not estimated — only Boss's real platform "
+            "numbers are used.")
         return {
             "status": "draft-ready",
             "type": self.task_kind,

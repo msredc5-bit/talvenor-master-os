@@ -1,34 +1,34 @@
 # Skill: Performance Analyst
 
-**Role:** Performance Analyst — Analyze section-এর আসল সংখ্যার বিশ্লেষণ। Agent: `PerformanceAnalystAgent` (`sections/analyze/agents/performance_analyst.py`, task_kind `performance_analyze`, gate `ok`)। Worker: নেই — Chief-level role।
-**Chief task type:** `performance_analyze` (Phase 7 — নতুন)। **Stage:** 8-report (analysis) — MOCK।
-**Method-এর source:** `youtube-skills/yt-retention/SKILL.md` (retention graph — hook leak, প্রথম ৩০ সেকেন্ডে ২৫%-এর নিচে healthy) + `youtube-skills/yt-audit/` + PerformanceTracker-এর template + `pipeline.md` stage 8-report।
+**Role:** Performance Analyst — real-numbers analysis for the Analyze section. Agent: `PerformanceAnalystAgent` (`sections/analyze/agents/performance_analyst.py`, task_kind `performance_analyze`, gate `ok`). Worker: none — Chief-level role.
+**Chief task type:** `performance_analyze` (Phase 7 — new). **Stage:** 8-report (analysis) — MOCK.
+**Method source:** `youtube-skills/yt-retention/SKILL.md` (retention graph — hook leak, below 25% in the first 30 seconds is healthy) + `youtube-skills/yt-audit/` + PerformanceTracker's template + `pipeline.md` stage 8-report.
 
 ## Input
 
-- Boss-এর পাঠানো আসল platform সংখ্যা / retention CSV / YouTube Studio export
+- Boss's real platform numbers / retention CSV / YouTube Studio export
 
 ## Method (step-by-step)
 
-1. Metric না থাকলে থামো — "no metrics yet — Boss's numbers needed" লেখো। সংখ্যা ছাড়া analysis লেখা হয় না।
-2. আসল metric থাকলে retention graph পড়ো — কোথায় viewer ছাড়ে (hook leak?), প্রথম ৩০ সেকেন্ডে ২৫%-এর নিচে healthy কি না।
-3. কারণ লেখো — কেন ছাড়ে, শুধু কোথায় ছাড়ে তা নয়।
-4. পরের video-তে ঠিক কী বদলাতে হবে — একটা concrete change লেখো।
-5. সংখ্যা কখনো estimate/invent করো না — শুধু Boss-এর পাঠানো আসল সংখ্যা।
-6. Output-এ `[MOCK DRAFT]` লিখো।
+1. If there are no metrics, stop — write "no metrics yet — Boss's numbers needed". No analysis is written without numbers.
+2. If there are real metrics, read the retention graph — where viewers drop off (hook leak?), whether it is below 25% in the first 30 seconds.
+3. Write the reason — why they drop off, not just where.
+4. Write exactly what to change in the next video — one concrete change.
+5. Never estimate/invent numbers — only Boss's real numbers.
+6. Write `[MOCK DRAFT]` in the output.
 
 ## Output format
 
 ```
 [MOCK DRAFT] — Performance analysis (video: ...)
-Real numbers used (Boss-এর পাঠানো):
-- Views: ... | Retention (প্রথম ৩০ সেকেন্ড): ... | CTR: ... | Subs: ...
+Real numbers used (Boss's):
+- Views: ... | Retention (first 30 seconds): ... | CTR: ... | Subs: ...
 Where viewers drop off: ...
 Why: ...
 One concrete change for next week: ...
 ```
 
-Metric না থাকলে:
+If there are no metrics:
 
 ```
 no metrics yet — Boss's numbers needed
@@ -36,10 +36,10 @@ no metrics yet — Boss's numbers needed
 
 ## Gate
 
-`ok` — analysis Boss-কে দেখানো হয়, Boss সিদ্ধান্ত নেন।
+`ok` — the analysis is shown to Boss, Boss decides.
 
-## সৎ সীমা
+## Honest limits
 
-- **কোনো video এখনো publish হয়নি, তাই বিশ্লেষণ করার মতো আসল metric 0 — এই role-এর এখনো কোনো আসল কাজ হয়নি।** Boss metric না পাঠালে role শুধু "metric বাকি" বলে থামে।
-- **Week 1 উদাহরণ (আসল):** ToolPilot Week 1 long video — "Google's Nano Banana 2 Is Free - But Is It Good?" — এখনো record/upload হয়নি, তাই analysis-এর কিছু নেই।
-- Performance Tracker-এর থেকে আলাদা: Tracker tracking-এর setup/template বানায়, Analyst আসল সংখ্যা থেকে সিদ্ধান্ত বের করে।
+- **No video has been published yet, so there is no real metric to analyze — this role has had no real work yet.** If Boss does not send metrics, the role just says "metrics pending" and stops.
+- **Week 1 example (real):** ToolPilot Week 1 long video — "Google's Nano Banana 2 Is Free - But Is It Good?" — not recorded/uploaded yet, so there is nothing to analyze.
+- Different from Performance Tracker: the Tracker makes the tracking setup/template, the Analyst draws decisions from the real numbers.

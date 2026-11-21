@@ -1,35 +1,35 @@
 """Growth Agent — growth section (Phase 7, NEW role).
 
-ভূমিকা (role): Trend-research draft + collab-outreach draft বানানো —
-ToolPilot channel-এর growth-এর জন্য কোন trend/topic দেখতে হবে, আর কোন
-creator/channel-এর সাথে collab-এর জন্য কী লিখতে হবে, তার DRAFT।
-Worker: নেই — NEW standalone role, draft logic (brain.complete)।
-Channel: ToolPilot @ToolPilotai69 — AI Tools & Tutorials, faceless, US viewers।
-Pipeline stage: 1-research-এর growth-ধারা (trend research) — MOCK।
-Status: DRAFT ONLY — mock brain ($0), সব output [MOCK DRAFT]।
-Gate: "send" — collab-outreach পাঠাতে Boss-এর gate word "send" লাগে;
-outreach draft শুধু DRAFT, পাঠানো এই agent-এর কাজ নয়।
+Role: make a trend-research draft + collab-outreach draft —
+which trend/topic to watch for the ToolPilot channel's growth, and what to write
+for a collab with which creator/channel — as a DRAFT.
+Worker: none — NEW standalone role, draft logic (brain.complete).
+Channel: ToolPilot @ToolPilotai69 — AI Tools & Tutorials, faceless, US viewers.
+Pipeline stage: growth track of 1-research (trend research) — MOCK.
+Status: DRAFT ONLY — mock brain ($0), all output [MOCK DRAFT].
+Gate: "send" — sending collab-outreach needs Boss's gate word "send";
+the outreach draft is only a DRAFT, sending is not this agent's job.
 
-সৎ সত্য: কোনো trend invent করা হয় না — mock brain output [MOCK DRAFT]
-scaffold; আসল trend data-র জন্য Boss-এর input লাগে। কোনো collab এখনো
-হয়নি, কোনো outreach পাঠানো হয়নি।
+Honest truth: no trend is invented — mock brain output is a [MOCK DRAFT]
+scaffold; real trend data needs Boss's input. No collab has happened yet,
+no outreach has been sent.
 
-কখনো করে না: message/email পাঠায় না, publish করে না, upload করে না,
-খরচ করে না, delete করে না। Trend / collab / stat invent করে না।
-কোনো invented client / testimonial / case study / price লেখে না।
-Upload OFF — this agent never uploads।
+Never does: does not send messages/emails, publish, upload,
+spend, or delete. Does not invent trends / collabs / stats.
+Does not write any invented client / testimonial / case study / price.
+Upload OFF — this agent never uploads.
 """
 
 import os
 import sys
 
-# Import time-এ শুধু stdlib। Brain / gateway — সব lazy, run()-এর ভিতরে।
+# Only stdlib at import time. Brain / gateway — all lazy, inside run().
 
 BOOKING_LINK = "https://calendar.app.google/WLoxBfnLGTdjK3LB8"
 
 
 class GrowthAgent:
-    """Growth Agent — trend research + collab-outreach draft agent (NEW, standalone)।"""
+    """Growth Agent — trend research + collab-outreach draft agent (NEW, standalone)."""
 
     task_kind = "growth_research"
     gate = "send"
@@ -68,7 +68,7 @@ class GrowthAgent:
         return BrainFactory.get_brain("content")
 
     def _draft(self, prompt, brain):
-        """brain.complete(prompt) দিয়ে draft — brain না থাকলে scaffold।"""
+        """Draft via brain.complete(prompt) — scaffold if there is no brain."""
         llm = brain
         if llm is None:
             try:
@@ -99,12 +99,12 @@ class GrowthAgent:
             "mock_brain": True,
             "gate": self.gate,
             "note": "Gated action — PENDING approval recorded. Nothing was "
-                    "sent/published/uploaded/spent/deleted. Boss-এর gate word "
-                    "'send' ছাড়া কোনো outreach পাঠানো হয় না।",
+                    "sent/published/uploaded/spent/deleted. Without Boss's gate word " 
+                    "'send', no outreach is sent.",
         }
 
     def _gate_check(self, task, gateway, approvals_path):
-        """Gated action থাকলে draft চালানো যাবে না — PENDING-এ আটকাও।"""
+        """If there is a gated action, the draft may not run — hold it as PENDING."""
         gated_action = task.get("gated_action")
         if not gated_action:
             return None
@@ -117,8 +117,8 @@ class GrowthAgent:
                 "draft_only": True,
                 "mock_brain": True,
                 "gate": self.gate,
-                "upload_stage": "OFF by default — needs Boss-এর 'upload it' + "
-                                "YOUTUBE_UPLOAD_ENABLED=1 + Boss-এর নিজের "
+                "upload_stage": "OFF by default — needs Boss's 'upload it' + " 
+                                "YOUTUBE_UPLOAD_ENABLED=1 + Boss's own " 
                                 "YouTube credential",
                 "note": "Upload stage 9 is OFF by default. This agent never uploads.",
             }
@@ -127,7 +127,7 @@ class GrowthAgent:
         if approval_id:
             try:
                 if gw.is_approved(approval_id):
-                    return None  # approved — তবুও শুধু draft, action execute নয়
+                    return None  # approved — still only a draft, no action executed
             except KeyError:
                 pass
         if gated_action in ("send", "publish", "spend", "delete"):
@@ -143,20 +143,20 @@ class GrowthAgent:
             "draft_only": True,
             "mock_brain": True,
             "gate": self.gate,
-            "note": f"Gate word '{self.gate}' ছাড়া এগোবে না — Boss-এর "
-                    f"অনুমোদন বাকি। Gated action {gated_action!r}-এর জন্য "
-                    "কোনো approval record বানানো যায়নি।",
+            "note": f"Gate word '{self.gate}' is needed to go ahead — Boss's " 
+                    f"approval is pending. For gated action {gated_action!r} " 
+                    "no approval record could be made.",
         }
 
     # -- run ---------------------------------------------------------------
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Trend-research + collab-outreach DRAFT — standalone, brain.complete দিয়ে।
+        """Trend-research + collab-outreach DRAFT — standalone, via brain.complete.
 
         task = {"type": "growth_research", "title": "...",
-                "payload": {"niche": ..., "trend": ... (Boss-এর দেওয়া, থাকলে)},
+                "payload": {"niche": ..., "trend": ... (Boss's, if given)},
                 "gated_action": ... (optional), "approval_id": ... (optional)}
-        DRAFT ONLY — কিছু পাঠানো হয় না। কোনো file লেখে না, network ছোঁয় না,
-        কিছু publish/upload করে না।
+        DRAFT ONLY — nothing is sent. It writes no file, touches no network,
+        and publishes/uploads nothing.
         """
         task = dict(task or {})
         payload = dict(task.get("payload") or {})
@@ -176,11 +176,11 @@ class GrowthAgent:
         )
         text = self._draft(prompt, brain)
         notes = text + (
-            "\n[MOCK DRAFT] — mock brain ($0), DRAFT ONLY। কোনো trend invent "
-            "করা হয়নি — আসল trend data-র জন্য Boss-এর input লাগে।\n"
-            "Collab-outreach draft শুধু DRAFT — পাঠাতে Boss-এর gate word "
-            "'send' লাগে, আর পাঠানো Boss নিজে করেন। কোনো outreach এখনো "
-            "পাঠানো হয়নি।")
+            "\n[MOCK DRAFT] — mock brain ($0), DRAFT ONLY. No trend was invented "
+            "— real trend data needs Boss's input.\n"
+            "A collab-outreach draft is only a DRAFT — sending needs Boss's gate word "
+            "'send', and Boss sends it himself. No outreach has been "
+            "sent yet.")
         return {
             "status": "draft-ready",
             "type": self.task_kind,
