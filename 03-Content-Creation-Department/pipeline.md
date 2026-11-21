@@ -1,62 +1,62 @@
-# Content Creation — Pipeline (১৩ stage, সৎ map)
+# Content Creation — Pipeline (13 stages, honest map)
 
 **Engine:** Creator OS — vendored copy `03-Content-Creation-Department/engine/workers/` (Phase 6; upstream `~/workspace/creator-os-combined/`)
 **Channel:** ToolPilot @ToolPilotai69 (faceless, AI Tools & Tutorials)
-**Chief:** `chief_of_staff_content.py` — REAL (Phase 3), ৬ worker ডাকে (mock brain, $0)
+**Chief:** `chief_of_staff_content.py` — REAL (Phase 3), calls 6 workers (mock brain, $0)
 
-## ১৩ stage — অবস্থা
+## 13 stages — status
 
-| # | Stage | Worker / Tool | অবস্থা | Boss-এর কাছে যা বাকি |
+| # | Stage | Worker / Tool | Status | What is still pending with Boss |
 |---|---|---|---|---|
-| `0a-niche` | Niche finder | yt-niche `niche_score.py` | **MOCK** — topic না থাকলে চলে, নইলে skip | কিছু না (topic জানা থাকলে এই stage লাগে না) |
-| `0b-plan` | Plan | yt-plan (weekly plan) | **MOCK** — hours থেকে plan বানায় | সপ্তাহে কত ঘণ্টা দেবেন — জানানো |
-| `1-research` | Research | TopicResearcher | **MOCK** — mock brain-এ topic draft | কিছু না |
-| `2a-concept` | Concept | `concept_score.py` (৩–৫ concept, ১–১০ score) | **MOCK** — score scaffold | কিছু না |
-| `2b-script` | Script | ScriptWriter + hookscore.py | **MOCK** — `[MOCK DRAFT]` scaffold | **VOICE.md correction** — DRAFT, Boss ঠিক না করা পর্যন্ত কোনো script final নয় |
-| `3-visual-pack` | Visual+Pack | VisualProducer + title.py | **MOCK** — shot list + thumbnail idea | কিছু না |
-| `4-video` | Video | Reel Factory (pluggable provider) | **BLOCKED** — Chief শুধু production plan + missing-inputs list দেয়; video render করে না | **OBS recording / real footage** (Week 1-এর ৫ test), **PC GPU নাম** (true AI motion-এর জন্য — 2026-11-01 থেকে জানা যায়নি), অথবা paid video key ($0 cap-এ নয়) |
-| `5-edit` | Edit | yt-edit (deadair, chapters, shorts) | **BLOCKED** — transcript লাগে, এখনো কোনো transcript নেই | video-র transcript (video হলেই আসবে) |
-| `6-caption-seo` | Caption+SEO | CaptionWriter + yt-seo | **MOCK** — caption pack draft | কিছু না |
-| `7-publish-prep` | Publish prep | PublishPrep ONLY | **MOCK** — checklist draft, `ready_to_publish: false` | Boss-এর gate word: post করতে **"post it"**, upload করতে **"upload it"** |
-| `8-report` | Report | PerformanceTracker + yt-retention | **MOCK** — report template; post-publish only | কোনো video publish হয়নি, তাই metric 0 — Boss-এর পাঠানো আসল সংখ্যা লাগবে |
-| `9-upload` | Upload | `upload_youtube.py` | **BLOCKED** — **DEFAULT OFF** | Boss-এর **"upload it"** + `YOUTUBE_UPLOAD_ENABLED=1` + Boss-এর নিজের YouTube credential (OAuth) — তিনটাই |
-| `10-next-plan` | Next plan | `loop_next.py` | **MOCK** — আগের report পড়ে পরের brief লেখে | কোনো report নেই এখনো (video 0) |
+| `0a-niche` | Niche finder | yt-niche `niche_score.py` | **MOCK** — runs when there is no topic, skipped otherwise | nothing (this stage is not needed when the topic is known) |
+| `0b-plan` | Plan | yt-plan (weekly plan) | **MOCK** — makes a plan from hours | tell us how many hours a week you will give |
+| `1-research` | Research | TopicResearcher | **MOCK** — topic draft from the mock brain | nothing |
+| `2a-concept` | Concept | `concept_score.py` (3–5 concepts, 1–10 score) | **MOCK** — score scaffold | nothing |
+| `2b-script` | Script | ScriptWriter + hookscore.py | **MOCK** — `[MOCK DRAFT]` scaffold | **VOICE.md correction** — DRAFT, no script is final until Boss fixes it |
+| `3-visual-pack` | Visual+Pack | VisualProducer + title.py | **MOCK** — shot list + thumbnail idea | nothing |
+| `4-video` | Video | Reel Factory (pluggable provider) | **BLOCKED** — the Chief only gives a production plan + missing-inputs list; it does not render video | **OBS recording / real footage** (Week 1's 5 tests), **PC GPU name** (for true AI motion — unknown since 2026-11-01), or a paid video key (not under the $0 cap) |
+| `5-edit` | Edit | yt-edit (deadair, chapters, shorts) | **BLOCKED** — needs a transcript, there is no transcript yet | the video's transcript (it will come once there is a video) |
+| `6-caption-seo` | Caption+SEO | CaptionWriter + yt-seo | **MOCK** — caption pack draft | nothing |
+| `7-publish-prep` | Publish prep | PublishPrep ONLY | **MOCK** — checklist draft, `ready_to_publish: false` | Boss's gate word: **"post it"** to post, **"upload it"** to upload |
+| `8-report` | Report | PerformanceTracker + yt-retention | **MOCK** — report template; post-publish only | no video has been published, so metrics are 0 — Boss's real numbers will be needed |
+| `9-upload` | Upload | `upload_youtube.py` | **BLOCKED** — **DEFAULT OFF** | Boss's **"upload it"** + `YOUTUBE_UPLOAD_ENABLED=1` + Boss's own YouTube credential (OAuth) — all three |
+| `10-next-plan` | Next plan | `loop_next.py` | **MOCK** — reads the previous report and writes the next brief | no report yet (videos 0) |
 
-**গণনা:** REAL **0** · MOCK **10** · STUB **0** · BLOCKED **3** (stage 4, 5, 9)।
-REAL 0-ই সত্য — কোনো stage-ই এখনো আসল finished output দেয় না; সব draft
-mock scaffold। Chief-এর কাজ: draft বানানো + gate-এ আটকানো, video render
-বা upload করা নয়।
+**Count:** REAL **0** · MOCK **10** · STUB **0** · BLOCKED **3** (stages 4, 5, 9).
+REAL 0 is the truth — no stage gives a real finished output yet; everything is a
+mock scaffold. The Chief's job: make drafts + hold things at the gate, not render video
+or upload.
 
-## সৎ সীমা (লুকানো হয় না)
+## Honest limits (not hidden)
 
-- **Live-LLM brain unwired** — standalone runner-এ MockLLM-ই চলে; live
-  provider deliberate ভাবে unwired (কোনো key ফাইলে নেই, কোনো network
-  call নেই)। Agent (Elora/Muse) নিজেই brain — আসল লেখা agent লেখে।
-- **VOICE.md DRAFT** — `03-Content-Creation-Department/VOICE.md`।
-- **True AI video motion** — Boss-এর PC GPU (নাম জানা যায়নি) বা paid
-  key ছাড়া হয় না। AI video generation এখানে REGION-BLOCKED — retry
-  করা হয় না। Default stills + Ken Burns motion = সত্যিকারের motion নয়।
-- **Captions line-level** — word-level karaoke নয়।
-- **Upload OFF** — কোনো real YouTube upload এখনো verify হয়নি।
-- **পুরনো artifact page `creator-os-combined` STALE** — ৮ stage দেখায়,
-  আসল ১৩। Boss না বললে ঠিক করা হবে না।
+- **Live-LLM brain unwired** — the standalone runner runs MockLLM only; the live
+  provider is deliberately unwired (no key in any file, no network
+  call). The Agent (Elora/Muse) is itself the brain — the agent writes the real text.
+- **VOICE.md DRAFT** — `03-Content-Creation-Department/VOICE.md`.
+- **True AI video motion** — impossible without Boss's PC GPU (name unknown) or a paid
+  key. AI video generation is REGION-BLOCKED here — no retry.
+  Default stills + Ken Burns motion are not real motion.
+- **Captions are line-level** — not word-level karaoke.
+- **Upload OFF** — no real YouTube upload has been verified yet.
+- **The old artifact page `creator-os-combined` is STALE** — it shows 8 stages,
+  the real count is 13. It will not be fixed unless Boss says so.
 
-## Talvenor weekly social (Nov 16–22) — অবস্থা
+## Talvenor weekly social (Nov 16–22) — status
 
-- Plan (৫ post: Mon Reel, Tue Carousel, Wed Image, Thu Carousel, Fri
-  LinkedIn) **2026-11-15 18:00-তে দেওয়া হয়েছে — Boss-এর "ok" বাকি।**
-  কিছু approve হয়নি, কিছু post হয়নি।
-- Nov 9–15: **কিছু post হয়নি** (Nov 9–15 plan approve হয়নি)।
-- LinkedIn = Boss নিজে post করেন (personal profile)।
-- এই Chief Talvenor-এর weekly post-ও draft করতে পারে (content_plan /
-  caption_write), কিন্তু publish শুধু Boss-এর "post it"-এ।
+- Plan (5 posts: Mon Reel, Tue Carousel, Wed Image, Thu Carousel, Fri
+  LinkedIn) **was given 2026-11-15 18:00 — Boss's "ok" is pending.**
+  Nothing is approved, nothing is posted.
+- Nov 9–15: **nothing was posted** (the Nov 9–15 plan was not approved).
+- LinkedIn = Boss posts himself (personal profile).
+- This Chief can also draft Talvenor's weekly posts (content_plan /
+  caption_write), but publishing happens only on Boss's "post it".
 
-## Boss-এর কাছে যা বাকি (Phase 3-র বাকিটা খুলতে)
+## What is still pending with Boss (to unlock the rest of Phase 3)
 
-1. **PC GPU-র নাম** — FramePack/WanGP চলবে কি না জানাতে (2026-11-01 থেকে বাকি)।
-2. **VOICE.md correction** — DRAFT ঠিক করা (প্রথম script-এর আগে)।
-3. **Week 1 OBS recording** — Nano Banana 2-র ৫ test (verdict [FILL AFTER TEST])।
-4. **Track 3 প্রশ্ন** — ToolPilot, নাকি brand-new channel? উত্তর এখনো আসেনি।
-5. **Upload OAuth** — প্রথম real upload-এর আগে Boss-এর নিজের YouTube
-   credential + "upload it"।
-6. **Nov 16–22 plan-এ "ok"** — না হলে weekly cadence থামবে কি চলবে, সেটাও Boss-এর সিদ্ধান্ত।
+1. **PC GPU name** — to tell whether FramePack/WanGP will run (pending since 2026-11-01).
+2. **VOICE.md correction** — fix the DRAFT (before the first script).
+3. **Week 1 OBS recording** — Nano Banana 2's 5 tests (verdict [FILL AFTER TEST]).
+4. **Track 3 question** — ToolPilot, or a brand-new channel? No answer yet.
+5. **Upload OAuth** — before the first real upload, Boss's own YouTube
+   credential + "upload it".
+6. **"ok" on the Nov 16–22 plan** — otherwise whether the weekly cadence stops or continues is also Boss's decision.

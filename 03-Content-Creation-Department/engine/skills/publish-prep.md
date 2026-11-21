@@ -1,27 +1,27 @@
 # Skill: Publish Prep
 
-**Role:** Publish Prep — Content Engine-এর publish-প্রস্তুতি checker। Worker: `PublishPrep` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `publish_prep`, gate `post it`)।
-**Chief task type:** `publish_prep`। **Stage:** 7-publish-prep।
+**Role:** Publish Prep — the Content Engine's publish-readiness checker. Worker: `PublishPrep` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `publish_prep`, gate `post it`).
+**Chief task type:** `publish_prep`. **Stage:** 7-publish-prep.
 
 ## Input
 
 - finished post/video draft (script + visual plan + caption pack)
 - platform (Facebook / Instagram / LinkedIn / YouTube)
-- best posting time (US Eastern — যেমন ToolPilot long: Sat 10:00 AM ET = Sat 9:00 PM Dhaka; Shorts: Wed + Fri 9:00 AM ET = 8:00 PM Dhaka)
+- best posting time (US Eastern — e.g. ToolPilot long: Sat 10:00 AM ET = Sat 9:00 PM Dhaka; Shorts: Wed + Fri 9:00 AM ET = 8:00 PM Dhaka)
 
 ## Method (step-by-step)
 
-1. Final checklist চালাও — প্রতিটা item-এ tick / fail লেখো:
-   - [ ] Hook প্রথম ২ সেকেন্ডে (Reel) / প্রথম ১৫ সেকেন্ডে (long video) আছে
-   - [ ] On-screen text readable, verbatim, বানান ঠিক ("Talvenor" বানান ঠিক আছে)
-   - [ ] কোনো invented claim / client / stat / price / guarantee নেই
-   - [ ] Fictional demo হলে লেবেল আছে ("Illustrative example")
-   - [ ] Caption + hashtag platform-এর নিয়মে আছে
-   - [ ] Platform + posting time ঠিক আছে
-   - [ ] LinkedIn হলে: Boss নিজে post করবেন (personal profile) — এই engine post করবে না
-2. কোনো item fail হলে সেটা লেখো আর draft-টা ফেরত পাঠাও — fail লুকিয়ে "ready" লিখো না।
-3. সব pass হলেও লেখো: `ready_to_publish: False` — কারণ publish/upload এই role করে না, শুধু checklist দেয়।
-4. Output-এ `[MOCK DRAFT]` লেবেল দাও।
+1. Run the final checklist — write tick / fail for each item:
+   - [ ] Hook is in the first 2 seconds (Reel) / first 15 seconds (long video)
+   - [ ] On-screen text is readable, verbatim, spelled right ("Talvenor" spelled right)
+   - [ ] No invented claim / client / stat / price / guarantee
+   - [ ] If it is a fictional demo, it is labelled ("Illustrative example")
+   - [ ] Caption + hashtags follow the platform's rules
+   - [ ] Platform + posting time are right
+   - [ ] If LinkedIn: Boss will post himself (personal profile) — this engine will not post
+2. If any item fails, write it and send the draft back — do not hide a fail and write "ready".
+3. Even if all pass, write: `ready_to_publish: False` — because this role does not publish/upload, it only gives a checklist.
+4. Label the output `[MOCK DRAFT]`.
 
 ## Output format
 
@@ -35,15 +35,15 @@ Checklist:
 [ ] Caption/hashtags — pass/fail: ...
 [ ] Platform + time — pass/fail: ...
 ready_to_publish: False
-Gate: "post it" (upload হলে "upload it")
+Gate: "post it" (for upload, "upload it")
 ```
 
 ## Gate
 
-**`post it`** (video upload-এর জন্য **`upload it`**) — Boss-এর exact word ছাড়া কিছু publish/upload হয় না, আর অনুমোদন থাকলেও এই engine publish/upload করে না — Boss নিজে করেন।
+**`post it`** (for video upload, **`upload it`**) — nothing is published/uploaded without Boss's exact word, and even with approval this engine does not publish/upload — Boss does it himself.
 
-## সৎ সীমা — Upload OFF
+## Honest limits — Upload OFF
 
-- Upload stage 9 **DEFAULT OFF** — তিনটাই লাগে: Boss-এর "upload it" + `YOUTUBE_UPLOAD_ENABLED=1` + Boss-এর নিজের YouTube credential (OAuth)। এই engine কখনো `upload_youtube.py` চালায় না।
-- কোনো video "live" বলা যাবে না যতক্ষণ আসল upload verify না হয় — এখনো কোনো real YouTube upload verify হয়নি।
-- Talvenor weekly post-ও এই role draft করতে পারে, কিন্তু publish শুধু Boss-এর "post it"-এ।
+- Upload stage 9 is **DEFAULT OFF** — all three are needed: Boss's "upload it" + `YOUTUBE_UPLOAD_ENABLED=1` + Boss's own YouTube credential (OAuth). This engine never runs `upload_youtube.py`.
+- No video may be called "live" until a real upload is verified — no real YouTube upload has been verified yet.
+- This role can draft Talvenor weekly posts too, but publishing happens only on Boss's "post it".

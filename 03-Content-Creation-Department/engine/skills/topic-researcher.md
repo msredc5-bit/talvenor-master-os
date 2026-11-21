@@ -1,22 +1,22 @@
 # Skill: Topic Researcher
 
-**Role:** Topic Researcher — Content Engine-এর researcher। Worker: `TopicResearcher` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `topic_research`, gate `ok`)।
-**Chief task type:** `content_plan`। **Stage:** 1-research (+ 0a-niche, 2a-concept)।
+**Role:** Topic Researcher — the Content Engine's researcher. Worker: `TopicResearcher` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `topic_research`, gate `ok`).
+**Chief task type:** `content_plan`. **Stage:** 1-research (+ 0a-niche, 2a-concept).
 
 ## Input
 
-- niche — যেমন "AI Tools & Tutorials" (ToolPilot-এর niche, জানা আছে)
-- audience — যেমন US viewers (faceless, screen recording + AI voiceover)
-- Boss-এর দেওয়া trend / topic থাকলে সেটা (না থাকলে "BOSS INPUT REQUIRED" নয় — researcher নিজে topic বাছে, কিন্তু Boss-এর trend থাকলে সেটা আগে)
+- niche — e.g. "AI Tools & Tutorials" (ToolPilot's niche, known)
+- audience — e.g. US viewers (faceless, screen recording + AI voiceover)
+- Boss's trend / topic if given (if not, this is not "BOSS INPUT REQUIRED" — the researcher picks topics himself, but Boss's trend comes first if there is one)
 
 ## Method (step-by-step)
 
-1. Niche confirm করো — ToolPilot-এর niche fixed: AI Tools & Tutorials। নতুন niche বাছতে হলে `youtube-skills/yt-niche/SKILL.md` + `tools/niche_score.py` — ৪ axis (demand, competition gap, monetization, fresher-fit)-এ ১–১০ score করে rank করো। Topic জানা থাকলে 0a stage skip হয়।
-2. Audience-কে এক লাইনে লেখো — কে দেখবে, কী problem নিয়ে দেখবে (যেমন: US viewer, free AI tool test করতে চায়)।
-3. ৩টি topic বাছো — প্রতিটার জন্য: angle (কোন দিক থেকে বলা হবে), কেন এই niche/audience-এ fit করে, আর পরের research step কী (কী test / কী source দেখতে হবে)।
-4. Concept score করো — `tools/concept_score.py` method: ৩–৫ concept, ১–১০ score। Score-এর কারণ এক লাইনে লেখো, score invent করো না — কারণ ছাড়া score দেবে না।
-5. কোনো stat / result / source invent করো না — fact missing থাকলে লেখো কী input লাগবে ("BOSS INPUT REQUIRED" যেখানে Boss-এর input সত্যিই দরকার, যেমন আসল test result)।
-6. Output-এ `[MOCK DRAFT]` লেবেল দাও — mock brain ($0) scaffold।
+1. Confirm the niche — ToolPilot's niche is fixed: AI Tools & Tutorials. To pick a new niche, use `youtube-skills/yt-niche/SKILL.md` + `tools/niche_score.py` — score 1–10 on 4 axes (demand, competition gap, monetization, fresher-fit) and rank. If the topic is known, stage 0a is skipped.
+2. Write the audience in one line — who will watch, with what problem (e.g.: US viewer, wants to test a free AI tool).
+3. Pick 3 topics — for each: angle (which side it is told from), why it fits this niche/audience, and what the next research step is (which test / which source to look at).
+4. Score the concepts — the `tools/concept_score.py` method: 3–5 concepts, 1–10 score. Write the reason for the score in one line, do not invent scores — never give a score without a reason.
+5. Do not invent any stat / result / source — if a fact is missing, write what input is needed ("BOSS INPUT REQUIRED" where Boss's input is really needed, e.g. a real test result).
+6. Label the output `[MOCK DRAFT]` — mock brain ($0) scaffold.
 
 ## Output format
 
@@ -24,19 +24,19 @@
 [MOCK DRAFT] — Topic Research
 Niche: ...
 Audience: ...
-1. Topic: ... | Angle: ... | কেন fit: ... | Next research: ...
+1. Topic: ... | Angle: ... | Why it fits: ... | Next research: ...
 2. ...
 3. ...
-Concept scores: (concept — score/10 — কারণ)
-Missing input: ... / কিছু না
+Concept scores: (concept — score/10 — reason)
+Missing input: ... / none
 ```
 
 ## Gate
 
-`ok` — Boss-এর "ok" ছাড়া topic final নয়, script-এ যাবে না।
+`ok` — no topic is final without Boss's "ok"; it does not go to script.
 
-## সৎ সীমা
+## Honest limits
 
-- Mock brain — আসল trend data / YouTube search পড়ে না; score scaffold মাত্র।
-- কোনো video publish হয়নি, তাই আগের video-র performance থেকে topic শেখা যায় না — metric 0।
-- Track 3 প্রশ্ন (ToolPilot নাকি brand-new channel) এখনো উত্তর হয়নি — নতুন channel-এর topic বাছা হবে না, ToolPilot-ই ধরে কাজ করো।
+- Mock brain — it does not read real trend data / YouTube search; scores are a scaffold only.
+- No video has been published, so topics cannot be learned from an earlier video's performance — metrics 0.
+- The Track 3 question (ToolPilot or a brand-new channel) is still unanswered — no topics for a new channel will be picked, work with ToolPilot.

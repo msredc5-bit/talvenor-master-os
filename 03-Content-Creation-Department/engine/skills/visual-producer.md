@@ -1,22 +1,22 @@
 # Skill: Visual Producer
 
-**Role:** Visual Producer — Content Engine-এর visual plan বানায়, video file বানায় না। Worker: `VisualProducer` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `visual_produce`, gate `ok`)।
-**Chief task type:** `video_produce`। **Stage:** 3-visual-pack + 4-video (plan only)।
+**Role:** Visual Producer — makes the Content Engine's visual plan, does not make a video file. Worker: `VisualProducer` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `visual_produce`, gate `ok`).
+**Chief task type:** `video_produce`. **Stage:** 3-visual-pack + 4-video (plan only).
 
 ## Input
 
 - topic, format (short / long video)
-- script (থাকলে — না থাকলে script-এর জন্য Script Writer-এর কাছে ফেরত যাবে)
-- footage / voiceover line / GPU নাম (থাকলে — সাধারণত থাকে না, নিচে দেখো)
+- script (if there is one — if not, it goes back to the Script Writer for a script)
+- footage / voiceover line / GPU name (if there is one — usually there is not, see below)
 
 ## Method (step-by-step)
 
-1. Script পড়ো — প্রতিটা section-এর জন্য shot list লেখো: কী দেখাবে (screen recording / real footage / stills), কতক্ষণ, on-screen text কী (verbatim, ছোট, readable)।
-2. Title + thumbnail একসাথে বানাও — `youtube-skills/yt-package/SKILL.md` + `title.py` method: title আর thumbnail **এক unit**; thumbnail title-কে repeat করবে না; truncation + vagueness check করো। (Week 1 উদাহরণ: title "Google's Nano Banana 2 Is Free - But Is It Good?", thumbnail text "5 EDITS TESTED"।)
-3. Real footage first — কোনো shot film করা না গেলে সেটা পরিষ্কার লেখো, fake shot লিখো না।
-4. Stage 4-এর missing-inputs checklist বানাও — ঠিক কী কী বাকি: footage (OBS recording / phone clip), voiceover line / script, GPU নাম (local provider হলে), paid video API key (API provider হলে)।
-5. **Video file বানাবে না** — output-এ `video_file: None`, `video_built: False` লিখো। Production plan + missing-inputs list-ই output।
-6. Output-এ `[MOCK DRAFT]` লেবেল দাও।
+1. Read the script — for each section write a shot list: what to show (screen recording / real footage / stills), how long, what the on-screen text is (verbatim, short, readable).
+2. Make the title + thumbnail together — the `youtube-skills/yt-package/SKILL.md` + `title.py` method: title and thumbnail are **one unit**; the thumbnail will not repeat the title; check truncation + vagueness. (Week 1 example: title "Google's Nano Banana 2 Is Free - But Is It Good?", thumbnail text "5 EDITS TESTED".)
+3. Real footage first — if a shot cannot be filmed, write that clearly, do not write a fake shot.
+4. Make the stage 4 missing-inputs checklist — exactly what is still missing: footage (OBS recording / phone clip), voiceover line / script, GPU name (for a local provider), paid video API key (for an API provider).
+5. **Do not make a video file** — write `video_file: None`, `video_built: False` in the output. The production plan + missing-inputs list is the output.
+6. Label the output `[MOCK DRAFT]`.
 
 ## Output format
 
@@ -25,23 +25,23 @@
 Topic: ... | Format: ...
 Title: ... | Thumbnail text: ...
 Shot list:
-1. [time] কী দেখাবে — on-screen text: "..."
+1. [time] What to show — on-screen text: "..."
 2. ...
 Missing inputs (stage 4):
 - footage: ...
 - voiceover/script: ...
-- GPU নাম: ...
+- GPU name: ...
 video_file: None | video_built: False
 ```
 
 ## Gate
 
-`ok` — Boss-এর "ok" ছাড়া visual plan record/edit-এ যাবে না।
+`ok` — the visual plan does not go to record/edit without Boss's "ok".
 
-## সৎ সীমা
+## Honest limits
 
-- **Stage 4 BLOCKED** — video render করা হয় না। Real footage / OBS recording নেই (Week 1-এর ৫ test-এর recording Boss-এর কাছে বাকি)।
-- **Boss-এর PC GPU-র নাম 2026-11-01 থেকে জানা যায়নি** — true AI video motion-এর জন্য লাগে। নাম না জানালে local GPU path (FramePack/WanGP) যাচাই করা যায় না।
-- **AI video generation এখানে REGION-BLOCKED — retry করা হয় না।**
-- Default stills + Ken Burns motion = সত্যিকারের motion নয়।
-- Stage 5-edit-ও BLOCKED — transcript লাগে, এখনো কোনো transcript নেই (video হলেই আসবে)।
+- **Stage 4 BLOCKED** — no video is rendered. No real footage / OBS recording (Week 1's 5 test recordings are pending with Boss).
+- **Boss's PC GPU name is unknown since 2026-11-01** — needed for true AI video motion. Without the name, the local GPU path (FramePack/WanGP) cannot be checked.
+- **AI video generation is REGION-BLOCKED here — no retry.**
+- Default stills + Ken Burns motion are not real motion.
+- Stage 5-edit is also BLOCKED — needs a transcript, there is no transcript yet (it will come once there is a video).
