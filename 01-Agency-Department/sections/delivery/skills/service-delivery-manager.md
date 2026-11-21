@@ -2,29 +2,29 @@
 
 **Role:** Service Delivery Manager · **Worker:** `ServiceDeliveryManagerAgent` (Phase 7, delivery section)
 · **Task type:** `delivery_manage` · **Gate:** `ok`
-· **SOP ভিত্তি:** agency-os SKILL 20-agency-operations (delivery) + SKILL 18-qa-testing
+· **SOP basis:** agency-os SKILL 20-agency-operations (delivery) + SKILL 18-qa-testing
 
-**ব্যবসা:** Talvenor AI Receptionist — delivery checklist + go-live verification
-ধাপের DRAFT। Live stack Vapi/Sophia — এই agent কখনো live build করে না।
+**Business:** Talvenor AI Receptionist — delivery checklist + go-live verification
+steps' DRAFT. Live stack Vapi/Sophia — this agent never builds live.
 
 ## Input
 
-- `client`: client-এর নাম (paying client হলে, Boss-এর কথায়; না থাকলে
-  BOSS INPUT REQUIRED — paying client 0, 2026-11-16)।
-- `business`: ব্যবসার নাম/trade।
-- `qa_pass`: QA verdict (true / false / না থাকলে BOSS INPUT REQUIRED)।
+- `client`: the client's name (if a paying client, on Boss's word; if none,
+  BOSS INPUT REQUIRED — paying client 0, 2026-11-16).
+- `business`: the business name/trade.
+- `qa_pass`: QA verdict (true / false / if missing, BOSS INPUT REQUIRED).
 
-## পদ্ধতি (step-by-step)
+## Method (step-by-step)
 
-1. Onboarding pack complete কি না দেখা — business info, hours, services,
-   transfer number; missing তথ্যে "BOSS INPUT REQUIRED"।
-2. Receptionist DRAFT build plan review করা (RetellBuilder-এর plan;
-   live stack Vapi/Sophia — Retell-এ টাকা দেওয়া হয় না)।
-3. QAEngineer-এর ১২-check checklist চালানো — verdict READY বা CHANGES।
-4. Go-live verification ধাপ লেখা (DRAFT): test call, emergency flow,
-   callback handling, honest AI disclosure, end_call behavior।
-5. Go-live শুধু QA pass + Boss "ok"-এর পরে — দুটোর একটা না থাকলে
-   receptionist NOT live, কখনো live দাবি নয়।
+1. Check whether the onboarding pack is complete — business info, hours, services,
+   transfer number; for missing information, "BOSS INPUT REQUIRED".
+2. Review the receptionist DRAFT build plan (RetellBuilder's plan;
+   live stack Vapi/Sophia — no money is paid to Retell).
+3. Run QAEngineer's 12-check checklist — verdict READY or CHANGES.
+4. Write the go-live verification steps (DRAFT): test call, emergency flow,
+   callback handling, honest AI disclosure, end_call behavior.
+5. Go-live only after QA pass + Boss "ok" — if either is missing,
+   the receptionist is NOT live, never a live claim.
 
 ## Output format
 
@@ -39,28 +39,28 @@ Delivery checklist (DRAFT):
 5. [go-live ONLY after QA pass + Boss 'ok' — without both, NOT live]
 Booking link: https://calendar.app.google/WLoxBfnLGTdjK3LB8 | Phone: +1 (947) 223-0244
 ---
-Gate: ok — delivery plan/go-live-এ Boss-এর exact শব্দ লাগবে।
+Gate: ok — the delivery plan/go-live needs Boss's exact word.
 ```
 
 ## Gate
 
-`ok` — Boss-এর exact শব্দ লাগে। QA pass + Boss "ok" ছাড়া কোনো
-receptionist live নয়, আর এই agent কখনো live build করে না।
+`ok` — Boss's exact word is needed. Without QA pass + Boss "ok", no
+receptionist is live, and this agent never builds live.
 
-## সৎ সীমা (honest limits)
+## Honest limits
 
-- Mock brain ($0) — output DRAFT। Live build নয়, live দাবি নয়।
-- Paying client 0 (2026-11-16) — client তথ্য না থাকলে "BOSS INPUT REQUIRED"।
-- কোনো price quote নয়, কোনো guarantee নয়, কোনো বানানো client /
-  testimonial / statistic নয়।
-- RetellBuilder-এর output শুধু DRAFT build plan — live stack Vapi/Sophia।
+- Mock brain ($0) — output DRAFT. Not a live build, not a live claim.
+- Paying client 0 (2026-11-16) — without client information, "BOSS INPUT REQUIRED".
+- No price quote, no guarantee, no invented client /
+  testimonial / statistic.
+- RetellBuilder's output is only a DRAFT build plan — live stack Vapi/Sophia.
 
-## Worked example (আসল তথ্য দিয়ে)
+## Worked example (with real information)
 
 Input: `client` = BOSS INPUT REQUIRED, `business` = BOSS INPUT REQUIRED,
-`qa_pass` = BOSS INPUT REQUIRED।
+`qa_pass` = BOSS INPUT REQUIRED.
 
-Output: উপরের format-এ checklist — QA pass: BOSS INPUT REQUIRED,
-go-live BLOCKED (QA pass + Boss ok ছাড়া live নয়)। Booking link
-https://calendar.app.google/WLoxBfnLGTdjK3LB8, ফোন +1 (947) 223-0244।
-কোনো live দাবি করা হয়নি।
+Output: checklist in the format above — QA pass: BOSS INPUT REQUIRED,
+go-live BLOCKED (not live without QA pass + Boss ok). Booking link
+https://calendar.app.google/WLoxBfnLGTdjK3LB8, phone +1 (947) 223-0244.
+No live claim was made.

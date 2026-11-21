@@ -1,13 +1,13 @@
-"""Service Delivery Manager — delivery পরিচালনা (delivery section, Phase 7).
+"""Service Delivery Manager — managing delivery (delivery section, Phase 7).
 
-ভূমিকা (role): receptionist delivery-র checklist + go-live verification
-ধাপের DRAFT বানানো।
-Gate: ok — delivery plan/go-live-এ Boss-এর "ok" লাগে।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), plan-ই শেষ কথা।
-Live stack Vapi/Sophia — এই agent কখনো live build করে না, শুধু DRAFT
-plan; QA pass + Boss-এর ok ছাড়া কোনো receptionist "live" বলা যাবে না।
-এই agent কখনো করে না: live build করে না, live দাবি করে না, দাম quote
-করে না, client-এর তথ্য/পরিসংখ্যান বানায় না, কোনো guarantee দেয় না।
+Role: building the DRAFT of the receptionist delivery checklist + go-live verification
+steps.
+Gate: ok — the delivery plan/go-live needs Boss's ok.
+Status: DRAFT ONLY — mock brain ($0), the plan is the final word.
+Live stack Vapi/Sophia — this agent never builds live, only a DRAFT
+plan; without QA pass + Boss's ok, no receptionist can be called live.
+This agent never does this: it never builds live, never claims live, never quotes a price,
+never invents client information/statistics, never gives a guarantee.
 """
 
 import os
@@ -21,7 +21,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class ServiceDeliveryManagerAgent:
-    """Delivery checklist + go-live verification DRAFT বানায়। Live দাবি করে না।"""
+    """Builds a delivery checklist + go-live verification DRAFT. Never claims live."""
 
     task_kind = "delivery_manage"
     gate = "ok"
@@ -29,7 +29,7 @@ class ServiceDeliveryManagerAgent:
     role = "Service Delivery Manager"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -41,7 +41,7 @@ class ServiceDeliveryManagerAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -71,7 +71,7 @@ class ServiceDeliveryManagerAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Delivery checklist DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Building a delivery checklist DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Delivery checklist"
         gated_action = task.get("gated_action")
@@ -128,8 +128,8 @@ class ServiceDeliveryManagerAgent:
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Delivery checklist + go-live "
-            "verification DRAFT, live build নয়। Gate: ok। QA pass + Boss "
-            "'ok' ছাড়া live দাবি করা যাবে না।"
+            "verification DRAFT, not a live build. Gate: ok. QA pass + Boss "
+            "without \'ok\', no live claim can be made."
         )
         return {
             "status": "draft-ready",

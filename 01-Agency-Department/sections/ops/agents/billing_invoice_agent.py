@@ -1,24 +1,24 @@
 """Billing Invoice Agent — invoice DRAFT (ops section, Phase 7).
 
-ভূমিকা (role): paying client-এর জন্য invoice-এর DRAFT বানানো —
-শুধু LOCKED pricing (2026-11-12) থেকে।
-Gate: ok — invoice ব্যবহার করতে Boss-এর "ok" লাগে।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: building an invoice DRAFT for a paying client —
+only from LOCKED pricing (2026-11-12).
+Gate: ok — using the invoice needs Boss's ok.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-LOCKED pricing (2026-11-12, "lock Kore") — এর বাইরে কোনো দাম নয়:
+LOCKED pricing (2026-11-12, lock Kore) — no price outside it:
   Starter: $547/mo + $597 build
   Growth:  $1,109/mo + $1,297 build
   Scale:   $1,672/mo + $1,997 build
 
-নিয়ম:
-- Invoice শুধু paying client-এর জন্য, Boss-এর কথায়। Paying client
-  0 (2026-11-16) — client confirm না হলে "BOSS INPUT REQUIRED",
-  invoice issue করা যাবে না।
-- Prospect-কে কখনো কোনো দাম quote করা যাবে না — invoice prospect-এর
-  জন্য নয়।
-- কখনো payment collect করা যাবে না, কোনো payment link/charge নয়।
-এই agent কখনো করে না: দাম বানায় না, prospect-কে দাম বলে না, payment
-নেয় না, client-এর তথ্য বানায় না, কোনো guarantee দেয় না।
+Rules:
+- An invoice is only for a paying client, on Boss's word. Paying client
+  0 (2026-11-16) — without the client confirmed, BOSS INPUT REQUIRED,
+  the invoice cannot be issued.
+- A prospect can never be quoted any price — the invoice is not
+  for a prospect.
+- Payment can never be collected, no payment link/charge.
+This agent never does this: it invents no price, tells no price to a prospect, takes no payment,
+invents no client information, gives no guarantee.
 """
 
 import os
@@ -39,7 +39,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class BillingInvoiceAgent:
-    """LOCKED pricing থেকে invoice DRAFT বানায়। Payment নেয় না।"""
+    """Builds an invoice DRAFT from LOCKED pricing. Takes no payment."""
 
     task_kind = "billing_invoice"
     gate = "ok"
@@ -47,7 +47,7 @@ class BillingInvoiceAgent:
     role = "Billing Invoice Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -59,7 +59,7 @@ class BillingInvoiceAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -88,7 +88,7 @@ class BillingInvoiceAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Invoice DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Building an invoice DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Invoice draft"
         gated_action = task.get("gated_action")
@@ -142,12 +142,12 @@ class BillingInvoiceAgent:
             status_line = (
                 "Status: NOT ISSUED — no paying client confirmed on Boss's word. "
                 "Paying clients = 0 (2026-11-16). This is a TEMPLATE draft only; "
-                "invoice issue করতে Boss-এর confirm + 'ok' লাগবে।"
+                "Issuing the invoice needs Boss's confirm + 'ok'."
             )
         else:
             status_line = (
                 "Status: DRAFT ready for Boss review — paying client confirmed "
-                "on Boss's word. Issue করতে Boss-এর 'ok' লাগবে।"
+                "on Boss's word. Issuing needs Boss's 'ok'."
             )
 
         output = (
@@ -163,9 +163,9 @@ class BillingInvoiceAgent:
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Invoice DRAFT, issue নয়, payment নয়। "
-            "LOCKED pricing (2026-11-12) ছাড়া কোনো দাম নেই। Gate: ok। "
-            "Paying client confirm না হলে TEMPLATE only।"
+            "DRAFT ONLY — mock brain ($0). Invoice DRAFT, not issued, not payment. "
+            "No price except LOCKED pricing (2026-11-12). Gate: ok. "
+            "Without the paying client confirmed, TEMPLATE only."
         )
         return {
             "status": "draft-ready",

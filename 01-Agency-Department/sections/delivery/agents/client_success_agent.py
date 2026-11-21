@@ -1,15 +1,15 @@
 """Client Success Agent — client check-in (delivery section, Phase 7).
 
-ভূমিকা (role): paying client-এর check-in draft + renewal-reminder
-draft বানানো।
-Gate: send — check-in/renewal বার্তা পাঠাতে Boss-এর "send" লাগে;
-এই agent নিজে কিছু পাঠায় না।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
-সত্য অবস্থা: paying client 0 (2026-11-16) — তাই client-সংক্রান্ত
-কোনো তথ্য না থাকলে "BOSS INPUT REQUIRED" লিখতে হবে, কোনো client-এর
-নাম/তথ্য/ফলাফল বানানো যাবে না।
-এই agent কখনো করে না: কিছু পাঠায় না, client data বানায় না, দাম
-quote করে না, কোনো guarantee/testimonial দেয় না, dental/medical নয়।
+Role: building a paying client's check-in draft + renewal-reminder
+draft.
+Gate: send — sending a check-in/renewal message needs Boss's send;
+this agent itself sends nothing.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
+True status: paying client 0 (2026-11-16) — so for anything client-related,
+without any information, BOSS INPUT REQUIRED must be written; no client's
+name/information/result can be invented.
+This agent never does this: it sends nothing, invents no client data, quotes no price,
+gives no guarantee/testimonial, no dental/medical.
 """
 
 import os
@@ -23,7 +23,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class ClientSuccessAgent:
-    """Check-in + renewal-reminder DRAFT বানায়। কোনো client data বানায় না।"""
+    """Builds a check-in + renewal-reminder DRAFT. Invents no client data."""
 
     task_kind = "client_success"
     gate = "send"
@@ -31,7 +31,7 @@ class ClientSuccessAgent:
     role = "Client Success Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -43,7 +43,7 @@ class ClientSuccessAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -70,7 +70,7 @@ class ClientSuccessAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Check-in / renewal DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Building a check-in / renewal DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Client check-in"
         gated_action = task.get("gated_action")
@@ -125,8 +125,8 @@ class ClientSuccessAgent:
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Check-in + renewal-reminder drafts, "
-            "কোনো পাঠানো নয়। Paying client 0 — client তথ্য না থাকলে "
-            "'BOSS INPUT REQUIRED'। Gate: send।"
+            "No sending. Paying client 0 — without client information "
+            "'BOSS INPUT REQUIRED'. Gate: send."
         )
         return {
             "status": "draft-ready",
