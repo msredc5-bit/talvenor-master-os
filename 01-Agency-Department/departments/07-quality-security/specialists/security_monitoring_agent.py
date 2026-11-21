@@ -1,19 +1,19 @@
 """Security Monitoring Agent — security monitoring checklist draft (Dept 07, Phase 3).
 
-ভূমিকা (role): security monitoring checklist-এর DRAFT লেখা — secrets
-scan, repo/file-এ key নেই কি না, কী যাচাই করতে হবে।
-Gate: None — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: writing a security monitoring checklist DRAFT — secrets
+scan, whether a key is in any repo/file, what to check.
+Gate: None — the draft itself is safe, no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-এই agent কখনো live monitoring করে না, কোনো scan চালায় না, live
-monitoring-এর দাবি করে না। Credential দরকার হলে Boss নিজে secure
-page-এ দেবেন — agent কখনো password/key চায় না, দেখে না, file-এ
-লেখে না।
+This agent never does live monitoring, runs no scan, claims no live
+monitoring. If a credential is needed, Boss himself will give it on a secure
+page — the agent never asks for, looks at, or writes a password/key to a
+file.
 
-এই agent কখনো করে না: live monitoring করে না, scan চালায় না,
-কোনো credential দেখে/চায়/লেখে না, কোনো file বদলায়/মোছে না, কিছু
-পাঠায় না, খরচ করে না, client-এর তথ্য/দাম/পরিসংখ্যান বানায় না,
-কোনো guarantee দেয় না, dental/medical নয়, legal advice দেয় না।
+This agent never does this: it does no live monitoring, runs no scan,
+looks at/asks for/writes no credential, changes/deletes no file, sends
+nothing, spends nothing, invents no client facts/prices/statistics,
+gives no guarantee, takes no dental/medical, gives no legal advice.
 """
 
 import os
@@ -35,7 +35,7 @@ _CHECKLIST = (
 
 
 class SecurityMonitoringAgent:
-    """Security monitoring checklist DRAFT ONLY — কখনো live monitoring নয়।"""
+    """Security monitoring checklist DRAFT ONLY — never live monitoring."""
 
     task_kind = "security_monitoring"
     gate = None
@@ -43,7 +43,7 @@ class SecurityMonitoringAgent:
     role = "Security Monitoring Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -55,7 +55,7 @@ class SecurityMonitoringAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -82,7 +82,7 @@ class SecurityMonitoringAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Security monitoring checklist DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না, scan চালায় না।"""
+        """Building a security monitoring checklist DRAFT. Writes no file, touches no network, runs no scan."""
         task = task or {}
         title = task.get("title") or "Security monitoring checklist draft"
         gated_action = task.get("gated_action")
@@ -135,8 +135,8 @@ class SecurityMonitoringAgent:
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Checklist ONLY, কখনো live "
-            "monitoring নয়, scan চালানো নয়। Gate: None।"
+            "DRAFT ONLY — mock brain ($0). Checklist ONLY, never live "
+            "monitoring, no scan run. Gate: None."
         )
         return {
             "status": "draft-ready",

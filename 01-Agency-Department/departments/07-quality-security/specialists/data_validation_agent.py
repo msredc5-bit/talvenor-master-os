@@ -1,19 +1,19 @@
 """Data Validation Agent — data validation draft (Dept 07, Phase 3).
 
-ভূমিকা (role): lead list/file-এর data validation-এর DRAFT লেখা —
-কোন field যাচাই করতে হবে, কী missing/invented হতে পারে।
-Gate: None — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: writing a data validation DRAFT for a lead list/file —
+which field to check, what may be missing/invented.
+Gate: None — the draft itself is safe, no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-কঠোর নিয়ম: field না পেলে NOT_FOUND — কখনো email, ফোন, ঠিকানা
-অনুমান করে বানানো যাবে না। এই agent কোনো file পড়ে না, কোনো
-validation ফলাফল বানায় না। DB = JSON store files; CRM PLANNED,
-live নয়।
+Strict rule: if a field is not found, NOT_FOUND — never invent an email, phone, or address
+by guessing. This agent reads no file, invents no
+validation result. DB = JSON store files; CRM PLANNED,
+not live.
 
-এই agent কখনো করে না: validation ফলাফল বানায় না, field অনুমান করে
-পূরণ করে না, কোনো file পড়ে/লেখে/বদলায় না, কিছু পাঠায় না, খরচ
-করে না, client-এর তথ্য/দাম/পরিসংখ্যান বানায় না, কোনো guarantee
-দেয় না, dental/medical নয়, legal advice দেয় না।
+This agent never does this: it invents no validation result, fills in no field by guessing,
+reads/writes/changes no file, sends nothing, spends
+nothing, invents no client facts/prices/statistics, gives no guarantee,
+takes no dental/medical, gives no legal advice.
 """
 
 import os
@@ -37,7 +37,7 @@ _STANDARD_FIELDS = (
 
 
 class DataValidationAgent:
-    """Data validation checklist DRAFT ONLY — কখনো ফলাফল বানানো নয়।"""
+    """Data validation checklist DRAFT ONLY — never inventing a result."""
 
     task_kind = "data_validation"
     gate = None
@@ -45,7 +45,7 @@ class DataValidationAgent:
     role = "Data Validation Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -57,7 +57,7 @@ class DataValidationAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -84,7 +84,7 @@ class DataValidationAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Data validation DRAFT বানানো। কোনো file পড়ে না, লেখে না, network ছোঁয় না।"""
+        """Building a data validation DRAFT. Reads no file, writes none, touches no network."""
         task = task or {}
         title = task.get("title") or "Data validation draft"
         gated_action = task.get("gated_action")
@@ -138,9 +138,9 @@ class DataValidationAgent:
         output = (
             "[MOCK DRAFT] Data validation — DRAFT ONLY\n"
             f"{list_line}\n"
-            "Rules: field না পেলে NOT_FOUND — কখনো email/ফোন/ঠিকানা "
-            "অনুমান করে বানানো নয়। Invented মনে হলে Boss-কে জানানো, "
-            "নিজে ঠিক করা নয়। Dental/medical থাকলে DQ।\n"
+            "Rules: if a field is not found, NOT_FOUND — never invent an email/phone/address "
+            "by guessing. If it looks invented, tell Boss, "
+            "not fixing it yourself. If dental/medical, DQ.\n"
             "Fields to check:\n"
             f"{field_lines}\n"
             "Validation result: NOT VERIFIED — this draft checked no file "
@@ -150,8 +150,8 @@ class DataValidationAgent:
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Checklist ONLY, কখনো validation "
-            "ফলাফল বানানো নয়, কোনো file পড়া নয়। Gate: None।"
+            "DRAFT ONLY — mock brain ($0). Checklist ONLY, never a validation "
+            "result invented, no file read. Gate: None."
         )
         return {
             "status": "draft-ready",

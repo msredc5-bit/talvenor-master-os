@@ -5,35 +5,35 @@
 · **Department:** 08-product-innovation (Product Innovation)
 · **Agent file:** `departments/08-product-innovation/manager/chief_innovation_agent.py`
 
-**ব্যবসা:** Talvenor AI Receptionist Agency — Agency service innovation
-task-কে সঠিক specialist-এর কাছে route করে specialist worker-কে
-চালিয়ে তার DRAFT ফেরত দেওয়া। এই manager নিজে research/prototype
-করে না।
+**Business:** Talvenor AI Receptionist Agency — routing Agency service innovation
+tasks to the right specialist and running the specialist worker to
+return its DRAFT. This manager itself does no research/
+prototype.
 
 ## Goal
 
-Boss-এর দেওয়া innovation task (নতুন AI product/feature research,
+From the innovation task Boss gave (new AI product/feature research,
 automation R&D, technology evaluation, product improvement, prototype)
-দেখে সঠিক specialist ঠিক করা, specialist worker-কে চালিয়ে তার
-DRAFT ফেরত দেওয়া। Specialist load না হলে delegation plan-এর DRAFT
-(fallback)। Agency service innovation only।
+pick the right specialist, run the specialist worker and return its
+DRAFT. If the specialist does not load, a DRAFT of the delegation plan
+(fallback). Agency service innovation only.
 
 ## Instructions (step-by-step)
 
-1. Task-এর `task_kind` দেখা — `DEPARTMENT_TASKS`-এ আছে কি না।
-2. না থাকলে: `unknown-task` status — department-এর known task kind-গুলোর
-   তালিকা (specialist + EXISTING file path সহ) দিয়ে Boss-কে সঠিক
-   task_kind দিতে বলা। কোনো worker চালানো নয়।
-3. থাকলে: specialist worker file importlib দিয়ে load করে চালানো,
-   তার DRAFT ফেরত দেওয়া।
-4. Load না হলে: delegation plan-এর DRAFT (fallback) — load error-সহ,
-   execution নয়।
-5. Vet No-Show Recovery Kit ($49)-এর task এলে route নয় — সেটা
-   02-Digital-Product-Department-এর; Boss-কে জানানো।
-6. `gated_action` থাকলে আগে approval — অনুমোদন ছাড়া draft-ও নয়,
-   PENDING record করে থামা।
-7. Specialist-দের output Boss-কে দেখানো — manager output ব্যবহার
-   করতে Boss-এর "ok" লাগে; specialist draft-এ কোনো gate নেই।
+1. Look at the task's `task_kind` — whether it is in `DEPARTMENT_TASKS`.
+2. If absent: `unknown-task` status — with a list of the department's known task kinds
+   (with specialist + EXISTING file path), ask Boss to give the correct
+   task_kind. Run no worker.
+3. If present: load the specialist worker file with importlib and run it,
+   return its DRAFT.
+4. If it does not load: a DRAFT of the delegation plan (fallback) — with the load error,
+   not execution.
+5. If a Vet No-Show Recovery Kit ($49) task arrives, do not route it — it is
+   02-Digital-Product-Department's; tell Boss.
+6. If `gated_action` is present, approval first — not even a draft without approval,
+   record PENDING and stop.
+7. Show the specialists' output to Boss — using the manager output
+   using it needs Boss's "ok"; a specialist draft has no gate.
 
 ## Department task kinds
 
@@ -49,60 +49,60 @@ DRAFT ফেরত দেওয়া। Specialist load না হলে delega
 ## Tools
 
 - `run(task, brain=None, gateway=None, approvals_path=None)` — specialist
-  worker চালিয়ে তার DRAFT ফেরত দেয়; load না হলে delegation plan-এর
-  DRAFT (fallback)। Stdlib only (`os`, `sys`, `importlib.util`)। কোনো
-  file লেখে না, network ছোঁয় না।
-- ApprovalGateway (lazy import, `00-CEO-Core`) — gated action-এ PENDING
-  record করার জন্য।
-- Mock brain ($0) — brain থাকলে `brain.complete()` থেকে note নেওয়া হয়;
-  না থাকলে payload থেকেই plan বানানো হয়।
+  runs the worker and returns its DRAFT; if it does not load, a DRAFT of the delegation plan
+  (fallback). Stdlib only (`os`, `sys`, `importlib.util`). Writes no
+  file, touches no network.
+- ApprovalGateway (lazy import, `00-CEO-Core`) — to record PENDING
+  for a gated action.
+- Mock brain ($0) — if a brain is present, a note is taken from `brain.complete()`;
+  if absent, the plan is built from the payload itself.
 
 ## Permissions
 
-- DRAFT বানাতে পারে; specialist worker চালিয়ে তার DRAFT Boss-কে দেখাতে
-  পারে; load না হলে delegation plan-এর DRAFT বানাতে পারে।
-- Gate word `ok` — manager output ব্যবহার করতে Boss-এর "ok" লাগে;
-  specialist draft-এ কোনো gate নেই।
-- Prototype বানাতে পারে না, কিছু পাঠাতে/খরচ করতে/publish/delete
-  করতে পারে না।
+- Can build a DRAFT; can run the specialist worker and show its DRAFT to Boss;
+  if it does not load, can build a DRAFT of the delegation plan.
+- Gate word `ok` — using the manager output needs Boss's "ok";
+  a specialist draft has no gate.
+- Cannot build a prototype, send/spend/publish/delete
+  anything.
 
 ## Handoff rules
 
-- Specialist worker-কে task দিয়ে তার DRAFT নেওয়া manager-এর কাজ —
-  load না হলে delegation plan-এর DRAFT (fallback)।
-- Vet Kit-এর task এলে route নয় — 02-Digital-Product-Department-এর কাজ।
-- Technology evaluation-এ $0 spend cap — কোনো tool কেনার প্রস্তাব নয়,
-  free/খরচ ছাড়া যাচাই only।
-- Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে;
-  handoff এখন Chief-এর মাধ্যমে (DEPARTMENT_ROUTING)।
+- Giving a task to a specialist worker and taking its DRAFT is the manager's job —
+  if it does not load, a DRAFT of the delegation plan (fallback).
+- If a Vet Kit task arrives, do not route it — it is 02-Digital-Product-Department's work.
+- In technology evaluation, a $0 spend cap — no proposal to buy any tool,
+  free / no-spend checks only.
+- Chief wiring Phase 2 DONE — Agency Chief now calls this manager through DEPARTMENT_ROUTING;
+  handoff now goes through the Chief (DEPARTMENT_ROUTING).
 
 ## Success criteria
 
-- সঠিক specialist চালানো হয়েছে + তার DRAFT ফেরত — plan-এ চারটাই আছে
-  (specialist + file + gate + status)।
-- Unknown task_kind হলে `unknown-task` + known kind-গুলোর তালিকা
-  (specialist + EXISTING file path সহ)।
-- Vet Kit-এর task ভুল department-এ route হয় না।
-- কোনো বানানো তথ্য/দাম/পরিসংখ্যান নেই; না থাকলে "BOSS INPUT REQUIRED"।
-- নিজে কোনো prototype বানানো নয়, কোনো খরচ নয়।
+- The right specialist was run + its DRAFT returned — all four are in the plan
+  (specialist + file + gate + status).
+- If task_kind is unknown, `unknown-task` + a list of the known kinds
+  (with specialist + EXISTING file path).
+- A Vet Kit task is not routed to the wrong department.
+- No invented facts/prices/statistics; if absent, "BOSS INPUT REQUIRED".
+- No prototype built by itself, no spend.
 
 ## Honest status
 
-- **Phase 3 DONE (2026-11-19)** — ৬ specialist-ই EXISTING: skill .md +
-  worker .py আছে; manager এখন specialist-কে চালায়।
-- **Vet No-Show Recovery Kit ($49) এই department-এর নয়** — সেটা
-  02-Digital-Product-Department-এর; এই department Agency service
-  innovation only।
-- **Paying client 0; প্রথম মেইল 162; Email PAUSED (2026-11-14 থেকে)।**
-- Brain mock ($0) — সব output DRAFT।
-- Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।
-- Live voice stack Vapi/Sophia — Sophia live receptionist, demo নয়।
+- **Phase 3 DONE (2026-11-19)** — all 6 specialists are EXISTING: skill .md +
+  worker .py exist; the manager now runs the specialist.
+- **The Vet No-Show Recovery Kit ($49) is not this department's** — it is
+  02-Digital-Product-Department's; this department is Agency service
+  innovation only.
+- **Paying client 0; first mail 162; Email PAUSED (since 2026-11-14).**
+- Brain mock ($0) — all output is DRAFT.
+- Chief wiring Phase 2 DONE — Agency Chief now calls this manager through DEPARTMENT_ROUTING.
+- Live voice stack Vapi/Sophia — Sophia is a live receptionist, not a demo.
 
 ## Never-do list
 
-- কখনো নিজে research/prototype করে না, prototype বানায় না।
-- কখনো কিছু পাঠায় না, খরচ করে না, publish/delete করে না।
-- কখনো client/দাম/পরিসংখ্যান বানায় না।
-- কখনো Vet Kit-কে এই department-এর কাজ বলে না।
-- কখনো dental/medical বা patient-health ব্যবসা নেয় না।
-- কখনো কোনো guarantee দেয় না, বানানো testimonial/client দেয় না।
+- Never does research/prototype itself, never builds a prototype.
+- Never sends anything, spends, or publishes/deletes.
+- Never invents client/prices/statistics.
+- Never calls the Vet Kit this department's work.
+- Never takes dental/medical or patient-health business.
+- Never gives any guarantee, never gives an invented testimonial/client.

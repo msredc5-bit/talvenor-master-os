@@ -1,23 +1,23 @@
 """Chief Innovation Agent — product innovation department manager (Phase 1).
 
-ভূমিকা (role): 08-product-innovation department-এর manager — Agency
-service innovation task এলে কোন specialist-এর কাজ, তা ঠিক করে
-specialist worker-কে চালিয়ে তার DRAFT ফেরত দেওয়া। নিজে কোনো
-research/prototype করে না।
-Gate: ok — delegation/manager output ব্যবহার করতে Boss-এর "ok" লাগে।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
-Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।
-Phase 3 DONE (2026-11-19): ৬ specialist-ই EXISTING — manager এখন
-task_kind দেখে specialist-কে importlib দিয়ে load করে চালায়।
+Role: manager of the 08-product-innovation department — when an Agency
+service innovation task arrives, decide which specialist owns it, then
+run the specialist worker and return its DRAFT. It does no
+research/prototype itself.
+Gate: ok — using the delegation/manager output needs Boss's "ok".
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
+Chief wiring Phase 2 DONE — Agency Chief now calls this manager through DEPARTMENT_ROUTING.
+Phase 3 DONE (2026-11-19): all 6 specialists are EXISTING — the manager now
+loads and runs the specialist with importlib from task_kind.
 
-এই department-এ mapped existing staff আছে — ৬ specialist, সব EXISTING।
-Vet No-Show Recovery Kit ($49) এই department-এর নয় — সেটা
-02-Digital-Product-Department-এর; এই department শুধু Agency service
-innovation-এর জন্য।
-এই manager কখনো করে না: নিজে research/prototype করে না, prototype
-বানায় না, কিছু পাঠায় না, খরচ করে না, client-এর তথ্য/দাম/পরিসংখ্যান
-বানায় না, কোনো guarantee দেয় না, dental/medical বা patient-health
-ব্যবসা নেয় না।
+This department has mapped existing staff — 6 specialists, all EXISTING.
+The Vet No-Show Recovery Kit ($49) is not this department's — it is
+02-Digital-Product-Department's; this department is only for Agency service
+innovation.
+This manager never does this: it does no research/prototype itself, builds no prototype,
+sends nothing, spends nothing, invents no client facts/prices/statistics,
+gives no guarantee, takes no dental/medical or patient-health
+business.
 """
 
 import importlib.util
@@ -30,10 +30,10 @@ TALVENOR_PHONE = "+1 (947) 223-0244"
 _GATE_ACTION_MAP = {"post it": "publish", "upload it": "publish"}
 _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
-# Department task kinds — সব EXISTING (Phase 3, 2026-11-19): প্রতিটা
-# role-এর skill .md + specialist worker .py আছে; manager task_kind
-# দেখে specialist-কে load করে চালায়। Specialist-দের gate none।
-# file field: 01-Agency-Department থেকে repo-relative worker path।
+# Department task kinds — all EXISTING (Phase 3, 2026-11-19): each
+# role has a skill .md + specialist worker .py; the manager loads and runs the specialist from
+# task_kind. The specialists have gate none.
+# file field: repo-relative worker path from 01-Agency-Department.
 DEPARTMENT_TASKS = {
     "new_ai_product_research": {
         "specialist": "New AI Product Research Agent",
@@ -81,7 +81,7 @@ DEPARTMENT_TASKS = {
 
 
 class ChiefInnovationAgent:
-    """Product innovation task-এর specialist-কে load করে তার DRAFT ফেরত দেয়।"""
+    """Loads the specialist for a product innovation task and returns its DRAFT."""
 
     task_kind = "manage_product_innovation"
     gate = "ok"
@@ -89,7 +89,7 @@ class ChiefInnovationAgent:
     role = "Chief Innovation Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -101,7 +101,7 @@ class ChiefInnovationAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -143,8 +143,8 @@ class ChiefInnovationAgent:
         )
 
     def _load_specialist(self, entry):
-        """Specialist worker file importlib দিয়ে load করা — Chief-এর
-        SECTION_ROUTING loader-এর মতো (spec_from_file_location)।"""
+        """Loading a specialist worker file with importlib — like the Chief's
+        SECTION_ROUTING loader (spec_from_file_location)."""
         here = os.path.dirname(os.path.abspath(__file__))
         agency_dir = os.path.normpath(os.path.join(here, "..", "..", ".."))
         spec_path = os.path.join(agency_dir, entry["file"])
@@ -155,15 +155,15 @@ class ChiefInnovationAgent:
         return getattr(mod, entry["class"])()
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Specialist worker চালিয়ে তার DRAFT ফেরত দেওয়া। Load না হলে
-        delegation plan-এর DRAFT (fallback)। কোনো file লেখে না, network ছোঁয় না।"""
+        """Running a specialist worker and returning its DRAFT. If it does not load,
+        a DRAFT of the delegation plan (fallback). Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Product innovation delegation"
         gated_action = task.get("gated_action")
         approval_id = task.get("approval_id")
 
-        # Gated action থাকলে আগে approval — অনুমোদন ছাড়া draft-ও নয়,
-        # PENDING record করে থামা।
+        # If a gated action is present, approval first — not even a draft without approval,
+        # record PENDING and stop.
         if gated_action:
             gw = gateway if gateway is not None else self._gateway(approvals_path)
             approved = False
@@ -199,13 +199,13 @@ class ChiefInnovationAgent:
                 f"Known task kinds in this department: {kinds}\n"
                 "Department specialists (all EXISTING):\n"
                 f"{roster}\n"
-                "No worker was executed. সঠিক task_kind Boss-কে দিতে হবে।\n"
+                "No worker was executed. The correct task_kind must be given to Boss.\n"
                 f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}"
             )
             notes = (
                 "DRAFT ONLY — mock brain ($0). Unknown task_kind — delegation "
-                "হয়নি, কোনো worker চালানো হয়নি। Chief wiring Phase 2 DONE — "
-                "এই manager-কে এখন DEPARTMENT_ROUTING দিয়ে Agency Chief ডাকে।"
+                "not done, no worker was run. Chief wiring Phase 2 DONE — "
+                "Agency Chief now calls this manager through DEPARTMENT_ROUTING."
             )
             return {
                 "status": "unknown-task",
@@ -216,13 +216,13 @@ class ChiefInnovationAgent:
                 "gate": self.gate,
             }
 
-        # Known kind — specialist worker load করে চালানো, তার DRAFT ফেরত।
-        # Load না হলে delegation plan-এর DRAFT (fallback)।
+        # Known kind — load and run the specialist worker, return its DRAFT.
+        # If it does not load, a DRAFT of the delegation plan (fallback).
         if entry.get("status") == "EXISTING" and entry["file"].endswith(".py"):
             try:
                 specialist = self._load_specialist(entry)
                 return specialist.run(task, brain, gateway, approvals_path)
-            except Exception as e:  # noqa: BLE001 — fallback plan, crash নয়
+            except Exception as e:  # noqa: BLE001 — fallback plan, not a crash
                 load_error = f"{type(e).__name__}: {e}"
             else:
                 load_error = None
@@ -238,9 +238,9 @@ class ChiefInnovationAgent:
 
         gate = entry["gate"]
         gate_line = (
-            f"Gate: {gate} — Boss-এর \"{gate}\" লাগবে এই কাজের output ব্যবহার করতে।"
+            f"Gate: {gate} — Boss's \"{gate}\" is needed to use this task's output."
             if gate else
-            "Gate: None — draft নিজেই নিরাপদ, কোনো gate নেই।"
+            "Gate: None — the draft itself is safe, no gate."
         )
         output = (
             "[MOCK DRAFT] Delegation plan — DRAFT ONLY (fallback)\n"
@@ -249,19 +249,19 @@ class ChiefInnovationAgent:
             f"Specialist: {entry['specialist']}\n"
             f"File: {entry['file']}\n"
             f"{gate_line}\n"
-            f"Status: {entry['status']} — specialist worker load হয়নি "
-            f"({load_error}); এই plan শুধু routing, execution নয়।\n"
+            f"Status: {entry['status']} — specialist worker did not load "
+            f"({load_error}); this plan is only routing, not execution.\n"
             "Agency service innovation only — Vet No-Show Recovery Kit "
-            "02-Digital-Product-Department-এর, এখানকার নয়।\n"
-            "Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।\n"
+            "02-Digital-Product-Department's, not this department's.\n"
+            "Chief wiring Phase 2 DONE — Agency Chief now calls this manager through DEPARTMENT_ROUTING.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Delegation plan fallback — "
-            "specialist load হয়নি, তাই execution নয়। ৬ specialist-ই "
-            "EXISTING; load error দেখে ঠিক করতে হবে। "
-            "Vet Kit 02-Digital-Product-Department-এর। Gate: ok।"
+            "specialist did not load, so no execution. All 6 specialists are "
+            "EXISTING; the load error must be checked and fixed. "
+            "Vet Kit is 02-Digital-Product-Department's. Gate: ok."
         )
         return {
             "status": "draft-ready",

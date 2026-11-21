@@ -1,16 +1,16 @@
 """Call Scenario Testing Agent — call-scenario test draft (Dept 07, Phase 3).
 
-ভূমিকা (role): Sophia-র জন্য call-scenario test script-এর DRAFT লেখা —
-missed call, booking, life-safety redirect, angry caller।
-Gate: None — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: writing a call-scenario test script DRAFT for Sophia —
+missed call, booking, life-safety redirect, angry caller.
+Gate: None — the draft itself is safe, no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
 Live voice stack Vapi/Sophia — Sophia live receptionist, +1 (947)
-223-0244। এই agent কখনো live call করে না, কোনো test run করে না।
+223-0244. This agent never makes a live call, never runs a test.
 
-এই agent কখনো করে না: live call করে না, test run করে না, কিছু
-পাঠায় না, খরচ করে না, client-এর তথ্য/দাম/পরিসংখ্যান বানায় না,
-কোনো guarantee দেয় না, dental/medical নয়, legal advice দেয় না।
+This agent never does this: it makes no live call, runs no test, sends
+nothing, spends nothing, invents no client facts/prices/statistics,
+gives no guarantee, takes no dental/medical, gives no legal advice.
 """
 
 import os
@@ -26,7 +26,7 @@ _CORE_SCENARIOS = ("missed_call", "booking", "life_safety", "angry_caller")
 
 
 class CallScenarioTestingAgent:
-    """Call-scenario test script DRAFT ONLY — কখনো live call নয়।"""
+    """Call-scenario test script DRAFT ONLY — never a live call."""
 
     task_kind = "call_scenario_testing"
     gate = None
@@ -34,7 +34,7 @@ class CallScenarioTestingAgent:
     role = "Call Scenario Testing Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -46,7 +46,7 @@ class CallScenarioTestingAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -112,7 +112,7 @@ class CallScenarioTestingAgent:
         return blocks.get(scenario, "")
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Call-scenario test script DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না, call করে না।"""
+        """Building a call-scenario test script DRAFT. Writes no file, touches no network, makes no call."""
         task = task or {}
         title = task.get("title") or "Call scenario test draft"
         gated_action = task.get("gated_action")
@@ -172,8 +172,8 @@ class CallScenarioTestingAgent:
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Test script ONLY, কখনো live "
-            "call নয়। Life-safety redirect-ই আসল নিয়ম। Gate: None।"
+            "DRAFT ONLY — mock brain ($0). Test script ONLY, never live "
+            "call. The life-safety redirect is the real rule. Gate: None."
         )
         return {
             "status": "draft-ready",

@@ -1,17 +1,17 @@
 """Workflow Testing Agent — workflow test draft (Dept 07, Phase 3).
 
-ভূমিকা (role): workflow test-এর DRAFT লেখা — check script: কী যাচাই
-করতে হবে, কোন ধাপে কী দেখতে হবে।
-Gate: None — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: writing a workflow test DRAFT — check script: what to check,
+what to look at in each step.
+Gate: None — the draft itself is safe, no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-সৎ অবস্থা: n8n workflows READY, LIVE নয় (Boss-এর import + test
-বাকি); CRM (n8n Cloud Data Tables) PLANNED, live নয়; brain mock ($0)।
-এই agent কখনো live workflow run করে না, run হয়েছে বলে দাবি করে না।
+Honest status: n8n workflows READY, not LIVE (Boss's import + test
+pending); CRM (n8n Cloud Data Tables) PLANNED, not live; brain mock ($0).
+This agent never runs a live workflow, never claims one ran.
 
-এই agent কখনো করে না: workflow চালায় না, live run-এর দাবি করে না,
-কিছু পাঠায় না, খরচ করে না, client-এর তথ্য/দাম/পরিসংখ্যান বানায় না,
-কোনো guarantee দেয় না, dental/medical নয়, legal advice দেয় না।
+This agent never does this: it runs no workflow, claims no live run,
+sends nothing, spends nothing, invents no client facts/prices/statistics,
+gives no guarantee, takes no dental/medical, gives no legal advice.
 """
 
 import os
@@ -36,7 +36,7 @@ _CORE_STEPS = (
 
 
 class WorkflowTestingAgent:
-    """Workflow test check-script DRAFT ONLY — কখনো live run নয়।"""
+    """Workflow test check-script DRAFT ONLY — never a live run."""
 
     task_kind = "workflow_testing"
     gate = None
@@ -44,7 +44,7 @@ class WorkflowTestingAgent:
     role = "Workflow Testing Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -56,7 +56,7 @@ class WorkflowTestingAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -96,7 +96,7 @@ class WorkflowTestingAgent:
         return blocks.get(step, f"Step {step} — check: BOSS INPUT REQUIRED (unknown step).")
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Workflow test check-script DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না, workflow চালায় না।"""
+        """Building a workflow test check-script DRAFT. Writes no file, touches no network, runs no workflow."""
         task = task or {}
         title = task.get("title") or "Workflow test draft"
         gated_action = task.get("gated_action")
@@ -140,8 +140,8 @@ class WorkflowTestingAgent:
         output = (
             "[MOCK DRAFT] Workflow test — DRAFT ONLY\n"
             f"{workflow_line}\n"
-            "Honest status: n8n workflows READY, LIVE নয় (Boss import + "
-            "test বাকি); CRM (n8n Cloud Data Tables) PLANNED, live নয়; "
+            "Honest status: n8n workflows READY, not LIVE (Boss import + "
+            "test pending); CRM (n8n Cloud Data Tables) PLANNED, not live; "
             "brain mock ($0).\n"
             "Check script (what to verify at each step):\n"
             f"{steps}\n"
@@ -151,8 +151,8 @@ class WorkflowTestingAgent:
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Check script ONLY, কখনো live "
-            "run নয়। n8n READY-not-LIVE, CRM PLANNED-not-live। Gate: None।"
+            "DRAFT ONLY — mock brain ($0). Check script ONLY, never live "
+            "run. n8n READY-not-LIVE, CRM PLANNED-not-live. Gate: None."
         )
         return {
             "status": "draft-ready",

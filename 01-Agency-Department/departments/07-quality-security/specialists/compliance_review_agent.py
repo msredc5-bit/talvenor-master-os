@@ -1,18 +1,18 @@
 """Compliance Review Agent — compliance review draft (Dept 07, Phase 3).
 
-ভূমিকা (role): compliance review-এর DRAFT লেখা — কোনো invented
-client/stat/price নয়, dental/medical নয়, কোনো guarantee নয়।
-Gate: None — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: writing a compliance review DRAFT — no invented
+client/stat/price, no dental/medical, no guarantee.
+Gate: None — the draft itself is safe, no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-এই agent কখনো legal advice দেয় না — attorney review প্রথম paying
-client-এর আগে deferred। Pricing LOCKED, internal only — prospect-কে
-কখনো quote নয়।
+This agent never gives legal advice — attorney review is deferred until the first paying
+client arrives. Pricing LOCKED, internal only —
+never quoted to a prospect.
 
-এই agent কখনো করে না: legal advice দেয় না, legal verdict দেয় না,
-কিছু পাঠায় না, খরচ করে না, publish/delete করে না, client-এর তথ্য/
-দাম/পরিসংখ্যান বানায় না, কোনো guarantee দেয় না, dental/medical
-নয়, বানানো testimonial/client/case study দেয় না।
+This agent never does this: it gives no legal advice, no legal verdict,
+sends nothing, spends nothing, publishes/deletes nothing, invents no client facts/
+prices/statistics, gives no guarantee, takes no dental/medical,
+gives no invented testimonial/client/case study.
 """
 
 import os
@@ -36,7 +36,7 @@ _CHECKS = (
 
 
 class ComplianceReviewAgent:
-    """Compliance review DRAFT ONLY — কখনো legal advice নয়।"""
+    """Compliance review DRAFT ONLY — never legal advice."""
 
     task_kind = "compliance_review"
     gate = None
@@ -44,7 +44,7 @@ class ComplianceReviewAgent:
     role = "Compliance Review Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -56,7 +56,7 @@ class ComplianceReviewAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -84,7 +84,7 @@ class ComplianceReviewAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Compliance review DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Building a compliance review DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Compliance review draft"
         gated_action = task.get("gated_action")
@@ -138,9 +138,9 @@ class ComplianceReviewAgent:
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Review draft ONLY, কখনো legal "
-            "advice নয়। Attorney review deferred — প্রথম paying client-এর "
-            "আগে। Gate: None।"
+            "DRAFT ONLY — mock brain ($0). Review draft ONLY, never legal "
+            "advice. Attorney review deferred — until the first paying client "
+            "arrives. Gate: None."
         )
         return {
             "status": "draft-ready",
