@@ -1,31 +1,31 @@
 #!/usr/bin/env python3
 """sync_status.py — Talvenor Master OS dashboard sync (Phase 4).
 
-dashboards/status.html-এর সংখ্যাগুলো আসল ফাইল থেকে পড়ে আবার বানায় —
-হাতে লেখা সংখ্যা নয়। উৎস ফাইলে কোনো মান না থাকলে "unknown" লেখে,
-কখনো বানায় না। Stdlib only, no network, no send, no spend।
+Rebuilds the numbers in dashboards/status.html from the real files —
+not hand-written numbers. If a source file has no value, it writes "unknown",
+never invents one. Stdlib only, no network, no send, no spend.
 
-উৎস:
+Sources:
   - 00-CEO-Core/config.json — phase, version, gates, $0 cap, first mails,
-    paying clients, email status, phase status লাইন
-  - store/tasks.json + store/approvals.json — আসল task/approval সংখ্যা
-  - 02-Digital-Product-Department/gate0-status.md — Gate 0 Status লাইন
-    (শুধু ওই লাইনটাই পড়া হয় — fail-closed; Phase 2-র bug-এর শিক্ষা)
+    paying clients, email status, phase status lines
+  - store/tasks.json + store/approvals.json — real task/approval counts
+  - 02-Digital-Product-Department/gate0-status.md — Gate 0 Status line
+    (only that line is read — fail-closed; the lesson of Phase 2's bug)
   - 02-Digital-Product-Department/pa-vet-list/pa-vet-clinics.csv — PA list row
-  - 03-Content-Creation-Department/pipeline.md — ১৩ stage-এর গণনা লাইন
-  - 03-Content-Creation-Department/toolpilot-status.md — Subscribers লাইন
-    + Videos লাইন
-  - 01-Agency-Department/departments/ — subdir + manager/*.py গণনা;
-    agents/agent-registry/registry.json — entry + EXISTING গণনা
-  - 02-Digital-Product-Department/kit-outline.md — kit-এর অংশের তালিকা
-    (blueprint); built kit dir না থাকলে kit_parts 0
-  - 03-Content-Creation-Department/sections/ — subdir + agents/*.py গণনা
-  - 00-CEO-Core/jarvis_voice.py — voice REAL না STUB (NotImplementedError
-    আছে কিনা + Piper আছে কিনা)
-  - n8n workflow JSON (২টা, বাইরের folder) — "active" flag পড়ে
-    (false = NOT LIVE, true = LIVE — যেটা সত্য সেটাই লেখা হয়)
+  - 03-Content-Creation-Department/pipeline.md — the 13-stage count line
+  - 03-Content-Creation-Department/toolpilot-status.md — Subscribers line
+    + Videos line
+  - 01-Agency-Department/departments/ — subdir + manager/*.py counts;
+    agents/agent-registry/registry.json — entry + EXISTING counts
+  - 02-Digital-Product-Department/kit-outline.md — the kit's parts list
+    (blueprint); if no built kit dir exists, kit_parts 0
+  - 03-Content-Creation-Department/sections/ — subdir + agents/*.py counts
+  - 00-CEO-Core/jarvis_voice.py — voice REAL or STUB (whether NotImplementedError
+    exists + whether Piper exists)
+  - n8n workflow JSON (2, outside folder) — reads the "active" flag
+    (false = NOT LIVE, true = LIVE — whatever is true is what is written)
 
-চালানো:  python3 scripts/sync_status.py
+Run:  python3 scripts/sync_status.py
 """
 
 import csv
@@ -35,6 +35,10 @@ import re
 import sys
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CEO_CORE_DIR = os.path.join(BASE, "00-CEO-Core")
+sys.path.insert(0, CEO_CORE_DIR)
+
+from usage_ledger import UsageLedger  # noqa: E402 — A6: ledger numbers on the dashboard
 
 AUTO_SEND_PATH = os.path.expanduser(
     "~/workspace/talvenor-outreach/n8n-workflow-tier2-auto-send.json")
@@ -61,7 +65,7 @@ def _read_text(path):
 
 
 def read_gate0_status():
-    """শুধু gate0-status.md-এর Status লাইন পড়ে — fail-closed।"""
+    """Reads only the Status line of gate0-status.md — fail-closed."""
     text = _read_text(os.path.join(
         BASE, "02-Digital-Product-Department", "gate0-status.md"))
     if text is None:
@@ -77,7 +81,7 @@ def read_gate0_status():
 
 
 def read_pipeline_counts():
-    """pipeline.md-এর গণনা লাইন থেকে REAL/MOCK/STUB/BLOCKED।"""
+    """REAL/MOCK/STUB/BLOCKED from pipeline.md's count line."""
     text = _read_text(os.path.join(
         BASE, "03-Content-Creation-Department", "pipeline.md"))
     if text is None:
@@ -100,7 +104,7 @@ def read_pa_list_count():
             rows = list(csv.reader(f))
         if not rows:
             return UNKNOWN
-        return len(rows) - 1  # header বাদ
+        return len(rows) - 1  # excluding the header
     except OSError:
         return UNKNOWN
 
@@ -115,19 +119,22 @@ def read_toolpilot_subs():
 
 
 def read_voice_status():
-    """jarvis_voice.py থেকে voice REAL না STUB — STUB হলে NotImplementedError থাকে।"""
+    """Voice REAL or STUB from jarvis_voice.py — a STUB has NotImplementedError."""
     text = _read_text(os.path.join(BASE, "00-CEO-Core", "jarvis_voice.py"))
     if text is None:
         return {"label": UNKNOWN, "detail": UNKNOWN}
     if "NotImplementedError" not in text and "Piper" in text:
         return {"label": "REAL",
                 "detail": "Jarvis voice — Piper TTS + Vosk/sherpa STT, offline, $0 "
-                          "(mic test Boss-এর PC-তে বাকি)"}
-    return {"label": "STUB", "detail": "Jarvis voice (mic যুক্ত নয়)"}
+                          "(mic test still pending on Boss's PC)"}
+    return {"label": "STUB", "detail": "Jarvis voice STUB — Piper/sherpa "
+                                        "not found in jarvis_voice.py "
+                                        "(the real loop is voice/loop.py; "
+                                        "mic test still Boss's PC step)"}
 
 
 def read_workflow_status(path):
-    """n8n workflow JSON-এর active flag — false = NOT LIVE।"""
+    """The active flag of an n8n workflow JSON — false = NOT LIVE."""
     data = _read_json(path)
     if data is None:
         return {"status": UNKNOWN, "nodes": UNKNOWN, "name": UNKNOWN}
@@ -141,7 +148,7 @@ def read_workflow_status(path):
 
 
 def _count_subdirs(path):
-    """sorted subdir-এর সংখ্যা — পড়া না গেলে unknown।"""
+    """Count of sorted subdirs — unknown if it cannot be read."""
     try:
         return len([d for d in sorted(os.listdir(path))
                     if os.path.isdir(os.path.join(path, d))])
@@ -150,7 +157,7 @@ def _count_subdirs(path):
 
 
 def _count_py_in_subdirs(parent, sub):
-    """parent-এর প্রতিটা sorted subdir-এর sub/ folder-এ *.py ফাইলের সংখ্যা।"""
+    """Count of *.py files in the sub/ folder of each sorted subdir of parent."""
     try:
         total = 0
         for name in sorted(os.listdir(parent)):
@@ -165,7 +172,7 @@ def _count_py_in_subdirs(parent, sub):
 
 
 def read_toolpilot_videos():
-    """toolpilot-status.md-এর Videos লাইন — subs-এর মতোই pattern।"""
+    """The Videos line of toolpilot-status.md — same pattern as subs."""
     text = _read_text(os.path.join(
         BASE, "03-Content-Creation-Department", "toolpilot-status.md"))
     if text is None:
@@ -175,7 +182,7 @@ def read_toolpilot_videos():
 
 
 def _read_kit_total():
-    """kit-outline.md-এর 'Kit-এর ৬ অংশ' section-এ ### heading-এর সংখ্যা।"""
+    """Count of ### headings in kit-outline.md's 'Kit's 6 parts' section."""
     text = _read_text(os.path.join(
         BASE, "02-Digital-Product-Department", "kit-outline.md"))
     if text is None:
@@ -183,7 +190,7 @@ def _read_kit_total():
     in_section = False
     total = 0
     for line in text.splitlines():
-        if line.startswith("## Kit-এর"):
+        if line.startswith("## Kit's"):
             in_section = True
             continue
         if in_section:
@@ -195,8 +202,8 @@ def _read_kit_total():
 
 
 def read_business_os():
-    """3 Business OS-এর আসল অবস্থা — সব ফাইল থেকে, হাতে লেখা সংখ্যা নয়।"""
-    # --- Agency: departments/ + registry.json থেকে গণনা ---
+    """The real state of the 3 Business OSs — from all files, not hand-written numbers."""
+    # --- Agency: counts from departments/ + registry.json ---
     dept_dir = os.path.join(BASE, "01-Agency-Department", "departments")
     reg = _read_json(os.path.join(
         BASE, "01-Agency-Department", "agents", "agent-registry",
@@ -214,19 +221,19 @@ def read_business_os():
         "manager_count": _count_py_in_subdirs(dept_dir, "manager"),
         "registry_entries": registry_entries,
         "registry_existing": registry_existing,
-        # registry.md লাইন ২৭-এর durable fact: 21 staff
-        # (15 worker + 6 section agent)।
+        # registry.md line 27's durable fact: 21 staff
+        # (15 worker + 6 section agent).
         "staff_note": "21 staff (15 workers + 6 section agents)",
     }
 
-    # --- Commerce: Gate 0 + PA list reuse; kit blueprint থেকে গণনা ---
+    # --- Commerce: Gate 0 + PA list reuse; counts from the kit blueprint ---
     gate0 = read_gate0_status()
     kit_dir = os.path.join(BASE, "02-Digital-Product-Department", "kit")
     kit_total = _read_kit_total()
     if kit_total == UNKNOWN:
         kit_parts = UNKNOWN
     elif not os.path.isdir(kit_dir):
-        # blueprint আছে, built kit dir নেই → কোনো part-ই বানানো হয়নি।
+        # Blueprint exists, no built kit dir → no part has been built yet.
         kit_parts = 0
     else:
         kit_parts = len([f for f in sorted(os.listdir(kit_dir))
@@ -236,14 +243,14 @@ def read_business_os():
         "pa_list": read_pa_list_count(),
         "kit_parts": kit_parts,
         "kit_total": kit_total,
-        # Gate 0 না পাস করলে kit বানানো/বেচা শুরুই হয়নি → sale 0
-        # (entailed, invented নয়)।
+        # If Gate 0 is not passed, kit building/selling has not even started → sale 0
+        # (entailed, not invented).
         "kit_sales": 0 if gate0 == "NOT PASSED" else UNKNOWN,
-        # নিচের division status-গুলো durable policy fact — উৎস MEMORY.md
+        # The division statuses below are durable policy facts — source MEMORY.md
         # (Boss decisions 2026-11-12/11-19): Amazon GATED (5 live client +
-        # $5K MRR না হওয়া পর্যন্ত), Etsy CLOSED (Bangladesh), Shopify
-        # PARKED (Boss-এর direct project), Dropshipping RESEARCH-ONLY,
-        # Digital Products BLOCKED-GATE0 (Vet Kit $49)।
+        # until $5K MRR), Etsy CLOSED (Bangladesh), Shopify
+        # PARKED (Boss's direct project), Dropshipping RESEARCH-ONLY,
+        # Digital Products BLOCKED-GATE0 (Vet Kit $49).
         "divisions": {
             "amazon": "GATED",
             "etsy": "CLOSED",
@@ -253,13 +260,13 @@ def read_business_os():
         },
     }
 
-    # --- Media: pipeline + ToolPilot reuse; sections/ থেকে গণনা ---
+    # --- Media: pipeline + ToolPilot reuse; counts from sections/ ---
     media = {
         "pipeline": read_pipeline_counts(),
         "toolpilot_subs": read_toolpilot_subs(),
         "toolpilot_videos": read_toolpilot_videos(),
-        # pipeline.md-এর durable fact: Upload OFF — কোনো real YouTube
-        # upload এখনো verify হয়নি।
+        # pipeline.md's durable fact: Upload OFF — no real YouTube
+        # upload verified yet.
         "upload": "OFF",
         "sections": _count_subdirs(os.path.join(
             BASE, "03-Content-Creation-Department", "sections")),
@@ -269,8 +276,27 @@ def read_business_os():
     return {"agency": agency, "commerce": commerce, "media": media}
 
 
+def read_usage_ledger():
+    """Real numbers from store/usage_ledger.json — monthly_total() +
+    total_calls (A6). If the ledger file is missing, 0 — not unknown, 0."""
+    try:
+        ledger = UsageLedger()
+        summary = ledger.summary()
+        return {
+            "monthly_total_usd": ledger.monthly_total(),
+            "total_calls": summary["total_calls"],
+            "total_usd": summary["total_usd"],
+            "monthly_cap_usd": summary["monthly_cap_usd"],
+            "over_monthly_cap": ledger.over_monthly_cap(),
+        }
+    except Exception:  # noqa: BLE001 — if the ledger cannot be read, the dashboard does not break
+        return {"monthly_total_usd": UNKNOWN, "total_calls": UNKNOWN,
+                "total_usd": UNKNOWN, "monthly_cap_usd": UNKNOWN,
+                "over_monthly_cap": UNKNOWN}
+
+
 def collect_status():
-    """সব উৎস থেকে সত্য অবস্থা এক জায়গায় করে। কোনো মান না পেলে unknown।"""
+    """Gathers the true state from all sources in one place. Unknown if a value is missing."""
     cfg = _read_json(os.path.join(BASE, "00-CEO-Core", "config.json")) or {}
     honest = cfg.get("honest_status") or {}
     phases = honest.get("phases") or {}
@@ -292,6 +318,7 @@ def collect_status():
     return {
         "phase": cfg.get("phase", UNKNOWN),
         "version": cfg.get("version", UNKNOWN),
+        "built": cfg.get("built", UNKNOWN),
         "gates_enabled": gates.get("enabled", UNKNOWN),
         "spend_cap_usd": cfg.get("spend_cap_usd", UNKNOWN),
         "first_mails": honest.get("first_mails_sent", UNKNOWN),
@@ -304,17 +331,12 @@ def collect_status():
         "tasks_count": len(task_records) if isinstance(task_records, list) else UNKNOWN,
         "approvals_pending": len(pending) if isinstance(pending, list) else UNKNOWN,
         "approvals_approved": len(approved) if isinstance(approved, list) else UNKNOWN,
-        "phase_status": {
-            "phase_0": phases.get("phase_0", UNKNOWN),
-            "phase_1_agency": phases.get("phase_1_agency", UNKNOWN),
-            "phase_2_digital_product": phases.get("phase_2_digital_product", UNKNOWN),
-            "phase_3_creator_os": phases.get("phase_3_creator_os", UNKNOWN),
-            "phase_4_n8n_wiring": phases.get("phase_4_n8n_wiring", UNKNOWN),
-            "phase_5_three_engines": phases.get("phase_5_three_engines", UNKNOWN),
-            "phase_6_brain_runner": phases.get("phase_6_brain_runner", UNKNOWN),
-            "phase_7_sections": phases.get("phase_7_sections", UNKNOWN),
-        },
+        # D2 (2026-11-21): phase_status = all keys of honest_status.phases —
+        # not just phase_0–7 (agentic 1–3, unified_os, phase_9/10/11,
+        # improvements all reach the dashboard). Unknown if a key is missing.
+        "phase_status": dict(phases) if isinstance(phases, dict) else {},
         "voice": read_voice_status(),
+        "usage_ledger": read_usage_ledger(),
         "business_os": read_business_os(),
         "workflow_auto_send": read_workflow_status(AUTO_SEND_PATH),
         "workflow_callback": read_workflow_status(CALLBACK_PATH),
@@ -326,7 +348,7 @@ def _badge(text, kind):
 
 
 def render_html(s):
-    """collect_status() থেকে পুরো status.html বানায় (deterministic)।"""
+    """Builds the full status.html from collect_status() (deterministic)."""
     ph = s["phase_status"]
     pipe = s["pipeline"]
     gate0 = s["gate0"]
@@ -349,9 +371,13 @@ def render_html(s):
     def phase_badge(status_text):
         if isinstance(status_text, str) and status_text.startswith("BUILT"):
             return _badge("BUILT", "built")
+        if isinstance(status_text, str) and "NOT PROVEN LIVE" in status_text:
+            return _badge("NOT PROVEN LIVE", "paused")
         if status_text == "PENDING":
             return _badge("PENDING", "pending")
         return _badge(str(status_text), "stub")
+
+    ul = s.get("usage_ledger") or {}
 
     gate0_badge = (_badge("NOT PASSED", "paused") if gate0 == "NOT PASSED"
                    else _badge("PASSED", "built") if gate0 == "PASSED"
@@ -393,22 +419,22 @@ def render_html(s):
 <body>
 <div class="wrap">
   <h1>🎬 Talvenor Master OS</h1>
-  <p class="sub">Status dashboard — Phase {phase} (এই page scripts/sync_status.py দিয়ে বানানো — সংখ্যা আসল ফাইল থেকে আসে, হাতে লেখা নয়)</p>
+  <p class="sub">Status dashboard — Phase {phase} (this page is built by scripts/sync_status.py — numbers come from the real files, not hand-written)</p>
 
   <div class="card">
-    <h2>৩ ব্যবসা — শুধু এই ৩টাই (১৩৬ নয়)</h2>
+    <h2>3 businesses — only these 3 (136 DROPPED)</h2>
     <table>
-      <tr><th>ব্যবসা</th><th>অবস্থা</th><th>সত্য কথা</th></tr>
-      <tr><td><strong>1. Agency</strong> — Talvenor AI Receptionist</td><td><span class="badge built">MAIN · Phase 1 REAL</span></td><td>প্রথম মেইল {s["first_mails"]}, paying client {s["paying_clients"]} · Chief সত্যিই 15 worker ডাকে (mock brain, DRAFT ONLY) · Email {s["email"]}</td></tr>
-      <tr><td><strong>2. Digital Product</strong> — Vet No-Show Recovery Kit ($49)</td><td><span class="badge built">Phase 2 REAL*</span></td><td><strong>Gate 0 {gate0}</strong> — Lemon Squeezy test Boss-এর step, হয়নি · Kit blueprint আছে (kit নিজে নয়) · PA list {pa} / 100 (যাচাই করা) · Sale 0 · *Gate 0-তে আটকে</td></tr>
-      <tr><td><strong>3. Content Engine</strong> — Creator OS / ToolPilot</td><td><span class="badge built">Phase 3 REAL</span></td><td>Chief সত্যিই 6 worker ডাকে (mock brain, DRAFT ONLY) · 13 stage: REAL {pipe["real"]} / MOCK {pipe["mock"]} / BLOCKED {pipe["blocked"]} · Upload OFF · VOICE.md DRAFT · GPU AMD Radeon integrated 496 MB VRAM (FramePack/WanGP চলবে না) · ToolPilot video 0 (subs {subs})</td></tr>
+      <tr><th>Business</th><th>State</th><th>True Story</th></tr>
+      <tr><td><strong>1. Agency</strong> — Talvenor AI Receptionist</td><td><span class="badge built">MAIN · Phase 1 REAL</span></td><td>First mail {s["first_mails"]}, paying client {s["paying_clients"]} · Chief really calls 15 workers (mock brain, DRAFT ONLY) · Email {s["email"]}</td></tr>
+      <tr><td><strong>2. Digital Product</strong> — Vet No-Show Recovery Kit ($49)</td><td><span class="badge built">Phase 2 REAL*</span></td><td><strong>Gate 0 {gate0}</strong> — Lemon Squeezy test is Boss's step, not done · Kit blueprint exists (not the kit itself) · PA list {pa} / 100 (verified) · Sale 0 · *Stuck at Gate 0</td></tr>
+      <tr><td><strong>3. Content Engine</strong> — Creator OS / ToolPilot</td><td><span class="badge built">Phase 3 REAL</span></td><td>Chief really calls 6 workers (mock brain, DRAFT ONLY) · 13 stages: REAL {pipe["real"]} / MOCK {pipe["mock"]} / BLOCKED {pipe["blocked"]} · Upload OFF · VOICE.md DRAFT · GPU AMD Radeon integrated 496 MB VRAM (FramePack/WanGP will not run) · ToolPilot videos 0 (subs {subs})</td></tr>
     </table>
   </div>
 
   <div class="card">
     <h2>Unified OS — 3 Business OS</h2>
     <table>
-      <tr><th>Business OS</th><th>অবস্থা</th><th>আসল সংখ্যা</th></tr>
+      <tr><th>Business OS</th><th>State</th><th>Real Numbers</th></tr>
       <tr><td><strong>Agency</strong> — AI Receptionist</td><td><span class="badge paused">email PAUSED</span></td><td>{a["dept_count"]} departments · {a["manager_count"]} managers · {a["registry_entries"]} registry entries · {a["staff_note"]} · email {s["email"]} · clients {s["paying_clients"]}</td></tr>
       <tr><td><strong>Commerce</strong> — Vet Kit ($49)</td><td><span class="badge paused">Gate 0 NOT PASSED</span></td><td>Vet Kit Gate 0 {c["gate0"]} · kit {c["kit_parts"]}/{c["kit_total"]} · PA {c["pa_list"]}/100 · sale {c["kit_sales"]} · Amazon {d["amazon"]} · Etsy {d["etsy"]} · Shopify {d["shopify"]} (Boss direct) · Dropshipping {d["dropshipping"]}</td></tr>
       <tr><td><strong>Media</strong> — Content Engine / ToolPilot</td><td><span class="badge stub">upload OFF</span></td><td>{m["sections"]} sections · {m["agents"]} agents · {stages_total} stages REAL {pipe["real"]} / MOCK {pipe["mock"]} / BLOCKED {pipe["blocked"]} · upload {m["upload"]} · ToolPilot subs {m["toolpilot_subs"]} · videos {m["toolpilot_videos"]}</td></tr>
@@ -418,56 +444,67 @@ def render_html(s):
   <div class="card">
     <h2>Phase</h2>
     <table>
-      <tr><td><strong>Phase 0</strong> — folder + CEO Core + approval gateway + dashboard</td><td>{phase_badge(ph["phase_0"])}</td></tr>
-      <tr><td><strong>Phase 1</strong> — Agency department (vendored worker, draft-only, gate ধরে)</td><td>{phase_badge(ph["phase_1_agency"])}</td></tr>
-      <tr><td><strong>Phase 2</strong> — Digital Product (Chief REAL, kit blueprint, PA list {pa}/100 — launch/sale Gate 0-তে আটকে)</td><td>{phase_badge(ph["phase_2_digital_product"])}</td></tr>
-      <tr><td><strong>Phase 3</strong> — Creator OS department (Chief REAL, 6 worker wired, 13 stage REAL {pipe["real"]} / MOCK {pipe["mock"]} / BLOCKED {pipe["blocked"]}, upload OFF)</td><td>{phase_badge(ph["phase_3_creator_os"])}</td></tr>
-      <tr><td><strong>Phase 4</strong> — n8n wiring (Gmail, Vapi, Sheets — workflows READY, NOT LIVE)</td><td>{phase_badge(ph["phase_4_n8n_wiring"])}</td></tr>
-      <tr><td><strong>Phase 5</strong> — Three Engines (shared tool-calling core + 3 engines: Agency 15 / Products 5 / Content 8 staff)</td><td>{phase_badge(ph["phase_5_three_engines"])}</td></tr>
-      <tr><td><strong>Phase 6</strong> — Brain + Runner (BrainFactory mock default, run_office.py — workers vendored)</td><td>{phase_badge(ph["phase_6_brain_runner"])}</td></tr>
-      <tr><td><strong>Phase 7</strong> — Full Offices: 16 sections, 23 section agents, 23 section skills (Agency 5 / Products 6 / Content 5 sections)</td><td>{phase_badge(ph["phase_7_sections"])}</td></tr>
+      <tr><td><strong>Phase 0</strong> — folder + CEO Core + approval gateway + dashboard</td><td>{phase_badge(ph.get("phase_0", UNKNOWN))}</td></tr>
+      <tr><td><strong>Phase 1</strong> — Agency department (vendored worker, draft-only, holds the gate)</td><td>{phase_badge(ph.get("phase_1_agency", UNKNOWN))}</td></tr>
+      <tr><td><strong>Phase 2</strong> — Digital Product (Chief REAL, kit blueprint, PA list {pa}/100 — launch/sale stuck at Gate 0)</td><td>{phase_badge(ph.get("phase_2_digital_product", UNKNOWN))}</td></tr>
+      <tr><td><strong>Phase 3</strong> — Creator OS department (Chief REAL, 6 worker wired, 13 stage REAL {pipe["real"]} / MOCK {pipe["mock"]} / BLOCKED {pipe["blocked"]}, upload OFF)</td><td>{phase_badge(ph.get("phase_3_creator_os", UNKNOWN))}</td></tr>
+      <tr><td><strong>Phase 4</strong> — n8n wiring (Gmail, Vapi, Sheets — workflows READY, NOT LIVE)</td><td>{phase_badge(ph.get("phase_4_n8n_wiring", UNKNOWN))}</td></tr>
+      <tr><td><strong>Phase 5</strong> — Three Engines (shared tool-calling core + 3 engines: Agency 15 / Products 5 / Content 8 staff)</td><td>{phase_badge(ph.get("phase_5_three_engines", UNKNOWN))}</td></tr>
+      <tr><td><strong>Phase 6</strong> — Brain + Runner (BrainFactory mock default, run_office.py — workers vendored)</td><td>{phase_badge(ph.get("phase_6_brain_runner", UNKNOWN))}</td></tr>
+      <tr><td><strong>Phase 7</strong> — Full Offices: 16 sections, 23 section agents, 23 section skills (Agency 5 / Products 6 / Content 5 sections)</td><td>{phase_badge(ph.get("phase_7_sections", UNKNOWN))}</td></tr>
+      <tr><td><strong>Agentic Phase 1</strong> — 8 departments inside Agency</td><td>{phase_badge(ph.get("agentic_phase_1", UNKNOWN))}</td></tr>
+      <tr><td><strong>Agentic Phase 2</strong> — Chief DEPARTMENT_ROUTING (8 managers)</td><td>{phase_badge(ph.get("agentic_phase_2", UNKNOWN))}</td></tr>
+      <tr><td><strong>Agentic Phase 3</strong> — 43 ROLE-ONLY specialists built as worker code</td><td>{phase_badge(ph.get("agentic_phase_3", UNKNOWN))}</td></tr>
+      <tr><td><strong>Unified OS</strong> — CENTRAL-HQ (one brain + 3 Chiefs)</td><td>{phase_badge(ph.get("unified_os", UNKNOWN))}</td></tr>
+      <tr><td><strong>Phase 9</strong> — taskboard + MCP stdio + live-ready tool code</td><td>{phase_badge(ph.get("phase_9_connections", UNKNOWN))}</td></tr>
+      <tr><td><strong>Phase 10</strong> — live brain probe (NOT PROVEN LIVE — brain mock)</td><td>{phase_badge(ph.get("phase_10_live_brain", UNKNOWN))}</td></tr>
+      <tr><td><strong>Phase 11</strong> — 7 LLM providers + fallback chain (brain still mock)</td><td>{phase_badge(ph.get("phase_11_providers", UNKNOWN))}</td></tr>
+      <tr><td><strong>Improvement P1</strong> — trust gate as code</td><td>{phase_badge(ph.get("improvement_p1_gate", UNKNOWN))}</td></tr>
+      <tr><td><strong>Improvement P2</strong> — owner memory + usage ledger ($0)</td><td>{phase_badge(ph.get("improvement_p2_memory_ledger", UNKNOWN))}</td></tr>
+      <tr><td><strong>Improvement P3</strong> — quiet schedules (change-only watches)</td><td>{phase_badge(ph.get("improvement_p3_quiet_schedules", UNKNOWN))}</td></tr>
     </table>
   </div>
 
   <div class="card">
-    <h2>n8n Wiring — বাইরের দুনিয়ার সাথে সংযোগ</h2>
+    <h2>n8n Wiring — Connection to the Outside World</h2>
     <table>
-      <tr><th>Workflow</th><th>অবস্থা</th><th>সত্য কথা</th></tr>
-      <tr><td><strong>Auto-send</strong> — {wf_a["name"]} ({wf_a["nodes"]} nodes)</td><td>{wf_badge(wf_a["status"])}</td><td>Schedule 18:00 Dhaka → Google Sheet Queue → Gmail send → Sheet-এ sent লেখা · Import + Gmail/Sheets connect + 1-mail test Boss-এর step · Email PAUSED থাকায় চালানো যাবে না</td></tr>
-      <tr><td><strong>Callback</strong> — {wf_c["name"]} ({wf_c["nodes"]} nodes)</td><td>{wf_badge(wf_c["status"])}</td><td>Website form → n8n webhook → Vapi POST /call → Sophia callback · Twilio number (~$1.15/mo) import + workflow import + Vapi credential + webhook URL Boss-এর step</td></tr>
+      <tr><th>Workflow</th><th>State</th><th>True Story</th></tr>
+      <tr><td><strong>Auto-send</strong> — {wf_a["name"]} ({wf_a["nodes"]} nodes)</td><td>{wf_badge(wf_a["status"])}</td><td>Schedule 18:00 Dhaka → Google Sheet Queue → Gmail send → sent written to Sheet · Import + Gmail/Sheets connect + 1-mail test are Boss's step · Cannot be run while Email is PAUSED</td></tr>
+      <tr><td><strong>Callback</strong> — {wf_c["name"]} ({wf_c["nodes"]} nodes)</td><td>{wf_badge(wf_c["status"])}</td><td>Website form → n8n webhook → Vapi POST /call → Sophia callback · Twilio number (~$1.15/mo) import + workflow import + Vapi credential + webhook URL are Boss's step</td></tr>
     </table>
-    <p class="note">Host: Muse runtime + 10-min bridge cron ($0) — ২৪/৭ always-on server নেই, ওটা পরে টাকা দিয়ে করতে হবে। কোনো workflow-ই LIVE নয় — LIVE দাবি করা হয় না। দুই send system একসাথে চলবে না (double mail যাবে)।</p>
+    <p class="note">Host: Muse runtime + 10-min bridge cron ($0) — no 24/7 always-on server, that will have to be paid for later. No workflow is LIVE — LIVE is not claimed. Two send systems will not run together (double mail would go out).</p>
   </div>
 
   <div class="card">
-    <h2>Gate ও সীমা</h2>
-    <p>Gates: <span class="gate-on">{"ON" if s["gates_enabled"] is True else str(s["gates_enabled"])}</span> — send / publish / spend / delete, কোনোটাই Boss-এর gate word ছাড়া হয় না। Auto-approve নেই।</p>
+    <h2>Gates and Limits</h2>
+    <p>Gates: <span class="gate-on">{"ON" if s["gates_enabled"] is True else str(s["gates_enabled"])}</span> — send / publish / spend / delete, none of them happen without Boss's gate word. No auto-approve.</p>
     <p>Spend cap: <strong>${s["spend_cap_usd"]}</strong></p>
-    <p>Email: {email_badge} 2026-11-14 থেকে — SPF/DMARC DNS fix Boss-এর হাতে বাকি।</p>
-    <p>Paying clients: <strong>{s["paying_clients"]}</strong> · Kit sales: <strong>0</strong> (Gate 0 {gate0}) · ToolPilot videos: <strong>0</strong> · Upload: <span class="badge paused">OFF</span> (stage 9, Boss-এর "upload it" + credential লাগে)</p>
-    <p>Gate 0: {gate0_badge} — Lemon Squeezy signup test (~15 min) Boss-এর step। পাস হলে PA list 100-এ পূর্ণ হবে, তারপর kit বানানো।</p>
+    <p>Email: {email_badge} since 2026-11-14 — the SPF/DMARC DNS fix is still in Boss's hands.</p>
+    <p>Paying clients: <strong>{s["paying_clients"]}</strong> · Kit sales: <strong>0</strong> (Gate 0 {gate0}) · ToolPilot videos: <strong>0</strong> · Upload: <span class="badge paused">OFF</span> (stage 9, needs Boss's "upload it" + credential)</p>
+    <p>Gate 0: {gate0_badge} — Lemon Squeezy signup test (~15 min) is Boss's step. If it passes, the PA list will fill to 100, then the kit is built.</p>
     <p>Store: tasks {s["tasks_count"]} · approvals pending {s["approvals_pending"]} / approved {s["approvals_approved"]}</p>
+    <p>Usage ledger: {ul.get("total_calls", UNKNOWN)} calls · ${ul.get("monthly_total_usd", UNKNOWN)} this month (cap ${ul.get("monthly_cap_usd", UNKNOWN)}/mo) · over cap: {ul.get("over_monthly_cap", UNKNOWN)}</p>
   </div>
 
   <div class="card">
     <h2>REAL vs STUB vs REUSED</h2>
     <table>
-      <tr><td><strong>REAL</strong></td><td>Approval gateway (approve/reject সত্যিই record করে), Main CEO Bot router, config.json, এই dashboard (sync দিয়ে বানানো), <strong>Agency Chief of Staff (15 worker routing, draft-only, gated কাজ PENDING-এ আটকায়)</strong>, <strong>Products Chief of Staff (kit blueprint, PA list {pa}/100, launch/sale Gate 0-তে আটকায়)</strong>, <strong>Content Chief of Staff (6 Creator OS worker routing, draft-only, upload OFF-এ আটকায়, video file বানায় না)</strong></td></tr>
-      <tr><td><strong>READY (NOT LIVE)</strong></td><td>n8n auto-send workflow + callback workflow — import file তৈরি, Boss-এর import + connect + test বাকি, কোনোটাই LIVE নয়</td></tr>
+      <tr><td><strong>REAL</strong></td><td>Approval gateway (approve/reject really records), Main CEO Bot router, config.json, this dashboard (built by sync), <strong>Agency Chief of Staff (15 worker routing, draft-only, gated work gets stuck in PENDING)</strong>, <strong>Products Chief of Staff (kit blueprint, PA list {pa}/100, launch/sale stuck at Gate 0)</strong>, <strong>Content Chief of Staff (6 Creator OS worker routing, draft-only, stuck at upload OFF, does not make video files)</strong></td></tr>
+      <tr><td><strong>READY (NOT LIVE)</strong></td><td>n8n auto-send workflow + callback workflow — import files ready, Boss's import + connect + test remaining, neither is LIVE</td></tr>
       <tr><td><strong>{voice["label"]}</strong></td><td>{voice["detail"]}</td></tr>
-      <tr><td><strong>VENDORED (Phase 6)</strong></td><td>boss-ceo engine (15 worker) + Creator OS (6 worker) — copy এখন repo-র ভিতরে; talvenor-office, jarvis-ceo-os-concept — reference only</td></tr>
+      <tr><td><strong>VENDORED (Phase 6)</strong></td><td>boss-ceo engine (15 workers) + Creator OS (6 workers) — copies now inside the repo; talvenor-office, jarvis-ceo-os-concept — reference only</td></tr>
     </table>
-    <p class="note">Gemini-র map-এর ৪ ভুল এখানে ঠিক করা হয়েছে: (1) Jarvis ≠ Main CEO Bot, আলাদা; (2) approval/gate layer আছে; (3) store/Vault আছে; (4) digital product = Vet Kit $49, generic "Notion Kits" নয়।</p>
+    <p class="note">Gemini's map had 4 errors, fixed here: (1) Jarvis ≠ Main CEO Bot, separate; (2) an approval/gate layer exists; (3) store/Vault exists; (4) digital product = Vet Kit $49, not generic "Notion Kits".</p>
   </div>
 
   <div class="card">
-    <h2>যোগাযোগ (আসল)</h2>
+    <h2>Contact (real)</h2>
     <p>Booking: https://calendar.app.google/WLoxBfnLGTdjK3LB8 (15 min, New York Time)<br>
-    ফোন: +1 (947) 223-0244<br>
-    ইমেইল: hello@talvenorai.agency (outreach) · contact@talvenorai.agency (main)</p>
+    Phone: +1 (947) 223-0244<br>
+    Email: hello@talvenorai.agency (outreach) · contact@talvenorai.agency (main)</p>
   </div>
 
-  <footer>Built: 2026-11-16 (Phase 0 + Phase 1 Agency + Phase 2 Digital Product* + Phase 3 Creator OS + Phase 4 n8n wiring) · Folder: ~/workspace/talvenor-master-os/ · Version {s["version"]} · *Phase 2 Gate 0-তে আটকে — kit blueprint + PA list {pa}/100 শুধু। Content: 13 stage REAL {pipe["real"]} / MOCK {pipe["mock"]} / BLOCKED {pipe["blocked"]}, upload OFF। n8n workflows READY, NOT LIVE। কোনো সংখ্যা বানানো নয় — সব আসল ফাইল থেকে sync করা।</footer>
+  <footer>Built: {s.get("built", UNKNOWN)} (Phase {phase}) · Folder: ~/workspace/talvenor-master-os/ · Version {s["version"]} · Phase 2 stuck at Gate 0 — kit blueprint + PA list {pa}/100 only. Content: 13 stages REAL {pipe["real"]} / MOCK {pipe["mock"]} / BLOCKED {pipe["blocked"]}, upload OFF. n8n workflows READY, NOT LIVE. No number invented — all synced from the real files.</footer>
 </div>
 </body>
 </html>
@@ -475,11 +512,11 @@ def render_html(s):
 
 
 def write_status_json(status):
-    """collect_status()-এর পুরো dict dashboards/status.json-এ লেখে।
+    """Writes the full dict from collect_status() to dashboards/status.json.
 
-    dashboard-3d.html এই JSON পড়ে — তাই 3D dashboard-এর সংখ্যা সবসময়
-    আসল ফাইল থেকে আসে, হাতে লেখা নয়। sync_status.py চালালেই JSON
-    তাজা হয়। deterministic (sort_keys) — দুই run-এ byte-identical।"""
+    dashboard-3d.html reads this JSON — so the 3D dashboard's numbers always come
+    from the real files, not hand-written. Running sync_status.py refreshes the JSON
+    immediately. Deterministic (sort_keys) — two runs are byte-identical."""
     out = os.path.join(BASE, "dashboards", "status.json")
     with open(out, "w", encoding="utf-8") as f:
         json.dump(status, f, indent=2, ensure_ascii=False, sort_keys=True)

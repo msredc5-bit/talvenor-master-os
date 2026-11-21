@@ -1,0 +1,24 @@
+{
+  "schema": "schedules-v1",
+  "note": "Quiet schedules: a watch runs only when its observed state changed. One run at a time. Corrections keep the rest.",
+  "records": [
+    {
+      "id": "616bb89e0d50",
+      "name": "taskboard-queue-watch",
+      "kind": "watch",
+      "source": "store/tasks.json",
+      "interval_minutes": 10,
+      "status": "paused",
+      "last_marker": null,
+      "last_run_at": null,
+      "last_result": null,
+      "last_skip_reason": null,
+      "running": false,
+      "run_started_at": null,
+      "runs": 0,
+      "skips": 0,
+      "created_at": "2026-11-21T02:59:08.104018+00:00",
+      "note": "Phase 3 built 2026-11-21; no runner attached yet — bridge adoption needs Boss/parent word, not automatic."
+    }
+  ]
+}

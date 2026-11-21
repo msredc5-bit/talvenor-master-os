@@ -1,15 +1,15 @@
-"""Engines dashboard sync — dashboards/engines.html আসল engine file থেকে বানানো।
+"""Engines dashboard sync — dashboards/engines.html made from the real engine files.
 
-পড়ে:
-  - প্রতিটা engine-র tools.json (mock/gated সংখ্যা)
-  - প্রতিটা engine-র skills/*.md (staff + skill সংখ্যা)
+Reads:
+  - Each engine's tools.json (mock/gated counts)
+  - Each engine's skills/*.md (staff + skill counts)
   - Agency: config.json honest_status (email PAUSED)
-  - Products: gate0-status.md-র Status লাইন (fail-closed parse)
-  - Content: pipeline.md-র গণনা লাইন (REAL / MOCK / BLOCKED)
-  - Shared core: 00-CEO-Core/tool_calling.py-র HANDLERS
+  - Products: gate0-status.md's Status line (fail-closed parse)
+  - Content: pipeline.md's count line (REAL / MOCK / BLOCKED)
+  - Shared core: 00-CEO-Core/tools.json (9 tool — handler + mock/live-ready status)
 
-কোনো timestamp লেখে না — দুইবার চালালে byte-identical HTML হয়।
-কোনো মান না পেলে "unknown" লেখে, বানায় না।
+Writes no timestamp — running twice gives byte-identical HTML.
+If a value is not found, writes "unknown", does not invent one.
 """
 
 import json
@@ -61,8 +61,8 @@ def collect():
     email = config.get("honest_status", {}).get("email_outreach", "unknown")
     clients = config.get("honest_status", {}).get("paying_clients", "unknown")
     first_mails = config.get("honest_status", {}).get("first_mails_sent", "unknown")
-    # Products Gate 0 — fail-closed: শুধু "Status:" লাইনটা পড়া হয়
-    # (লাইনটা "**Status: NOT PASSED (2026-11-16)**" আকারে থাকতে পারে)
+    # Products Gate 0 — fail-closed: only the "Status:" line is read
+    # (the line may be in the form "**Status: NOT PASSED (2026-11-16)**")
     gate0 = "unknown"
     gate_text = read_text(os.path.join(
         ROOT, "02-Digital-Product-Department", "gate0-status.md"))
@@ -71,8 +71,8 @@ def collect():
         if m:
             gate0 = m.group(1).strip()
             break
-    # Content pipeline counts — গণনা লাইন থেকে
-    # ("**গণনা:** REAL **0** · MOCK **10** · STUB **0** · BLOCKED **3**")
+    # Content pipeline counts — from the count line
+    # ("**Count:** REAL **0** · MOCK **10** · STUB **0** · BLOCKED **3**")
     pipe_text = read_text(os.path.join(
         ROOT, "03-Content-Creation-Department", "pipeline.md"))
     pipe = {"real": "?", "mock": "?", "stub": "?", "blocked": "?"}
@@ -82,14 +82,16 @@ def collect():
     if m:
         pipe = {"real": m.group(1), "mock": m.group(2),
                 "stub": m.group(3), "blocked": m.group(4)}
-    # Shared core handlers
-    core_text = read_text(os.path.join(ROOT, "00-CEO-Core", "tool_calling.py"))
-    handlers = sorted(set(re.findall(r'"(draft_\w+|kit_outline_read|status_read|research_notes)"',
-                                     core_text)))
+    # Shared core handlers — source 00-CEO-Core/tools.json (9 tools, with mock/live-ready status).
+    # If tool_calling.py were regexed, "draft_only" (a flag, not a handler) would be caught
+    # and booking_reply would be missed (D9, 2026-11-21).
+    core_tools = read_json(os.path.join(ROOT, "00-CEO-Core", "tools.json"))["tools"]
+    handlers = sorted(t["handler"] for t in core_tools)
+    handler_status = {t["handler"]: t.get("status", "mock") for t in core_tools}
     return {
         "engines": engines, "email": email, "clients": clients,
         "first_mails": first_mails, "gate0": gate0, "pipeline": pipe,
-        "handlers": handlers,
+        "handlers": handlers, "handler_status": handler_status,
     }
 
 
@@ -121,32 +123,32 @@ footer {{ margin-top: 32px; color: #666; font-size: 13px; }}
 </head>
 <body>
 <h1>⚙️ Talvenor Master OS — Three Engines (Phase 5)</h1>
-<p>Boss → Jarvis (voice) → Main CEO Bot (second brain) → ৩ Engine / Office System।
-প্রতিটা engine-র নিজের Staff, নিজের Tool Calling System, নিজের Skills।</p>
-<p>এই page <code>scripts/sync_engines.py</code> দিয়ে আসল engine file থেকে বানানো —
-হাতে সংখ্যা বদলালে sync-এ ফিরে যাবে।</p>
+<p>Boss → Jarvis (voice) → Main CEO Bot (second brain) → 3 Engines / Office System.
+Each engine has its own Staff, its own Tool Calling System, its own Skills.</p>
+<p>This page is made from the real engine files by <code>scripts/sync_engines.py</code> —
+if you change a number by hand, sync will revert it.</p>
 
-<h2>Engine-গুলো</h2>
+<h2>The Engines</h2>
 <table>
-<tr><th>Engine</th><th>Staff</th><th>Tools</th><th>Mock</th><th>Gated</th><th>Skills</th><th>Gated tool (কখনো execute হয় না)</th></tr>
+<tr><th>Engine</th><th>Staff</th><th>Tools</th><th>Mock</th><th>Gated</th><th>Skills</th><th>Gated tool (never executes)</th></tr>
 {rows}</table>
 
-<h2>সত্য অবস্থা (আসল file থেকে)</h2>
+<h2>True State (from the real files)</h2>
 <ul>
-<li><b>Paying clients:</b> {s['clients']} &nbsp;|&nbsp; <b>প্রথম মেইল:</b> {s['first_mails']}</li>
+<li><b>Paying clients:</b> {s['clients']} &nbsp;|&nbsp; <b>First mail:</b> {s['first_mails']}</li>
 <li><b>Email:</b> {s['email']}</li>
 <li><b>Vet Kit Gate 0:</b> {s['gate0']}</li>
 <li><b>Creator OS 13 stage:</b> REAL {s['pipeline']['real']} / MOCK {s['pipeline']['mock']} / STUB {s['pipeline']['stub']} / BLOCKED {s['pipeline']['blocked']}</li>
-<li><b>Shared core handlers:</b> {', '.join(s['handlers'])}</li>
+<li><b>Shared core handlers (from tools.json, 9 tools):</b> {', '.join(f"{h} ({s['handler_status'].get(h, 'mock')})" for h in s['handlers'])}</li>
 </ul>
 
-<div class="note"><b>Gate (আইন):</b> <code>ok</code> / <code>post it</code> / <code>upload it</code> /
-<code>send</code> / <code>go</code> — Boss-এর exact word ছাড়া send / publish /
-spend / delete হবে না। Gated tool call করলে ApprovalGateway-এ PENDING লেখা হয়,
-কিছু execute হয় না। Spend cap <b>$0</b>। Jarvis voice STUB (mic যুক্ত নয়)।</div>
+<div class="note"><b>Gate (law):</b> <code>ok</code> / <code>post it</code> / <code>upload it</code> /
+<code>send</code> / <code>go</code> — without Boss's exact word, no send / publish /
+spend / delete. A gated tool call writes PENDING to the ApprovalGateway,
+nothing executes. Spend cap <b>$0</b>. Jarvis voice REAL (offline, $0).</div>
 
 <footer>Built 2026-11-16 (Phase 5) — folder <code>~/workspace/talvenor-master-os/</code> |
-Host: Muse runtime + bridge cron ($0) — ২৪/৭ server নেই।</footer>
+Host: Muse runtime + bridge cron ($0) — no 24/7 server.</footer>
 </body>
 </html>
 """

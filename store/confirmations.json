@@ -1,0 +1,5 @@
+{
+  "schema": "confirmations-v1",
+  "note": "One confirmation = one exact action + args, runs once. Failed/interrupted = UNCERTAIN, never re-run. A repeat needs a new confirmation.",
+  "records": []
+}

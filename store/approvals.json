@@ -1,1 +1,5 @@
-{"note":"Every gated action needs Boss's exact gate word. No auto-approve.","records":[],"schema":"approvals-v1"}
+{
+  "note": "Every gated action needs Boss's exact gate word. No auto-approve.",
+  "records": [],
+  "schema": "approvals-v1"
+}

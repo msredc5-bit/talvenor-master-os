@@ -22,6 +22,16 @@ Endpoints (localhost only — no auth, never expose publicly):
       {"id": "...", "status": "queued", "business": "agency",
        "type": "research", "title": "...", "payload": {...},
        "queued_at": "..."}
+  DELETE /api/tasks/<id> -> cancel one QUEUED task only (done/failed
+      tasks cannot be deleted — history stays); missing id -> 404,
+      non-queued -> 409.
+
+Environment (optional — defaults are the real repo paths, like the
+MCP server's TALVENOR_MCP_* vars):
+  TALVENOR_TASKBOARD_TASKS  — tasks JSON path
+  TALVENOR_TASKBOARD_STATUS — status JSON path (/api/status)
+  TALVENOR_TASKBOARD_PAGE   — board HTML path (/)
+Set them to TEMP paths in tests so the real store stays untouched.
 
 Run:  python3 scripts/taskboard_server.py [--port 8766]
 Then: http://localhost:8766/
@@ -40,9 +50,12 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DASHBOARDS_DIR = os.path.join(BASE, "dashboards")
-TASKS_PATH = os.path.join(BASE, "store", "tasks.json")
-STATUS_PATH = os.path.join(DASHBOARDS_DIR, "status.json")
-BOARDPAGE_PATH = os.path.join(DASHBOARDS_DIR, "taskboard.html")
+TASKS_PATH = os.environ.get(
+    "TALVENOR_TASKBOARD_TASKS", os.path.join(BASE, "store", "tasks.json"))
+STATUS_PATH = os.environ.get(
+    "TALVENOR_TASKBOARD_STATUS", os.path.join(DASHBOARDS_DIR, "status.json"))
+BOARDPAGE_PATH = os.environ.get(
+    "TALVENOR_TASKBOARD_PAGE", os.path.join(DASHBOARDS_DIR, "taskboard.html"))
 
 BUSINESSES = ("agency", "digital-product", "content")
 TYPE_RE = re.compile(r"^[a-z][a-z0-9_]{0,63}$")
@@ -171,6 +184,31 @@ class TaskboardHandler(BaseHTTPRequestHandler):
             records.append(record)
             _write_tasks(records)
         self._send_json(201, record)
+
+    def do_DELETE(self):
+        # DELETE /api/tasks/<id> — queued-only cancel.
+        if not self.path.startswith("/api/tasks/"):
+            self._send_json(404, {"error": f"Unknown path: {self.path}"})
+            return
+        task_id = self.path[len("/api/tasks/"):].strip("/").split("/")[0]
+        if not task_id:
+            self._send_json(400, {"error": "Task id is required."})
+            return
+        with _store_lock:
+            records = _read_tasks()
+            target = next((r for r in records if r.get("id") == task_id),
+                          None)
+            if target is None:
+                self._send_json(404, {"error": f"No task with id {task_id!r}."})
+                return
+            if target.get("status") != "queued":
+                self._send_json(409, {
+                    "error": f"Only queued tasks can be cancelled — "
+                             f"task {task_id!r} is {target.get('status')!r}."})
+                return
+            records = [r for r in records if r.get("id") != task_id]
+            _write_tasks(records)
+        self._send_json(200, {"cancelled": target})
 
 
 def main(argv=None):

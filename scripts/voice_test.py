@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
 """Voice headless self-test — Jarvis voice loop (no mic/speaker needed).
 
-যাচাই করে (Piper TTS + Vosk/sherpa-onnx STT, offline, $0):
-  1. piper-tts import হয়
-  2. upstream voices.json-এ bn_BD-google-medium + en_US-lessac-medium আছে
-     (piper-tts package-এর নিজের VOICES_JSON URL দিয়ে পড়া)
-  3. দুই voice download হয় (না থাকলে; md5 যাচাই সহ)
+Verifies (Piper TTS + Vosk/sherpa-onnx STT, offline, $0):
+  1. piper-tts imports
+  2. upstream voices.json has bn_BD-google-medium + en_US-lessac-medium
+     (read via piper-tts package's own VOICES_JSON URL)
+  3. Both voices download (if missing; with md5 verification)
   4. English synth: "Hello, I am Jarvis." -> WAV (valid header, non-empty)
   5. Bengali synth: "আমি জারভিস, শুনছি।" -> WAV (valid header, non-empty)
-  6. English WAV -> Vosk transcribe: "jarvis" (আর hello/i/am-এর অন্তত
-     একটা) থাকতে হবে
-  7. Bengali WAV -> sherpa-onnx transcribe: Bengali অক্ষর থাকতে হবে
-     (WER 17-33% বলে exact-word match দাবি করা হয় না — pipeline-টা
-     কাজ করে কিনা, সেটাই যাচাই)
+  6. English WAV -> Vosk transcribe: "jarvis" (and at least one of hello/i/am
+     must be present)
+  7. Bengali WAV -> sherpa-onnx transcribe: Bengali characters must be present
+     (WER 17-33%, so exact-word match is not claimed — what is verified is whether
+     the pipeline works)
 
-Mic/speaker লাগে না — এই VM-এও চলে। Model download-এ network লাগে
-(একবারই; তারপর offline)।
+No mic/speaker needed — runs on this VM too. Model download needs network
+(once only; offline after that).
 
 Usage: python3 scripts/voice_test.py [--models-dir ...] [--skip-bn-stt]
-Exit 0 = সব PASS; 1 = কোনো FAIL (কারণ print হয়, ভান হয় না)।
+Exit 0 = all PASS; 1 = some FAIL (the reason is printed, no pretence).
 """
 
 import argparse
@@ -50,10 +50,10 @@ def check(name, ok, detail=""):
 
 
 def wav_is_valid(path):
-    """WAV আছে + non-empty + valid header + mono 16-bit + frames > 0।"""
+    """WAV exists + non-empty + valid header + mono 16-bit + frames > 0."""
     try:
         if not os.path.exists(path) or os.path.getsize(path) == 0:
-            return False, "file নেই বা খালি"
+            return False, "file missing or empty"
         with wave.open(path, "rb") as wav:
             if wav.getnchannels() != 1 or wav.getsampwidth() != 2:
                 return False, (f"channels={wav.getnchannels()}, "
@@ -63,31 +63,31 @@ def wav_is_valid(path):
             return True, (f"{os.path.getsize(path)} B, "
                           f"{wav.getframerate()} Hz, "
                           f"{wav.getnframes()} frames")
-    except Exception as e:  # noqa: BLE001 — detail-সহ FAIL
+    except Exception as e:  # noqa: BLE001 — FAIL with detail
         return False, f"{type(e).__name__}: {e}"
 
 
 def ensure_piper_voices(model_dir):
-    """Piper voice download (piper-tts-এর নিজের downloader দিয়ে)।"""
+    """Piper voice download (with piper-tts's own downloader)."""
     import piper.download_voices as dv  # noqa: PLC0415
     piper_dir = os.path.join(model_dir, "piper")
     os.makedirs(piper_dir, exist_ok=True)
     for voice_id in (VOICE_IDS["bn"], VOICE_IDS["en"]):
         onnx = os.path.join(piper_dir, f"{voice_id}.onnx")
         if os.path.exists(onnx) and os.path.getsize(onnx) > 0:
-            print(f"  voice আছে: {voice_id}")
+            print(f"  voice exists: {voice_id}")
             continue
         print(f"  downloading voice: {voice_id} ...")
         dv.download_voice(voice_id, piper_dir)
 
 
 def ensure_vosk_model(model_dir):
-    """Vosk en model zip download + unzip (না থাকলে)।"""
+    """Vosk en model zip download + unzip (if missing)."""
     import zipfile  # noqa: PLC0415
     vosk_dir = os.path.join(model_dir, "vosk")
     model_dir_path = os.path.join(vosk_dir, MODEL_IDS["en"]["model"])
     if os.path.exists(os.path.join(model_dir_path, "am", "final.mdl")):
-        print(f"  vosk model আছে: {MODEL_IDS['en']['model']}")
+        print(f"  vosk model exists: {MODEL_IDS['en']['model']}")
         return
     os.makedirs(vosk_dir, exist_ok=True)
     zippath = os.path.join(vosk_dir, "vosk-model-small-en-us-0.15.zip")
@@ -105,14 +105,14 @@ def ensure_vosk_model(model_dir):
 
 
 def ensure_sherpa_model(model_dir):
-    """Sherpa bn model download (huggingface_hub snapshot_download)।"""
+    """Sherpa bn model download (huggingface_hub snapshot_download)."""
     from huggingface_hub import snapshot_download  # noqa: PLC0415
     sherpa_dir = os.path.join(model_dir, "sherpa-bn")
     need = ["am-onnx/encoder.onnx", "am-onnx/decoder.onnx",
             "am-onnx/joiner.onnx", "lang/tokens.txt",
             "lang/unigram_500.vocab"]
     if all(os.path.exists(os.path.join(sherpa_dir, p)) for p in need):
-        print(f"  sherpa model আছে: {MODEL_IDS['bn']['model']}")
+        print(f"  sherpa model exists: {MODEL_IDS['bn']['model']}")
         return
     print("  downloading sherpa bn model (~96 MB) ...")
     snapshot_download(MODEL_IDS["bn"]["repo"], local_dir=sherpa_dir)
@@ -123,7 +123,7 @@ def main():
     parser.add_argument("--models-dir", default=os.path.join(
         CEO_CORE_DIR, "voice", "models"))
     parser.add_argument("--skip-bn-stt", action="store_true",
-                        help="Bengali STT check বাদ দাও (model না থাকলে)")
+                        help="skip the Bengali STT check (if the model is missing)")
     args = parser.parse_args()
     model_dir = args.models_dir
     out_dir = os.path.join(CEO_CORE_DIR, "voice", "output")
@@ -136,32 +136,32 @@ def main():
               getattr(piper, "__version__", "version n/a"))
     except ImportError as e:
         check("piper-tts import", False,
-              "pip install piper-tts চালান — " + str(e))
+              "run pip install piper-tts — " + str(e))
         return _finish()
 
-    # 2. upstream voices.json-এ দুই voice আছে
+    # 2. upstream voices.json has both voices
     try:
         import piper.download_voices as dv  # noqa: PLC0415
         with urllib.request.urlopen(dv.VOICES_JSON, timeout=60) as r:
             voices = json.load(r)
         bn_ok = VOICE_IDS["bn"] in voices
         en_ok = VOICE_IDS["en"] in voices
-        check("upstream voices.json-এ bn + en voice আছে", bn_ok and en_ok,
+        check("upstream voices.json has bn + en voices", bn_ok and en_ok,
               f"bn={VOICE_IDS['bn']}: {bn_ok}, "
-              f"en={VOICE_IDS['en']}: {en_ok}, মোট {len(voices)} voice")
+              f"en={VOICE_IDS['en']}: {en_ok}, total {len(voices)} voices")
     except Exception as e:  # noqa: BLE001
-        check("upstream voices.json-এ bn + en voice আছে", False,
+        check("upstream voices.json has bn + en voices", False,
               f"{type(e).__name__}: {e}")
         return _finish()
 
     # 3. voice download
     try:
         ensure_piper_voices(model_dir)
-        check("Piper voice file (bn + en) আছে", all(
+        check("Piper voice files (bn + en) exist", all(
             os.path.exists(os.path.join(
                 model_dir, "piper", f"{v}.onnx")) for v in VOICE_IDS.values()))
     except Exception as e:  # noqa: BLE001
-        check("Piper voice file (bn + en) আছে", False,
+        check("Piper voice files (bn + en) exist", False,
               f"{type(e).__name__}: {e}")
         return _finish()
 
@@ -189,12 +189,12 @@ def main():
             words = set(text.lower().split())
             hit = words & {"hello", "i", "am", "jarvis"}
             check("Vosk transcribe (en WAV)", "jarvis" in words and len(hit) >= 2,
-                  f"transcript: {text!r} (মিল: {sorted(hit)})")
+                  f"transcript: {text!r} (matches: {sorted(hit)})")
         except Exception as e:  # noqa: BLE001
             check("Vosk transcribe (en WAV)", False,
                   f"{type(e).__name__}: {e}")
     else:
-        check("Vosk transcribe (en WAV)", False, "en WAV বানানো যায়নি")
+        check("Vosk transcribe (en WAV)", False, "en WAV could not be made")
 
     # 7. bn WAV -> sherpa-onnx
     if args.skip_bn_stt:
@@ -211,7 +211,7 @@ def main():
             check("sherpa transcribe (bn WAV)", False,
                   f"{type(e).__name__}: {e}")
     else:
-        check("sherpa transcribe (bn WAV)", False, "bn WAV বানানো যায়নি")
+        check("sherpa transcribe (bn WAV)", False, "bn WAV could not be made")
 
     return _finish()
 
