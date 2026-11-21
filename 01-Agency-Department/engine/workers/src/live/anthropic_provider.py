@@ -1,18 +1,18 @@
 """Layer 1 — AnthropicProvider: Claude model (Anthropic Messages API).
 
-MetaSparkProvider-এর মতোই LLMProvider interface — complete(prompt, *,
-max_tokens) -> str — তাই বদলানো শুধু config-এর ব্যাপার
-(00-CEO-Core/config.json-এর providers section)। Key আসে শুধু
-ANTHROPIC_API_KEY environment variable থেকে — কখনো file, log বা
-argument থেকে নয়। Key নেই / network error / API error হলে raise করে;
-LiveBrainAdapter ধরে LOUD mock fallback দেয়। Construction-এ কোনো
-network I/O নেই (key পড়া হয় শুধু complete()-এ)।
+Same LLMProvider interface as MetaSparkProvider — complete(prompt, *,
+max_tokens) -> str — so switching is only a config matter
+(00-CEO-Core/config.json's providers section). The key comes only
+from the ANTHROPIC_API_KEY environment variable — never from a file, log, or
+argument. If there is no key / a network error / an API error, it raises;
+LiveBrainAdapter catches it and gives a LOUD mock fallback. Construction has no
+network I/O (the key is read only in complete()).
 
-Anthropic-এর API OpenAI-র মতো নয় — Messages API: system আলাদা field,
-body-তে max_tokens বাধ্যতামূলক, response-এ content block-এর list।
-Endpoint: https://api.anthropic.com/v1/messages (Anthropic, official)।
-Key পাওয়া যায়: https://console.anthropic.com/settings/keys
-Stdlib only — কোনো pip নেই।
+Anthropic's API is not like OpenAI's — Messages API: system is a separate field,
+max_tokens is mandatory in the body, and the response has a list of content blocks.
+Endpoint: https://api.anthropic.com/v1/messages (Anthropic, official).
+Key available at: https://console.anthropic.com/settings/keys
+Stdlib only — no pip.
 """
 from __future__ import annotations
 

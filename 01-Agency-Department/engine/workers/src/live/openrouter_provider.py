@@ -1,27 +1,27 @@
 """Layer 1 — OpenRouterProvider: OpenRouter auto-router + named models.
 
-MetaSparkProvider-এর মতোই LLMProvider interface — complete(prompt, *,
-max_tokens) -> str — তাই বদলানো শুধু config-এর ব্যাপার
-(00-CEO-Core/config.json-এর providers section)। Key আসে শুধু
-OPENROUTER_API_KEY environment variable থেকে — কখনো file, log বা
-argument থেকে নয়। Key নেই / network error / API error হলে raise করে;
-LiveBrainAdapter ধরে LOUD mock fallback দেয়। Construction-এ কোনো
-network I/O নেই (key পড়া হয় শুধু complete()-এ)।
+Same LLMProvider interface as MetaSparkProvider — complete(prompt, *,
+max_tokens) -> str — so switching is only a config matter
+(00-CEO-Core/config.json's providers section). The key comes only
+from the OPENROUTER_API_KEY environment variable — never from a file, log, or
+argument. If there is no key / a network error / an API error, it raises;
+LiveBrainAdapter catches it and gives a LOUD mock fallback. Construction has no
+network I/O (the key is read only in complete()).
 
-Model দুইভাবে বাছা যায়:
-  - "openrouter/free" — auto-router: প্রতি request-এ OpenRouter নিজে
-    একটা fitting free model বেছে নেয় (Boss-কে model-এর নাম মনে
-    রাখতে হয় না)।
-  - নাম ধরে, যেমন "nvidia/nemotron-3-ultra-550b-a55b:free" — :free
-    দিয়ে শেষ হওয়া model-গুলো free। Free model বদলায় (আসে/যায়),
-    তাই fallback chain-এ একাধিক model রাখা ভালো।
-Free limit (OpenRouter docs): ২০ request/min, ৫০ request/day;
-$10 lifetime credit কিনলে ১,০০০/day। Limit গোনা হয় request-এ,
-token-এ নয়।
+The model can be chosen two ways:
+  - "openrouter/free" — auto-router: on every request OpenRouter itself
+    picks a fitting free model (Boss does not need to remember
+    the model's name).
+  - By name, e.g. "nvidia/nemotron-3-ultra-550b-a55b:free" — models ending in :free
+    are free. Free models change (come/go),
+    so it is good to keep several models in the fallback chain.
+Free limit (OpenRouter docs): 20 requests/min, 50 requests/day;
+Buying $10 lifetime credit gives 1,000/day. The limit is counted in requests,
+not tokens.
 
 Endpoint: https://openrouter.ai/api/v1/chat/completions
-(OpenAI-compatible, official)। Key পাওয়া যায়: https://openrouter.ai/keys
-Stdlib only — কোনো pip নেই।
+(OpenAI-compatible, official). Key available at: https://openrouter.ai/keys
+Stdlib only — no pip.
 """
 from __future__ import annotations
 

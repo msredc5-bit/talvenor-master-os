@@ -1,18 +1,18 @@
 """Layer 1 — GrokProvider: xAI Grok model (OpenAI-compatible API).
 
-MetaSparkProvider-এর মতোই LLMProvider interface — complete(prompt, *,
-max_tokens) -> str — তাই বদলানো শুধু config-এর ব্যাপার
-(00-CEO-Core/config.json-এর providers section)। Key আসে শুধু
-XAI_API_KEY environment variable থেকে — কখনো file, log বা argument
-থেকে নয়। Key নেই / network error / API error হলে raise করে;
-LiveBrainAdapter ধরে LOUD mock fallback দেয়। Construction-এ কোনো
-network I/O নেই (key পড়া হয় শুধু complete()-এ)।
+Same LLMProvider interface as MetaSparkProvider — complete(prompt, *,
+max_tokens) -> str — so switching is only a config matter
+(00-CEO-Core/config.json's providers section). The key comes only
+from the XAI_API_KEY environment variable — never from a file, log, or argument
+If there is no key / a network error / an API error, it raises;
+LiveBrainAdapter catches it and gives a LOUD mock fallback. Construction has no
+network I/O (the key is read only in complete()).
 
-xAI-এর official OpenAI-compatible endpoint — OpenAI-র মতোই
-chat completions shape, শুধু base URL আলাদা।
+xAI's official OpenAI-compatible endpoint — just like OpenAI's
+chat completions shape, only the base URL differs.
 Endpoint: https://api.x.ai/v1/chat/completions
-Key পাওয়া যায়: https://console.x.ai (credits কিনতে হয় — free tier নেই)
-Stdlib only — কোনো pip নেই।
+Key available at: https://console.x.ai (credits must be bought — no free tier)
+Stdlib only — no pip.
 """
 from __future__ import annotations
 

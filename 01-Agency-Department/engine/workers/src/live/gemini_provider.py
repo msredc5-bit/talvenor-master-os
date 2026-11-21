@@ -1,18 +1,18 @@
 """Layer 1 — GeminiProvider: Google Gemini model (OpenAI-compatible endpoint).
 
-MetaSparkProvider-এর মতোই LLMProvider interface — complete(prompt, *,
-max_tokens) -> str — তাই বদলানো শুধু config-এর ব্যাপার
-(00-CEO-Core/config.json-এর providers section)। Key আসে শুধু
-GEMINI_API_KEY environment variable থেকে — কখনো file, log বা argument
-থেকে নয়। Key নেই / network error / API error হলে raise করে;
-LiveBrainAdapter ধরে LOUD mock fallback দেয়। Construction-এ কোনো
-network I/O নেই (key পড়া হয় শুধু complete()-এ)।
+Same LLMProvider interface as MetaSparkProvider — complete(prompt, *,
+max_tokens) -> str — so switching is only a config matter
+(00-CEO-Core/config.json's providers section). The key comes only
+from the GEMINI_API_KEY environment variable — never from a file, log, or argument
+If there is no key / a network error / an API error, it raises;
+LiveBrainAdapter catches it and gives a LOUD mock fallback. Construction has no
+network I/O (the key is read only in complete()).
 
-Google-এর official OpenAI compatibility endpoint — OpenAI-র মতোই
-chat completions shape, শুধু base URL আলাদা (Google AI Studio docs)।
+Google's official OpenAI compatibility endpoint — just like OpenAI's
+chat completions shape, only the base URL differs (Google AI Studio docs).
 Endpoint: https://generativelanguage.googleapis.com/v1beta/openai/chat/completions
-Key পাওয়া যায়: https://aistudio.google.com/apikey
-Stdlib only — কোনো pip নেই।
+Key available at: https://aistudio.google.com/apikey
+Stdlib only — no pip.
 """
 from __future__ import annotations
 

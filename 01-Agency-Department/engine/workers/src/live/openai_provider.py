@@ -1,16 +1,16 @@
 """Layer 1 — OpenAIProvider: ChatGPT model (OpenAI chat completions).
 
-MetaSparkProvider-এর মতোই LLMProvider interface — complete(prompt, *,
-max_tokens) -> str — তাই বদলানো শুধু config-এর ব্যাপার
-(00-CEO-Core/config.json-এর providers section)। Key আসে শুধু
-OPENAI_API_KEY environment variable থেকে — কখনো file, log বা argument
-থেকে নয়। Key নেই / network error / API error হলে raise করে;
-LiveBrainAdapter ধরে LOUD mock fallback দেয়। Construction-এ কোনো
-network I/O নেই (key পড়া হয় শুধু complete()-এ)।
+Same LLMProvider interface as MetaSparkProvider — complete(prompt, *,
+max_tokens) -> str — so switching is only a config matter
+(00-CEO-Core/config.json's providers section). The key comes only
+from the OPENAI_API_KEY environment variable — never from a file, log, or argument
+If there is no key / a network error / an API error, it raises;
+LiveBrainAdapter catches it and gives a LOUD mock fallback. Construction has no
+network I/O (the key is read only in complete()).
 
-Endpoint: https://api.openai.com/v1/chat/completions (OpenAI, official)।
-Key পাওয়া যায়: https://platform.openai.com/api-keys
-Stdlib only — কোনো pip নেই।
+Endpoint: https://api.openai.com/v1/chat/completions (OpenAI, official).
+Key available at: https://platform.openai.com/api-keys
+Stdlib only — no pip.
 """
 from __future__ import annotations
 
