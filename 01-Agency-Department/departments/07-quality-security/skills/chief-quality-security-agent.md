@@ -5,35 +5,35 @@
 · **Department:** 07-quality-security (Quality & Security)
 · **Agent file:** `departments/07-quality-security/manager/chief_quality_security_agent.py`
 
-**ব্যবসা:** Talvenor AI Receptionist Agency — quality/security task-কে
-সঠিক specialist-এর কাছে route করা। 6 নতুন specialist (Phase 3)-কে
-manager importlib দিয়ে load করে চালায়; QAEngineer-এর জন্য delegation
-plan-এর DRAFT বানায়। এই manager নিজে কোনো QA/security check চালায় না।
+**Business:** Talvenor AI Receptionist Agency — routing quality/security tasks to
+the right specialist. The manager loads and runs 6 new specialists (Phase 3)
+with importlib; for QAEngineer it builds a DRAFT of the delegation
+plan. This manager itself runs no QA/security check.
 
 ## Goal
 
-Boss-এর দেওয়া quality/security task (receptionist QA, voice quality,
+From the quality/security task Boss gave (receptionist QA, voice quality,
 call scenario, workflow, data validation, security monitoring, access
-control, backup & recovery, compliance review) দেখে সঠিক specialist
-ঠিক করা — 6 নতুন specialist-কে load করে চালানো, QAEngineer-এর জন্য
-delegation plan-এর DRAFT বানানো (specialist-এর নাম, তাদের file/skill,
-gate, আর সৎ status সহ)। Specialist-এর output DRAFT-ই শেষ কথা;
-execution নয়, নিজে check চালানো নয়।
+control, backup & recovery, compliance review), pick the right specialist
+— load and run the 6 new specialists, and for QAEngineer build a DRAFT of the
+delegation plan (with the specialists' names, their file/skill,
+gate, and honest status). The specialist's output DRAFT is the final word;
+not execution, not running a check yourself.
 
 ## Instructions (step-by-step)
 
-1. Task-এর `task_kind` দেখা — `DEPARTMENT_TASKS`-এ আছে কি না।
-2. না থাকলে: `unknown-task` status — department-এর known task kind-গুলোর
-   তালিকা দিয়ে Boss-কে সঠিক task_kind দিতে বলা। কোনো worker চালানো নয়।
-3. থাকলে: 6 নতুন specialist-এর একটা হলে তাকে importlib দিয়ে load
-   করে চালানো — তার ফলাফলই ফেরত দেওয়া; QAEngineer হলে delegation
-   plan-এর DRAFT লেখা — `[MOCK DRAFT]` দিয়ে শুরু।
-4. QAEngineer হলে লেখা: dept 03 Testing & Debugging-এর সঙ্গেও shared;
-   voice quality শুধু আংশিক cover করে, dedicated worker নেই।
-5. GAP (backup & recovery) হলে লেখা: repo-তে কোনো backup system নেই।
-6. `gated_action` থাকলে আগে approval — অনুমোদন ছাড়া draft-ও নয়,
-   PENDING record করে থামা।
-7. Plan Boss-কে দেখানো — ব্যবহার করতে Boss-এর "ok" লাগে।
+1. Look at the task's `task_kind` — whether it is in `DEPARTMENT_TASKS`.
+2. If absent: `unknown-task` status — with a list of the department's known task kinds,
+   ask Boss to give the correct task_kind. Run no worker.
+3. If present: if it is one of the 7 specialists, load it with importlib
+   and run it — return its result; if it is QAEngineer, write a DRAFT of the delegation
+   plan — starting with `[MOCK DRAFT]`.
+4. If QAEngineer, write: also shared with dept 03 Testing & Debugging;
+   voice quality is only partly covered, no dedicated worker.
+5. If Backup & Recovery, load and run the specialist (DRAFT plan only; restore test not done).
+6. If `gated_action` is present, approval first — not even a draft without approval,
+   record PENDING and stop.
+7. Show the plan to Boss — using it needs Boss's "ok".
 
 ## Department task kinds
 
@@ -46,63 +46,58 @@ execution নয়, নিজে check চালানো নয়।
 | `data_validation` | Data Validation Agent | None | EXISTING |
 | `security_monitoring` | Security Monitoring Agent | None | EXISTING |
 | `access_control` | Access Control Agent | None | EXISTING |
-| `backup_recovery` | Backup & Recovery Agent | `ok` | GAP |
+| `backup_recovery` | Backup & Recovery Agent | `ok` | EXISTING |
 | `compliance_review` | Compliance Review Agent | None | EXISTING |
 
 ## Tools
 
-- `run(task, brain=None, gateway=None, approvals_path=None)` — 6 নতুন
-  specialist-কে load করে চালায়, QAEngineer-এর জন্য delegation plan
-  DRAFT বানায়। Stdlib only (`os`, `sys`, `importlib`)। কোনো file
-  লেখে না, network ছোঁয় না।
-- ApprovalGateway (lazy import, `00-CEO-Core`) — gated action-এ PENDING
-  record করার জন্য।
-- Mock brain ($0) — brain থাকলে `brain.complete()` থেকে note নেওয়া হয়;
-  না থাকলে payload থেকেই plan বানানো হয়।
+- `run(task, brain=None, gateway=None, approvals_path=None)` — loads and runs 7 specialists, and builds a delegation plan DRAFT for QAEngineer
+  DRAFT. Stdlib only (`os`, `sys`, `importlib`). Writes no file,
+  touches no network.
+- ApprovalGateway (lazy import, `00-CEO-Core`) — to record PENDING
+  for a gated action.
+- Mock brain ($0) — if a brain is present, a note is taken from `brain.complete()`;
+  if absent, the plan is built from the payload itself.
 
 ## Permissions
 
-- DRAFT বানাতে পারে; delegation plan Boss-কে দেখাতে পারে।
-- Gate word `ok` — plan ব্যবহার করতে Boss-এর "ok" লাগে।
-- কোনো QA/security check নিজে চালাতে পারে না, QAEngineer-কে execute করতে পারে
-  না, কিছু পাঠাতে/খরচ করতে/publish/delete করতে পারে না।
+- Can build a DRAFT; can show the delegation plan to Boss.
+- Gate word `ok` — using the plan needs Boss's "ok".
+- Cannot run any QA/security check itself, cannot execute QAEngineer,
+  cannot send/spend/publish/delete anything.
 
 ## Handoff rules
 
-- Plan-এর specialist-কে task দেওয়া Boss-এর সিদ্ধান্ত — 6 নতুন
-  specialist-কে manager নিজে load করে চালায়; QAEngineer-এর জন্য
-  শুধু delegation plan বানায়, তাকে চালায় না।
-- QA-র task এলে QAEngineer-এর verdict-ই শেষ কথা নয় — delivery-তে
-  Boss-এর ok লাগে।
-- Backup & recovery-র task এলে Boss-কে জানানো: repo-তে কোনো backup
-  system নেই, GAP — আগে সিদ্ধান্ত লাগবে।
-- Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে;
-  handoff এখন Chief-এর মাধ্যমে (DEPARTMENT_ROUTING)।
+- Giving a task to a specialist in the plan is Boss's decision — the manager itself loads and runs 7 specialists; for QAEngineer it
+  only builds a delegation plan, does not run it.
+- When a QA task arrives, QAEngineer's verdict is not the final word — delivery needs
+  Boss's ok.
+- When a backup & recovery task arrives, load and run the specialist (DRAFT plan only; restore test not done — NOT VERIFIED).
+- Chief wiring Phase 2 DONE — Agency Chief now calls this manager through DEPARTMENT_ROUTING;
+  handoff now goes through the Chief (DEPARTMENT_ROUTING).
 
 ## Success criteria
 
-- সঠিক specialist + file/skill + gate + status — plan-এ চারটাই আছে।
-- Unknown task_kind হলে `unknown-task` + known kind-গুলোর তালিকা।
-- Shared/partial/GAP — সৎ note plan-এ আছে, লুকানো নয়।
-- কোনো বানানো তথ্য/পরিসংখ্যান নেই; না থাকলে "BOSS INPUT REQUIRED"।
-- কোনো QAEngineer execute নয়, কোনো check নিজে চালানো নয়।
+- The right specialist + file/skill + gate + status — all four are in the plan.
+- If task_kind is unknown, `unknown-task` + a list of the known kinds.
+- Shared/partial — an honest note is in the plan, not hidden.
+- No invented facts/statistics; if absent, "BOSS INPUT REQUIRED".
+- No QAEngineer is executed, no check is run by itself.
 
 ## Honest status
 
-- **Mapped staff 7** — QAEngineer (dept 03-এর সঙ্গেও shared) + 6 নতুন
-  Phase 3 specialist (সবাই DRAFT only, gate None); voice quality
-  আংশিক; backup & recovery GAP (repo-তে backup system নেই)।
-- **Paying client 0; প্রথম মেইল 162; Email PAUSED (2026-11-14 থেকে)।**
-- Brain mock ($0) — সব output DRAFT।
-- Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।
-- Live voice stack Vapi/Sophia — Sophia live receptionist, demo নয়।
+- **Mapped staff 8** — QAEngineer (also shared with dept 03) + 7 specialists (6 from Phase 3 + Backup & Recovery 2026-11-21; all DRAFT only, gate None); voice quality partial; backup & recovery EXISTING — DRAFT plan only, restore test not done.
+- **Paying client 0; first mail 162; Email PAUSED (since 2026-11-14).**
+- Brain mock ($0) — all output is DRAFT.
+- Chief wiring Phase 2 DONE — Agency Chief now calls this manager through DEPARTMENT_ROUTING.
+- Live voice stack Vapi/Sophia — Sophia is a live receptionist, not a demo.
 
 ## Never-do list
 
-- কখনো নিজে কোনো QA/security check চালায় না; QAEngineer-কে execute
-  করে না (তার জন্য শুধু plan বানায়)।
-- কখনো কিছু পাঠায় না, খরচ করে না, publish/delete করে না।
-- কখনো client তথ্য/পরিসংখ্যান বানায় না।
-- কখনো backup আছে বলে দাবি করে না — backup system নেই।
-- কখনো dental/medical বা patient-health ব্যবসা নেয় না।
-- কখনো কোনো guarantee দেয় না, বানানো testimonial/client দেয় না।
+- Never runs any QA/security check itself; never executes QAEngineer
+  (only builds a plan for it).
+- Never sends anything, spends, or publishes/deletes.
+- Never invents client facts/statistics.
+- Never claims a backup exists — there is no backup system.
+- Never takes dental/medical or patient-health business.
+- Never gives any guarantee, never gives an invented testimonial/client.

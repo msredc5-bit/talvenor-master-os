@@ -1,24 +1,25 @@
 """Chief Quality Security Agent — quality & security department manager (Phase 1).
 
-ভূমিকা (role): 07-quality-security department-এর manager — quality/
-security task এলে কোন specialist-এর কাজ, তা ঠিক করে specialist-কে
-load করে চালানো (importlib), আর ফলাফল DRAFT হিসেবে ফেরত দেওয়া।
-নিজে কোনো QA/security check চালায় না।
-Gate: ok — delegation plan ব্যবহার করতে Boss-এর "ok" লাগে।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
-Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।
+Role: manager of the 07-quality-security department — quality/
+when a security task arrives, decide which specialist owns it, then
+load and run the specialist (importlib), and return the result as a DRAFT.
+It never runs any QA/security check itself.
+Gate: ok — using the delegation plan needs Boss's "ok".
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
+Chief wiring Phase 2 DONE — Agency Chief now calls this manager through DEPARTMENT_ROUTING.
 
-Mapped existing staff (7): QAEngineer (receptionist_qa, no gate —
-12-check QA checklist; dept 03 Testing & Debugging-এর সঙ্গেও shared)
-+ 6 নতুন specialist (Phase 3): Call Scenario Testing, Workflow
-Testing, Data Validation, Security Monitoring, Access Control,
-Compliance Review — সবাই DRAFT only, gate None। Voice Quality Testing
-— QAEngineer দিয়ে আংশিক (partial), dedicated worker নেই। Backup &
-Recovery GAP — repo-তে কোনো backup system নেই।
-Live voice stack Vapi/Sophia — Sophia live receptionist, demo নয়।
-এই manager কখনো করে না: কোনো QA/security check নিজে চালায় না, কিছু
-পাঠায় না, খরচ করে না, client-এর তথ্য/দাম/পরিসংখ্যান বানায় না, কোনো
-guarantee দেয় না, dental/medical বা patient-health ব্যবসা নেয় না।
+Mapped existing staff (8): QAEngineer (receptionist_qa, no gate —
+12-check QA checklist; also shared with dept 03 Testing & Debugging)
++ 7 specialist: Call Scenario Testing, Workflow Testing, Data
+Validation, Security Monitoring, Access Control, Compliance Review
+(Phase 3) + Backup & Recovery (2026-11-21) — all DRAFT only, gate
+None. Voice Quality Testing — partly covered by QAEngineer (partial),
+no dedicated worker. Backup & Recovery EXISTING — DRAFT plan only,
+restore test not done.
+Live voice stack Vapi/Sophia — Sophia is a live receptionist, not a demo.
+This manager never does this: it never runs any QA/security check itself, sends
+nothing, spends nothing, invents no client facts/prices/statistics, gives no
+guarantee, takes no dental/medical or patient-health business.
 """
 
 import importlib.util
@@ -32,9 +33,9 @@ _GATE_ACTION_MAP = {"post it": "publish", "upload it": "publish"}
 _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 # Department task kinds.
-# EXISTING: worker আছে — file = 01-Agency-Department-এর ভেতরের relative path।
-# ROLE-ONLY: role definition আছে, worker নেই — file = planned skill path।
-# GAP: worker-ও নেই, skill-ও নেই।
+# EXISTING: worker exists — file = relative path inside 01-Agency-Department.
+# ROLE-ONLY: role definition exists, no worker — file = planned skill path.
+# GAP: neither worker nor skill.
 DEPARTMENT_TASKS = {
     "receptionist_qa": {
         "specialist": "QAEngineer",
@@ -82,9 +83,10 @@ DEPARTMENT_TASKS = {
     },
     "backup_recovery": {
         "specialist": "Backup & Recovery Agent",
-        "file": "GAP — no worker, no skill yet (no backup system in the repo)",
+        "class": "BackupRecoveryAgent",
+        "file": "departments/07-quality-security/specialists/backup_recovery_agent.py",
         "gate": "ok",
-        "status": "GAP",
+        "status": "EXISTING",
     },
     "compliance_review": {
         "specialist": "Compliance Review Agent",
@@ -95,8 +97,8 @@ DEPARTMENT_TASKS = {
 }
 
 # task_kind -> (specialist module file, relative to 01-Agency-Department/,
-# class name). শুধু standalone .py specialist-দের জন্য — QAEngineer
-# (engine/workers/...) এখানে নেই, তার জন্য plan-draft behavior-ই থাকে।
+# class name). Only for standalone .py specialists — QAEngineer
+# (engine/workers/...) is not here; for it, the plan-draft behavior stays.
 SPECIALIST_MODULES = {
     "call_scenario_testing": (
         "departments/07-quality-security/specialists/call_scenario_testing_agent.py",
@@ -126,7 +128,7 @@ SPECIALIST_MODULES = {
 
 
 class ChiefQualitySecurityAgent:
-    """Quality/security task-এর specialist-কে load করে চালায়; QAEngineer-এর জন্য delegation plan DRAFT বানায়। নিজে check চালায় না।"""
+    """Loads and runs the specialist for a quality/security task; builds a delegation plan DRAFT for QAEngineer. Never runs a check itself."""
 
     task_kind = "manage_quality_security"
     gate = "ok"
@@ -134,7 +136,7 @@ class ChiefQualitySecurityAgent:
     role = "Chief Quality Security Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -146,7 +148,7 @@ class ChiefQualitySecurityAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -184,7 +186,7 @@ class ChiefQualitySecurityAgent:
         )
 
     def _load_specialist(self, task_kind):
-        """Standalone specialist .py importlib দিয়ে load করা (Chief-এর loader-এর মতো)।"""
+        """Loading a standalone specialist .py with importlib (like the Chief's loader)."""
         module_file, class_name = SPECIALIST_MODULES[task_kind]
         here = os.path.dirname(os.path.abspath(__file__))
         agency_dir = os.path.normpath(os.path.join(here, "..", "..", ".."))
@@ -196,14 +198,14 @@ class ChiefQualitySecurityAgent:
         return getattr(mod, class_name)()
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Specialist চালানো বা delegation plan DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Running a specialist or building a delegation plan DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Quality & security delegation"
         gated_action = task.get("gated_action")
         approval_id = task.get("approval_id")
 
-        # Gated action থাকলে আগে approval — অনুমোদন ছাড়া draft-ও নয়,
-        # PENDING record করে থামা।
+        # If a gated action is present, approval first — not even a draft without approval,
+        # record PENDING and stop.
         if gated_action:
             gw = gateway if gateway is not None else self._gateway(approvals_path)
             approved = False
@@ -225,8 +227,8 @@ class ChiefQualitySecurityAgent:
         task_kind = task.get("task_kind")
         entry = DEPARTMENT_TASKS.get(task_kind)
 
-        # Overview — task_kind না থাকলে বা manager-এর নিজের kind হলে
-        # (M1–M4 pattern): সব specialist-এর তালিকা সহ overview draft।
+        # Overview — if task_kind is absent or is the manager's own kind
+        # (M1–M4 pattern): overview draft with a list of all specialists.
         if not task_kind or task_kind == self.task_kind:
             if brain is not None:
                 try:
@@ -243,7 +245,7 @@ class ChiefQualitySecurityAgent:
             lines = [
                 "[MOCK DRAFT] Quality & Security — department overview delegation plan (DRAFT ONLY)",
                 "Manager: Chief Quality Security Agent | task_kind: manage_quality_security | gate: ok",
-                "Specialists (7 EXISTING — QAEngineer shared + 6 Phase 3 specialists):",
+                "Specialists (8 EXISTING — QAEngineer shared + 7 specialists):",
             ]
             for kind in sorted(DEPARTMENT_TASKS.keys()):
                 item = DEPARTMENT_TASKS[kind]
@@ -252,16 +254,16 @@ class ChiefQualitySecurityAgent:
                     f"gate: {item['gate'] or 'none'} | {item['status']}"
                 )
             lines.append(
-                "Note: Backup & Recovery GAP — repo-তে কোনো backup system "
-                "নেই। QAEngineer dept 03-এর সঙ্গেও shared; voice quality "
-                "শুধু আংশিক cover করে। 6 নতুন specialist DRAFT only, gate None।"
+                "Note: Backup & Recovery EXISTING — DRAFT plan only, restore test not done. "
+                "QAEngineer is also shared with dept 03; voice quality "
+                "covers only part of it. 7 specialists DRAFT only, gate None."
             )
             lines.append(f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}")
             lines.append(f"Brain note: {brain_text}")
             notes = (
                 "DRAFT ONLY — mock brain ($0). Overview delegation plan, "
-                "কোনো check নিজে চালানো নয়। Chief wiring Phase 2 DONE — "
-                "Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।"
+                "No check is run by itself. Chief wiring Phase 2 DONE — "
+                "Agency Chief now calls this manager through DEPARTMENT_ROUTING."
             )
             return {
                 "status": "draft-ready",
@@ -272,8 +274,8 @@ class ChiefQualitySecurityAgent:
                 "gate": self.gate,
             }
 
-        # Standalone specialist থাকলে তাকে load করে চালানো (importlib,
-        # Chief-এর loader-এর মতো) — specialist-এর ফলাফলই ফেরত দেওয়া।
+        # If a standalone specialist exists, load and run it (importlib,
+        # like the Chief's loader) — return the specialist's result.
         if task_kind in SPECIALIST_MODULES:
             specialist = self._load_specialist(task_kind)
             return specialist.run(task, brain, gateway, approvals_path)
@@ -285,13 +287,13 @@ class ChiefQualitySecurityAgent:
                 f"Department: {self.department} | Manager: {self.role}\n"
                 f"Unknown task_kind: {task_kind or 'BOSS INPUT REQUIRED'}\n"
                 f"Known task kinds in this department: {kinds}\n"
-                "No worker was executed. সঠিক task_kind Boss-কে দিতে হবে।\n"
+                "No worker was executed. The correct task_kind must be given to Boss.\n"
                 f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}"
             )
             notes = (
                 "DRAFT ONLY — mock brain ($0). Unknown task_kind — delegation "
-                "হয়নি, কোনো worker চালানো হয়নি। Chief wiring Phase 2 DONE — "
-                "এই manager-কে এখন DEPARTMENT_ROUTING দিয়ে Agency Chief ডাকে।"
+                "not done, no worker was run. Chief wiring Phase 2 DONE — "
+                "Agency Chief now calls this manager through DEPARTMENT_ROUTING."
             )
             return {
                 "status": "unknown-task",
@@ -312,16 +314,17 @@ class ChiefQualitySecurityAgent:
 
         gate = entry["gate"]
         gate_line = (
-            f"Gate: {gate} — Boss-এর \"{gate}\" লাগবে এই কাজের output ব্যবহার করতে।"
+            f"Gate: {gate} — Boss's \"{gate}\" is needed to use this task's output."
             if gate else
-            "Gate: None — draft নিজেই নিরাপদ, কোনো gate নেই।"
+            "Gate: None — the draft itself is safe, no gate."
         )
         status_note = (
             "worker exists; this plan routes only, never executes."
             if entry["status"] == "EXISTING" else
             "no worker yet — this plan routes only; it never executes a worker."
             if entry["status"] == "ROLE-ONLY" else
-            "no worker, no skill yet — nothing to route to; Boss-কে সিদ্ধান্ত দিতে হবে।"
+            "worker + skill now exist (2026-11-21) — worker path in File/skill "
+            "above; this plan routes only, never executes."
         )
         note_line = f"Note: {entry['note']}\n" if entry.get("note") else ""
         output = (
@@ -333,14 +336,14 @@ class ChiefQualitySecurityAgent:
             f"{gate_line}\n"
             f"Status: {entry['status']} — {status_note}\n"
             f"{note_line}"
-            "Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।\n"
+            "Chief wiring Phase 2 DONE — Agency Chief now calls this manager through DEPARTMENT_ROUTING.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Delegation plan, execution নয়। "
-            "QAEngineer dept 03-এর সঙ্গেও shared। Backup & Recovery GAP — "
-            "repo-তে কোনো backup system নেই। Gate: ok।"
+            "DRAFT ONLY — mock brain ($0). Delegation plan, not execution. "
+            "QAEngineer is also shared with dept 03. Backup & Recovery EXISTING — "
+            "DRAFT plan only, restore test not done. Gate: ok."
         )
         return {
             "status": "draft-ready",

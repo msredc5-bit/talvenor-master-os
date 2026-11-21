@@ -1,18 +1,18 @@
 """Access Control Agent — access-control draft (Dept 07, Phase 3).
 
-ভূমিকা (role): access-control-এর DRAFT লেখা — কে approve/send/
-publish/spend করতে পারে (gated action-এ শুধু Boss)।
-Gate: None — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: writing an access-control DRAFT — who can approve/send/
+publish/spend (only Boss for gated actions).
+Gate: None — the draft itself is safe, no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-এই agent কখনো কোনো access বদলায় না, কাউকে access দেয় না, কারো
-access কাড়ে না, নিজে approve করে না। Spend cap $0 — খরচের অনুমোদন
-নেই।
+This agent never changes any access, gives access to anyone, or takes
+access from anyone, and never approves anything itself. Spend cap $0 — no spend
+approval.
 
-এই agent কখনো করে না: access বদলায় না, gated action করে না, কিছু
-পাঠায় না, খরচ করে না, publish/delete করে না, client-এর তথ্য/দাম/
-পরিসংখ্যান বানায় না, কোনো guarantee দেয় না, dental/medical নয়,
-legal advice দেয় না।
+This agent never does this: it does not change access, do a gated action, send
+anything, spend, publish/delete, or invent client facts/prices/
+statistics, give any guarantee, or take dental/medical;
+no legal advice.
 """
 
 import os
@@ -33,7 +33,7 @@ _GATED_TABLE = (
 
 
 class AccessControlAgent:
-    """Access-control DRAFT ONLY — কখনো access বদলানো নয়।"""
+    """Access-control DRAFT ONLY — never changing access."""
 
     task_kind = "access_control"
     gate = None
@@ -41,7 +41,7 @@ class AccessControlAgent:
     role = "Access Control Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -53,7 +53,7 @@ class AccessControlAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -79,7 +79,7 @@ class AccessControlAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Access-control DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না, access বদলায় না।"""
+        """Building an access-control DRAFT. Writes no file, touches no network, changes no access."""
         task = task or {}
         title = task.get("title") or "Access control draft"
         gated_action = task.get("gated_action")
@@ -137,7 +137,7 @@ class AccessControlAgent:
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Access-control draft ONLY, "
-            "কখনো access বদলানো নয়। Spend cap $0। Gate: None।"
+            "Never changing access. Spend cap $0. Gate: None."
         )
         return {
             "status": "draft-ready",
