@@ -1,16 +1,16 @@
 """n8n Automation Engineer — n8n workflow draft notes (Dept 03, Phase 3).
 
-ভূমিকা (role): n8n workflow-এর DRAFT notes বানানো — কখনো live workflow
-import/run করে না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: making DRAFT notes for n8n workflows — it never imports/runs a live workflow
+— it never does.
+Gate: none — the draft itself is safe, there is no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-n8n workflows READY, not LIVE — Boss-এর import + test বাকি। CRM (n8n Cloud
-Data Tables) PLANNED, not live।
-এই worker কখনো করে না: live workflow import/run করে না, webhook call করে
-না, n8n account-এ ঢোকে না, কিছু পাঠায় না, খরচ করে না, মোছে না, দাম quote
-করে না, client-এর তথ্য/পরিসংখ্যান বানায় না, কোনো guarantee দেয় না,
-dental/medical নয়, workflow live বলে দাবি করে না।
+n8n workflows READY, not LIVE — Boss's import + test is pending. CRM (n8n Cloud
+Data Tables) PLANNED, not live.
+This worker never: imports/runs a live workflow, calls a webhook,
+enters an n8n account, sends anything, spends anything, deletes anything, quotes a price,
+does not invent client facts/statistics, gives no guarantee,
+no dental/medical, does not claim a workflow is live.
 """
 
 import os
@@ -24,7 +24,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class N8nAutomationEngineer:
-    """n8n workflow DRAFT notes ONLY — কখনো live workflow চালায় না।"""
+    """n8n workflow DRAFT notes ONLY — never runs a live workflow."""
 
     task_kind = "n8n_automation"
     gate = None
@@ -32,7 +32,7 @@ class N8nAutomationEngineer:
     role = "n8n Automation Engineer"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -44,7 +44,7 @@ class N8nAutomationEngineer:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -73,7 +73,7 @@ class N8nAutomationEngineer:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """n8n workflow DRAFT notes বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Makes n8n workflow DRAFT notes. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "n8n workflow draft notes"
         gated_action = task.get("gated_action")
@@ -113,24 +113,24 @@ class N8nAutomationEngineer:
         output = (
             "[MOCK DRAFT] n8n Automation Engineer — workflow notes (DRAFT ONLY)\n"
             f"Client: {client} | Workflow: {workflow} | Purpose: {purpose}\n"
-            "Status: workflows READY, not LIVE — Boss-এর import + test বাকি।\n"
-            "CRM: n8n Cloud Data Tables — PLANNED, not live।\n"
+            "Status: workflows READY, not LIVE — Boss's import + test is pending.\n"
+            "CRM: n8n Cloud Data Tables — PLANNED, not live.\n"
             "Workflow notes (DRAFT):\n"
-            "1. Trigger — Vapi/Sophia call শেষ হলে call log আসে।\n"
-            "2. Step — call-এর তথ্য (নাম, phone, service, booking) সাজানো হয়।\n"
-            "3. Step — booking থাকলে booking link-এর বিবরণ যুক্ত করা হয়: "
-            f"{BOOKING_LINK} (15 min, New York Time)।\n"
-            "4. Step — follow-up-এর জন্য তথ্য রাখা হয় (CRM live হলে Data "
-            "Tables-এ; এখন PLANNED, তাই হাতে রাখা হয়)।\n"
-            "5. Next — Boss import + test করবেন; তার আগে live বলে দাবি নয়।\n"
-            "Status: DRAFT notes only — কোনো live workflow নেই, কোনো "
-            "import/run/webhook হয়নি।\n"
+            "1. Trigger — when a Vapi/Sophia call ends, the call log arrives.\n"
+            "2. Step — the call's information (name, phone, service, booking) is arranged.\n"
+            "3. Step — if there is a booking, the booking link's details are added: "
+            f"{BOOKING_LINK} (15 min, New York Time).\n"
+            "4. Step — information is kept for follow-up (in Data Tables if the CRM is live; "
+            "now PLANNED, so it is kept by hand).\n"
+            "5. Next — Boss will import + test; before that, no claim that it is live.\n"
+            "Status: DRAFT notes only — there is no live workflow, no "
+            "import/run/webhook happened.\n"
             f"Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). n8n workflow DRAFT notes ONLY, "
-            "কখনো live workflow নয়। Gate: none।"
+            "Never a live workflow. Gate: none."
         )
         return {
             "status": "draft-ready",

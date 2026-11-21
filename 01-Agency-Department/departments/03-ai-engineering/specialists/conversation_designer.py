@@ -1,14 +1,14 @@
 """Conversation Designer — call-flow / conversation design draft (Dept 03, Phase 3).
 
-ভূমিকা (role): Sophia receptionist-এর ৮ ধাপের call flow-এর DRAFT বানানো —
-কখনো কোনো call করে না, live assistant বদলায় না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: making a DRAFT of Sophia the receptionist's 8-step call flow —
+it never makes any call, never changes a live assistant.
+Gate: none — the draft itself is safe, there is no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-এই worker কখনো করে না: live assistant-এর flow বদলায় না, call করে না,
-কিছু পাঠায় না, খরচ করে না, মোছে না, দাম quote করে না, client-এর
-তথ্য/পরিসংখ্যান বানায় না, কোনো guarantee দেয় না, dental/medical নয়,
-AI disclosure ছাড়া flow লেখে না।
+This worker never: changes a live assistant's flow, makes a call,
+sends nothing, spends nothing, deletes nothing, quotes no price, invents no client
+facts/statistics, gives no guarantee, no dental/medical,
+writes a flow without AI disclosure.
 """
 
 import os
@@ -22,7 +22,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class ConversationDesigner:
-    """Call-flow design DRAFT ONLY — কখনো live assistant বদলায় না।"""
+    """Call-flow design DRAFT ONLY — never changes a live assistant."""
 
     task_kind = "conversation_design"
     gate = None
@@ -30,7 +30,7 @@ class ConversationDesigner:
     role = "Conversation Designer"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -42,7 +42,7 @@ class ConversationDesigner:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -71,7 +71,7 @@ class ConversationDesigner:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Call-flow DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Makes a call-flow DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Conversation design draft"
         gated_action = task.get("gated_action")
@@ -110,32 +110,32 @@ class ConversationDesigner:
 
         dq_line = ""
         if business_type.strip().lower() in ("dental", "medical", "dentist", "clinic"):
-            dq_line = "\nDQ: dental/medical বা patient-health ব্যবসা — design নয়, target নয়।"
+            dq_line = "\nDQ: dental/medical or patient-health business — not a design, not a target."
 
         output = (
             "[MOCK DRAFT] Conversation Designer — call flow (DRAFT ONLY)\n"
             f"Client: {client} | Business type: {business_type} | Services: {services}"
             f"{dq_line}\n"
             "Call flow (8 steps):\n"
-            "1. Greet — honest AI disclosure: caller-কে জানানো হয় সে Talvenor-এর "
-            "AI receptionist Sophia-র সঙ্গে কথা বলছে।\n"
-            "2. Life-safety check — জরুরি (আগুন, গ্যাস লিক, বন্যা, আঘাত) হলে "
-            "caller-কে সরাসরি emergency number-এ যেতে বলা হয়; Sophia নিজে "
-            "emergency handle করে না।\n"
-            "3. Intent — caller কী চায় (booking, quote, emergency, অন্য কিছু)।\n"
-            "4. Qualify — নাম, phone, service, এলাকা, সময় — যা জানা দরকার।\n"
-            "5. Action — booking link দেওয়া: "
-            f"{BOOKING_LINK} (15 min, New York Time)।\n"
-            "6. Confirm — booking-এর বিবরণ caller-কে আবার পড়ে শোনানো।\n"
-            "7. Log — call-এর তথ্য লগ করা (n8n workflow, READY not LIVE)।\n"
-            "8. Close — ধন্যবাদ, পরের ধাপ জানানো।\n"
-            "Status: DRAFT design only — live assistant-এ কিছু বদলানো হয়নি।\n"
+            "1. Greet — honest AI disclosure: the caller is told they are talking to Talvenor's "
+            "AI receptionist Sophia.\n"
+            "2. Life-safety check — if there is an emergency (fire, gas leak, flood, injury), "
+            "the caller is told to go directly to the emergency number; Sophia herself "
+            "does not handle emergencies.\n"
+            "3. Intent — what the caller wants (booking, quote, emergency, or something else).\n"
+            "4. Qualify — name, phone, service, area, time — whatever needs to be known.\n"
+            "5. Action — giving the booking link: "
+            f"{BOOKING_LINK} (15 min, New York Time).\n"
+            "6. Confirm — reading the booking details back to the caller.\n"
+            "7. Log — logging the call's information (n8n workflow, READY not LIVE).\n"
+            "8. Close — thanks, and telling the next step.\n"
+            "Status: DRAFT design only — nothing has been changed in the live assistant.\n"
             f"Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Call-flow design DRAFT ONLY, "
-            "কখনো live assistant বদলানো নয়। Gate: none।"
+            "Never changing a live assistant. Gate: none."
         )
         return {
             "status": "draft-ready",

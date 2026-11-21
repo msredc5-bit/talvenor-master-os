@@ -1,14 +1,14 @@
 """Calendar Integration Agent — booking-link integration draft (Dept 03, Phase 3).
 
-ভূমিকা (role): Google Calendar Appointment Schedule booking link-এর সঙ্গে
-সংযোগের DRAFT plan বানানো — কখনো live calendar ছোঁয় না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: making a DRAFT plan for connecting with the Google Calendar Appointment Schedule booking link
+— it never touches a live calendar.
+Gate: none — the draft itself is safe, there is no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-এই worker কখনো করে না: live calendar-এ ঢোকে না, event বানায়/বদলায়/মোছে
-না, booking link বানায় না (আসল link-ই ব্যবহার করে), কিছু পাঠায় না,
-খরচ করে না, দাম quote করে না, client-এর তথ্য/পরিসংখ্যান বানায় না,
-কোনো guarantee দেয় না, dental/medical নয়।
+This worker never: enters a live calendar, makes/changes/deletes an event,
+makes no booking link (it uses the real link itself), sends nothing,
+spends nothing, quotes no prices, invents no client facts/statistics,
+Gives no guarantee, no dental/medical.
 """
 
 import os
@@ -22,7 +22,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class CalendarIntegrationAgent:
-    """Booking-link integration DRAFT ONLY — কখনো live calendar ছোঁয় না।"""
+    """Booking-link integration DRAFT ONLY — never touches a live calendar."""
 
     task_kind = "calendar_integration"
     gate = None
@@ -30,7 +30,7 @@ class CalendarIntegrationAgent:
     role = "Calendar Integration Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -42,7 +42,7 @@ class CalendarIntegrationAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -69,7 +69,7 @@ class CalendarIntegrationAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Booking-link integration DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Makes a booking-link integration DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Calendar integration draft"
         gated_action = task.get("gated_action")
@@ -112,17 +112,17 @@ class CalendarIntegrationAgent:
             f"- Link: {BOOKING_LINK}\n"
             "- Schedule: Talvenor Demo, 15 min, New York Time\n"
             "Where the link sits:\n"
-            "- Call flow Action ধাপে: Sophia caller-কে booking link দেয়।\n"
-            "- Call flow Confirm ধাপে: booking-এর বিবরণ আবার পড়ে শোনানো হয়।\n"
-            "- Outreach draft-এ: 15-min demo call-এর CTA হিসেবে একই link।\n"
-            "Status: DRAFT plan only — live calendar-এ কিছু বদলানো হয়নি, "
-            "কোনো event বানানো/বদলানো/মোছা হয়নি।\n"
+            "- In the call flow's Action step: Sophia gives the caller the booking link.\n"
+            "- In the call flow's Confirm step: the booking details are read back to the caller.\n"
+            "- In the outreach draft: the same link as the CTA for the 15-min demo call.\n"
+            "Status: DRAFT plan only — nothing has been changed in the live calendar, "
+            "no event was made/changed/deleted.\n"
             f"Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Booking-link integration DRAFT ONLY, "
-            "কখনো live calendar ছোঁয়া নয়। Gate: none।"
+            "Never touching a live calendar. Gate: none."
         )
         return {
             "status": "draft-ready",

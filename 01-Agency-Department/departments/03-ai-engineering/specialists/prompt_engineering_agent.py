@@ -1,14 +1,13 @@
 """Prompt Engineering Agent — prompt draft / tuning notes (Dept 03, Phase 3).
 
-ভূমিকা (role): Sophia receptionist-এর prompt-এর DRAFT ও tuning notes
-বানানো — কখনো কোনো live prompt বদলায় না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: making a DRAFT of Sophia the receptionist's prompt and tuning notes
+— it never changes any live prompt.
+Gate: none — the draft itself is safe, there is no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-এই worker কখনো করে না: live prompt বদলায় না, কিছু পাঠায় না, খরচ করে
-না, মোছে না, দাম quote করে না, client-এর তথ্য/পরিসংখ্যান বানায় না,
-কোনো guarantee দেয় না, dental/medical নয়, live prompt বদল হয়েছে বলে
-দাবি করে না।
+This worker never: changes a live prompt, sends anything, spends
+anything, deletes anything, quotes prices, invents client facts/statistics,
+gives any guarantee, no dental/medical, does not claim a live prompt was changed.
 """
 
 import os
@@ -22,7 +21,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class PromptEngineeringAgent:
-    """Prompt DRAFT + tuning notes ONLY — কখনো live prompt বদলায় না।"""
+    """Prompt DRAFT + tuning notes ONLY — never changes a live prompt."""
 
     task_kind = "prompt_engineering"
     gate = None
@@ -30,7 +29,7 @@ class PromptEngineeringAgent:
     role = "Prompt Engineering Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -42,7 +41,7 @@ class PromptEngineeringAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -73,7 +72,7 @@ class PromptEngineeringAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Prompt DRAFT + tuning notes বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Makes a prompt DRAFT + tuning notes. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Prompt draft"
         gated_action = task.get("gated_action")
@@ -113,7 +112,7 @@ class PromptEngineeringAgent:
 
         dq_line = ""
         if business_type.strip().lower() in ("dental", "medical", "dentist", "clinic"):
-            dq_line = "\nDQ: dental/medical বা patient-health ব্যবসা — prompt নয়, target নয়।"
+            dq_line = "\nDQ: dental/medical or patient-health business — not a prompt, not a target."
 
         output = (
             "[MOCK DRAFT] Prompt Engineering Agent — prompt draft (DRAFT ONLY)\n"
@@ -133,15 +132,15 @@ class PromptEngineeringAgent:
             "Tuning notes:\n"
             f"- Requested change: {change}\n"
             f"- Reason: {reason}\n"
-            "- Note: change/reason জানা না থাকলে tuning note অসম্পূর্ণ — "
-            "BOSS INPUT REQUIRED।\n"
-            "Status: DRAFT prompt only — live prompt-এ কিছু বদলানো হয়নি।\n"
+            "- Note: if change/reason is not known, the tuning note is incomplete — "
+            "BOSS INPUT REQUIRED.\n"
+            "Status: DRAFT prompt only — nothing has been changed in the live prompt.\n"
             f"Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Prompt DRAFT + tuning notes ONLY, "
-            "কখনো live prompt বদলানো নয়। Gate: none।"
+            "Never changing a live prompt. Gate: none."
         )
         return {
             "status": "draft-ready",

@@ -1,14 +1,14 @@
 """Deployment Agent — deployment plan draft ONLY (Dept 03, Phase 3).
 
-ভূমিকা (role): deployment-এর plan DRAFT বানানো — কখনো কিছু deploy করে না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই; deploy-এর জন্য Boss-এর
-"ok" + manual steps লাগে, সেটা এই worker-এর বাইরে।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: making a DRAFT of the deployment plan — it never deploys anything.
+Gate: none — the draft itself is safe, there is no gate; deploying needs Boss's
+"ok" + manual steps, which is outside this worker.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-এই worker কখনো করে না: কিছু deploy করে না, file লেখে না, server-এ ঢোকে
-না, command চালায় না, কিছু পাঠায় না, খরচ করে না, মোছে না, দাম quote
-করে না, client-এর তথ্য/পরিসংখ্যান বানায় না, কোনো guarantee দেয় না,
-dental/medical নয়, deploy হয়েছে বলে দাবি করে না।
+This worker never: deploys anything, writes a file, enters a server,
+runs a command, sends anything, spends anything, deletes anything, quotes a price,
+does not invent client facts/statistics, gives no guarantee,
+no dental/medical, does not claim a deploy happened.
 """
 
 import os
@@ -22,7 +22,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class DeploymentAgent:
-    """Deployment plan DRAFT ONLY — কখনো deploy করে না।"""
+    """Deployment plan DRAFT ONLY — never deploys."""
 
     task_kind = "deployment"
     gate = None
@@ -30,7 +30,7 @@ class DeploymentAgent:
     role = "Deployment Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -42,7 +42,7 @@ class DeploymentAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -70,7 +70,7 @@ class DeploymentAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Deployment plan DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Makes a deployment plan DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Deployment plan draft"
         gated_action = task.get("gated_action")
@@ -110,26 +110,26 @@ class DeploymentAgent:
         output = (
             "[MOCK DRAFT] Deployment Agent — deployment plan (DRAFT ONLY)\n"
             f"Client: {client} | What: {what} | Target: {target}\n"
-            "Rule: deployment-এ Boss-এর \"ok\" + manual steps লাগে; কোনো "
-            "worker deploy করে না।\n"
-            "Plan steps (DRAFT — কোনো ধাপ execute হয়নি):\n"
-            "1. Check — কী deploy হবে, কোথায়, আগের draft-গুলো (solution, "
-            "call flow, prompt, Vapi plan) Boss দেখেছেন কি না।\n"
-            "2. Ok — Boss-এর exact word \"ok\" ছাড়া deploy নয়।\n"
-            "3. Manual deploy — Boss/Elora হাতে deploy করবেন; এই worker "
-            "file লেখে না, server-এ ঢোকে না, command চালায় না।\n"
-            "4. Verify — Boss-এর signed-in session-এ real run দেখে তবেই "
-            "live বলা যাবে; তার আগে DRAFT-ই শেষ কথা।\n"
+            "Rule: deploying needs Boss's \"ok\" + manual steps; no "
+            "worker deploys.\n"
+            "Plan steps (DRAFT — no step has been executed):\n"
+            "1. Check — what will be deployed, where, and whether Boss has seen the previous drafts (solution, "
+            "call flow, prompt, Vapi plan).\n"
+            "2. Ok — Boss's exact word \"ok\" without it, no deploy.\n"
+            "3. Manual deploy — Boss/Elora will deploy by hand; this worker "
+            "writes no file, enters no server, runs no command.\n"
+            "4. Verify — only after seeing a real run in Boss's signed-in session "
+            "can it be called live; before that, the DRAFT is the final word.\n"
             "Booking link (real): "
             f"{BOOKING_LINK} (15 min, New York Time)\n"
-            "Status: DRAFT plan only — কিছু deploy করা হয়নি।\n"
+            "Status: DRAFT plan only — nothing has been deployed.\n"
             f"Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Deployment plan DRAFT ONLY, "
-            "কখনো deploy নয়। Gate: none (deploy-এর জন্য Boss-এর ok + "
-            "manual steps, এই worker-এর বাইরে)।"
+            "Never a deploy. Gate: none (deploying needs Boss's ok + "
+            "manual steps, outside this worker)."
         )
         return {
             "status": "draft-ready",

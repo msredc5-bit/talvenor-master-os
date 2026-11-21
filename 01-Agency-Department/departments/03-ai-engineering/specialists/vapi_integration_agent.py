@@ -1,15 +1,15 @@
 """Vapi Integration Agent — Vapi integration draft (Dept 03, Phase 3).
 
-ভূমিকা (role): Vapi assistant Sophia-র সঙ্গে সংযোগের DRAFT plan বানানো —
-কখনো live account বদলায় না, API call করে না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: making a DRAFT plan for connecting with Vapi assistant Sophia —
+it never changes a live account, makes no API call.
+Gate: none — the draft itself is safe, there is no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-Live stack শুধু Vapi — অন্য কোনো voice provider production নয়।
-এই worker কখনো করে না: live Vapi account-এ কিছু বদলায় না, API call
-করে না, key ছোঁয় না, কিছু পাঠায় না, খরচ করে না, মোছে না, দাম quote
-করে না, client-এর তথ্য/পরিসংখ্যান বানায় না, কোনো guarantee দেয় না,
-dental/medical নয়।
+The live stack is only Vapi — no other voice provider is production.
+This worker never: changes anything in a live Vapi account, makes an API call,
+touches a key, sends anything, spends anything, deletes anything, quotes a price,
+does not invent client facts/statistics, gives no guarantee,
+no dental/medical.
 """
 
 import os
@@ -23,7 +23,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class VapiIntegrationAgent:
-    """Vapi integration DRAFT ONLY — কখনো live account বদলায় না।"""
+    """Vapi integration DRAFT ONLY — never changes a live account."""
 
     task_kind = "vapi_integration"
     gate = None
@@ -31,7 +31,7 @@ class VapiIntegrationAgent:
     role = "Vapi Integration Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -43,7 +43,7 @@ class VapiIntegrationAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -71,7 +71,7 @@ class VapiIntegrationAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Vapi integration DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Makes a Vapi integration DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Vapi integration draft"
         gated_action = task.get("gated_action")
@@ -114,21 +114,21 @@ class VapiIntegrationAgent:
             "- Provider: Vapi | Assistant: Sophia (live receptionist)\n"
             "- Org: 1861a735 | Phone: +1 (947) 223-0244\n"
             "- Model: GPT-4o-mini | Voice: Emma | Transcription: Deepgram nova-3\n"
-            "Integration steps (DRAFT plan — কোনো ধাপ execute হয়নি):\n"
-            "1. Client-এর need অনুযায়ী Sophia-র call flow + prompt draft নেওয়া।\n"
-            "2. Booking link যুক্ত করা: "
-            f"{BOOKING_LINK} (15 min, New York Time)।\n"
-            "3. Call log / follow-up-এর জন্য n8n workflow notes নেওয়া "
-            "(READY, not LIVE)।\n"
-            "4. Boss-এর ok-এর পর হাতে প্রয়োগ + test call।\n"
-            "Status: DRAFT plan only — live Vapi account-এ কিছু বদলানো হয়নি, "
-            "কোনো API call হয়নি।\n"
+            "Integration steps (DRAFT plan — no step has been executed):\n"
+            "1. Take Sophia's call flow + prompt draft as per the client's need.\n"
+            "2. Add the booking link: "
+            f"{BOOKING_LINK} (15 min, New York Time).\n"
+            "3. Take the n8n workflow notes for the call log / follow-up "
+            "(READY, not LIVE).\n"
+            "4. Apply by hand after Boss's ok + test call.\n"
+            "Status: DRAFT plan only — nothing was changed in the live Vapi account, "
+            "No API call was made.\n"
             f"Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Vapi integration DRAFT ONLY, "
-            "কখনো live account বদলানো নয়। Gate: none।"
+            "Never change a live account. Gate: none."
         )
         return {
             "status": "draft-ready",
