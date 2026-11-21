@@ -1,22 +1,22 @@
 # Skill: Performance Tracker
 
-**Role:** Performance Tracker — Content Engine-এর tracking setup বানায়। Worker: `PerformanceTracker` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `performance_track`, gate `ok`)।
-**Chief task type:** `performance_track`। **Stage:** 8-report (`youtube-skills/yt-retention/retention.py`)।
+**Role:** Performance Tracker — makes the Content Engine's tracking setup. Worker: `PerformanceTracker` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `performance_track`, gate `ok`).
+**Chief task type:** `performance_track`. **Stage:** 8-report (`youtube-skills/yt-retention/retention.py`).
 
 ## Input
 
-- topic / video (publish হওয়া বা হতে যাওয়া)
-- Boss-এর পাঠানো আসল platform সংখ্যা (থাকলে — না থাকলে template-ই output, সংখ্যা invent করা হবে না)
+- topic / video (published or about to be published)
+- Boss's real platform numbers if sent (if not, the template itself is the output, no numbers will be invented)
 
 ## Method (step-by-step)
 
-1. Tracking setup লেখো — কোন platform থেকে কোন metric নিতে হবে:
+1. Write the tracking setup — which metric to take from which platform:
    - YouTube: views, watch hours, subs, retention, CTR
-   - Facebook / Instagram / LinkedIn: reach, engagement, link click (যা platform আসলে দেখায়)
-2. Report template বানাও — best performer vs worst performer-এর comparison format + পরের সপ্তাহে **একটা** change-এর জায়গা।
-3. Retention-এর জন্য: `yt-retention` method — YouTube Studio → video → Analytics → Engagement → audience-retention chart → download ("Audience retention") CSV; `retention.py retention.csv --duration 600` দিয়ে hook leak খোঁজা। CSV না থাকলে retention analysis লিখো না — "BOSS INPUT REQUIRED: retention CSV" লেখো।
-4. সংখ্যা কখনো estimate করো না — শুধু Boss-এর পাঠানো আসল platform সংখ্যা ব্যবহার করো। সংখ্যা না থাকলে metric-এর ঘর **0 / খালি** রাখো, বানানো সংখ্যা বসাবে না।
-5. Output-এ `[MOCK DRAFT]` লেবেল দাও। এটা template/setup — analysis নয় (analysis Performance Analyst-এর কাজ)।
+   - Facebook / Instagram / LinkedIn: reach, engagement, link click (what the platform actually shows)
+2. Make a report template — best performer vs worst performer comparison format + a place for **one** change next week.
+3. For retention: the `yt-retention` method — YouTube Studio → video → Analytics → Engagement → audience-retention chart → download ("Audience retention") CSV; run `retention.py retention.csv --duration 600` to find the hook leak. If there is no CSV, do not write retention analysis — write "BOSS INPUT REQUIRED: retention CSV".
+4. Never estimate numbers — use only Boss's real platform numbers. If there are no numbers, leave the metric fields **0 / empty**, do not put made-up numbers in.
+5. Label the output `[MOCK DRAFT]`. This is a template/setup — not analysis (analysis is Performance Analyst's job).
 
 ## Output format
 
@@ -24,21 +24,21 @@
 [MOCK DRAFT] — Performance Report Template
 Topic/Video: ...
 Metrics to collect:
-- YouTube: views / watch hours / subs / retention / CTR — Boss-এর পাঠানো সংখ্যা
+- YouTube: views / watch hours / subs / retention / CTR — Boss's numbers
 - Facebook: ...
 - Instagram: ...
 - LinkedIn: ...
-Best performer: ... (আসল সংখ্যা পেলে)
-Worst performer: ... (আসল সংখ্যা পেলে)
+Best performer: ... (when real numbers arrive)
+Worst performer: ... (when real numbers arrive)
 One change for next week: ...
 ```
 
 ## Gate
 
-`ok` — Boss-এর "ok" ছাড়া template ব্যবহার করা যাবে না।
+`ok` — the template may not be used without Boss's "ok".
 
-## সৎ সীমা
+## Honest limits
 
-- **কোনো video এখনো publish হয়নি — metric 0** (ToolPilot: subs 0, watch hours 0, videos 0)। তাই এখন এই role শুধু template দিতে পারে, report দিতে পারে না।
-- Retention CSV / Studio export Boss-কে পাঠাতে হবে — export ছাড়া retention analysis হয় না।
-- Performance Analyst-এর থেকে আলাদা: Tracker setup/template বানায়; Analyst আসল সংখ্যা বিশ্লেষণ করে সিদ্ধান্ত বের করে।
+- **No video has been published yet — metrics 0** (ToolPilot: subs 0, watch hours 0, videos 0). So right now this role can only give a template, not a report.
+- Boss must send the retention CSV / Studio export — without an export there is no retention analysis.
+- Different from Performance Analyst: the Tracker makes the setup/template; the Analyst analyzes the real numbers and draws decisions.

@@ -2,37 +2,37 @@
 
 **Engine:** Creator OS (Combined Creator OS)
 **Channel:** ToolPilot — @ToolPilotai69 (AI Tools & Tutorials, faceless)
-**Rhythm:** ১ long/week + ২ Shorts/week (plan অনুযায়ী)
-**Chief:** REAL (Phase 3) — `chief_of_staff_content.py`, ৬ worker ডাকে (mock brain, $0)
+**Rhythm:** 1 long/week + 2 Shorts/week (as per plan)
+**Chief:** REAL (Phase 3) — `chief_of_staff_content.py`, calls 6 workers (mock brain, $0)
 
-## সত্য অবস্থা (2026-11-16, Phase 3)
+## True status (2026-11-16, Phase 3)
 
-| জিনিস | অবস্থা |
+| Item | Status |
 |---|---|
-| Creator Studio 6 worker | BUILT, mock-tested, Chief-এর সাথে জোড়া (VENDORED Phase 6 — `03-Content-Creation-Department/engine/workers/`) |
-| ১৩ stage | REAL 0 · MOCK 10 · STUB 0 · BLOCKED 3 (video / edit / upload) — দেখুন `pipeline.md` |
-| ToolPilot channel | আছে, video 0, monetization 0, art 0 — দেখুন `toolpilot-status.md` |
-| প্রথম content (Nano Banana 2) | READY TO RECORD — Boss-এর OBS recording বাকি, verdict [FILL AFTER TEST] |
-| Real YouTube upload | এখনো verify হয়নি — stage 9 OFF |
-| True AI video motion | GPU path (Boss-এর PC GPU নাম জানা যায়নি) বা paid tool — $0-তে প্রমাণিত নয় |
-| VOICE.md | DRAFT — Boss-এর correction বাকি |
-| Upload | সবসময় OFF by default; "upload it" + credential ছাড়া কিছু যাবে না |
-| Nov 16–22 weekly plan (Talvenor, ৫ post) | Boss-এর "ok" বাকি; Nov 9–15-এ কিছু post হয়নি |
+| Creator Studio 6 workers | BUILT, mock-tested, paired with the Chief (VENDORED Phase 6 — `03-Content-Creation-Department/engine/workers/`) |
+| 13 stages | REAL 0 · MOCK 10 · STUB 0 · BLOCKED 3 (video / edit / upload) — see `pipeline.md` |
+| ToolPilot channel | exists, videos 0, monetization 0, art 0 — see `toolpilot-status.md` |
+| First content (Nano Banana 2) | READY TO RECORD — Boss's OBS recording still pending, verdict [FILL AFTER TEST] |
+| Real YouTube upload | not verified yet — stage 9 OFF |
+| True AI video motion | GPU path (Boss's PC GPU name not known yet) or paid tool — not proven at $0 |
+| VOICE.md | DRAFT — Boss's correction pending |
+| Upload | always OFF by default; nothing goes out without "upload it" + credentials |
+| Nov 16–22 weekly plan (Talvenor, 5 posts) | Boss's "ok" pending; nothing was posted Nov 9–15 |
 
-## Pipeline (13 stage, Creator OS থেকে)
+## Pipeline (13 stages, from Creator OS)
 
 Research → concept → script → video build + edit → upload → analyze →
-improve। আসল worker: TopicResearcher, ScriptWriter, VisualProducer,
-CaptionWriter, PublishPrep (gate `post it`), PerformanceTracker।
+improve. The real workers: TopicResearcher, ScriptWriter, VisualProducer,
+CaptionWriter, PublishPrep (gate `post it`), PerformanceTracker.
 
-## Boss-এর open প্রশ্ন (এখনো উত্তর আসেনি)
+## Boss's open questions (no answers yet)
 
-Track 3 = ToolPilot, নাকি brand-new channel? উত্তর এলে এই README
-আপডেট হবে।
+Track 3 = ToolPilot, or a brand-new channel? When the answer comes, this README
+will be updated.
 
-## Phase 3-এ যা হয়েছে (2026-11-16)
+## What happened in Phase 3 (2026-11-16)
 
-Chief of Staff module vendored ৬ worker-এর সাথে জোড়া
-হয়েছে (REAL, Phase 6)। কোনো video "live" বলে দাবি করা হবে না যতক্ষণ আসল
-upload verify না হয়। video_produce video file বানায় না — শুধু
-production plan + missing-inputs list দেয়।
+The Chief of Staff module has been paired with 6 vendored workers
+(REAL, Phase 6). No video will be claimed as "live" until a real
+upload is verified. video_produce does not make a video file — it only gives
+a production plan + missing-inputs list.

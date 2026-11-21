@@ -1,38 +1,38 @@
 """Chief of Staff — Content Creation Department (REAL, Phase 3).
 
-Content Creation Engine = Creator OS — faceless YouTube channel-এর
-পুরো ১৩-stage pipeline: niche -> viral concept -> script -> video
-build + edit -> upload -> analyze -> improve।
+Content Creation Engine = Creator OS — a faceless YouTube channel's
+full 13-stage pipeline: niche -> viral concept -> script -> video
+build + edit -> upload -> analyze -> improve.
 
-কাজ: Main CEO Bot থেকে আসা task-টা পড়ে এই office-এর ভেতরে
-vendored আসল ৬ Creator OS worker-এর দিকে পাঠানো (MockLLM,
-mock brain, $0), ফলাফল DRAFT হিসেবে ফেরত দেওয়া, আর gated কাজ
-(send / publish / upload / spend / delete) হলে ApprovalGateway
-দিয়ে আটকে রাখা।
+Job: read the task coming from the Main CEO Bot and send it to the
+vendored real 6 Creator OS workers inside this office (MockLLM,
+mock brain, $0), return the result as a DRAFT, and hold back gated work
+(send / publish / upload / spend / delete) — hold it back with
+the ApprovalGateway.
 
-নিয়ম (কোডে লেখা):
-  - এই Chief কখনো publish করে না, upload করে না, মেইল পাঠায় না,
-    খরচ করে না, delete করে না। Publish/Upload শুধু Boss-এর gate
-    word ("post it" / "upload it")-এ হয়, আর সেটাও Boss নিজে করেন
-    (এই সিস্টেম শুধু DRAFT বানায়)।
-  - Upload stage 9 সবসময় OFF by default — `upload_youtube.py`
-    চালাতে `--auto-upload` + `YOUTUBE_UPLOAD_ENABLED=1` + Boss-এর
-    নিজের YouTube credential, তিনটাই লাগে। এই Chief upload script
-    কখনো চালায় না।
-  - video_produce কখনো video file বানায় না — VisualProducer-এর
-    visual plan + ঠিক কী কী input বাকি (footage / voiceover line /
-    GPU নাম) সেই list দেয়। `video_file` সবসময় None।
-  - Worker-রা BrainFactory-র brain দিয়ে চলে — config.json-এর
-    "brain" flag "mock" (DEFAULT, $0) হলে vendored MockLLM,
-    "[MOCK DRAFT]" লেবেল করা থাকে; "live" হলে vendored
-    MetaSparkProvider। Live brain (Muse Spark) শুধু Boss-এর আলাদা
-    অনুমোদনে, এখানে নয়; Phase 6 কোনো live call করে না (দেখুন
-    00-CEO-Core/brain.py)। Content-এর নিজের LiveLLMProvider
-    deliberate ভাবে unwired — এই Chief-ও তা ছোঁয় না।
-  - VOICE.md DRAFT — Boss ঠিক না করা পর্যন্ত কোনো script-ই
-    "final" নয়। script_write-এর প্রতিটা output-এ এই সতর্কতা থাকে।
-  - Captions line-level — word-level karaoke নয় (Creator OS-এর
-    সীমা, লুকানো হয় না)।
+Rules (written in code):
+  - This Chief never publishes, never uploads, never sends mail,
+    never spends, never deletes. Publish/Upload happen only on Boss's gate
+    word ("post it" / "upload it"), and even then Boss does it himself
+    (this system only makes DRAFTs).
+  - Upload stage 9 is always OFF by default — to run `upload_youtube.py`
+    you need `--auto-upload` + `YOUTUBE_UPLOAD_ENABLED=1` + Boss's
+    own YouTube credential — all three are needed. This Chief never runs
+    the upload script.
+  - video_produce never makes a video file — it gives VisualProducer's
+    visual plan + the list of exactly which inputs are still missing (footage / voiceover line /
+    GPU name). `video_file` is always None.
+  - Workers run on BrainFactory's brain — if the "brain" flag in config.json is
+    "mock" (DEFAULT, $0), the vendored MockLLM,
+    labelled "[MOCK DRAFT]"; if "live", the vendored
+    MetaSparkProvider. A live brain (Muse Spark) only with Boss's separate
+    approval, not here; Phase 6 makes no live calls (see
+    00-CEO-Core/brain.py). Content's own LiveLLMProvider is
+    deliberately unwired — this Chief does not touch it either.
+  - VOICE.md is DRAFT — no script is
+    "final" until Boss fixes it. Every script_write output carries this warning.
+  - Captions are line-level — not word-level karaoke (a Creator OS
+    limit, not hidden).
 
 Routing table: TASK_TYPE -> (worker class, gate word)
 """
@@ -44,7 +44,7 @@ import sys
 import uuid
 from datetime import datetime, timezone
 
-# --- paths (VENDORED workers — office-এর ভেতরে, বাইরের dependency নেই) --
+# --- paths (VENDORED workers — inside the office, no outside dependency) --
 MASTER_OS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CEO_CORE_DIR = os.path.join(MASTER_OS_DIR, "00-CEO-Core")
 ENGINE_WORKERS_DIR = os.path.join(
@@ -72,25 +72,25 @@ VOICE_MD = os.path.join(os.path.dirname(os.path.abspath(__file__)), "VOICE.md")
 VOICE_STATUS = "DRAFT — Boss must correct before any real script ships"
 UPLOAD_STAGE = "OFF by default — needs --auto-upload + YOUTUBE_UPLOAD_ENABLED=1 + owner's own credentials"
 
-# ১৩-stage pipeline (Creator OS README থেকে — 0a..10)
+# 13-stage pipeline (from the Creator OS README — 0a..10)
 PIPELINE_STAGES = [
-    "0a-niche",        # yt-niche niche_score.py — topic না থাকলে চলে, নইলে skip
-    "0b-plan",         # yt-plan — weekly plan (loop-এর next-brief.json পড়ে)
+    "0a-niche",        # yt-niche niche_score.py — runs when there is no topic, skipped otherwise
+    "0b-plan",         # yt-plan — weekly plan (reads the loop's next-brief.json)
     "1-research",      # TopicResearcher — niche + viral concept
-    "2a-concept",      # concept_score.py — ৩–৫ concept, ১–১০ score
+    "2a-concept",      # concept_score.py — 3–5 concepts, 1–10 score
     "2b-script",       # ScriptWriter + hookscore.py
     "3-visual-pack",   # VisualProducer + title.py (title + thumbnail)
     "4-video",         # Reel Factory — real footage / stills+Ken Burns / GPU / paid API
-    "5-edit",          # yt-edit — transcript লাগে, না থাকলে skip
+    "5-edit",          # yt-edit — needs a transcript, skipped without one
     "6-caption-seo",   # CaptionWriter + yt-seo
     "7-publish-prep",  # PublishPrep ONLY — gate: "post it" / "upload it"
     "8-report",        # PerformanceTracker + yt-retention (post-publish only)
     "9-upload",        # upload_youtube.py — DEFAULT OFF
-    "10-next-plan",    # loop_next.py — পরের run-এর brief লেখে
+    "10-next-plan",    # loop_next.py — writes the next run's brief
 ]
 
 # task type -> (worker class, gate word for the OUTPUT's onward use)
-# gate word = output পাঠাতে/ব্যবহার করতে Boss-এর যে শব্দ লাগবে।
+# gate word = the word Boss must give to send/use the output.
 ROUTING = {
     "content_plan": (TopicResearcher, "ok"),
     "script_write": (ScriptWriter, "ok"),
@@ -101,13 +101,25 @@ ROUTING = {
 }
 
 # Phase 7 section agents — task type -> (agent file rel. to this dept dir,
-# agent class name). Chief-level + NEW role-গুলো এখানে যায় (ROUTING-এর ৬টা
-# বদলানো হয়নি)। Agent-রা file path দিয়ে importlib দিয়ে load হয়।
+# agent class name). Chief-level + NEW roles go here (the ROUTING 6
+# have not been changed). Agents are loaded by file path with importlib.
 SECTION_ROUTING = {
     "plan_weekly": ("sections/plan/agents/content_planner.py", "ContentPlannerAgent"),
     "performance_analyze": ("sections/analyze/agents/performance_analyst.py", "PerformanceAnalystAgent"),
     "growth_research": ("sections/growth/agents/growth_agent.py", "GrowthAgent"),
     "repurpose_plan": ("sections/growth/agents/repurpose_agent.py", "RepurposeAgent"),
+    # Sweep 2026-11-21 — 6 WRAPPED section agents: the ROUTING 6 task types
+    # now go through a section agent instead of calling the vendored worker directly.
+    # Agents wrap the same vendored worker, so the Chief's
+    # outward contract (status / worker / gate / voice_status /
+    # video_file / ready_to_publish / note) stay as before —
+    # check_phase3.py asserts that.
+    "content_plan": ("sections/plan/agents/topic_researcher.py", "TopicResearcherAgent"),
+    "script_write": ("sections/produce/agents/script_writer.py", "ScriptWriterAgent"),
+    "video_produce": ("sections/produce/agents/visual_producer.py", "VisualProducerAgent"),
+    "caption_write": ("sections/publish/agents/caption_writer.py", "CaptionWriterAgent"),
+    "publish_prep": ("sections/publish/agents/publish_prep.py", "PublishPrepAgent"),
+    "performance_track": ("sections/analyze/agents/performance_tracker.py", "PerformanceTrackerAgent"),
 }
 
 STORE_DIR = os.path.join(MASTER_OS_DIR, "store")
@@ -120,8 +132,8 @@ def _now_iso():
 
 
 def _log_task(record, tasks_path=None):
-    """প্রতিটা routed task store/tasks.json-এ append করে। অন্য
-    department-এর entry কখনো মুছে না — read-modify-write।"""
+    """Every routed task is appended to store/tasks.json. It never deletes another
+    department's entry — read-modify-write."""
     path = tasks_path or DEFAULT_TASKS_PATH
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -137,48 +149,48 @@ def _log_task(record, tasks_path=None):
 
 
 def missing_video_inputs(payload):
-    """video_produce-এর জন্য ঠিক কী কী input বাকি — বানানো উত্তর নয়,
-    checklist। video file কখনো এখানে বানানো হয় না।"""
+    """Exactly which inputs are still missing for video_produce — not a made-up answer,
+    a checklist. A video file is never made here."""
     missing = []
     if not payload.get("footage"):
         missing.append(
             "footage — real footage file (OBS recording / phone clip). "
-            "না থাকলে video stage শুধু plan লেখে, video বানায় না।")
+            "Without it, the video stage only writes a plan, it does not make a video.")
     if not payload.get("voice_lines") and not payload.get("script"):
         missing.append(
-            "voiceover lines / script — VOICE.md DRAFT, Boss-এর "
-            "correction বাকি; script ছাড়া voiceover line লেখা যায় না।")
+            "voiceover lines / script — VOICE.md DRAFT, Boss's " 
+            "correction pending; without a script no voiceover line can be written.")
     if payload.get("provider") == "local" and not payload.get("gpu_name"):
         missing.append(
-            "Boss-এর PC GPU নাম — true AI video motion-এর জন্য লাগে "
-            "(নাম 2026-11-01 থেকে জানা যায়নি)।")
+            "Boss's PC GPU name — needed for true AI video motion " 
+            "(name unknown since 2026-11-01).")
     if payload.get("provider") == "api" and not payload.get("video_api_key"):
         missing.append(
-            "paid video API key — $0 cap-এ এই Chief key চায় না, Boss "
-            "নিজে দিলে তবেই।")
+            "paid video API key — under the $0 cap this Chief does not ask for a key; only if Boss " 
+            "gives it himself.")
     return missing
 
 
 def handle_task(task, tasks_path=None, approvals_path=None):
-    """Main CEO Bot থেকে আসা একটা content task চালানো।
+    """Run one content task coming from the Main CEO Bot.
 
     task = {
       "type": "content_plan" | "script_write" | "video_produce" |
               "caption_write" | "publish_prep" | "performance_track",
       "title": "...",
-      "payload": {...},           # worker-কে দেওয়া input
+      "payload": {...},           # input given to the worker
       "gated_action": "send" | "publish" | "upload" | "spend" | "delete" (optional),
-      "approval_id": "..." (optional — আগে নেওয়া approval),
+      "approval_id": "..." (optional — approval taken earlier),
       "requested_by": "Main CEO Bot" (optional),
     }
 
     Returns: {"status": "draft-ready" | "pending-approval" |
               "approved-not-executed" | "blocked-upload-off" |
               "route-only" | "error", ...}
-    - gated_action থাকলে worker একদম চালানো হয় না — gateway-এ PENDING
-      approval request লেখা হয়, আর এখানেই থেমে যায়।
-    - worker চালালেও ফলাফল শুধু DRAFT — publish/upload এই Chief করে না।
-    - video_produce-তে video_file সবসময় None + missing_inputs list।
+    - If a gated_action is present, the worker is not run at all — the approval request is
+      written to the gateway as PENDING, and it stops here.
+    - Even when a worker runs, the result is only a DRAFT — this Chief does not publish/upload.
+    - In video_produce, video_file is always None + a missing_inputs list.
     """
     title = task.get("title", "")
     task_type = task.get("type")
@@ -186,7 +198,7 @@ def handle_task(task, tasks_path=None, approvals_path=None):
     gated_action = task.get("gated_action")
     payload = dict(task.get("payload") or {})
 
-    # 1. Upload চাওয়া হয়েছে — stage 9 OFF, কখনো চালানো হয় না।
+    # 1. Upload requested — stage 9 OFF, never run.
     if gated_action == "upload":
         result = {
             "status": "blocked-upload-off",
@@ -195,9 +207,9 @@ def handle_task(task, tasks_path=None, approvals_path=None):
             "gated_action": gated_action,
             "upload_stage": UPLOAD_STAGE,
             "note": "Upload stage 9 is OFF by default. This Chief never "
-                    "runs upload_youtube.py. Boss-এর 'upload it' + "
-                    "YOUTUBE_UPLOAD_ENABLED=1 + Boss-এর নিজের YouTube "
-                    "credential — তিনটাই লাগে, আর upload Boss নিজে করেন।",
+                    "runs upload_youtube.py. Boss's 'upload it' + " 
+                    "YOUTUBE_UPLOAD_ENABLED=1 + Boss's own YouTube " 
+                    "credential — all three are needed, and Boss does the upload himself.",
             "draft_only": True,
         }
         _log_task({
@@ -212,13 +224,13 @@ def handle_task(task, tasks_path=None, approvals_path=None):
         }, tasks_path=tasks_path)
         return result
 
-    # 2. অন্য gated action — worker চালানো যাবে না, approval-এ আটকাতে হবে।
+    # 2. Another gated action — the worker may not run, it must be held at approval.
     if gated_action:
         gateway = ApprovalGateway(approvals_path=approvals_path) if approvals_path else ApprovalGateway()
         approval_id = task.get("approval_id")
         if approval_id and gateway.is_approved(approval_id):
-            # অনুমোদন থাকলেও এই Chief send/publish/spend/delete করে না —
-            # শুধু জানায় যে Boss অনুমোদন দিয়েছেন, কাজটা Boss নিজে করবেন।
+            # Even with approval, this Chief does not send/publish/spend/delete —
+            # it only says that Boss has approved, and Boss will do the work himself.
             result = {
                 "status": "approved-not-executed",
                 "department": DEPARTMENT,
@@ -252,7 +264,7 @@ def handle_task(task, tasks_path=None, approvals_path=None):
         }, tasks_path=tasks_path)
         return result
 
-    # 3. Type ছাড়া task — শুধু routing probe, worker চলে না।
+    # 3. Task without a type — just a routing probe, no worker runs.
     if not task_type:
         result = {
             "status": "route-only",
@@ -275,9 +287,9 @@ def handle_task(task, tasks_path=None, approvals_path=None):
         return result
 
     # 3b. Phase 7 section agents — plan_weekly / performance_analyze /
-    #     growth_research / repurpose_plan — sections/<section>/agents/-এর
-    #     agent file load করে চালানো (importlib, file path দিয়ে)। Gated
-    #     action থাকলে উপরের block-এ আগেই আটকে গেছে, তাই এখানে শুধু draft।
+    #     growth_research / repurpose_plan — run by loading the agent file from
+    #     sections/<section>/agents/ (importlib, by file path). If a gated
+    #     action was present it was already held in the block above, so here only drafts.
     if task_type in SECTION_ROUTING:
         agent_rel_path, agent_cls_name = SECTION_ROUTING[task_type]
         agent_path = os.path.join(
@@ -298,6 +310,34 @@ def handle_task(task, tasks_path=None, approvals_path=None):
             "type": task_type,
             "agent": agent_cls_name,
         }
+        if task_type in ROUTING:
+            # WRAPPED agent — keeping the Chief's legacy outward contract:
+            # worker = the vendored worker's name, output = the worker's output,
+            # note = the agent's notes (with the VOICE.md warning), and by type
+            # extra field (voice_status / video_file / ready_to_publish).
+            _worker_cls, gate_word = ROUTING[task_type]
+            result["worker"] = agent_result.get("worker", _worker_cls.__name__)
+            result["worker_status"] = agent_result.get("worker_status")
+            result["output"] = agent_result.get(
+                "worker_output", agent_result.get("output"))
+            result["notes"] = agent_result.get("notes", "")
+            result["note"] = agent_result.get("notes", "")
+            result["mock_brain"] = agent_result.get("mock_brain", True)
+            result["draft_only"] = True
+            result["gate"] = gate_word
+            if task_type == "script_write":
+                result["voice_status"] = agent_result.get(
+                    "voice_status", VOICE_STATUS)
+            if task_type == "video_produce":
+                result["video_file"] = agent_result.get("video_file")
+                result["video_built"] = agent_result.get("video_built", False)
+                result["missing_inputs"] = agent_result.get(
+                    "missing_inputs", missing_video_inputs(payload))
+            if task_type == "publish_prep":
+                result["ready_to_publish"] = agent_result.get(
+                    "ready_to_publish", False)
+                result["upload_stage"] = agent_result.get(
+                    "upload_stage", UPLOAD_STAGE)
         _log_task({
             "id": uuid.uuid4().hex[:12],
             "department": DEPARTMENT,
@@ -309,7 +349,7 @@ def handle_task(task, tasks_path=None, approvals_path=None):
         }, tasks_path=tasks_path)
         return result
 
-    # 4. অচেনা type — ভুল স্বীকার করে থামা, বানানো worker নয়।
+    # 4. Unknown type — admit the mistake and stop, no made-up worker.
     if task_type not in ROUTING:
         result = {
             "status": "error",
@@ -329,7 +369,7 @@ def handle_task(task, tasks_path=None, approvals_path=None):
         }, tasks_path=tasks_path)
         return result
 
-    # 5. আসল routing — real Creator OS worker, BrainFactory-র brain ($0 mock default)।
+    # 5. Real routing — real Creator OS worker, BrainFactory's brain ($0 mock default).
     worker_cls, gate_word = ROUTING[task_type]
     llm = BrainFactory.get_brain("content")
     worker = worker_cls(
@@ -348,17 +388,17 @@ def handle_task(task, tasks_path=None, approvals_path=None):
     )
     worker_result = worker.execute(creator_task)
 
-    note = "DRAFT ONLY — mock brain ($0), [MOCK DRAFT] scaffold। "
+    note = "DRAFT ONLY — mock brain ($0), [MOCK DRAFT] scaffold. "
     if gate_word:
-        note += f"Output পাঠাতে/ব্যবহার করতে Boss-এর gate word লাগবে: '{gate_word}'।"
+        note += f"To send/use this output you need Boss's gate word: '{gate_word}'." 
     else:
-        note += "এই draft-এ কোনো gate নেই।"
+        note += "This draft has no gate."
     if task_type == "script_write":
-        note += f" VOICE.md {VOICE_STATUS} — এই script final নয়।"
+        note += f" VOICE.md {VOICE_STATUS} — this script is not final."
     if task_type == "video_produce":
-        note += " Video file বানানো হয়নি — এই Chief video render করে না।"
+        note += "No video file was made — this Chief does not render video."
     if task_type == "publish_prep":
-        note += " ready_to_publish=False — upload stage 9 OFF।"
+        note += " ready_to_publish=False — upload stage 9 OFF."
 
     result = {
         "status": "draft-ready",
@@ -371,7 +411,7 @@ def handle_task(task, tasks_path=None, approvals_path=None):
         "worker_status": worker_result.status,
         "output": worker_result.output,
         "notes": worker_result.notes,
-        "mock_revenue_usd": worker_result.mock_revenue_usd,  # MOCK ledger only — real money নয় (সবসময় 0.0)
+        "mock_revenue_usd": worker_result.mock_revenue_usd,  # MOCK ledger only — not real money (always 0.0)
         "mock_brain": True,
         "draft_only": True,
         "gate": gate_word,
