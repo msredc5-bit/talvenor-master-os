@@ -1,16 +1,16 @@
-"""New Feature Research Agent — নতুন feature research draft (Dept 08, Phase 3).
+"""New Feature Research Agent — new feature research draft (Dept 08, Phase 3).
 
-ভূমিকা (role): receptionist service-এ (Sophia, Vapi live) নতুন
-feature-এর ভাবনা নিয়ে research-এর DRAFT লেখা — কখনো feature
-বানায় না, বানানো হয়েছে বলে দাবি করে না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: writing a research DRAFT on a new feature idea for the receptionist service (Sophia, Vapi live) —
+it never builds a feature,
+never claims one has been built.
+Gate: none — the draft itself is safe, no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-এই agent কখনো করে না: feature বানায় না, live service বদলায় না,
-client feedback/সংখ্যা/পরিসংখ্যান বানায় না, কিছু পাঠায় না,
-খরচ করে না, dental/medical নয়।
-Live stack Vapi/Sophia — Sophia live receptionist, +1 (947) 223-0244।
-Retell DROPPED 2026-10-26 — কখনো production নয়।
+This agent never does this: it builds no feature, changes no live service,
+invents no client feedback/numbers/statistics, sends nothing,
+spends nothing, no dental/medical.
+Live stack Vapi/Sophia — Sophia live receptionist, +1 (947) 223-0244.
+Retell DROPPED 2026-10-26 — never production.
 """
 
 import os
@@ -24,7 +24,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class NewFeatureResearchAgent:
-    """নতুন feature research DRAFT ONLY — ভাবনা মাত্র, build নয়।"""
+    """New feature research DRAFT ONLY — only an idea, no build."""
 
     task_kind = "new_feature_research"
     gate = None
@@ -32,7 +32,7 @@ class NewFeatureResearchAgent:
     role = "New Feature Research Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -44,7 +44,7 @@ class NewFeatureResearchAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -71,7 +71,7 @@ class NewFeatureResearchAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """নতুন feature research DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Building a new feature research DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "New feature research draft"
         gated_action = task.get("gated_action")
@@ -111,11 +111,11 @@ class NewFeatureResearchAgent:
             "[MOCK DRAFT] New feature research — DRAFT ONLY\n"
             f"Feature idea: {topic}\n"
             f"Problem it solves: {problem}\n"
-            "Status: DRAFT IDEA ONLY — feature বানানো হয়নি, live service-এ "
-            "কিছু বদলানো হয়নি।\n"
+            "Status: DRAFT IDEA ONLY — no feature has been built, in the live service "
+            "nothing has been changed.\n"
             "Fit with live service: Vapi/Sophia receptionist (live, "
-            f"{TALVENOR_PHONE}) — feature-টা live কাজের সাথে মিলিয়ে ভাবা, "
-            "চালু করা নয়।\n"
+            f"{TALVENOR_PHONE}) — the feature is thought about against live work, "
+            "not launched.\n"
             "What is NOT known (no invented feedback): client feedback, "
             "usage numbers — all BOSS INPUT REQUIRED / verification pending.\n"
             "Next verification step ($0): Boss decides whether the idea is "
@@ -124,9 +124,9 @@ class NewFeatureResearchAgent:
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Research draft ONLY, ভাবনা মাত্র — "
-            "feature বানানো হয়নি, live service বদলানো হয়নি। কোনো বানানো "
-            "client feedback/সংখ্যা নেই। Gate: none।"
+            "DRAFT ONLY — mock brain ($0). Research draft ONLY, only an idea — "
+            "no feature has been built, the live service has not been changed. No invented "
+            "client feedback/numbers. Gate: none."
         )
         return {
             "status": "draft-ready",

@@ -1,17 +1,17 @@
 """Product Improvement Agent — product improvement draft (Dept 08, Phase 3).
 
-ভূমিকা (role): live receptionist service-কে (Sophia, Vapi) আরও ভালো
-করার ভাবনার DRAFT লেখা — কখনো client feedback বানায় না, service
-বদলায় না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: writing a DRAFT of ideas to make the live receptionist service (Sophia, Vapi) better —
+it never invents client feedback, changes no
+service.
+Gate: none — the draft itself is safe, no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-সৎ অবস্থা: paying client 0 — কোনো client feedback-এর দাবি নয়।
-এই agent কখনো করে না: client feedback/কথা বানায় না, live service
-বদলায় না, বদল হয়েছে বলে দাবি করে না, সংখ্যা/পরিসংখ্যান বানায় না,
-কিছু পাঠায় না, খরচ করে না, dental/medical নয়।
-Live stack Vapi/Sophia — Sophia live receptionist, +1 (947) 223-0244।
-Retell DROPPED 2026-10-26 — কখনো production নয়।
+Honest status: paying client 0 — no claim of client feedback.
+This agent never does this: it invents no client feedback/words, changes no live service,
+never claims it changed, invents no numbers/statistics,
+sends nothing, spends nothing, no dental/medical.
+Live stack Vapi/Sophia — Sophia live receptionist, +1 (947) 223-0244.
+Retell DROPPED 2026-10-26 — never production.
 """
 
 import os
@@ -25,7 +25,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class ProductImprovementAgent:
-    """Product improvement DRAFT ONLY — ভাবনা মাত্র, বদল নয়।"""
+    """Product improvement DRAFT ONLY — only an idea, no change."""
 
     task_kind = "product_improvement"
     gate = None
@@ -33,7 +33,7 @@ class ProductImprovementAgent:
     role = "Product Improvement Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -45,7 +45,7 @@ class ProductImprovementAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -72,7 +72,7 @@ class ProductImprovementAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Product improvement DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Building a product improvement DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Product improvement draft"
         gated_action = task.get("gated_action")
@@ -112,7 +112,7 @@ class ProductImprovementAgent:
             "[MOCK DRAFT] Product improvement — DRAFT ONLY\n"
             f"Improvement idea: {topic}\n"
             f"Problem it fixes: {problem}\n"
-            "Status: DRAFT IDEA ONLY — service-এ কিছু বদলানো হয়নি।\n"
+            "Status: DRAFT IDEA ONLY — nothing in the service has been changed.\n"
             "What would change (idea only): live Vapi/Sophia receptionist "
             f"({TALVENOR_PHONE}) — change happens only on Boss's word, "
             "never by this draft.\n"
@@ -124,9 +124,9 @@ class ProductImprovementAgent:
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Improvement draft ONLY, ভাবনা মাত্র — "
-            "service-এ কিছু বদলানো হয়নি। কোনো বানানো client feedback/সংখ্যা "
-            "নেই। Gate: none।"
+            "DRAFT ONLY — mock brain ($0). Improvement draft ONLY, only an idea — "
+            "nothing in the service has been changed. No invented client feedback/numbers "
+            "none. Gate: none."
         )
         return {
             "status": "draft-ready",

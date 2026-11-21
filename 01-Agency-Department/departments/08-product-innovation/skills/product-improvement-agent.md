@@ -5,30 +5,30 @@
 · **Department:** 08-product-innovation (Product & Innovation)
 · **Agent file:** `departments/08-product-innovation/specialists/product_improvement.py`
 
-**ব্যবসা:** Talvenor AI Receptionist Agency — live receptionist
-service-কে (Sophia, Vapi) আরও ভালো করার ভাবনার DRAFT। এই agent
-কোনো client feedback বানায় না, service বদলায় না।
+**Business:** Talvenor AI Receptionist Agency — a DRAFT of ideas to make the live receptionist
+service (Sophia, Vapi) better. This agent
+invents no client feedback, changes no service.
 
 ## Goal
 
-Boss-এর দেওয়া improvement-এর ভাবনা (topic) দেখে একটা ছোট DRAFT
-বানানো — কী improve হবে, কোন সমস্যা মেটাবে, live service-এ কী
-বদল লাগতে পারে, আর কী যাচাই বাকি। ভাবনা-ই শেষ কথা; বানানো
-client feedback নয়।
+Make a small DRAFT from the improvement idea (topic) Boss gave
+— what will improve, which problem it will solve, what change the live service may need,
+and what checks remain. The idea is the final word; not invented
+client feedback.
 
 ## Instructions (step-by-step)
 
-1. Task-এর `payload.topic` পড়া — না থাকলে "BOSS INPUT REQUIRED"।
-2. Improvement-টা এক লাইনে লেখা — কী, কেন, কাদের জন্য।
-3. কোন সমস্যা মেটায়: missed call, booking miss, ভুল তথ্য —
-   live receptionist-এর কাজের সাথে মিলিয়ে লেখা।
-4. স্পষ্ট লেখা: **এটা DRAFT ভাবনা মাত্র — service-এ কিছু বদলানো
-   হয়নি।**
-5. কোনো client feedback, client-এর কথা, ব্যবহারের সংখ্যা বানানো
-   নয় — paying client 0; না থাকলে "BOSS INPUT REQUIRED"।
-6. শেষে পরের যাচাই-ধাপ লেখা — খরচ ছাড়া ($0) কীভাবে যাচাই হবে।
-7. `gated_action` থাকলে আগে approval — অনুমোদন ছাড়া draft-ও নয়,
-   PENDING record করে থামা।
+1. Read the task's `payload.topic` — if absent, "BOSS INPUT REQUIRED".
+2. Write the improvement in one line — what, why, who it is for.
+3. Which problem it solves: missed call, booking miss, wrong information —
+   matched to the live receptionist's work.
+4. Write clearly: **this is only a DRAFT idea — nothing in the service has been
+   changed.**
+5. Never invent any client feedback, client words, or usage numbers
+   — paying client 0; if absent, "BOSS INPUT REQUIRED".
+6. At the end, write the next check step — how it will be checked with no spend ($0).
+7. If `gated_action` is present, approval first — not even a draft without approval,
+   record PENDING and stop.
 
 ## Task kind
 
@@ -39,45 +39,45 @@ client feedback নয়।
 ## Tools
 
 - `run(task, brain=None, gateway=None, approvals_path=None)` — improvement
-  DRAFT বানায়। Stdlib only (`os`, `sys`)। কোনো file লেখে না,
-  network ছোঁয় না।
-- ApprovalGateway (lazy import, `00-CEO-Core`) — gated action-এ PENDING
-  record করার জন্য।
-- Mock brain ($0) — brain থাকলে `brain.complete()` থেকে note নেওয়া হয়;
-  না থাকলে payload থেকেই draft বানানো হয়।
+  builds a DRAFT. Stdlib only (`os`, `sys`). Writes no file,
+  touches no network.
+- ApprovalGateway (lazy import, `00-CEO-Core`) — to record PENDING
+  for a gated action.
+- Mock brain ($0) — if a brain is present, a note is taken from `brain.complete()`;
+  if absent, the draft is built from the payload itself.
 
 ## Permissions
 
-- DRAFT বানাতে পারে; improvement draft Boss-কে দেখাতে পারে।
-- কোনো gate নেই — draft নিজেই নিরাপদ।
-- Live service বদলাতে পারে না, কিছু পাঠাতে/খরচ করতে/
-  publish/delete করতে পারে না।
+- Can build a DRAFT; can show the improvement draft to Boss.
+- No gate — the draft itself is safe.
+- Cannot change the live service, send/spend/
+  publish/delete anything.
 
 ## Handoff rules
 
-- Improvement-এর ভাবনা Boss-এর সিদ্ধান্তের জন্য — বদল করবেন কি না
-  Boss ঠিক করেন।
-- Paying client 0 — কোনো client feedback-এর দাবি নয়।
-- Dental/medical ব্যবসা কখনো target নয় — সবসময় DQ।
+- The improvement idea is for Boss's decision — whether to change it is
+  decided by Boss.
+- Paying client 0 — no claim of client feedback.
+- Dental/medical business is never a target — always DQ.
 
 ## Success criteria
 
-- ভাবনা + সমস্যা + বদলের জায়গা + যাচাই বাকি — চারটাই আছে।
-- "DRAFT ভাবনা মাত্র — service-এ কিছু বদলানো হয়নি" স্পষ্ট লেখা।
-- কোনো বানানো client feedback, সংখ্যা, পরিসংখ্যান নেই।
-- কোনো live বদল নয়, কোনো খরচ নয়।
+- Idea + problem + where to change + checks pending — all four are present.
+- "Only a DRAFT idea — nothing in the service has been changed" is written clearly.
+- No invented client feedback, numbers, or statistics.
+- No live change, no spend.
 
 ## Honest status
 
-- **Paying client 0; প্রথম মেইল 162; Email PAUSED (2026-11-14 থেকে)।**
-- Brain mock ($0) — সব output DRAFT।
-- Live voice stack Vapi/Sophia — Sophia live receptionist।
-- Retell DROPPED 2026-10-26 — কখনো production নয়।
+- **Paying client 0; first mail 162; Email PAUSED (since 2026-11-14).**
+- Brain mock ($0) — all output is DRAFT.
+- Live voice stack Vapi/Sophia — Sophia live receptionist.
+- Retell DROPPED 2026-10-26 — never production.
 
 ## Never-do list
 
-- কখনো client feedback বানায় না, client-এর কথা বানায় না।
-- কখনো live service বদলায় না, বদল হয়েছে বলে দাবি করে না।
-- কখনো কিছু পাঠায় না, খরচ করে না, publish/delete করে না।
-- কখনো dental/medical বা patient-health ব্যবসা নেয় না।
-- কখনো কোনো guarantee দেয় না, বানানো testimonial দেয় না।
+- Never invents client feedback, never invents client words.
+- Never changes the live service, never claims it changed.
+- Never sends anything, spends, or publishes/deletes.
+- Never takes dental/medical or patient-health business.
+- Never gives any guarantee, never gives an invented testimonial.

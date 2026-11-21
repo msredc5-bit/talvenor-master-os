@@ -1,16 +1,16 @@
 """Automation R&D Agent — automation R&D draft (Dept 08, Phase 3).
 
-ভূমিকা (role): নতুন automation-এর ভাবনা নিয়ে R&D-র DRAFT লেখা —
-কখনো live automation চালায় না, চালু হয়েছে বলে দাবি করে না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: writing an automation R&D DRAFT on a new automation idea —
+it never runs a live automation, never claims one has launched.
+Gate: none — the draft itself is safe, no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-সৎ অবস্থা: n8n workflows READY, LIVE নয় — Boss-এর import + test
-বাকি। CRM n8n Cloud Data Tables PLANNED, live নয়। Brain mock ($0)।
-এই agent কখনো করে না: workflow চালায় না, live automation বলে দাবি
-করে না, সময়/সাফল্যের সংখ্যা বানায় না, কিছু পাঠায় না, খরচ করে না,
-dental/medical নয়।
-Live stack Vapi/Sophia — Sophia live receptionist, +1 (947) 223-0244।
+Honest status: n8n workflows READY, not LIVE — Boss's import + test
+pending. CRM n8n Cloud Data Tables PLANNED, not live. Brain mock ($0).
+This agent never does this: it runs no workflow, never claims a live automation,
+invents no time/success numbers, sends nothing, spends nothing,
+no dental/medical.
+Live stack Vapi/Sophia — Sophia live receptionist, +1 (947) 223-0244.
 """
 
 import os
@@ -24,7 +24,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class AutomationRDAgent:
-    """Automation R&D DRAFT ONLY — ভাবনা মাত্র, live automation নয়।"""
+    """Automation R&D DRAFT ONLY — only an idea, not a live automation."""
 
     task_kind = "automation_rd"
     gate = None
@@ -32,7 +32,7 @@ class AutomationRDAgent:
     role = "Automation R&D Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -44,7 +44,7 @@ class AutomationRDAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -72,7 +72,7 @@ class AutomationRDAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Automation R&D DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Building an automation R&D DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Automation R&D draft"
         gated_action = task.get("gated_action")
@@ -112,11 +112,11 @@ class AutomationRDAgent:
             "[MOCK DRAFT] Automation R&D — DRAFT ONLY\n"
             f"Automation idea: {topic}\n"
             f"Trigger: {trigger}\n"
-            "Status: DRAFT ONLY — কোনো live automation নয়। n8n workflows "
-            "READY, LIVE নয় — Boss-এর import + test বাকি।\n"
+            "Status: DRAFT ONLY — no live automation. n8n workflows "
+            "READY, not LIVE — Boss's import + test pending.\n"
             "Where it could sit: n8n (READY, not live), Vapi/Sophia live "
             f"receptionist ({TALVENOR_PHONE}), booking link live; CRM n8n "
-            "Cloud Data Tables PLANNED, live নয়।\n"
+            "Cloud Data Tables PLANNED, not live.\n"
             "What is NOT known (no invented numbers): time saved, success "
             "rate — all BOSS INPUT REQUIRED / verification pending.\n"
             "Next verification step ($0): Boss decides whether to import "
@@ -126,8 +126,8 @@ class AutomationRDAgent:
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). R&D draft ONLY — n8n READY, LIVE "
-            "নয়, কোনো live automation নয়। কোনো বানানো সময়/সাফল্যের সংখ্যা "
-            "নেই। Gate: none।"
+            "not, no live automation. No invented time/success numbers "
+            "none. Gate: none."
         )
         return {
             "status": "draft-ready",

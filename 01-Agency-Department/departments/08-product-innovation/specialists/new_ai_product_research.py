@@ -1,15 +1,15 @@
-"""New AI Product Research Agent — নতুন AI product research draft (Dept 08, Phase 3).
+"""New AI Product Research Agent — new AI product research draft (Dept 08, Phase 3).
 
-ভূমিকা (role): নতুন AI product-এর ভাবনা নিয়ে research-এর DRAFT লেখা —
-কখনো product বানায় না, দাম ঠিক করে না, কিছু বিক্রি করে না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: writing a research DRAFT on a new AI product idea —
+it never builds a product, sets a price, or sells anything.
+Gate: none — the draft itself is safe, no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-এই agent কখনো করে না: product বানায় না, দাম/বাজারের সংখ্যা/
-পরিসংখ্যান বানায় না, কিছু পাঠায় না, খরচ করে না, Vet Kit-এর কাজ
-করে না (সেটা 02-Digital-Product-Department-এর), dental/medical নয়।
-Live stack Vapi/Sophia — Sophia live receptionist, +1 (947) 223-0244।
-Retell DROPPED 2026-10-26 — কখনো production নয়।
+This agent never does this: it builds no product, invents no price/market number/
+statistic, sends nothing, spends nothing, does no Vet Kit work
+(that is 02-Digital-Product-Department's), no dental/medical.
+Live stack Vapi/Sophia — Sophia live receptionist, +1 (947) 223-0244.
+Retell DROPPED 2026-10-26 — never production.
 """
 
 import os
@@ -23,7 +23,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class NewAIProductResearchAgent:
-    """নতুন AI product research DRAFT ONLY — বানানো তথ্য নয়, build নয়।"""
+    """New AI product research DRAFT ONLY — no invented facts, no build."""
 
     task_kind = "new_ai_product_research"
     gate = None
@@ -31,7 +31,7 @@ class NewAIProductResearchAgent:
     role = "New AI Product Research Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -43,7 +43,7 @@ class NewAIProductResearchAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -71,7 +71,7 @@ class NewAIProductResearchAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """নতুন AI product research DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Building a new AI product research DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "New AI product research draft"
         gated_action = task.get("gated_action")
@@ -124,9 +124,9 @@ class NewAIProductResearchAgent:
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Research draft ONLY, build নয়। "
-            "কোনো বানানো product, দাম, বাজারের সংখ্যা, পরিসংখ্যান নেই। "
-            "Gate: none।"
+            "DRAFT ONLY — mock brain ($0). Research draft ONLY, no build. "
+            "No invented product, price, market number, or statistic. "
+            "Gate: none."
         )
         return {
             "status": "draft-ready",

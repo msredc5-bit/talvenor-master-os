@@ -1,16 +1,16 @@
 """Prototype Builder Agent — prototype plan draft ONLY (Dept 08, Phase 3).
 
-ভূমিকা (role): prototype-এর PLAN-এর DRAFT লেখা — কখনো live prototype
-বানায় না, কোনো code চালিয়ে service চালু করে না, কোনো খরচ করে না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: writing a DRAFT of a prototype PLAN — it never builds a live prototype,
+runs no code to launch a service, spends nothing.
+Gate: none — the draft itself is safe, no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-এই agent কখনো করে না: prototype বানায় না, code চালায় না, service
-চালু করে না, সময়/খরচ/সাফল্যের সংখ্যা বানায় না, কিছু পাঠায় না,
-খরচ করে না, Vet Kit-এর কাজ করে না (সেটা 02-Digital-Product-
-Department-এর), dental/medical নয়।
-Live stack Vapi/Sophia — Sophia live receptionist, +1 (947) 223-0244।
-Retell DROPPED 2026-10-26 — কখনো production নয়।
+This agent never does this: it builds no prototype, runs no code, launches no service,
+invents no time/spend/success numbers, sends nothing,
+spends nothing, does no Vet Kit work (that is 02-Digital-Product-
+Department's), no dental/medical.
+Live stack Vapi/Sophia — Sophia live receptionist, +1 (947) 223-0244.
+Retell DROPPED 2026-10-26 — never production.
 """
 
 import os
@@ -24,7 +24,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class PrototypeBuilderAgent:
-    """Prototype PLAN DRAFT ONLY — plan মাত্র, build নয়।"""
+    """Prototype PLAN DRAFT ONLY — only a plan, no build."""
 
     task_kind = "prototype_builder"
     gate = None
@@ -32,7 +32,7 @@ class PrototypeBuilderAgent:
     role = "Prototype Builder Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -44,7 +44,7 @@ class PrototypeBuilderAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -71,7 +71,7 @@ class PrototypeBuilderAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Prototype PLAN DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না, code চালায় না।"""
+        """Building a prototype PLAN DRAFT. Writes no file, touches no network, runs no code."""
         task = task or {}
         title = task.get("title") or "Prototype plan draft"
         gated_action = task.get("gated_action")
@@ -109,12 +109,12 @@ class PrototypeBuilderAgent:
         output = (
             "[MOCK DRAFT] Prototype plan — DRAFT ONLY\n"
             f"Prototype idea: {topic}\n"
-            "Status: PLAN DRAFT ONLY — কোনো prototype বানানো হয়নি, কোনো "
-            "code চালানো হয়নি, কোনো service চালু হয়নি।\n"
+            "Status: PLAN DRAFT ONLY — no prototype has been built, no "
+            "code has been run, no service has launched.\n"
             "Plan steps (idea only):\n"
-            "  1. কী দেখাবে — ভাবনাটা এক লাইনে Boss-কে দেখানো।\n"
-            "  2. কী লাগবে — শুধু $0, খরচ ছাড়া জিনিস; Boss-এর 'ok' ছাড়া কিছু নয়।\n"
-            "  3. যাচাই — Boss plan দেখে বানাবেন কি না ঠিক করেন।\n"
+            "  1. What it will show — show the idea to Boss in one line.\n"
+            "  2. What is needed — only $0, no-spend things; nothing without Boss's 'ok'.\n"
+            "  3. Check — Boss decides from the plan whether to build it.\n"
             "What is NOT known (no invented numbers): time, cost, success "
             "rate — all BOSS INPUT REQUIRED / verification pending.\n"
             "Vet No-Show Recovery Kit is NOT this department's work — it "
@@ -123,9 +123,9 @@ class PrototypeBuilderAgent:
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Prototype PLAN draft ONLY — কোনো "
-            "prototype বানানো হয়নি, কোনো code চালানো হয়নি। কোনো বানানো "
-            "সময়/খরচ/সাফল্যের সংখ্যা নেই। Gate: none।"
+            "DRAFT ONLY — mock brain ($0). Prototype PLAN draft ONLY — no "
+            "prototype has been built, no code has been run. No invented "
+            "time/spend/success numbers. Gate: none."
         )
         return {
             "status": "draft-ready",
