@@ -1,93 +1,93 @@
 # Agent Permissions — Per-Agent Permission Model
 
 > Phase 1 — Foundation only
-> Status: DRAFT — Boss-এর অনুমোদনের অপেক্ষায়
-> তারিখ: 2026-11-19
-> সম্পর্কিত ফাইল: `office-charter.md`, `approval-policy.md`, `security-policy.md`
+> Status: DRAFT — awaiting Boss's approval
+> Date: 2026-11-19
+> Related files: `office-charter.md`, `approval-policy.md`, `security-policy.md`
 
-## 1. মূল নীতি (Core Principles)
+## 1. Core Principles
 
-1. **প্রতিটি agent-এর permission তার role অনুযায়ী।** Role-এর বাইরে কোনো action করা যাবে না।
-2. **Mock-brain agent শুধু draft করে।** Mock brain দিয়ে কোনো live action execute করা যায় না।
-3. **কোনো agent credential ধরে না।** Password, API key, token — কোনো agent-এর কাছে থাকে না। Key শুধু connector Secure Vault-এ থাকে, transient use হয়।
-4. **Manager plan/delegate করতে পারে, execute করতে পারে না।** Gated action manager নিজে execute করবে না — সেটা ApprovalGateway-তে PENDING হয়ে Boss-এর কাছে যাবে।
-5. **কোনো auto-approve নেই।** Permission থাকলেই action হয়ে যায় না — gated action-এর জন্য Boss-এর gate word লাগবেই।
+1. **Each agent's permission follows its role.** No action outside the role can be done.
+2. **A mock-brain agent only drafts.** No live action can be executed with a mock brain.
+3. **No agent holds a credential.** Password, API key, token — no agent has any of them. The key lives only in the connector Secure Vault, used transiently.
+4. **A manager can plan/delegate, not execute.** A manager will not execute a gated action itself — it goes to ApprovalGateway as PENDING, to Boss.
+5. **No auto-approve.** Having permission does not make an action happen — a gated action still needs Boss's gate word.
 
-## 2. Permission-এর চারটি অংশ
+## 2. The four parts of a permission
 
-প্রতিটি agent-এর permission এই চারটি দিয়ে বোঝা যায়:
+Each agent's permission is understood through these four:
 
-| অংশ | মানে |
+| Part | Meaning |
 |-----|------|
-| **Role** | Agent-টি কী কাজের জন্য — যেমন Sales Manager, Marketing Manager |
-| **Allowed tools** | কোন tool ব্যবহার করতে পারে — যেমন file read, draft write, research |
-| **Allowed actions** | কোন কাজ নিজে করতে পারে — যেমন research, draft, plan, delegate |
-| **Forbidden actions** | কোন কাজ কখনো করতে পারবে না — যেমন send, publish, spend, delete, credential access |
+| **Role** | What the agent is for — e.g. Sales Manager, Marketing Manager |
+| **Allowed tools** | Which tools it can use — e.g. file read, draft write, research |
+| **Allowed actions** | Which jobs it can do itself — e.g. research, draft, plan, delegate |
+| **Forbidden actions** | Which jobs it can never do — e.g. send, publish, spend, delete, credential access |
 
-## 3. Worker Agent — সাধারণ নিয়ম
+## 3. Worker Agent — general rules
 
-- **Allowed tools:** File read, draft write, research/search, internal note তৈরি।
-- **Allowed actions:** Research করা, draft তৈরি করা, internal report লেখা, নিজের section-এর plan সাজানো।
+- **Allowed tools:** File read, draft write, research/search, creating internal notes.
+- **Allowed actions:** Researching, creating drafts, writing internal reports, arranging its own section's plan.
 - **Forbidden actions:**
-  - External email / DM / message পাঠানো
-  - Social post publish করা
-  - টাকা খরচ করা, payment করা, refund দেওয়া
-  - File / record / repo delete করা
-  - Production Vapi agent deploy বা বদলানো
-  - Credential, password, API key দেখা বা ব্যবহার করা
-  - Client-এর সাথে সরাসরি যোগাযোগ করা
-  - Price quote করা
+  - Sending external email / DM / message
+  - Publishing a social post
+  - Spending money, paying, giving a refund
+  - Deleting a file / record / repo
+  - Deploying or changing a production Vapi agent
+  - Seeing or using a credential, password, API key
+  - Contacting a client directly
+  - Quoting a price
 
-## 4. Manager Agent — সাধারণ নিয়ম
+## 4. Manager Agent — general rules
 
-- **Allowed tools:** Worker agent-দের delegate করা, draft review করা, plan তৈরি করা, internal report লেখা।
-- **Allowed actions:** Plan করা, delegate করা, draft তৈরি ও review করা, Boss-এর কাছে approval-এর জন্য পাঠানো।
+- **Allowed tools:** Delegating to worker agents, reviewing drafts, creating plans, writing internal reports.
+- **Allowed actions:** Planning, delegating, creating and reviewing drafts, sending to Boss for approval.
 - **Forbidden actions:**
-  - Gated action নিজে execute করা (send / publish / spend / delete / deploy)
-  - ApprovalGateway bypass করা
-  - Worker-কে gated action করতে বলা
-  - Credential access করা
-  - Pricing বদলানো বা quote করা
-  - Legal / tax filing করা
+  - Executing a gated action itself (send / publish / spend / delete / deploy)
+  - Bypassing ApprovalGateway
+  - Telling a worker to do a gated action
+  - Accessing a credential
+  - Changing or quoting pricing
+  - Filing legal / tax
 
-Manager-এর কাজ plan + delegate + draft — এর বেশি নয়।
+A manager's job is plan + delegate + draft — no more.
 
-## 5. 8 Manager Agent-এর Permission Table
+## 5. Permission table for the 8 manager agents
 
-সব manager-এর permission level একই ভিত্তিতে: **plan + delegate + draft; gated action → ApprovalGateway PENDING**। কোনো manager-এর আলাদা execute permission নেই।
+All managers' permission level is on the same basis: **plan + delegate + draft; gated action → ApprovalGateway PENDING**. No manager has a separate execute permission.
 
-| # | Manager Agent | Department | Permission Level | Gated Action হলে কী হয় |
+| # | Manager Agent | Department | Permission Level | What happens on a gated action |
 |---|---------------|------------|------------------|------------------------|
-| 01 | Sales Manager | 01 Sales & Growth | Plan + delegate + draft | ApprovalGateway PENDING → Boss-এর gate word লাগবে |
-| 02 | Marketing Manager | 02 Marketing | Plan + delegate + draft | ApprovalGateway PENDING → Boss-এর gate word লাগবে |
-| 03 | AI Engineering Manager | 03 AI Engineering | Plan + delegate + draft | ApprovalGateway PENDING → Boss-এর gate word লাগবে |
-| 04 | Client Operations Manager | 04 Client Operations | Plan + delegate + draft | ApprovalGateway PENDING → Boss-এর gate word লাগবে |
-| 05 | Research & Strategy Manager | 05 Research & Strategy | Plan + delegate + draft | ApprovalGateway PENDING → Boss-এর gate word লাগবে |
-| 06 | Finance & Admin Manager | 06 Finance & Admin | Plan + delegate + draft | ApprovalGateway PENDING → Boss-এর gate word লাগবে |
-| 07 | Quality & Security Manager | 07 Quality & Security | Plan + delegate + draft | ApprovalGateway PENDING → Boss-এর gate word লাগবে |
-| 08 | Product & Innovation Manager | 08 Product & Innovation | Plan + delegate + draft | ApprovalGateway PENDING → Boss-এর gate word লাগবে |
+| 01 | Sales Manager | 01 Sales & Growth | Plan + delegate + draft | ApprovalGateway PENDING → Boss's gate word is needed |
+| 02 | Marketing Manager | 02 Marketing | Plan + delegate + draft | ApprovalGateway PENDING → Boss's gate word is needed |
+| 03 | AI Engineering Manager | 03 AI Engineering | Plan + delegate + draft | ApprovalGateway PENDING → Boss's gate word is needed |
+| 04 | Client Operations Manager | 04 Client Operations | Plan + delegate + draft | ApprovalGateway PENDING → Boss's gate word is needed |
+| 05 | Research & Strategy Manager | 05 Research & Strategy | Plan + delegate + draft | ApprovalGateway PENDING → Boss's gate word is needed |
+| 06 | Finance & Admin Manager | 06 Finance & Admin | Plan + delegate + draft | ApprovalGateway PENDING → Boss's gate word is needed |
+| 07 | Quality & Security Manager | 07 Quality & Security | Plan + delegate + draft | ApprovalGateway PENDING → Boss's gate word is needed |
+| 08 | Product & Innovation Manager | 08 Product & Innovation | Plan + delegate + draft | ApprovalGateway PENDING → Boss's gate word is needed |
 
-**নোট:** Agency Chief wiring Phase 2-এর কাজ — এই Phase 1-এ manager-দের উপরে Chief wiring এখনো করা হয়নি। Manager-রা Phase 1-এ সরাসরি Main CEO Bot / Boss-এর কাছে report করে।
+**Note:** Agency Chief wiring is Phase 2 work — in this Phase 1, Chief wiring above the managers has not been done yet. In Phase 1, managers report directly to Main CEO Bot / Boss.
 
-## 6. বিশেষ সীমা (Special Limits)
+## 6. Special limits
 
-- **Sales Manager:** Lead research করতে পারে, email draft করতে পারে — কিন্তু email পাঠাতে পারে না। Email outreach এখন PAUSED (2026-11-14 থেকে)। Pause উঠলেও send-এর জন্য Boss-এর gate word লাগবে।
-- **Marketing Manager:** Post draft করতে পারে — কিন্তু "post it" ছাড়া publish করতে পারে না।
-- **AI Engineering Manager:** Vapi build plan draft করতে পারে — কিন্তু production agent (Sophia, live receptionist, +1 (947) 223-0244) deploy বা বদলাতে পারে না। Production deploy শুধু Boss-এর অনুমোদনে।
-- **Finance & Admin Manager:** হিসাব draft করতে পারে — কিন্তু payment, refund, spend করতে পারে না। Spend cap $0।
-- **Quality & Security Manager:** Audit করতে পারে, সমস্যা flag করতে পারে — কিন্তু access বদলাতে বা secret rotate করতে পারে না। সেটা Boss করেন।
-- **Product & Innovation Manager:** Vet Kit idea draft করতে পারে — কিন্তু Gate 0 pass না হওয়া পর্যন্ত Vet Kit-এর কোনো live step নিতে পারে না।
+- **Sales Manager:** Can research leads, can draft emails — but cannot send email. Email outreach is now PAUSED (since 2026-11-14). Even when the pause lifts, sending needs Boss's gate word.
+- **Marketing Manager:** Can draft posts — but cannot publish without "post it".
+- **AI Engineering Manager:** Can draft a Vapi build plan — but cannot deploy or change the production agent (Sophia, live receptionist, +1 (947) 223-0244). Production deploy only with Boss's approval.
+- **Finance & Admin Manager:** Can draft accounts — but cannot pay, refund, or spend. Spend cap $0.
+- **Quality & Security Manager:** Can audit, can flag problems — but cannot change access or rotate a secret. Boss does that.
+- **Product & Innovation Manager:** Can draft a Vet Kit idea — but cannot take any live step on the Vet Kit until Gate 0 passes.
 
-## 7. Permission ভাঙলে কী হয়
+## 7. What happens if a permission is broken
 
-- কোনো agent তার permission-এর বাইরে action নেওয়ার চেষ্টা করলে, সেই action block হবে।
-- Block হওয়া action ApprovalGateway-তে PENDING হিসেবে record হবে — store/approvals.json-এ।
-- Agent নিজে block bypass করার চেষ্টা করবে না। Bypass-এর চেষ্টা Quality & Security Manager-কে জানাতে হবে।
-- Permission বদলাতে হলে Boss-এর অনুমোদন লাগবে। কোনো agent নিজের permission নিজে বাড়াতে পারবে না।
+- If any agent tries to take an action outside its permission, that action will be blocked.
+- The blocked action is recorded as PENDING in ApprovalGateway — in store/approvals.json.
+- The agent will not try to bypass the block itself. A bypass attempt must be reported to the Quality & Security Manager.
+- Changing a permission needs Boss's approval. No agent can raise its own permission itself.
 
-## 8. Credential নিয়ম (সংক্ষেপ)
+## 8. Credential rules (summary)
 
-- কোনো agent-এর কাছে password / API key / token থাকে না।
-- Key শুধু connector Secure Vault-এ থাকে।
-- Agent-এর tool call-এ key transient ভাবে ব্যবহার হয় — file-এ, prompt-এ, বা GitHub repo-তে key লেখা যাবে না।
-- বিস্তারিত `security-policy.md`-তে আছে।
+- No agent has a password / API key / token.
+- The key lives only in the connector Secure Vault.
+- In an agent's tool call the key is used transiently — a key must never be written in a file, a prompt, or a GitHub repo.
+- Details are in `security-policy.md`.

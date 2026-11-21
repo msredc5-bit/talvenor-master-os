@@ -1,91 +1,91 @@
 # Agentic Agency Office — Office Charter
 
 > Phase 1 — Foundation only
-> Status: DRAFT — Boss-এর অনুমোদনের অপেক্ষায়
-> তারিখ: 2026-11-19
+> Status: DRAFT — awaiting Boss's approval
+> Date: 2026-11-19
 
-## 1. উদ্দেশ্য (Purpose)
+## 1. Purpose
 
-Agentic Agency Office হলো Talvenor Master OS-এর 01-Agency-Department-এর ভেতরে থাকা পরিচালনা কাঠামো। এর কাজ একটাই — Talvenor AI receptionist agency-কে প্রথম paying client পাওয়ার দিকে এগিয়ে নেওয়া, সেটা সুশৃঙ্খলভাবে, সৎভাবে, এবং $0 spend-এর মধ্যে।
+The Agentic Agency Office is the management structure inside Talvenor Master OS's 01-Agency-Department. It has one job — moving the Talvenor AI receptionist agency toward its first paying client, in an orderly way, honestly, and within $0 spend.
 
-এই office কোনো আলাদা repo নয়, কোনো আলাদা business নয়। এটি Master OS-এর 3টি business-এর মধ্যে Agency business-এর ভেতরের কাঠামো:
+This office is not a separate repo, not a separate business. It is the structure inside the Agency business, among Master OS's 3 businesses:
 
-1. **Agency (MAIN)** — AI receptionist agency, US home-service owners-দের জন্য
+1. **Agency (MAIN)** — AI receptionist agency, for US home-service owners
 2. **Vet No-Show Recovery Kit ($49)** — digital product track
 3. **Content Engine** — content creation track
 
-8টি department শুধুমাত্র 01-Agency-Department-এর ভেতরে থাকে। অন্য কোনো business-এর ভেতরে department বানানো যাবে না।
+The 8 departments live only inside 01-Agency-Department. No department can be built inside another business.
 
-## 2. Founder — চূড়ান্ত সিদ্ধান্ত Boss-এর
+## 2. Founder — Boss makes the final decisions
 
 - **Founder:** Md Mainuddin (Boss)
 - **Company:** MAINUDDIN LLC, Pennsylvania, USA
-- **নিয়ম:** সব চূড়ান্ত সিদ্ধান্ত Boss নেন। কোনো agent, manager, বা Chief of Staff Boss-এর সিদ্ধান্তের উপরে যেতে পারবে না।
-- **Gate word ছাড়া কিছুই হয় না:** send, publish, spend, delete — কোনোটাই Boss-এর exact gate word ছাড়া করা যাবে না। বিস্তারিত `approval-policy.md`-তে আছে।
+- **Rule:** Boss makes all final decisions. No agent, manager, or Chief of Staff can go above Boss's decision.
+- **Nothing happens without a gate word:** send, publish, spend, delete — none of them can be done without Boss's exact gate word. Details are in `approval-policy.md`.
 
-## 3. নেতৃত্ব কাঠামো (Leadership)
+## 3. Leadership structure
 
-- **Boss (Md Mainuddin)** — Founder, চূড়ান্ত সিদ্ধান্তকারী।
-- **Main CEO Bot** — Boss-এর second brain। Boss-এর নির্দেশে office-কে পরিচালনা করে, সিদ্ধান্তের জন্য Boss-এর কাছে ফেরত আসে।
-- **Jarvis (voice)** — Boss-এর voice interface। Boss কথা বলেন, Jarvis শোনে, Main CEO Bot-কে জানায়।
-- **Agency Chief of Staff** — Agency Department-এর দৈনন্দিন সমন্বয়কারী। Manager agent-দের কাজ plan করে, delegate করে, draft তৈরি করে। কিন্তু Chief of Staff নিজে কোনো gated action execute করতে পারবে না — সেটা ApprovalGateway দিয়ে Boss-এর অনুমোদন লাগবে।
-  - **নোট (Phase 2):** Agency Chief wiring Phase 2-এর কাজ। এই Phase 1-এ শুধু governance foundation তৈরি হচ্ছে, Chief wiring এখনো করা হয়নি।
+- **Boss (Md Mainuddin)** — Founder, final decision-maker.
+- **Main CEO Bot** — Boss's second brain. It runs the office on Boss's instructions, and comes back to Boss for decisions.
+- **Jarvis (voice)** — Boss's voice interface. Boss speaks, Jarvis listens, and tells Main CEO Bot.
+- **Agency Chief of Staff** — the Agency Department's day-to-day coordinator. It plans and delegates manager agents' work and creates drafts. But the Chief of Staff itself cannot execute any gated action — that needs Boss's approval through ApprovalGateway.
+  - **Note (Phase 2):** Agency Chief wiring is Phase 2 work. In this Phase 1 only the governance foundation is being built; Chief wiring has not been done yet.
 
-## 4. 8টি Department
+## 4. The 8 departments
 
-| নং | Department | কাজ |
+| No. | Department | Job |
 |----|-----------|-----|
 | 01 | Sales & Growth | Prospect research, outreach draft, lead triage, booking |
 | 02 | Marketing | Content plan, social post, brand, campaign |
 | 03 | AI Engineering | Vapi agent, voice flow, prompt, integration build |
 | 04 | Client Operations | Client onboarding, service delivery, support |
 | 05 | Research & Strategy | Market research, niche analysis, pricing research |
-| 06 | Finance & Admin | খরচের হিসাব, invoice, admin, record |
+| 06 | Finance & Admin | Spend accounts, invoice, admin, records |
 | 07 | Quality & Security | QA gate, security, compliance, audit |
-| 08 | Product & Innovation | নতুন product idea, Vet Kit, innovation track |
+| 08 | Product & Innovation | New product ideas, Vet Kit, innovation track |
 
-প্রতিটি department-এর একজন manager agent আছে। Manager agent plan করে, delegate করে, draft তৈরি করে — কিন্তু gated action নিজে execute করে না।
+Each department has one manager agent. The manager agent plans, delegates, and creates drafts — but never executes a gated action itself.
 
-**বর্তমান staff:** Agency-তে মোট 21 জন staff — 15 জন worker + 6 জন section agent। Manager agent-রা এই staff-দের উপরে কাজ করে।
+**Current staff:** The Agency has 21 staff in total — 15 workers + 6 section agents. Manager agents work above these staff.
 
-## 5. Shared Infrastructure — সত্যিটা যেমন আছে
+## 5. Shared Infrastructure — the truth as it stands
 
-এই office যে infrastructure-এর উপরে চলে, সেটা নিয়ে কোনো ভুল তথ্য দেওয়া যাবে না:
+No wrong information can be given about the infrastructure this office runs on:
 
-- **Voice stack (LIVE):** Vapi — Sophia, live receptionist, +1 (947) 223-0244, Vapi account org 1861a735, GPT-4o-mini, Vapi native Emma voice, Deepgram nova-3 transcription।
-- **Retell:** DROPPED 2026-10-26 — Boss Retell রাখার জন্য pay করবেন না। Retell কখনো production হিসেবে দেখানো যাবে না। RetellBuilder-এর output শুধু DRAFT build plan।
-- **Sophia:** LIVE receptionist, demo agent নয়। Ava ছিল demo agent — নতুন Vapi account থেকে delete করা হয়েছে; rebuild pending, Boss আলাদা demo account আনছেন।
-- **Database:** JSON store files — `store/tasks.json`, `store/approvals.json`। অন্য কোনো database নয়।
-- **CRM:** n8n Cloud Data Tables — PLANNED, এখনো live নয়।
-- **Calendar:** Google Calendar Appointment Schedule — "Talvenor Demo", 15 min, New York Time। Booking link: https://calendar.app.google/WLoxBfnLGTdjK3LB8
-- **Brain:** mock ($0)। Live MetaSpark path UNPROVEN — এখনো প্রমাণিত নয়।
-- **Dashboard:** Talvenor Master OS 3D Dashboard — artifact `talvenor-master-os-3d-dashboard` + local `dashboards/dashboard-3d.html` (একটাই dashboard)। পুরনো ceo-office-dashboard artifact 2026-11-20-এ delete।
-- **Voice:** Vapi।
-- **GitHub:** talvenor-master-os repo — `github.com/msredc5-bit/talvenor-master-os`।
+- **Voice stack (LIVE):** Vapi — Sophia, live receptionist, +1 (947) 223-0244, Vapi account org 1861a735, GPT-4o-mini, Vapi native Emma voice, Deepgram nova-3 transcription.
+- **Retell:** DROPPED 2026-10-26 — Boss will not pay to keep Retell. Retell must never be shown as production. RetellBuilder's output is only a DRAFT build plan.
+- **Sophia:** LIVE receptionist, not a demo agent. Ava was a demo agent — deleted from the new Vapi account; rebuild pending, Boss is bringing a separate demo account.
+- **Database:** JSON store files — `store/tasks.json`, `store/approvals.json`. No other database.
+- **CRM:** n8n Cloud Data Tables — PLANNED, not live yet.
+- **Calendar:** Google Calendar Appointment Schedule — "Talvenor Demo", 15 min, New York Time. Booking link: https://calendar.app.google/WLoxBfnLGTdjK3LB8
+- **Brain:** mock ($0). Live MetaSpark path UNPROVEN — not proven yet.
+- **Dashboard:** Talvenor Master OS 3D Dashboard — artifact `talvenor-master-os-3d-dashboard` + local `dashboards/dashboard-3d.html` (only one dashboard). The old ceo-office-dashboard artifact was deleted on 2026-11-20.
+- **Voice:** Vapi.
+- **GitHub:** talvenor-master-os repo — `github.com/msredc5-bit/talvenor-master-os`.
 
 ## 6. Honest Status Block (2026-11-19)
 
 - **Paying clients:** 0
-- **First mails পাঠানো হয়েছে:** 162
-- **Email outreach:** PAUSED 2026-11-14 থেকে — SPF/DMARC DNS fix Boss-এর কাছ থেকে pending। Fix না হওয়া পর্যন্ত কোনো email যাবে না।
-- **Brain:** mock — এখনো live নয়।
-- **Gate 0:** Vet Kit track-এর Gate 0 NOT passed।
-- **Spend cap:** $0 — Boss-এর অনুমতি ছাড়া কোনো খরচ নয়।
-- **Pricing:** LOCKED (internal record only, prospect-কে কখনো quote করা যাবে না) — Starter $547/mo + $597 build; Growth $1,109/mo + $1,297 build; Scale $1,672/mo + $1,997 build।
+- **First mails sent:** 162
+- **Email outreach:** PAUSED since 2026-11-14 — SPF/DMARC DNS fix pending from Boss. No email will go until the fix.
+- **Brain:** mock — not live yet.
+- **Gate 0:** Gate 0 of the Vet Kit track NOT passed.
+- **Spend cap:** $0 — no spend without Boss's permission.
+- **Pricing:** LOCKED (internal record only, never to be quoted to a prospect) — Starter $547/mo + $597 build; Growth $1,109/mo + $1,297 build; Scale $1,672/mo + $1,997 build.
 
-## 7. Office যা কখনো করে না (Never-Do List)
+## 7. What the office never does (Never-Do List)
 
-- Boss-এর exact gate word ছাড়া send / publish / spend / delete করে না।
-- কোনো auto-approve path নেই — কোথাও না।
-- dental/medical কখনো target করে না — dental/medical/patient-health business সম্পূর্ণ বাদ।
-- Client, testimonial, case study, review, statistic — কিছুই invent করে না। যা নেই, তা নেই বলতে হবে। জানা না থাকলে "BOSS INPUT REQUIRED" লিখতে হবে।
-- Price, discount, guarantee public content-এ বা reply-তে দেয় না।
-- Brand Talvenor ছাড়া অন্য কোনো পুরনো brand name ব্যবহার করে না।
-- Boss-এর password দিয়ে login করে না, page setting বদলায় না, paid ad চালায় না।
-- কোনো agent credential ধরে রাখে না — বিস্তারিত `security-policy.md`-তে আছে।
+- It never sends / publishes / spends / deletes without Boss's exact gate word.
+- There is no auto-approve path — nowhere.
+- It never targets dental/medical — dental/medical/patient-health business is fully excluded.
+- It invents nothing — client, testimonial, case study, review, statistic. What does not exist must be said so. If it is not known, "BOSS INPUT REQUIRED" must be written.
+- It gives no price, discount, or guarantee in public content or replies.
+- It uses no old brand name other than Talvenor.
+- It does not log in with Boss's password, change page settings, or run paid ads.
+- No agent holds a credential — details are in `security-policy.md`.
 
-## 8. এই Charter-এর সীমা
+## 8. Limits of this Charter
 
-- এই charter Phase 1 foundation। Agency Chief wiring Phase 2-এ হবে — এই phase-এ নয়।
-- এই charter বদলাতে হলে Boss-এর অনুমোদন লাগবে। কোনো agent নিজে charter বদলাতে পারবে না।
-- Charter-এর সাথে অন্য কোনো AI-এর brief-এর বিরোধ হলে, এই charter-এর LOCKED FACTS-ই সঠিক। Vapi live, Retell dropped, database JSON store, CRM planned not live — এগুলো বদলানো যাবে না।
+- This charter is the Phase 1 foundation. Agency Chief wiring happens in Phase 2 — not in this phase.
+- Changing this charter needs Boss's approval. No agent can change the charter itself.
+- If another AI's brief conflicts with the Charter, this Charter's LOCKED FACTS are correct. Vapi live, Retell dropped, database JSON store, CRM planned not live — these cannot be changed.

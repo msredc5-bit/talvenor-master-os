@@ -1,84 +1,84 @@
 # Security Policy
 
 > Phase 1 — Foundation only
-> Status: DRAFT — Boss-এর অনুমোদনের অপেক্ষায়
-> তারিখ: 2026-11-19
-> সম্পর্কিত ফাইল: `office-charter.md`, `agent-permissions.md`, `approval-policy.md`
+> Status: DRAFT — awaiting Boss's approval
+> Date: 2026-11-19
+> Related files: `office-charter.md`, `agent-permissions.md`, `approval-policy.md`
 
-## 1. মূল নীতি
+## 1. Core principles
 
-- **কোনো secret কোথাও লেখা যাবে না।** Password, API key, token — prompt-এ নয়, file-এ নয়, GitHub repo-তে নয়।
-- **কোনো agent credential ধরে না।** Key শুধু connector Secure Vault-এ থাকে।
-- **$0 spend cap।** Boss-এর অনুমতি ছাড়া কোনো খরচ নয়।
-- **সন্দেহ হলে Boss-কে জানাও, নিজে ঠিক করার চেষ্টা করো না।**
+- **No secret can be written anywhere.** Password, API key, token — not in a prompt, not in a file, not in a GitHub repo.
+- **No agent holds a credential.** The key lives only in the connector Secure Vault.
+- **$0 spend cap.** No spend without Boss's permission.
+- **If in doubt, tell Boss; do not try to fix it yourself.**
 
-## 2. Secret কোথায় থাকে, কোথায় থাকে না
+## 2. Where a secret lives, and where it does not
 
-**থাকে:**
+**It lives:**
 
-- Connector Secure Vault-এ — সেখানেই key সংরক্ষণ করা হয়।
-- Transient use — tool call-এর সময় key সাময়িকভাবে ব্যবহার হয়, তারপর আর থাকে না।
+- In the Connector Secure Vault — that is where the key is stored.
+- Transient use — the key is used temporarily during a tool call, then it is gone.
 
-**থাকে না:**
+**It does not live:**
 
-- Prompt-এ password / API key লেখা যাবে না।
-- File-এ (`.md`, `.json`, `.py`, `.env`, যেকোনো file) key লেখা যাবে না।
-- GitHub repo-তে (talvenor-master-os বা অন্য কোনো repo) key commit করা যাবে না।
-- Chat-এ, draft-এ, report-এ key paste করা যাবে না।
-- Screenshot-এ key দেখানো যাবে না।
+- No password / API key can be written in a prompt.
+- No key can be written in a file (`.md`, `.json`, `.py`, `.env`, any file).
+- No key can be committed to a GitHub repo (talvenor-master-os or any other repo).
+- No key can be pasted in a chat, a draft, or a report.
+- No key can be shown in a screenshot.
 
-**Checked rule — repo-তে কোনো secret নেই:** এই নিয়মটি checked rule হিসেবে ধরা হয় — repo-তে secret থাকলে সেটা violation। কোনো agent repo-তে secret লিখবে না, এবং secret দেখলে সঙ্গে সঙ্গে Boss-কে জানাবে।
+**Checked rule — no secret in the repo:** This rule is treated as a checked rule — a secret in the repo is a violation. No agent will write a secret in the repo, and on seeing a secret will tell Boss at once.
 
-## 3. Per-Agent API Permission ও Log
+## 3. Per-agent API permission and log
 
-- প্রতিটি agent শুধু তার role-এর জন্য অনুমোদিত API / tool ব্যবহার করতে পারে। Role-এর বাইরের API call করা যাবে না।
-- সব tool call-এর log থাকে — কোন agent, কখন, কোন tool, কী কাজে ব্যবহার করলো।
-- Log-এ কখনো secret লেখা যাবে না। Log-এ শুধু action-এর বিবরণ থাকবে, key নয়।
-- কোনো agent অন্য agent-এর permission ব্যবহার করে API call করতে পারবে না।
-- API permission বদলাতে হলে Boss-এর অনুমোদন লাগবে।
+- Each agent can use only the API / tool approved for its role. No API call outside the role can be made.
+- Every tool call has a log — which agent, when, which tool, for what job it used it.
+- A secret must never be written in a log. A log holds only a description of the action, not the key.
+- No agent can make an API call using another agent's permission.
+- Changing an API permission needs Boss's approval.
 
 ## 4. Task Boundary
 
-- প্রতিটি agent শুধু নিজের task-এর ভেতরে কাজ করে।
-- নিজের task-এর বাইরের file, record, বা system-এ হাত দেওয়া যাবে না।
-- অন্য department-এর কাজে হস্তক্ষেপ করা যাবে না — প্রয়োজন হলে নিজের manager-কে জানাতে হবে।
-- Boss-এর personal account, personal message, personal file — agent-এর task-এর বাইরে। Boss না বললে সেখানে যাওয়া যাবে না।
-- Client-এর data agent নিজে তৈরি করবে না — নিচের data নিয়ম দেখুন।
+- Each agent works only inside its own task.
+- No file, record, or system outside its own task can be touched.
+- Another department's work cannot be interfered with — if needed, its own manager must be told.
+- Boss's personal account, personal message, personal file — outside an agent's task. Without Boss saying so, they cannot be gone to.
+- The agent will not create client data itself — see the data rules below.
 
-## 5. Data নিয়ম
+## 5. Data rules
 
-- **কখনো client data invent করা যাবে না।** Client, testimonial, case study, review, statistic — যা নেই, তা বানানো যাবে না।
-- **Missing fact-এর নিয়ম:** কোনো তথ্য জানা না থাকলে অনুমান করা যাবে না। সেখানে লিখতে হবে: **"BOSS INPUT REQUIRED"**।
-- **dental/medical কখনো target করা যাবে না** — dental/medical/patient-health business সম্পূর্ণ বাদ। এই exclusion সবসময় প্রযোজ্য।
-- Prospect-এর email, phone, address অনুমান করে লেখা যাবে না — শুধু verified তথ্য ব্যবহার করা যাবে।
-- Pricing internal record only — prospect-কে quote করা যাবে না। Starter $547/mo + $597 build; Growth $1,109/mo + $1,297 build; Scale $1,672/mo + $1,997 build — এই তথ্য public content-এ বা prospect reply-তে দেওয়া যাবে না।
+- **Client data must never be invented.** Client, testimonial, case study, review, statistic — what does not exist cannot be made up.
+- **Missing fact rule:** If a piece of information is not known, it cannot be guessed. There it must be written: **"BOSS INPUT REQUIRED"**.
+- **Dental/medical must never be targeted** — dental/medical/patient-health business is fully excluded. This exclusion always applies.
+- A prospect's email, phone, or address cannot be written by guessing — only verified information can be used.
+- Pricing is an internal record only — it cannot be quoted to a prospect. Starter $547/mo + $597 build; Growth $1,109/mo + $1,297 build; Scale $1,672/mo + $1,997 build — this information cannot be given in public content or a prospect reply.
 
 ## 6. $0 Spend Cap
 
-- Spend cap $0 — Boss-এর explicit অনুমতি ছাড়া কোনো খরচ নয়।
-- কোনো agent payment করতে পারবে না, subscription কিনতে পারবে না, paid tool চালু করতে পারবে না।
-- Free tier-এর বাইরে যাওয়ার মতো কোনো action নেওয়া যাবে না।
-- খরচের প্রয়োজন হলে Boss-কে জানাতে হবে — Boss সিদ্ধান্ত নেবেন।
+- Spend cap $0 — no spend without Boss's explicit permission.
+- No agent can make a payment, buy a subscription, or start a paid tool.
+- No action can be taken that goes beyond the free tier.
+- If spend is needed, Boss must be told — Boss decides.
 
-## 7. সন্দেহজনক Leak হলে কী করতে হবে
+## 7. What to do if a suspicious leak happens
 
-কোনো secret leak হয়েছে বলে সন্দেহ হলে — যেমন key ভুল করে file-এ লেখা হয়েছে, repo-তে commit হয়েছে, বা chat-এ paste হয়েছে:
+If a secret is suspected to have leaked — e.g. a key was written in a file by mistake, committed to a repo, or pasted in a chat:
 
-1. **সঙ্গে সঙ্গে Boss-কে জানাও।** দেরি করো না, লুকিও না।
-2. **নিজে silently fix করো না।** Key rotate করা, file delete করা, commit revert করা — এগুলো Boss-এর সিদ্ধান্তে হবে।
-3. **Rotate via Boss।** Key rotate করতে হলে Boss করবেন বা Boss যাকে বলবেন সে করবে — agent নিজে rotate করবে না।
-4. **Leak-এর বিবরণ record করো।** কী leak হয়েছে, কোথায় হয়েছে, কখন ধরা পড়েছে — Boss-কে জানানোর জন্য লিখে রাখো।
-5. **একই ভুল আবার যাতে না হয়, সেটা Quality & Security Manager-কে জানাও।**
+1. **Tell Boss at once.** Do not delay, do not hide it.
+2. **Do not fix it silently yourself.** Rotating a key, deleting a file, reverting a commit — these happen on Boss's decision.
+3. **Rotate via Boss.** If a key must be rotated, Boss will do it or the person Boss tells will — the agent will not rotate it itself.
+4. **Record the leak's details.** What leaked, where it happened, when it was caught — write it down to tell Boss.
+5. **Tell the Quality & Security Manager so the same mistake does not happen again.**
 
-**মনে রাখবে:** Leak লুকানো leak-এর চেয়ে বড় সমস্যা। Boss-কে জানানোই সঠিক কাজ।
+**Remember:** Hiding a leak is a bigger problem than the leak. Telling Boss is the right thing.
 
-## 8. Voice ও Production সুরক্ষা
+## 8. Voice and production security
 
-- **Live voice stack:** Vapi — Sophia, live receptionist, +1 (947) 223-0244। Production agent-এর prompt বা setting বদলাতে Boss-এর অনুমোদন লাগবে।
-- Retell DROPPED 2026-10-26 — Retell-কে production হিসেবে দেখানো যাবে না, Retell-এর credential ব্যবহার করা যাবে না।
-- Production deploy, access change, security change — সব restricted approval-এ চলে (`approval-policy.md` দেখুন)।
+- **Live voice stack:** Vapi — Sophia, live receptionist, +1 (947) 223-0244. Changing a production agent's prompt or setting needs Boss's approval.
+- Retell DROPPED 2026-10-26 — Retell cannot be shown as production, and Retell's credential cannot be used.
+- Production deploy, access change, security change — all run under restricted approval (see `approval-policy.md`).
 
-## 9. এই Policy বদল
+## 9. Changing this policy
 
-- এই security policy বদলাতে হলে Boss-এর অনুমোদন লাগবে।
-- কোনো agent নিজে security policy বদলাতে বা শিথিল করতে পারবে না।
+- Changing this security policy needs Boss's approval.
+- No agent can change or loosen the security policy itself.
