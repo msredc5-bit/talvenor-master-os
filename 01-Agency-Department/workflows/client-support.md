@@ -1,11 +1,11 @@
 # Workflow 5 — Client Support
 
 **Department:** 04 Client Operations (+ 06 Finance & Admin — billing/reporting)
-**তারিখ:** 2026-11-19 | **Status:** READY — কিন্তু **0 client, তাই unexercised (চালানো হয়নি)।**
+**Date:** 2026-11-19 | **Status:** READY — but **0 clients, so unexercised (not run).**
 
-## Purpose (উদ্দেশ্য)
+## Purpose
 
-Live client-কে support দেওয়া, invoice করা, মাসিক report দেওয়া, আর client-কে ধরে রাখা — সব draft-first, Boss-এর gate প্রতিটা send-এ।
+Supporting a live client, invoicing, giving a monthly report, and keeping the client — all draft-first, Boss's gate on every send.
 
 ## Owner roles
 
@@ -14,53 +14,53 @@ Live client-কে support দেওয়া, invoice করা, মাসি�
 | Support Agent (`ClientSuccessAgent`) | 04 | EXISTING — support draft |
 | Invoice Management Agent (`BillingInvoiceAgent`) | 06 | EXISTING — invoice (paying client only) |
 | Financial Reporting Agent (`ReportCompiler`) | 06 | EXISTING — visible metrics only |
-| Client Reporting Agent | 04 | ROLE-ONLY |
-| Retention Agent | 04 | ROLE-ONLY — worker নেই |
-| Renewal & Upsell Agent | 04 | ROLE-ONLY — worker নেই |
+| Client Reporting Agent | 04 | EXISTING — `departments/04-client-operations/specialists/client_reporting.py` (`client_reporting`) |
+| Retention Agent | 04 | EXISTING — `departments/04-client-operations/specialists/retention.py` (`retention`) |
+| Renewal & Upsell Agent | 04 | EXISTING — `departments/04-client-operations/specialists/renewal_upsell.py` (`renewal_upsell`) |
 
-## সত্য অবস্থা
+## True status
 
-- **Paying client 0** — এই workflow এখনো কোনো real client-এ চলেনি। READY কিন্তু unexercised।
-- **Billing LOCKED pricing, internal only** — invoice-এ Boss যেটা confirm করেছেন সেটাই; prospect-কে কখনো quote নয়।
-- **Monthly reporting: visible metrics only** — যা দেখা যায় তাই; কখনো estimate/invent নয়।
+- **Paying client 0** — this workflow has not run on any real client yet. READY but unexercised.
+- **Billing LOCKED pricing, internal only** — the invoice has only what Boss confirmed; never quoted to a prospect.
+- **Monthly reporting: visible metrics only** — only what can be seen; never an estimate/invent.
 
 ## Step-by-step
 
-### ধাপ ১ — Support draft (ClientSuccessAgent)
+### Step 1 — Support draft (ClientSuccessAgent)
 
-1. Client-এর সমস্যা/প্রশ্ন পড়ুন (inbox triage থেকে আসে)।
-2. **Support reply-এর DRAFT** লিখুন — plain US English, সমস্যার সমাধান বা পরের step, একটা CTA।
-3. কোনো price, guarantee, invented সমাধান লিখবেন না। না জানলে **CLIENT INPUT REQUIRED** / Boss-কে জিজ্ঞেস করুন — guess নয়।
-4. **Gate:** reply পাঠাতে `send` লাগে — Boss-এর exact word। DRAFT only — send gate ছাড়া পাঠানো যাবে না।
+1. Read the client's problem/question (it comes from inbox triage).
+2. Write a **support reply DRAFT** — plain US English, the problem's solution or the next step, one CTA.
+3. Write no price, guarantee, or invented solution. If you do not know, **CLIENT INPUT REQUIRED** / ask Boss — no guessing.
+4. **Gate:** sending a reply needs `send` — Boss's exact word. DRAFT only — it cannot be sent without the send gate.
 
-### ধাপ ২ — Billing / invoice (BillingInvoiceAgent)
+### Step 2 — Billing / invoice (BillingInvoiceAgent)
 
-1. **Invoice শুধু paying client-এর জন্য, Boss-এর কথায়।** Client 0 — এখনো কোনো invoice বানানো হয়নি।
-2. Invoice draft-এ: tier, build fee, included minutes, month — Boss-এর confirm করা LOCKED pricing অনুযায়ী।
-3. **Gate:** invoice-তে `ok` লাগে — Boss-এর exact word।
+1. **An invoice is only for a paying client, on Boss's word.** Client 0 — no invoice has been made yet.
+2. In the invoice draft: tier, build fee, included minutes, month — per the LOCKED pricing Boss confirmed.
+3. **Gate:** an invoice needs `ok` — Boss's exact word.
 
-### ধাপ ৩ — Monthly reporting (ReportCompiler)
+### Step 3 — Monthly reporting (ReportCompiler)
 
-1. মাস শেষে **visible metrics only** দিয়ে report বানান:
-   - কত call এসেছে, কত booking হয়েছে (যদি দেখা যায়)
-   - কী ভালো চলছে, কী ঠিক করতে হবে
-2. Metric না থাকলে **"waiting-for-metrics"** লিখুন — কখনো estimate/invent নয়।
-3. **Gate:** report compile-এ gate নেই — পড়া/লেখার কাজ।
+1. At month's end, build the report with **visible metrics only**:
+   - how many calls came, how many bookings happened (if visible)
+   - what is going well, what needs fixing
+2. Without a metric, write **"waiting-for-metrics"** — never an estimate/invent.
+3. **Gate:** report compiling has no gate — reading/writing work.
 
-### ধাপ ৪ — Retention / renewal (ROLE-ONLY — worker নেই)
+### Step 4 — Retention / renewal (workers exist — DRAFT plan only)
 
-1. **Retention Agent ও Renewal & Upsell Agent ROLE-ONLY** — কোনো worker নেই।
-2. Client 0 — retention/renewal-এর কাজ এখনো শুরুই হয়নি।
-3. Client এলে: renewal-এর আগে Boss-কে জানান, draft লিখুন, Boss-এর `ok` ছাড়া কিছু পাঠাবেন না।
+1. **Workers exist for Retention Agent, Renewal & Upsell Agent, and Client Reporting Agent** (EXISTING, Phase 3, 2026-11-19) — they build DRAFT plans, send nothing.
+2. Client 0 — retention/renewal work has not started at all yet.
+3. When a client comes: tell Boss before renewal, write a draft, send nothing without Boss's `ok`.
 
 ## Honest status
 
-- Support draft worker আছে, invoice worker আছে, reporting worker আছে — কিন্তু **0 client বলে কোনোটাই real client-এ চলেনি**।
-- Retention/renewal-এর কোনো worker নেই (ROLE-ONLY)।
+- Support draft worker exists, invoice worker exists, reporting worker exists — but **because of 0 clients, none has run on a real client**.
+- Retention/renewal/reporting workers exist (EXISTING) — but because of 0 clients, none has run on a real client.
 
-## Missing inputs (যা নেই)
+## Missing inputs
 
-- **প্রথম paying client** — client ছাড়া support/billing/reporting শুরু হয় না।
-- Client-এর call/booking metrics (visible metrics ছাড়া report হয় না)।
-- Retention/renewal worker।
-- Boss-এর `send` / `ok` প্রতিটা outward step-এ।
+- **First paying client** — without a client, support/billing/reporting never starts.
+- The client's call/booking metrics (no report without visible metrics).
+- Retention/renewal workers exist (EXISTING); without a client, retention/renewal work never starts.
+- Boss's `send` / `ok` at every outward step.

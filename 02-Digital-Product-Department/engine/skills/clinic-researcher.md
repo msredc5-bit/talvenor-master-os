@@ -1,67 +1,66 @@
 # Skill: Clinic Researcher
 
-**Role:** PA vet list-কে ১০০টি যাচাই করা independent clinic-এর দিকে বাড়ানো।
-**Status: REAL work, 39/100** (2026-11-16, যাচাই করা) — বাকি 61 Gate 0-র
-পরে পূর্ণ করা হবে।
+**Role:** Grow the PA vet list toward 100 verified independent clinics.
+**Status: REAL work, 39/100** (2026-11-16, verified) — the remaining 61 will
+be completed after Gate 0.
 
 ## Target (locked facts)
 
-- **লক্ষ্য:** 100 independent vet clinic, Pennsylvania (এক state দিয়ে শুরু)।
-- **এখন আছে:** 39 clinic — লক্ষ্যের 39%। বাকি 61।
-- **কার জন্য:** Independent companion-animal vet clinic, ১–৫ vet। Corporate
-  chain নয় (ওদের central system আছে), solo mobile vet নয় (খুব ছোট)।
-- **শহর ভাগ (39):** Philadelphia 8, York 5, Lancaster 4, Allentown /
+- **Goal:** 100 independent vet clinics, Pennsylvania (starting with one state).
+- **Have now:** 39 clinics — 39% of the goal. 61 remaining.
+- **For whom:** Independent companion-animal vet clinic, 1–5 vets. Not a corporate
+  chain (they have a central system), not a solo mobile vet (too small).
+- **City breakdown (39):** Philadelphia 8, York 5, Lancaster 4, Allentown /
   Bethlehem 4, Pittsburgh / Monroeville 3, Erie 3, Scranton / Wilkes-Barre 3,
-  State College 3, Harrisburg 2, Norristown 2, Reading 1, Altoona 1।
+  State College 3, Harrisburg 2, Norristown 2, Reading 1, Altoona 1.
 
 ## Inputs
 
-- `02-Digital-Product-Department/pa-vet-list/pa-vet-clinics.csv` (39 row —
-  source, কখনো overwrite নয়, শুধু যাচাই করা row যোগ করা)
-- `02-Digital-Product-Department/pa-vet-list/README.md` (যাচাইয়ের নিয়ম)
-- Public source: clinic-এর নিজের official website (সবচেয়ে ভালো) অথবা
-  directory listing (নাম + শহর + website/phone দেখা যায়)
+- `02-Digital-Product-Department/pa-vet-list/pa-vet-clinics.csv` (39 rows —
+  source, never overwritten, only verified rows added)
+- `02-Digital-Product-Department/pa-vet-list/README.md` (verification rules)
+- Public source: the clinic's own official website (best) or a
+  directory listing (name + city + website/phone visible)
 
 ## Step-by-step method
 
-1. **নতুন শহর বাছাই** (README plan): Pittsburgh আশেপাশে, Harrisburg
-   আশেপাশে, Lehigh Valley, Bucks/Montgomery County, Pittsburgh suburbs,
-   Central PA ছোট শহর।
-2. **একটা clinic খুঁজে** official website খুলে দেখা — independent কি না,
-   family-run / woman-owned-এর মতো signal নোট করা।
-3. **Chain check — বাদ দেওয়ার তালিকা:** Banfield, VCA, Vetco/Petco,
-   BluePearl, Thrive, PetVet365, PetVet Care Centers network। Chain হলে
-   row যোগ করা যাবে না।
-4. **Field ভরা:** clinic_name, city, website, public_email, public_phone,
-   source_url। Email/phone public-এ না থাকলে **"Not publicly listed"**
-   লেখা — কিছু বানানো হয় না। 39-এর মধ্যে email আছে 8টার।
-5. **Spot-check:** নতুন row-এর website + phone official site-এর সাথে
-   মিলিয়ে দেখা (Phase 2-এ যেমন Indy Veterinary Care ও Love City Vet
-   যাচাই করা হয়েছে)।
-6. **100 পূর্ণ হলে list freeze** করা হবে (ফাইল-এ তারিখ লেখা হবে) — তারপর
-   Gate 1 → kit build → launch।
+1. **Pick a new city** (README plan): around Pittsburgh, around Harrisburg,
+   Lehigh Valley, Bucks/Montgomery County, Pittsburgh suburbs,
+   small Central PA towns.
+2. **Find a clinic** and open its official website — check whether it is
+   independent, note signals like family-run / woman-owned.
+3. **Chain check — exclusion list:** Banfield, VCA, Vetco/Petco,
+   BluePearl, Thrive, PetVet365, PetVet Care Centers network. If it is a chain,
+   no row can be added.
+4. **Fill the fields:** clinic_name, city, website, public_email, public_phone,
+   source_url. If the email/phone is not public, write **"Not publicly listed"**
+   — nothing is invented. Of the 39, 8 have an email.
+5. **Spot-check:** compare the new row's website + phone against the official site
+   (as Indy Veterinary Care and Love City Vet were verified in Phase 2).
+6. **When 100 is reached, freeze the list** (the date will be written in the file) — then
+   Gate 1 → kit build → launch.
 
 ## Output format
 
-- যাচাই করা নতুন row (CSV) + সারাংশ: মোট row সংখ্যা, নতুন শহর, কয়টার
-  email আছে / কয়টার "Not publicly listed"।
-- Output-এ শুধু যাচাই করা তথ্য — অনুমান নয়।
+- Verified new rows (CSV) + summary: total row count, new cities, how many
+  have an email / how many are "Not publicly listed".
+- The output contains only verified information — no estimates.
 
 ## Gate
 
-- List বানানোয় কোনো gate নেই — এটা নিরাপদ কাজ।
-- কিন্তু list থেকে কাউকে মেইল করতে `send` gate লাগে, আর email channel
-  এখন **PAUSED** (2026-11-14 থেকে — SPF/DMARC DNS fix pending)। কোনো
-  clinic-কে মেইল করা হয়নি, করা যাবে না।
+- Building the list has no gate — it is safe work.
+- But emailing anyone from the list needs the `send` gate, and the email channel
+  is now **PAUSED** (since 2026-11-14 — SPF/DMARC DNS fix pending). No
+  clinic has been emailed, and none can be.
 
 ## Honest limits
 
-- **39/100** — 61 বাকি। কোনো clinic-র সাথে Talvenor-এর কোনো সম্পর্ক/
-  চুক্তি নেই — এটা শুধু public তথ্যের list।
-- Contact details কখনো বানানো হয় না। Email না থাকলে "Not publicly
-  listed" — এটা gap, এটা fill করা যাবে না অনুমান দিয়ে।
-- কোনো clinic-কে দুইবার মেইল করা যাবে না (launch-এর সময়)।
-- Dental/medical কখনো target নয় — vet clinic animal care, patient-health
-  exclusion-এর বাইরে।
-- **BOSS INPUT REQUIRED:** কোনো নতুন শহর/area-তে focus করতে চান কি না —
-  না বললে README plan অনুযায়ী এগোনো হবে।
+- **39/100** — 61 remaining. Talvenor has no relationship/
+  agreement with any clinic — this is only a list of public information.
+- Contact details are never invented. If there is no email, "Not publicly
+  listed" — that is a gap, it cannot be filled with a guess.
+- No clinic can be emailed twice (at launch time).
+- Dental/medical is never a target — a vet clinic is animal care, outside the
+  patient-health exclusion.
+- **BOSS INPUT REQUIRED:** whether he wants to focus on any new city/area —
+  if he does not say so, work proceeds per the README plan.

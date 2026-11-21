@@ -1,80 +1,80 @@
 # Workflow 2 — Sales Outreach
 
 **Department:** 01 Sales & Growth
-**তারিখ:** 2026-11-19 | **Status:** ⛔ PAUSED — draft only (2026-11-14 থেকে, Boss-এর নির্দেশ)।
+**Date:** 2026-11-19 | **Status:** ⛔ PAUSED — draft only (since 2026-11-14, Boss's order).
 
-## Purpose (উদ্দেশ্য)
+## Purpose
 
-Tier 1/2 lead-দের কাছে personalized email + Instagram DM পাঠিয়ে Talvenor AI receptionist-এর কথা জানানো আর 15-min demo call-এ booking নেওয়া — কোনো price quote ছাড়া, কোনো pressure ছাড়া।
+Telling Tier 1/2 leads about the Talvenor AI receptionist with personalized email + Instagram DM, and taking bookings for a 15-min demo call — no price quote, no pressure.
 
 ## Owner roles
 
 | Role | Dept | Status |
 |---|---|---|
-| Email Outreach Agent (`OutreachDrafter`) | 01 | EXISTING — draft লেখে মাত্র, কখনো পাঠায় না |
+| Email Outreach Agent (`OutreachDrafter`) | 01 | EXISTING — only writes drafts, never sends |
 | Follow-up Agent (`FollowUpAgent`) | 01 | EXISTING — PARKED (100-mail rule) |
 | ReplyHandler (`reply_triage`) | 01 | EXISTING — reply triage |
 | SalesCloser / NegotiationCoach | 01 | EXISTING — close/negotiation prep (draft only) |
-| SchedulerAssistant (`schedule_help`) | 01 | EXISTING — booking link সাহায্য |
+| SchedulerAssistant (`schedule_help`) | 01 | EXISTING — booking link help |
 
-## সত্য অবস্থা (CURRENT STATE — PAUSED)
+## True status (CURRENT STATE — PAUSED)
 
-- **Email PAUSED 2026-11-14 থেকে।** কারণ: DNS fix বাকি (SPF-এ Gmail include নেই, DMARC missing)। Boss DNS panel-এ fix করলে + "check koro" বললে তবেই restart।
-- **প্রথম মেইল 162** — PA 39, TX 15, GA 16, FL 54, CA 14, NC 5, IL 9, MI 5, OH 1, NY 4।
-- **Day 4 / Day 5 / Day 6 draft — 25টা করে READY, পাঠানো হয়নি।** Pause উঠলে Boss যেটা বলবেন সেটাই যাবে।
-- **Follow-up rule (standing, 2026-11-10):** কোনো state-এ 100টা প্রথম মেইল complete না হওয়া পর্যন্ত ওই state-এর কোনো follow-up নয়। কোনো state-ই 100-তে নেই (FL ceiling 98 — 100-তে পৌঁছাতে পারবে না)। তাই follow-up **PARKED**।
-- **IG DM: 5–10/day** via `@talvenor_ai` — Boss-এর approval tap লাগে।
-- **n8n auto-send READY, LIVE নয়** — Boss-এর import + 1টা test মেইল বাকি।
+- **Email PAUSED since 2026-11-14.** Reason: DNS fix pending (SPF has no Gmail include, DMARC missing). Restart only once Boss fixes it in the DNS panel + says "check koro".
+- **First mail 162** — PA 39, TX 15, GA 16, FL 54, CA 14, NC 5, IL 9, MI 5, OH 1, NY 4.
+- **Day 4 / Day 5 / Day 6 drafts — 25 each READY, not sent.** Once the pause lifts, what Boss says goes.
+- **Follow-up rule (standing, 2026-11-10):** no follow-up for a state until 100 first mails are complete in that state. No state is at 100 (FL ceiling 98 — it cannot reach 100). So follow-up is **PARKED**.
+- **IG DM: 5–10/day** via `@talvenor_ai` — needs Boss's approval tap.
+- **n8n auto-send READY, not LIVE** — Boss's import + 1 test mail pending.
 
 ## Step-by-step
 
-### ধাপ ১ — Draft লেখা (OutreachDrafter)
+### Step 1 — Writing drafts (OutreachDrafter)
 
-1. Lead-এর research notes পড়ুন (business name, owner, pain signal, angle)।
-2. **Personalized email draft** লিখুন — একটাই idea, plain US English, একটা CTA: 15-min demo call।
-3. **Demo = recorded 60-second demo video:** https://facebook.com/reel/2947321012290705/ — সবসময় "60-second demo" বলুন।
-4. Sender: `hello@talvenorai.agency` (outreach address)। `contact@talvenorai.agency` কখনো cold outreach-এ নয়।
-5. **কখনো price quote করবেন না** — pricing internal only। কেউ দাম জানতে চাইলে: short call-এ details শেয়ার করব, booking link দিন।
-6. **Gate:** draft-এ gate নেই — draft লেখা পাঠানো নয়।
+1. Read the lead's research notes (business name, owner, pain signal, angle).
+2. Write a **personalized email draft** — one idea, plain US English, one CTA: 15-min demo call.
+3. **Demo = recorded 60-second demo video:** https://facebook.com/reel/2947321012290705/ — always say "60-second demo".
+4. Sender: `hello@talvenorai.agency` (outreach address). `contact@talvenorai.agency` is never for cold outreach.
+5. **Never quote a price** — pricing is internal only. If someone asks the price: share details on a short call, give the booking link.
+6. **Gate:** a draft has no gate — writing a draft is not sending.
 
-### ধাপ ২ — Send (PAUSED — এখন এই ধাপ বন্ধ)
+### Step 2 — Send (PAUSED — this step is closed now)
 
-1. **স্বাভাবিক নিয়ম (pause না থাকলে):** 20–30টা email/day, Boss-এর exact gate word **`send`** ছাড়া কিছু পাঠানো যাবে না।
-2. **এখন:** PAUSED। কোনো মেইল যাবে না। Day 4/5/6 draft READY অবস্থায় থাকবে।
-3. n8n auto-send LIVE নয় — তাই auto-send-ও এখন হয় না।
-4. **Gate:** `send` — Boss-এর exact word। Pause থাকলে `send` বললেও পাঠানো যাবে না যতক্ষণ DNS fix verify না হয়।
+1. **Normal rule (without a pause):** 20–30 emails/day; nothing can be sent without Boss's exact gate word **`send`**.
+2. **Now:** PAUSED. No mail will go. Day 4/5/6 drafts stay READY.
+3. n8n auto-send is not LIVE — so no auto-send happens now either.
+4. **Gate:** `send` — Boss's exact word. While the pause stands, even saying `send` cannot send until the DNS fix is verified.
 
-### ধাপ ৩ — Instagram DM (5–10/day)
+### Step 3 — Instagram DM (5–10/day)
 
-1. Lead-এর Instagram account খুঁজুন; DM পাঠানোর আগে observe করুন — comment-এ কখনো pitch নয়।
-2. DM draft লিখুন (OutreachDrafter, channel = instagram) — short, personal, একটা CTA।
-3. **Gate:** Boss-এর approval tap ছাড়া DM পাঠানো যাবে না।
+1. Find the lead's Instagram account; observe before sending a DM — never pitch in a comment.
+2. Write a DM draft (OutreachDrafter, channel = instagram) — short, personal, one CTA.
+3. **Gate:** no DM can be sent without Boss's approval tap.
 
-### ধাপ ৪ — Follow-up (PARKED)
+### Step 4 — Follow-up (PARKED)
 
-1. **100-mail rule:** state-এ 100 প্রথম মেইল complete হলে তবেই ওই state-এর lead-দের follow-up।
-2. এখন কোনো state 100-তে নেই — **তাই কোনো follow-up নয়**। PA-তে 37 প্রথম মেইল।
-3. Follow-up draft (`FollowUpAgent`) লেখা থাকতে পারে, পাঠানো যাবে না।
-4. **Gate:** `send` — + 100-mail rule পূরণ।
+1. **100-mail rule:** follow-up for a state's leads only once 100 first mails are complete in that state.
+2. No state is at 100 now — **so no follow-up**. PA has 37 first mails.
+3. A follow-up draft (`FollowUpAgent`) may be written, but it cannot be sent.
+4. **Gate:** `send` — + the 100-mail rule fulfilled.
 
-### ধাপ ৫ — Reply triage (ReplyHandler)
+### Step 5 — Reply triage (ReplyHandler)
 
-1. Reply এলে triage করুন:
-   - **Decline / not interested → polite exit** — আর follow-up নয়, তর্ক নয়।
-   - **Interest / question / pricing / demo request → draft only** — reply draft লিখুন, Boss-কে দেখান, Boss-এর কথায় পাঠান। কখনো price নয় — booking link দিন: https://calendar.app.google/WLoxBfnLGTdjK3LB8
-   - **Bounce / dead address →** lead row-তে `bounced`/`dead` লিখুন, row delete করবেন না, আর মেইল করবেন না।
-2. **Zoho gap:** `hello@`-তে আসা reply Zoho-তে যায় — Elora দেখতে পায় না। **Boss-কে নিজে check করে forward করতে হয়।**
-3. **Gate:** reply পাঠাতে `send` লাগে — Boss-এর exact word।
+1. When a reply comes, triage it:
+   - **Decline / not interested → polite exit** — no more follow-up, no argument.
+   - **Interest / question / pricing / demo request → draft only** — write a reply draft, show Boss, send on Boss's word. Never a price — give the booking link: https://calendar.app.google/WLoxBfnLGTdjK3LB8
+   - **Bounce / dead address →** write `bounced`/`dead` in the lead row, do not delete the row, do not mail again.
+2. **Zoho gap:** replies to `hello@` go to Zoho — Elora cannot see them. **Boss must check and forward them himself.**
+3. **Gate:** sending a reply needs `send` — Boss's exact word.
 
 ## Honest status
 
-- Outreach **PAUSED** — draft লেখা চলছে, পাঠানো বন্ধ।
-- Follow-up **PARKED** — 100-mail rule-এ আটকে আছে।
-- Reply triage worker আছে, কিন্তু Zoho-র reply Boss forward না করলে Elora দেখতে পায় না।
+- Outreach **PAUSED** — draft writing continues, sending is stopped.
+- Follow-up **PARKED** — stuck on the 100-mail rule.
+- A reply triage worker exists, but Elora cannot see Zoho replies unless Boss forwards them.
 
-## Missing inputs (যা নেই)
+## Missing inputs
 
-- DNS fix (Boss-এর DNS panel): SPF-এ `include:_spf.google.com` + `_dmarc` record — না হলে restart নয়।
-- Boss-এর "check koro" + restart-এর কথা।
-- Zoho reply forward (Boss-এর কাজ)।
-- n8n auto-send-এর import + test (Boss-এর কাজ)।
+- DNS fix (Boss's DNS panel): `include:_spf.google.com` in SPF + `_dmarc` record — no restart without it.
+- Boss's "check koro" + word to restart.
+- Zoho reply forwarding (Boss's job).
+- n8n auto-send import + test (Boss's job).
