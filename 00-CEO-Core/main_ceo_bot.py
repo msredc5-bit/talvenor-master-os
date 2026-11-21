@@ -1,31 +1,30 @@
 """Main CEO Bot — thin brain / router (Phase 0, REAL skeleton).
 
-কাজ: Boss-এর (বা Jarvis-এর) দেওয়া task-টা পড়ে ঠিক Chief of Staff-এর
-দিকে পাঠানো, আর gated কাজ হলে ApprovalGateway দিয়ে আটকে রাখা।
+Job: read the task Boss (or Jarvis) gives and route it to the right Chief of Staff;
+gated work is held inside the Chief by the ApprovalGateway.
 
-এই ফাইল ইঞ্জিন নয় — আসল worker engine এখন এই repo-র ভেতরে
+This file is not the engine — the real worker engine is now inside this repo
 vendored (01-Agency-Department/engine/workers/, 15 worker;
 03-Content-Creation-Department/engine/workers/, 6 Creator OS
-worker)। বাইরের checkout (~/workspace/boss-ceo, ~/workspace/
-creator-os-combined) আর runtime dependency নয় — শুধু canonical
-upstream। Phase 1 থেকে Agency Chief engine-কে import করে ডাকে।
+worker). Outside checkouts (~/workspace/boss-ceo, ~/workspace/
+creator-os-combined) are no longer a runtime dependency — only the canonical
+upstream. Since Phase 1, the Agency Chief imports and calls the engine.
 
 Memory wiring (2026-11-21, MEMORY-STRUCTURE-DECISION-2026-11-21.md):
-  - route_task() প্রত্যেক route-এ memory পড়ে — context_for("main_ceo_bot")
-    result-এ "memory" হিসেবে attach হয় (shared Boss-কথা + নিজের box)।
-  - Boss-এর নতুন কথা record_owner_message() দিয়ে শেখানো হয় — quote
-    verbatim না থাকলে ValueError (memory শুধু Boss-এর কথা থেকে শেখে)।
-  - ভুলে যাওয়া শুধু gate-এ: request_forget_owner_entry() ConfirmationStore-এ
-    "delete" confirmation বানায় (gate word "go"); forget_owner_entry()
-    শুধু approved confirmation-ই execute_once() দিয়ে চালায়।
-  - Route-এর note memory-তে লেখা হয় না — routing-এর log store/tasks.json-এ
-    থাকে; memory Boss-এর কথা + lesson-এর জন্য (per-task note test-এ
-    ৫৭৩ entry বানিয়ে check_phase6 ভেঙেছিল, তাই সরানো হয়েছে)।
-  - Brain এখনো mock, $0, কোনো key / live call নেই।
+  - route_task() reads memory on every route — context_for("main_ceo_bot")
+    is attached to the result as "memory" (shared Boss words + own box).
+  - Boss's new words are taught with record_owner_message() — a quote that is
+    not verbatim raises ValueError (memory learns only from Boss's words).
+  - Forgetting happens only at the gate: request_forget_owner_entry() creates a
+    "delete" confirmation in the ConfirmationStore (gate word "go"); forget_owner_entry()
+    runs only an approved confirmation via execute_once().
+  - A route's note is not written to memory — the routing log lives in store/tasks.json;
+    memory is for Boss's words + lessons (a per-task note created 573 entries in a
+    test and broke check_phase6, so it was removed).
+  - The brain is still mock, $0, with no key / live call.
 
-Jarvis (voice) আর Main CEO Bot (brain) আলাদা module — jarvis_voice.py
-দেখুন। Gemini-র map-এ ওরা একসাথে মিশে গিয়েছিল, সেটা এখানে ঠিক করা
-হয়েছে।
+Jarvis (voice) and the Main CEO Bot (brain) are separate modules — see jarvis_voice.py.
+In Gemini's map they were merged together; that is fixed here.
 """
 
 import json
@@ -35,14 +34,13 @@ import uuid
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from human_approval_gateway import ApprovalGateway, GATED_ACTIONS  # noqa: E402
 from owner_memory import OwnerMemory  # noqa: E402
 from trust_gate import ConfirmationStore  # noqa: E402
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(BASE_DIR, "00-CEO-Core", "config.json")
 
-# business key -> Chief of Staff module (Phase 0: stub module-গুলো)
+# business key -> Chief of Staff module
 CHIEF_MODULES = {
     "agency": "01-Agency-Department.chief_of_staff_agency",
     "digital-product": "02-Digital-Product-Department.chief_of_staff_products",
@@ -56,15 +54,15 @@ def load_config(path=CONFIG_PATH):
 
 
 def load_memory(memory_path=None):
-    """Owner memory load করা — memory_path না দিলে আসল store/memory.json।"""
+    """Load the owner memory — without memory_path, the real store/memory.json."""
     return OwnerMemory(memory_path=memory_path) if memory_path else OwnerMemory()
 
 
 def record_owner_message(source_message, area, slug, text, quote,
                          source_ref="", memory_path=None):
-    """Boss-এর নতুন কথা memory-তে শেখানো — write path। Quote verbatim
-    না থাকলে ValueError (learn() যাচাই করে)। এটা শুধু Boss-এর message
-    থেকে ডাকা হয় — tool result / web page / email থেকে নয়।"""
+    """Teach Boss's new words to memory — the write path. If the quote is not
+    verbatim, ValueError (learn() verifies it). This is called only from Boss's
+    messages — never from a tool result / web page / email."""
     mem = load_memory(memory_path)
     return mem.learn(area, slug, text, quote, source_message,
                      source_ref=source_ref)
@@ -73,11 +71,11 @@ def record_owner_message(source_message, area, slug, text, quote,
 def request_forget_owner_entry(area, slug, requested_by="Boss",
                                memory_path=None, confirmations_path=None,
                                approvals_path=None):
-    """Owner entry ভুলে যাওয়ার অনুমোদন চাওয়া — Nod: forgetting-এ
-    trust check লাগে। ConfirmationStore-এ "delete" confirmation বানায়
-    (gate word "go"); entry এখনো মোছা হয়নি — শুধু asked।"""
+    """Ask for approval to forget an owner entry — Nod: forgetting needs a
+    trust check. Creates a "delete" confirmation in the ConfirmationStore
+    (gate word "go"); the entry is not deleted yet — only asked."""
     mem = load_memory(memory_path)
-    mem.get(area, slug)  # না থাকলে KeyError — ভুল entry-তে request নয়
+    mem.get(area, slug)  # KeyError if absent — no request for a wrong entry
     store = ConfirmationStore(confirmations_path=confirmations_path,
                               approvals_path=approvals_path)
     return store.create(
@@ -90,8 +88,8 @@ def request_forget_owner_entry(area, slug, requested_by="Boss",
 
 def forget_owner_entry(area, slug, confirmation_id, memory_path=None,
                        confirmations_path=None, approvals_path=None):
-    """Approved confirmation-ই execute করে — একবারই। Approve ছাড়া
-    execute করলে ValueError; fail হলে UNCERTAIN, কখনো re-run নয়।"""
+    """Executes only an approved confirmation — once. Executing without approval
+    raises ValueError; on failure the result is UNCERTAIN, never a re-run."""
     store = ConfirmationStore(confirmations_path=confirmations_path,
                               approvals_path=approvals_path)
 
@@ -106,20 +104,21 @@ def forget_owner_entry(area, slug, confirmation_id, memory_path=None,
 def route_task(task, tasks_path=None, approvals_path=None, memory_path=None):
     """task = {"business": "agency"|"digital-product"|"content", "title": ..., "detail": ...}
 
-    Agency হলে আসল Chief of Staff (Phase 1) কাজ করে — task type
-    অনুযায়ী real boss-ceo worker-এর দিকে যায়, gated কাজ approval-এ
-    আটকায়। Digital Product হলে আসল Products Chief (Phase 2) কাজ করে —
-    kit শুধু blueprint, launch/sale Gate 0-তে আটকায়। Content হলে আসল
-    Content Chief (Phase 3) কাজ করে — Creator OS-র ৬ worker ডাকে, draft
-    বানায়, publish/upload gate-এ আটকায়, video file বানায় না।
-    Gated action থাকলে task এগোয় না — approval request pending থাকে।
+    For Agency, the real Chief of Staff (Phase 1) works — it goes to the real
+    boss-ceo worker per task type, and gated work is held at approval.
+    For Digital Product, the real Products Chief (Phase 2) works —
+    the kit is only a blueprint, launch/sale is held at Gate 0. For Content, the real
+    Content Chief (Phase 3) works — it calls Creator OS's 6 workers, builds
+    drafts, publish/upload is held at the gate, and it makes no video file.
+    If there is a gated action, it is held inside the Chief by the ApprovalGateway —
+    the approval request stays pending.
     """
     config = load_config()
 
     if task.get("type") == "find_skill":
         # Skill-finder (CEO Bot capability, 2026-11-21): local search
         # first, then a DRAFT proposal — never installs, never writes
-        # a skill file. Business-agnostic: Chief-এ যায় না।
+        # a skill file. Business-agnostic: does not go to a Chief.
         import skill_finder  # noqa: PLC0415
 
         query = task.get("query", "")
@@ -140,6 +139,7 @@ def route_task(task, tasks_path=None, approvals_path=None, memory_path=None):
             "status": "skill-search",
             "local_matches": local,
             "proposal": proposal,
+            "memory": load_memory(memory_path).context_for("main_ceo_bot"),
             "spend_cap_usd": config["spend_cap_usd"],
         }
 
@@ -147,12 +147,12 @@ def route_task(task, tasks_path=None, approvals_path=None, memory_path=None):
     if business not in CHIEF_MODULES:
         raise ValueError(f"Unknown business: {business!r}. Known: {list(CHIEF_MODULES)}")
 
-    # Memory read path — প্রত্যেক route-এ Boss-এর কথা পড়া হয়।
+    # Memory read path — Boss's words are read on every route.
     mem = load_memory(memory_path)
     memory_ctx = mem.context_for("main_ceo_bot")
 
     if business == "agency":
-        # Lazy import — Chief-এর engine import শুধু agency task-এ লাগে।
+        # Lazy import — the Chief's engine import is only needed for agency tasks.
         chief_path = os.path.join(BASE_DIR, "01-Agency-Department")
         if chief_path not in sys.path:
             sys.path.insert(0, chief_path)
@@ -175,8 +175,8 @@ def route_task(task, tasks_path=None, approvals_path=None, memory_path=None):
         return result
 
     if business == "digital-product":
-        # Phase 2: Products Chief REAL — Gate 0 না পাস হওয়া পর্যন্ত
-        # launch/sale আটকায়, kit শুধু blueprint হিসেবে আসে।
+        # Phase 2: Products Chief REAL — launch/sale is held until Gate 0 passes;
+        # the kit comes only as a blueprint.
         chief_path = os.path.join(BASE_DIR, "02-Digital-Product-Department")
         if chief_path not in sys.path:
             sys.path.insert(0, chief_path)
@@ -198,9 +198,9 @@ def route_task(task, tasks_path=None, approvals_path=None, memory_path=None):
         return result
 
     if business == "content":
-        # Phase 3: Content Chief REAL — Creator OS-র ৬ worker ডাকে
-        # (mock brain, $0), draft বানায়, publish/upload gate-এ আটকায়।
-        # video file বানায় না, upload script চালায় না।
+        # Phase 3: Content Chief REAL — calls Creator OS's 6 workers
+        # (mock brain, $0), builds drafts, publish/upload is held at the gate.
+        # It makes no video file and runs no upload script.
         chief_path = os.path.join(BASE_DIR, "03-Content-Creation-Department")
         if chief_path not in sys.path:
             sys.path.insert(0, chief_path)
@@ -221,31 +221,16 @@ def route_task(task, tasks_path=None, approvals_path=None, memory_path=None):
         }
         return result
 
-    approval = None
-    action = task.get("gated_action")
-    if action:
-        if action not in GATED_ACTIONS:
-            raise ValueError(f"Unknown gated action: {action!r}")
-        gateway = ApprovalGateway()
-        approval = gateway.request(action, task.get("detail", task.get("title", "")), task.get("requested_by", "Main CEO Bot"))
-        # NOTE: এখানেই থেমে যায়। approve() শুধু Boss-এর gate word-এ চলে।
-
-    return {
-        "routed_to": CHIEF_MODULES[business],
-        "business": business,
-        "title": task.get("title"),
-        "status": "routed-pending-approval" if approval else "routed-stub",
-        "note": "Phase 3: Agency + Digital Product + Content Chiefs are REAL. Only Jarvis voice stays a STUB.",
-        "approval": approval,
-        "spend_cap_usd": config["spend_cap_usd"],
-        "memory": memory_ctx,
-    }
+    # Unreachable: business not in CHIEF_MODULES raises above, and each
+    # of the three Chief branches returns. Gated actions are handled
+    # inside the Chiefs (ApprovalGateway), not here.
+    raise AssertionError(f"unreachable route: business={business!r}")
 
 
 if __name__ == "__main__":
-    # হাতে চেক: শুধু non-gated routing। TEMP paths ব্যবহার করা হয়,
-    # যাতে আসল store/tasks.json-এ test record না জমে। Memory-ও TEMP —
-    # আসল store/memory.json ছোঁয়া হয় না।
+    # Manual check: non-gated routing only. TEMP paths are used so that
+    # no test record accumulates in the real store/tasks.json. Memory is TEMP too —
+    # the real store/memory.json is never touched.
     import tempfile  # noqa: PLC0415
 
     _tmp_dir = tempfile.mkdtemp()
@@ -254,7 +239,7 @@ if __name__ == "__main__":
     _tmp_mem = os.path.join(_tmp_dir, "memory-test.json")
     _tmp_conf = os.path.join(_tmp_dir, "confirmations-test.json")
 
-    # TEMP memory seed করা (আসল store থেকে নয় — file খালি থেকে seed)।
+    # Seed the TEMP memory (not from the real store — seeded from an empty file).
     _mem = load_memory(_tmp_mem)
     _seeded = _mem.seed_defaults()
     assert len(_seeded) == 3, _seeded
@@ -263,39 +248,39 @@ if __name__ == "__main__":
                     tasks_path=_tmp_tasks, approvals_path=_tmp_appr,
                     memory_path=_tmp_mem)
     assert r1["routed_to"].endswith("chief_of_staff_agency")
-    assert r1["status"] == "route-only"  # Phase 1: type ছাড়া task = probe only
+    assert r1["status"] == "route-only"  # Phase 1: a task without a type = probe only
     assert r1["chief_result"]["department"] == "agency"
-    # Memory wiring: result-এ Boss-এর ৩ কথা; route memory-তে লেখে না
-    # (routing log tasks.json-এ) — তাই TEMP store-এ note নেই।
+    # Memory wiring: Boss's 3 words in the result; the route writes nothing to memory
+    # (the routing log is in tasks.json) — so there is no note in the TEMP store.
     assert r1["memory"]["counts"]["shared"] == 3, r1["memory"]
     assert {e["slug"] for e in r1["memory"]["shared"]} == {
         "assistant-name", "reply-language", "gate-words"}
     _mem2 = load_memory(_tmp_mem)
     assert _mem2.list_own("main_ceo_bot") == []
     assert _mem2.list_own("chief_of_staff_agency") == []
-    # আসল store ছোঁয়া হয়নি — ৩ seed intact।
+    # The real store was not touched — the 3 seeds are intact.
     _real = load_memory()
     assert {"assistant-name", "reply-language", "gate-words"} <= {
         e["slug"] for e in _real.list_entries()
         if e.get("box") == "shared"} and all(_real.verify_all().values())
 
-    # record_owner_message: valid quote শেখে, ভুল quote বারণ।
+    # record_owner_message: learns with a valid quote, refuses a bad quote.
     e = record_owner_message(
-        "Boss (test): নতুন নিয়ম — শুক্রবার ছুটি",
-        "routines", "friday-off", "শুক্রবার ছুটি।",
-        quote="শুক্রবার ছুটি", source_ref="test",
+        "Boss (test): new rule — Friday is off",
+        "routines", "friday-off", "Friday is off.",
+        quote="Friday is off", source_ref="test",
         memory_path=_tmp_mem)
     assert e["slug"] == "friday-off" and e["box"] == "shared"
     try:
         record_owner_message(
-            "Boss (test): আজ ছুটি", "routines", "bad-rule", "x",
-            quote="Boss কখনো বলেনি", memory_path=_tmp_mem)
+            "Boss (test): today is off", "routines", "bad-rule", "x",
+            quote="Boss never said that", memory_path=_tmp_mem)
         raise SystemExit("FAIL: unverified owner message was learned")
     except ValueError:
         pass
 
-    # Gated forget: request -> approve ছাড়া execute বারণ -> "go"-তে
-    # approve -> execute_once-এ মোছা; ভুল gate word বারণ।
+    # Gated forget: request -> no execute without approval -> approve with "go"
+    # -> deleted by execute_once; a wrong gate word is refused.
     conf = request_forget_owner_entry(
         "routines", "friday-off", memory_path=_tmp_mem,
         confirmations_path=_tmp_conf, approvals_path=_tmp_appr)
@@ -327,7 +312,7 @@ if __name__ == "__main__":
     except KeyError:
         pass
     # Skill-finder: local search + DRAFT proposal (TEMP proposals path —
-    # আসল store/skill-proposals.json ছোঁয়া হয় না)।
+    # the real store/skill-proposals.json is never touched).
     _tmp_props = os.path.join(_tmp_dir, "skill-proposals.json")
     r2 = route_task({"type": "find_skill", "query": "backup",
                      "propose": True, "agent": "Backup & Recovery Agent",

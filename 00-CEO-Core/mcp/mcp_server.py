@@ -17,7 +17,9 @@ must go through the ApprovalGateway, never through MCP.
 Environment (optional — defaults are the real store paths):
   TALVENOR_MCP_APPROVALS   — approvals JSON path for gated calls
   TALVENOR_MCP_CALLS_LOG   — tool-calls log path
-Set both to TEMP paths in tests so the real store stays untouched.
+  TALVENOR_MCP_LEDGER      — usage-ledger path ($0 receipts; every
+                             call_tool call writes one receipt here)
+Set all three to TEMP paths in tests so the real store stays untouched.
 
 Stdlib only. Run: python3 00-CEO-Core/mcp/mcp_server.py
 """
@@ -33,6 +35,7 @@ import tool_calling  # noqa: E402
 BASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 TOOLS_JSON = os.path.join(BASE, "00-CEO-Core", "tools.json")
 CONFIG_JSON = os.path.join(BASE, "00-CEO-Core", "config.json")
+DEFAULT_LEDGER_PATH = os.path.join(BASE, "store", "usage_ledger.json")
 
 PROTOCOL_VERSION = "2024-11-05"
 
@@ -110,7 +113,9 @@ def handle(request, registry):
         result = tool_calling.call_tool(
             name, arguments, registry=registry,
             approvals_path=os.environ.get("TALVENOR_MCP_APPROVALS"),
-            calls_log_path=os.environ.get("TALVENOR_MCP_CALLS_LOG"))
+            calls_log_path=os.environ.get("TALVENOR_MCP_CALLS_LOG"),
+            ledger_path=os.environ.get("TALVENOR_MCP_LEDGER",
+                                       DEFAULT_LEDGER_PATH))
         is_error = result.get("status") == "error"
         return _result({
             "content": [{"type": "text",

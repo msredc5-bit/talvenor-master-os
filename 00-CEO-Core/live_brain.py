@@ -1,35 +1,36 @@
-"""Live Brain adapter — Phase 10. Brain-কে mock থেকে real-এ নেওয়ার adapter।
+"""Live Brain adapter — Phase 10. The adapter that takes the brain from mock to real.
 
-কাজ: Main CEO Bot-এর brain যখন config-এ "live", তখন এই adapter
-vendored MetaSparkProvider (Muse Spark, api.meta.ai) দিয়ে আসল
-complete() call করে। কোনো call fail করলে (credential নেই, timeout,
-403/401, non-200, API error) adapter চুপচাপ live সাজে না — LOUD
-fallback: stderr-এ কারণ লিখে department-এর নিজের mock brain দিয়ে
-draft ফেরত দেয়। এক call = এক attempt, কখনো retry loop নয়।
+Job: when the Main CEO Bot's brain is "live" in config, this adapter
+makes the real complete() call via the vendored MetaSparkProvider
+(Muse Spark, api.meta.ai). If any call fails (no credential, timeout,
+403/401, non-200, API error) the adapter never silently pretends to be
+live — LOUD fallback: it writes the reason to stderr and returns a
+draft from the department's own mock brain. One call = one attempt, never
+a retry loop.
 
-Credential: key কখনো এই file-এ নেই। MetaSparkProvider key নেয় শুধু
-connector Secure Vault surrogate দিয়ে (custom.meta-model-api-2,
-dynamic_credentials) — real key file/env/argument/log-এ কখনো আসে না।
-Adapter construction-এ কোনো network I/O নেই (provider শুধু
-model/timeout store করে) — network শুধু complete() call-এ।
+Credential: the key is never in this file. MetaSparkProvider takes the key only
+via the connector Secure Vault surrogate (custom.meta-model-api-2,
+dynamic_credentials) — the real key never appears in a file/env/argument/log.
+Adapter construction performs no network I/O (a provider only stores
+model/timeout) — network happens only in a complete() call.
 
-Interface: provider-দের মতোই — complete(prompt, *, max_tokens) -> str,
-health() -> dict। দুই department-এর mock-ই fallback হিসেবে চলে
-(agency MockLLMProvider, content MockLLM) — Chief-দের call site
-বদলাতে হয় না। Body (office, worker, tool, dashboard, gate) ছোঁয়া
-হয় না — শুধু brain-এর ভাবনা live হয়।
+Interface: the same as the providers — complete(prompt, *, max_tokens) -> str,
+health() -> dict. Both departments' mocks work as fallback
+(agency MockLLMProvider, content MockLLM) — the Chiefs' call sites
+do not change. The body (office, worker, tool, dashboard, gate) is never
+touched — only the brain's thinking goes live.
 
-Phase 11 — provider chain: adapter এখন একটা provider নয়, config-এর
-fallback_chain অনুযায়ী একটার পর একটা provider চেষ্টা করে
-(openrouter -> meta -> ... -> mock)। প্রতিটা provider একই interface
-— complete(prompt, *, max_tokens) -> str — তাই যেকোনো vendor-এর
-যেকোনো chat model বসানো যায়, শুধু নাম বদলে। Provider registry নিচে
-(PROVIDER_MODULES): module + class + default model। Key-র নিয়ম
-প্রতিটা provider file-এ একই — env var থেকে (Meta শুধু connector
-surrogate দিয়ে)। Chain-এর কোনো provider-ই construction-এ network
-করে না; key পড়া হয় শুধু complete()-এ।
+Phase 11 — provider chain: the adapter is now not one provider; it tries
+providers one after another per config's fallback_chain
+(openrouter -> meta -> ... -> mock). Every provider has the same interface
+— complete(prompt, *, max_tokens) -> str — so any vendor's
+any chat model can be fitted, just by changing the name. The provider registry
+is below (PROVIDER_MODULES): module + class + default model. The key rule is
+the same in every provider file — from an env var (Meta only via the connector
+surrogate). No provider in the chain does network at construction;
+the key is read only in complete().
 
-Stdlib only (+ dynamic_credentials, connector helper) — কোনো pip নেই।
+Stdlib only (+ dynamic_credentials, connector helper) — no pip.
 """
 
 import importlib
@@ -43,12 +44,12 @@ AGENCY_WORKERS_DIR = os.path.join(
 
 MODEL = "muse-spark-1.3"
 
-# Phase 11 — provider registry: key -> (module, class)।
-# Module-গুলো 01-Agency-Department/engine/workers/src/live/-এ থাকে,
-# _load_module দিয়ে "src.live.<name>_provider" হিসেবে load হয়।
-# Key-র নিয়ম প্রতিটা provider file-এ লেখা (env var; Meta শুধু
-# connector surrogate)। config.json-এর providers section-এ একই
-# তথ্য declarative ভাবে থাকে — check_providers.py দুটো মেলায়।
+# Phase 11 — provider registry: key -> (module, class).
+# The modules live in 01-Agency-Department/engine/workers/src/live/,
+# loaded as "src.live.<name>_provider" via _load_module.
+# The key rule is written in each provider file (env var; Meta only via the
+# connector surrogate). The same information lives declaratively in
+# config.json's providers section — check_providers.py matches the two.
 PROVIDER_MODULES = {
     "meta": ("src.live.meta_provider", "MetaSparkProvider"),
     "openai": ("src.live.openai_provider", "OpenAIProvider"),
@@ -59,7 +60,7 @@ PROVIDER_MODULES = {
     "openrouter": ("src.live.openrouter_provider", "OpenRouterProvider"),
 }
 
-# প্রতিটা provider-এর default model — config-এ model না দিলে এটা চলে।
+# Each provider's default model — used when config gives no model.
 DEFAULT_MODELS = {
     "meta": "muse-spark-1.3",
     "openai": "gpt-4o",
@@ -72,10 +73,10 @@ DEFAULT_MODELS = {
 
 
 def load_provider(name, model=None, timeout=90):
-    """একটা provider construct করো — কোনো network I/O নেই।
+    """Construct one provider — no network I/O.
 
-    name: registry key ("meta" | "openai" | ... )। model: None হলে
-    DEFAULT_MODELS[name]। Unknown name -> ValueError।
+    name: registry key ("meta" | "openai" | ... ). model: if None,
+    DEFAULT_MODELS[name]. Unknown name -> ValueError.
     """
     key = str(name).strip().lower()
     if key not in PROVIDER_MODULES:
@@ -88,18 +89,24 @@ def load_provider(name, model=None, timeout=90):
 
 
 def build_provider_chain(cfg, timeout=90):
-    """config থেকে live provider chain বানাও — কোনো network I/O নেই।
+    """Build the live provider chain from config — no network I/O.
 
-    cfg: config.json-এর dict (বা {} — তখন default ["meta"])।
-    fallback_chain-এর প্রতিটা entry "provider" বা "provider:model"
-    (model-এ ":" থাকতে পারে, যেমন openrouter:nvidia/...:free — তাই
-    প্রথম ":"-এই split)। "mock" entry chain-এর শেষ — ওটা provider
-    নয়, adapter-এর implicit fallback, তাই এখানে skip করা হয়।
-    Chain খালি হলে RuntimeError (কোনো live provider নেই)।
+    cfg: config.json's dict (or {} — then the default ["meta"]).
+    Each fallback_chain entry is "provider" or "provider:model"
+    (the model may contain ":", e.g. openrouter:nvidia/...:free — so
+    split on the first ":"). A "mock" entry is the end of the chain — it is not a
+    provider, it is the adapter's implicit fallback, so it is skipped here.
+    An empty chain raises RuntimeError (no live provider).
+    If config's providers[name].enabled == false, that entry is skipped
+    (2026-11-21 — the flag used to be decorative: openrouter was tried first
+    in the chain even while disabled). If there is no providers section
+    or the name is absent, the entry runs (the old behaviour) — only an
+    explicit false skips it. Nothing changes for the mock brain.
     """
     if not isinstance(cfg, dict):
         cfg = {}
     chain_spec = cfg.get("fallback_chain") or [cfg.get("brain_provider", "meta")]
+    providers_cfg = cfg.get("providers") or {}
     providers = []
     for entry in chain_spec:
         if not isinstance(entry, str):
@@ -109,6 +116,9 @@ def build_provider_chain(cfg, timeout=90):
         name = name.strip().lower()
         if name == "mock":
             continue
+        entry_cfg = providers_cfg.get(name)
+        if isinstance(entry_cfg, dict) and entry_cfg.get("enabled") is False:
+            continue  # disabled provider — dropped from the chain
         providers.append(
             load_provider(name, model.strip() or None, timeout=timeout))
     if not providers:
@@ -120,11 +130,11 @@ def build_provider_chain(cfg, timeout=90):
 
 
 def _load_module(workers_dir, dotted_name):
-    """brain.py-র _load_module-এর copy (circular import এড়াতে এখানে)।
+    """A copy of brain.py's _load_module (here to avoid a circular import).
 
-    Vendored tree-গুলো top-level `src` package share করে, তাই এক
-    process-এ একসময় এক department-এর `src`-ই থাকতে পারে। চাওয়া
-    dir-এর `src` না থাকলে stale `src` evict করে নতুনটা load করা হয়।
+    The vendored trees share a top-level `src` package, so in one
+    process only one department's `src` can exist at a time. If the wanted
+    dir's `src` is not loaded, the stale `src` is evicted and the new one loaded.
     """
     src_pkg = sys.modules.get("src")
     if src_pkg is not None:
@@ -142,26 +152,26 @@ def _load_module(workers_dir, dotted_name):
 
 
 class LiveBrainAdapter:
-    """Live brain + loud mock fallback — একটাই interface, দুই mode।
+    """Live brain + loud mock fallback — one interface, two modes.
 
-    mode: "live" (শেষ call live-এ সফল) বা "mock-fallback" (শেষ call
-    live-এ fail করে mock draft ফেরত গেছে)। last_failure-এ fail-এর
-    কারণ থাকে — কখনো খালি/চাপা নয়।
+    mode: "live" (the last call succeeded live) or "mock-fallback" (the last call
+    failed live and a mock draft was returned). last_failure holds the failure's
+    reason — never empty/suppressed.
 
-    Phase 11: adapter এখন provider CHAIN নেয় — complete() chain-এর
-    প্রতিটা provider একটার পর একটা চেষ্টা করে; সব fail করলে তবেই
-    mock fallback। live_provider (একটা) দিলে chain=[সেটা] — পুরনো
-    call site অপরিবর্তিত।
+    Phase 11: the adapter now takes a provider CHAIN — complete() tries each
+    provider in the chain one after another; only if all fail does it
+    fall back to mock. Giving one live_provider makes chain=[that one] — old
+    call sites unchanged.
     """
 
     name = "live-brain-adapter"
 
     def __init__(self, mock_brain, live_provider=None, live_providers=None,
                  timeout=90):
-        """mock_brain: department-এর নিজের mock (fallback-এর জন্য)।
-        live_provider: একটা provider inject করা যায় (test-এ);
-        live_providers: chain (list) দিলে সেটাই চলে; দুটোই না দিলে
-        vendored MetaSparkProvider construct হয় (কোনো network I/O নেই)।"""
+        """mock_brain: the department's own mock (for fallback).
+        live_provider: one provider can be injected (in tests);
+        live_providers: if a chain (list) is given, that runs; if neither is given,
+        the vendored MetaSparkProvider is constructed (no network I/O)."""
         self.mock_brain = mock_brain
         if live_providers is not None:
             if not live_providers:
@@ -181,14 +191,14 @@ class LiveBrainAdapter:
         self.fallback_calls = 0
 
     def complete(self, prompt, *, max_tokens=500):
-        """এক attempt প্রতি provider: chain ঘুরে প্রথম সফল উত্তর নেয়;
-        সব fail করলে LOUD fallback to mock।"""
+        """One attempt per provider: walks the chain and takes the first successful
+        answer; if all fail, LOUD fallback to mock."""
         self.calls += 1
         errors = []
         for provider in self.live_chain:
             try:
                 text = provider.complete(prompt, max_tokens=max_tokens)
-            except Exception as exc:  # noqa: BLE001 — পরের provider চেষ্টা
+            except Exception as exc:  # noqa: BLE001 — try the next provider
                 pname = getattr(provider, "name",
                                 type(provider).__name__)
                 errors.append(f"{pname}: {type(exc).__name__}: {exc}")
@@ -211,10 +221,10 @@ class LiveBrainAdapter:
         return self.mock_brain.complete(prompt)
 
     def health(self):
-        """Adapter-এর সত্য অবস্থা — mode, call count, শেষ fail-এর কারণ।"""
+        """The adapter's true state — mode, call count, the last failure's reason."""
         try:
             mock_health = self.mock_brain.health()
-        except Exception:  # noqa: BLE001 — mock health কখনো adapter-কে ভাঙবে না
+        except Exception:  # noqa: BLE001 — mock health must never break the adapter
             mock_health = {"provider": "unknown"}
         return {
             "provider": self.name,
@@ -234,8 +244,8 @@ class LiveBrainAdapter:
 
 
 if __name__ == "__main__":
-    # হাতে চেক: adapter construct হয়, কোনো network call হয় না।
-    # (complete() ডাকা হয় না — সেটা live probe-এর কাজ।)
+    # Manual check: the adapter constructs, no network call happens.
+    # (complete() is not called — that is the live probe's job.)
     _mod = _load_module(AGENCY_WORKERS_DIR, "src.mock.provider")
     _mock = _mod.MockLLMProvider(seed="master-os-phase1")
     adapter = LiveBrainAdapter(mock_brain=_mock)

@@ -1,4 +1,4 @@
-"""Skill-finder — Main CEO Bot-এর skill খোঁজার ক্ষমতা (REAL, 2026-11-21).
+"""Skill-finder — the Main CEO Bot's skill-finding ability (REAL, 2026-11-21).
 
 Adapted from two upstream skill-finders (read-only reference, no code
 copied — their text was read, their scripts/commands were NOT reproduced):
@@ -13,15 +13,15 @@ copied — their text was read, their scripts/commands were NOT reproduced):
     options; install only on approval.
 
 Talvenor rules layered on top:
-  - Local first: repo-র নিজের skills/ আগে খোঁজা হয়।
-  - $0 cap: paid skill/account নয়; brain mock — কোনো live call নয়।
-  - Draft-only: proposal লেখা যায় (store/skill-proposals.json),
-    skill file লেখা / install করা যায় না — Boss-এর "ok" লাগে।
-  - Never verbatim: বাইরের skill copy নয় — Talvenor-এর জন্য adapt।
-  - Windows: symlink নয় — adapted file copy করা হয়।
+  - Local first: the repo's own skills/ are searched first.
+  - $0 cap: no paid skill/account; brain mock — no live call.
+  - Draft-only: a proposal can be written (store/skill-proposals.json),
+    a skill file cannot be written / installed — Boss's "ok" is needed.
+  - Never verbatim: no copying an outside skill — adapt it for Talvenor.
+  - Windows: no symlink — the adapted file is copied.
 
-Stdlib only. No network — online search মানুষ (Mira) করে; এই module
-শুধু local registry search + DRAFT proposal লেখে।
+Stdlib only. No network — a human (Mira) does the online search; this module
+only does local registry search + writes DRAFT proposals.
 """
 
 import json
@@ -32,7 +32,7 @@ _MASTER_OS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_PROPOSALS_PATH = os.path.join(_MASTER_OS_DIR, "store",
                                       "skill-proposals.json")
 
-# Local skill roots — repo-র সব skill folder।
+# Local skill roots — all skill folders in the repo.
 SKILL_ROOTS = (
     "skills",
     "01-Agency-Department/engine/skills",
@@ -79,14 +79,14 @@ REMOTE_SOURCES = (
      "what": "skill-finder (exact name)"},
 )
 
-# find-skills quality gate (vercel): installs / reputation thresholds।
+# find-skills quality gate (vercel): installs / reputation thresholds.
 MIN_INSTALLS_PREFERRED = 1000
 MIN_INSTALLS_WARY = 100
 TRUSTED_PUBLISHERS = ("vercel-labs", "anthropics", "microsoft", "openclaw")
 
 
 def _parse_skill_file(path):
-    """একটা .md skill file থেকে নাম + এক লাইনের description।"""
+    """Name + one-line description from a .md skill file."""
     try:
         with open(path, "r", encoding="utf-8") as f:
             text = f.read()
@@ -98,7 +98,7 @@ def _parse_skill_file(path):
         if line.startswith("# "):
             title = line[2:].strip()
             break
-    # Description: প্রথম non-empty, non-heading paragraph line।
+    # Description: the first non-empty, non-heading paragraph line.
     description = ""
     for line in text.splitlines():
         s = line.strip()
@@ -115,7 +115,7 @@ def _parse_skill_file(path):
 
 
 def list_local_skills(repo_dir=None):
-    """Repo-র সব local skill file-এর registry।"""
+    """Registry of all local skill files in the repo."""
     root = repo_dir or _MASTER_OS_DIR
     found = []
     for rel in SKILL_ROOTS:
@@ -132,7 +132,7 @@ def list_local_skills(repo_dir=None):
 
 
 def find_skill_local(query, repo_dir=None):
-    """Local registry-তে keyword search — নাম + description-এ মিল।"""
+    """Keyword search in the local registry — match in name + description."""
     words = [w.lower() for w in re.findall(r"[a-z0-9][a-z0-9_-]*",
                                            (query or "").lower())]
     if not words:
@@ -149,9 +149,9 @@ def find_skill_local(query, repo_dir=None):
 
 
 def quality_gate(installs=None, stars=None, publisher="", license_id=""):
-    """find-skills verification: installs + reputation + license।
+    """find-skills verification: installs + reputation + license.
 
-    Returns (ok, reason). License MIT/Apache-2.0 ছাড়া ok নয়।
+    Returns (ok, reason). Not ok without an MIT/Apache-2.0 license.
     """
     if license_id not in ("MIT", "Apache-2.0"):
         return False, f"license {license_id!r} not allowed (MIT/Apache-2.0 only)"
@@ -168,9 +168,9 @@ def quality_gate(installs=None, stars=None, publisher="", license_id=""):
 def propose_skill(query, agent, candidate_repo, candidate_skill,
                   source_url, license_id, fit_note, why="",
                   proposals_path=None):
-    """DRAFT proposal লেখা — install নয়, skill file লেখা নয়।
+    """Write a DRAFT proposal — not an install, not writing a skill file.
 
-    Boss-এর "ok" ছাড়া proposal থেকে কিছু হয় না।
+    Without Boss's "ok", nothing comes of a proposal.
     """
     ok, reason = quality_gate(license_id=license_id)
     if not ok:
@@ -182,8 +182,8 @@ def propose_skill(query, agent, candidate_repo, candidate_skill,
         proposals = data.get("proposals", []) if isinstance(data, dict) else []
     except (FileNotFoundError, json.JSONDecodeError):
         proposals = []
-    # Dedup (2026-11-21): একই repo + একই skill দুবার proposal হয় না —
-    # আগের proposal-টাই ফেরত যায়, নতুন record লেখা হয় না।
+    # Dedup (2026-11-21): the same repo + same skill is never proposed twice —
+    # the earlier proposal is returned, no new record is written.
     for existing in proposals:
         if (existing.get("candidate_repo") == candidate_repo
                 and existing.get("candidate_skill") == candidate_skill):
@@ -212,7 +212,7 @@ def propose_skill(query, agent, candidate_repo, candidate_skill,
 
 
 def doctor(repo_dir=None):
-    """Local skill registry চেক: file পড়া যায় কি না, heading আছে কি না।"""
+    """Check the local skill registry: can files be read, do they have a heading."""
     problems = []
     skills = list_local_skills(repo_dir)
     for skill in skills:
@@ -224,7 +224,7 @@ def doctor(repo_dir=None):
 
 
 if __name__ == "__main__":
-    # হাতে চেক: TEMP paths ব্যবহার করা হয় — আসল store ছোঁয়া হয় না।
+    # Manual check: TEMP paths are used — the real store is never touched.
     import tempfile
 
     _tmp = tempfile.mkdtemp()
@@ -245,8 +245,8 @@ if __name__ == "__main__":
                        "MIT", "RPO/RTO + restore-test pattern fits Talvenor",
                        proposals_path=_tmp_props)
     assert _p["status"] == "proposed"
-    # Dedup: একই repo + skill আবার propose করলে নতুন record নয়,
-    # আগেরটাই ফেরত যায় ("duplicate": True)।
+    # Dedup: proposing the same repo + skill again writes no new record,
+    # the earlier one is returned ("duplicate": True).
     _p2 = propose_skill("backup", "Backup & Recovery Agent",
                         "makash/godmode", "backup",
                         "https://github.com/makash/godmode",

@@ -1,41 +1,49 @@
 """Human Approval Gateway — REAL, working module (Phase 0).
 
-Talvenor Master OS-এর সবচেয়ে গুরুত্বপূর্ণ নিয়ম এই ফাইলে কোড হিসেবে লেখা:
-কোনো gated কাজ (send / publish / spend / delete) Boss-এর সঠিক gate word
-ছাড়া এগোবে না। Auto-approve-এর কোনো পথ নেই — কোডেও নেই।
+The most important rule of the Talvenor Master OS is written in this file as code:
+no gated work (send / publish / spend / delete) moves forward without Boss's exact gate word.
+There is no auto-approve path — not even in the code.
 
-Gate words (Boss-এর সিদ্ধান্ত):
+Gate words (Boss's decision):
   ok       = plan / finished asset approval
   post it  = publish
   upload it = upload a video
   send     = send a message or email
   go       = advance a build phase
 
-ব্যবহার:
-  gw = ApprovalGateway()                       # store/approvals.json পড়ে
+Usage:
+  gw = ApprovalGateway()                       # reads store/approvals.json
   req = gw.request("send", "Day 4 batch - 25 emails", "OutreachDrafter")
-  # Boss "send" বললে:
+  # If Boss says "send":
   gw.approve(req["id"], gate_word="send", decided_by="Boss")
-  # Boss "না" বললে:
+  # If Boss says "no":
   gw.reject(req["id"], decided_by="Boss")
-  gw.is_approved(req["id"])  # True শুধু approve()-এর পর
+  gw.is_approved(req["id"])  # True only after approve()
 
-Status: REAL (Phase 0)। কোনো mock নয় — সিদ্ধান্ত সত্যিই approvals.json-এ লেখা হয়।
+Status: REAL (Phase 0). No mock — the decision is really written to approvals.json.
 """
 
 import json
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
-GATED_ACTIONS = ("send", "publish", "spend", "delete")
+GATED_ACTIONS = ("send", "publish", "spend", "delete", "upload")
 
-# Gate word -> যে action-টা সে অনুমোদন করে
+# Approval TTL — pending approvals expire after this many minutes.
+# Recorded chat-card expiry is ~20 minutes (MEMORY.md: approval cards
+# expire after about 20 minutes); the gateway mirrors that here so a
+# pending approval cannot live forever. Expired records are refused
+# by approve() and marked "expired" by sweep_expired().
+APPROVAL_TTL_MINUTES = 20
+
+# Gate word -> the action it approves
 GATE_WORD_FOR_ACTION = {
     "send": ("send", "পাঠাও"),
     "publish": ("post it", "post all"),
-    "spend": ("go",),          # খরচের জন্য আলাদা স্পষ্ট অনুমোদন লাগে; "go" শুধু phase এগোনোর শব্দ
+    "spend": ("go",),          # spending needs separate explicit approval; "go" is only the word for advancing a phase
     "delete": ("go",),
+    "upload": ("upload it",),
 }
 
 _STORE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "store")
@@ -46,7 +54,7 @@ def _now_iso():
 
 
 class ApprovalGateway:
-    """Gated action-এর অনুমোদন রেকর্ড করে। Auto-approve নেই।"""
+    """Records approval for a gated action. No auto-approve."""
 
     def __init__(self, approvals_path=None):
         self.approvals_path = approvals_path or os.path.join(_STORE_DIR, "approvals.json")
@@ -70,7 +78,7 @@ class ApprovalGateway:
             json.dump(payload, f, indent=2, ensure_ascii=False)
 
     def request(self, action, detail, requested_by):
-        """নতুন অনুমোদন চাওয়া। Status সবসময় 'pending' দিয়ে শুরু হয়।"""
+        """Ask for a new approval. Status always starts as 'pending'."""
         if action not in GATED_ACTIONS:
             raise ValueError(f"Unknown gated action: {action!r}. Allowed: {list(GATED_ACTIONS)}")
         record = {
@@ -89,8 +97,15 @@ class ApprovalGateway:
         return dict(record)
 
     def approve(self, approval_id, gate_word, decided_by="Boss"):
-        """Boss অনুমোদন দিলে — gate word মিলতেই হবে, নইলে ValueError।"""
+        """When Boss approves — the gate word must match, otherwise ValueError.
+        An expired record cannot be approved — sweep_expired() runs first,
+        so an old pending expires on its own."""
+        self.sweep_expired()
         record = self._find(approval_id)
+        if record["status"] == "expired":
+            raise ValueError(
+                f"Approval {approval_id} expired (TTL "
+                f"{APPROVAL_TTL_MINUTES} min) — ask Boss for a fresh approval.")
         if record["status"] != "pending":
             raise ValueError(f"Approval {approval_id} already decided: {record['status']}")
         allowed = GATE_WORD_FOR_ACTION[record["action"]]
@@ -107,7 +122,12 @@ class ApprovalGateway:
         return dict(record)
 
     def reject(self, approval_id, decided_by="Boss"):
+        self.sweep_expired()
         record = self._find(approval_id)
+        if record["status"] == "expired":
+            raise ValueError(
+                f"Approval {approval_id} already expired (TTL "
+                f"{APPROVAL_TTL_MINUTES} min).")
         if record["status"] != "pending":
             raise ValueError(f"Approval {approval_id} already decided: {record['status']}")
         record["status"] = "rejected"
@@ -121,7 +141,33 @@ class ApprovalGateway:
         return record["status"] == "approved"
 
     def pending(self):
+        self.sweep_expired()
         return [dict(r) for r in self.records if r["status"] == "pending"]
+
+    def sweep_expired(self):
+        """Mark pending records past their TTL as "expired".
+
+        TTL: APPROVAL_TTL_MINUTES from requested_at. Saves only if something
+        changed; the file is not touched if nothing changed. Returns: the list
+        of ids that expired."""
+        now = datetime.now(timezone.utc)
+        expired_ids = []
+        for record in self.records:
+            if record.get("status") != "pending":
+                continue
+            requested_at = record.get("requested_at")
+            try:
+                asked = datetime.fromisoformat(
+                    str(requested_at).replace("Z", "+00:00"))
+            except (TypeError, ValueError):
+                continue  # if the timestamp cannot be read, it is not expired
+            if now - asked > timedelta(minutes=APPROVAL_TTL_MINUTES):
+                record["status"] = "expired"
+                record["decided_at"] = now.isoformat()
+                expired_ids.append(record["id"])
+        if expired_ids:
+            self._save()
+        return expired_ids
 
     def _find(self, approval_id):
         for r in self.records:
@@ -131,7 +177,7 @@ class ApprovalGateway:
 
 
 if __name__ == "__main__":
-    # হাতে চেক: in-memory টেস্ট, আসল approvals.json ছোঁয়া হয় না।
+    # Manual check: in-memory test, the real approvals.json is never touched.
     import tempfile
 
     tmp = os.path.join(tempfile.mkdtemp(), "approvals-test.json")

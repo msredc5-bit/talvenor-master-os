@@ -12,7 +12,7 @@ What it checks (stdio only, no network, no real send):
   7. No network in the MCP files (AST scan: no socket/urllib/requests).
   8. Real store untouched by this check (snapshot before/after).
 
-The server runs as a subprocess with TEMP approvals/log paths, so the
+The server runs as a subprocess with TEMP approvals/log/ledger paths, so the
 real store is never written. Run: python3 00-CEO-Core/mcp/check_mcp.py
 """
 
@@ -49,7 +49,7 @@ def check(name, ok, detail=""):
 
 def _snapshot_store():
     snap = {}
-    for name in ("tasks.json", "approvals.json"):
+    for name in ("tasks.json", "approvals.json", "usage_ledger.json"):
         try:
             with open(os.path.join(STORE_DIR, name), encoding="utf-8") as f:
                 snap[name] = f.read()
@@ -76,6 +76,7 @@ def main():
     env = {
         "TALVENOR_MCP_APPROVALS": os.path.join(tmp, "approvals-test.json"),
         "TALVENOR_MCP_CALLS_LOG": os.path.join(tmp, "tool_calls-test.json"),
+        "TALVENOR_MCP_LEDGER": os.path.join(tmp, "usage_ledger-test.json"),
     }
     store_before = _snapshot_store()
 

@@ -1,30 +1,30 @@
 """Jarvis — voice interface (REAL, Phase voice — 2026-11-17).
 
-Jarvis = Main CEO Bot-এর ডাকনাম / voice মুখ। Boss কথা বলবেন Jarvis-কে,
-Jarvis সেটা Main CEO Bot (brain)-এর কাছে পাঠাবে।
+Jarvis = the Main CEO Bot's nickname / voice face. Boss will talk to Jarvis,
+and Jarvis passes it on to the Main CEO Bot (brain).
 
-আগে ছিল STUB (Phase 0) — এখন REAL:
-  - বলা (TTS): Piper — offline, neural, $0, CPU-তে চলে।
-    Voice: bn = bn_BD-google-medium (catalog-এর একমাত্র Bengali voice,
-    VERIFIED upstream voices.json), en = en_US-lessac-medium।
-  - শোনা (STT): English = Vosk (vosk-model-small-en-us-0.15, official
-    list-এ আছে); Bengali = sherpa-onnx (vosk-model-small-streaming-bn,
-    Zipformer2 — classic Vosk-এর official list-এ Bengali model নেই,
-    তাই sherpa-onnx-ই Bengali শোনার পথ)।
-  - Loop: listen -> brain (mock default) -> speak; gated কাজ
-    (send/publish) voice-এ শুধু ApprovalGateway-এ PENDING হয়।
+Previously a STUB (Phase 0) — now REAL:
+  - Speaking (TTS): Piper — offline, neural, $0, runs on CPU.
+    Voice: bn = bn_BD-google-medium (the catalog's only Bengali voice,
+    VERIFIED from upstream voices.json), en = en_US-lessac-medium.
+  - Listening (STT): English = Vosk (vosk-model-small-en-us-0.15, on the official
+    list); Bengali = sherpa-onnx (vosk-model-small-streaming-bn,
+    Zipformer2 — the classic Vosk official list has no Bengali model,
+    so sherpa-onnx is the way to hear Bengali).
+  - Loop: listen -> brain (mock default) -> speak; gated work
+    (send/publish) only becomes PENDING in the ApprovalGateway by voice.
 
-গুরুত্বপূর্ণ: Jarvis আর Main CEO Bot এক জিনিস নয় — আলাদা module।
-Jarvis শুধু কথা শোনে/বলে (voice engine), brain Main CEO Bot।
+Important: Jarvis and the Main CEO Bot are not one thing — separate modules.
+Jarvis only listens/speaks (voice engine); the brain is the Main CEO Bot.
 
-সৎ সীমা:
-  - Bengali Piper voice-এর মান এখনো কোনো native listener শোনেনি;
-    Vosk/sherpa Bengali নির্ভুলতা Boss নিজে কথা বলে যাচাই করবে।
-  - Brain mock (default) — voice Jarvis-কে বুদ্ধিমান বানায় না।
-  - Mic/speaker ছাড়া এই VM-এ live test হয় না — প্রথম আসল mic test
-    Boss-এর PC-তে (VOICE-SETUP.md দেখুন)।
+Honest limits:
+  - No native listener has heard the quality of the Bengali Piper voice yet;
+    Boss himself will verify Vosk/sherpa Bengali accuracy by speaking to it.
+  - Brain mock (default) — voice does not make Jarvis intelligent.
+  - Without a mic/speaker there is no live test on this VM — the first real mic test
+    is on Boss's PC (see VOICE-SETUP.md).
 
-Public functions (Phase 0-র নামই আছে — বদলায়নি):
+Public functions (the Phase 0 names are unchanged):
   listen() / speak(text) / handle_voice_command(audio_input)
 """
 
@@ -43,20 +43,21 @@ DEFAULT_LANG = "bn"
 
 
 def listen(seconds=8, lang=DEFAULT_LANG):
-    """Mic থেকে শোনা — Vosk (en) / sherpa-onnx (bn)। Text ফেরত দেয়।"""
+    """Listen from the mic — Vosk (en) / sherpa-onnx (bn). Returns text."""
     return _listen(seconds=seconds, lang=lang)
 
 
 def speak(text, lang=DEFAULT_LANG):
-    """Boss-কে voice-এ উত্তর দেওয়া — Piper। WAV path ফেরত দেয়।"""
+    """Answer Boss by voice — Piper. Returns the WAV path."""
     return _speak(text, lang=lang)
 
 
 def handle_voice_command(audio_input, lang=DEFAULT_LANG):
-    """Voice command -> Main CEO Bot-এর কাছে পাঠানো।
+    """Voice command -> sent to the Main CEO Bot.
 
-    audio_input str হলে সেটাই শোনা বাক্য ধরে এক turn চালায়; None হলে
-    একবার mic-এ শুনে তারপর চালায়। ফেরত: handle_voice_text-এর dict।
+    If audio_input is a str, it is taken as the heard sentence and one turn
+    runs; if None, it listens once on the mic and then runs. Returns: the
+    handle_voice_text dict.
     """
     if audio_input is None:
         heard = _listen(seconds=8, lang=lang)
@@ -64,13 +65,13 @@ def handle_voice_command(audio_input, lang=DEFAULT_LANG):
         heard = audio_input
     else:
         raise TypeError(
-            "handle_voice_command: audio_input হতে হবে str (শোনা বাক্য) "
-            f"বা None (mic-এ শোনো)। পেলাম: {type(audio_input).__name__}")
+            "handle_voice_command: audio_input must be a str (the heard sentence) "
+            f"or None (listen on the mic). Got: {type(audio_input).__name__}")
     return handle_voice_text(heard, lang=lang)
 
 
 if __name__ == "__main__":
     print("Jarvis voice — REAL (Piper TTS + Vosk/sherpa-onnx STT, offline, $0)")
-    print("ব্যবহার: python scripts/jarvis_voice_loop.py [--lang bn|en]")
-    print("এক turn test (text দিয়ে, mic ছাড়া):")
-    print(handle_voice_command("আমার আজকের কাজ কী?", lang="bn"))
+    print("Usage: python scripts/jarvis_voice_loop.py [--lang bn|en]")
+    print("One-turn test (with text, no mic):")
+    print(handle_voice_command("What is my work today?", lang="en"))

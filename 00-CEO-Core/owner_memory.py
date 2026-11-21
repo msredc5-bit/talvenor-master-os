@@ -1,68 +1,67 @@
 """Owner memory — quote-verified memory, owner-messages-only
-(Improvement Phase 2, Nod memory.ts-এর আদলে).
+(Improvement Phase 2, modelled on Nod's memory.ts).
 
-Nod-এর pattern (~/workspace/nod-reverse/reverse-engineering.md,
+Nod's pattern (~/workspace/nod-reverse/reverse-engineering.md,
 memory.ts + memory-learning.ts):
-  - Memory শুধু owner-এর নিজের message থেকে শেখে — কখনো tool result,
-    web page, বা email থেকে নয়।
-  - প্রতিটা note-এর একটা verbatim quote থাকে; server সেই quote-টা
-    owner-এর message-এ সত্যিই আছে কি না যাচাই করে রাখে।
-  - একটা private JSON doc (256 KiB cap), ৫টা area (about / preferences /
-    people / routines / lessons), প্রতিটা entry ≤ 4,000 chars, status
-    tentative / observed / stated / archived।
-  - Memory context, NOT permission — memory-তে লেখা থাকলেই কোনো কাজের
-    অনুমোদন হয় না; অনুমোদন শুধু trust_gate + ApprovalGateway-এ।
-  - সব note visible + editable: দেখা / বদলানো / archive / ভুলে যাওয়া
-    (forget) — export Markdown-এ।
+  - Memory learns only from the owner's own messages — never from a tool result,
+    web page, or email.
+  - Every note carries a verbatim quote; the server verifies that the quote
+    really is in the owner's message.
+  - One private JSON doc (256 KiB cap), 5 areas (about / preferences /
+    people / routines / lessons), each entry ≤ 4,000 chars, status
+    tentative / observed / stated / archived.
+  - Memory is context, NOT permission — something being written in memory
+    never approves an action; approval lives only in trust_gate + ApprovalGateway.
+  - All notes visible + editable: view / change / archive / forget
+    — exported as Markdown.
 
-এই ফাইলে (Python, stdlib only, কোনো network / live call নেই):
+In this file (Python, stdlib only, no network / live call):
   - OwnerMemory: learn / verify / get / list / edit / archive /
-    forget / export_markdown।
-  - learn() quote ছাড়া entry নেয় না: quote-টা source_message-এ
-    verbatim থাকতেই হবে, নইলে ValueError (Nod: quote না থাকলে note
-    রাখা হয় না)।
-  - Seed: ৩টা entry — Boss-এর রেকর্ড করা সঠিক কথা থেকে (MEMORY.md
-    2026-11-21 + human_approval_gateway.py), প্রতিটার quote +
-    source_message সহ। Seed শুধু seed_defaults() ডাকলে হয় — module
-    নিজে থেকে store-এ কিছু লেখে না।
+    forget / export_markdown.
+  - learn() takes no entry without a quote: the quote must be verbatim in the
+    source_message, otherwise ValueError (Nod: a note without a quote is not kept).
+  - Seed: 3 entries — from Boss's recorded exact words (MEMORY.md
+    2026-11-21 + human_approval_gateway.py), each with its quote +
+    source_message. Seeding happens only when seed_defaults() is called — the module
+    never writes to the store on its own.
 
-ব্যবহার:
+Usage:
   mem = OwnerMemory()  # store/memory.json
-  mem.seed_defaults()  # প্রথমবার — ৩টা Boss-এর কথা
-  mem.learn("preferences", "reply-language", "Boss-কে বাংলায় উত্তর দাও।",
+  mem.seed_defaults()  # first time — 3 of Boss's words
+  mem.learn("preferences", "reply-language", "Answer Boss in Bengali.",
             quote="তুমি এখন থেকে বাংলায় কথা বলবা",
             source_message="Boss (voice call 2026-11-21): তুমি এখন থেকে বাংলায় কথা বলবা",
             source_ref="MEMORY.md 2026-11-21")
-  mem.verify("preferences", "reply-language")  # True — quote এখনো মেলে
+  mem.verify("preferences", "reply-language")  # True — the quote still matches
   mem.export_markdown()  # store/MEMORY.md
 
-Status: REAL (Improvement Phase 2, 2026-11-21) — mock brain-এ চলে।
+Status: REAL (Improvement Phase 2, 2026-11-21) — runs on the mock brain.
 
 Structure — DECIDED on merit (2026-11-21,
-00-CEO-Core/MEMORY-STRUCTURE-DECISION-2026-11-21.md — Boss-এর rule:
-analogy থেকে নয়, merit-এ decide):
-  - একটাই drawer = একটাই store file (store/memory.json) — একজন owner
-    → একটাই memory doc (Nod §4); ৭৯ agent-এর জন্য ৭৯টা file নয়
-    (bot-hq-র per-bot file ওদের আলাদা Hermes home-এর জন্য, আমাদের
-    agent-রা এক repo-র module)।
-  - Drawer-এর ভেতরে আলাদা box: "shared" (Boss-এর কথা — সবাই পড়ে)
-    + প্রত্যেক agent-এর নিজের box (main_ceo_bot, chief_of_staff_agency,
+00-CEO-Core/MEMORY-STRUCTURE-DECISION-2026-11-21.md — Boss's rule:
+decide on merit, not from analogy):
+  - One drawer = one store file (store/memory.json) — one owner
+    → one memory doc (Nod §4); not 79 files for 79 agents
+    (bot-hq's per-bot files are for their separate Hermes homes; our
+    agents are modules of one repo).
+  - Separate boxes inside the drawer: "shared" (Boss's words — everyone reads)
+    + each agent's own box (main_ceo_bot, chief_of_staff_agency,
     dept_sales / dept_marketing / dept_engineering / dept_operations /
     dept_strategy / dept_finance / dept_quality / dept_innovation,
-    worker:<specialist-slug>)।
-  - Boss-এর কথা শুধু shared box-এ যায় (learn() অন্য box নেয় না)।
-  - Agent-দের কাজের note শুধু তাদের নিজের box-এ যায় (note_work()) —
-    এক box-এর note অন্য box পড়তে পারে না; shared box-এ কাজের note
-    লেখা যায় না।
-  - Work note-এ Boss-এর quote থাকে না — এটা agent-এর লেখা, owner
-    memory নয়, permission নয়। verify() শুধু owner entry-তে চলে।
-  - পুরোনো entry (box/origin ছাড়া) load-এ migrate হয়: box="shared",
-    origin="owner" — text/quote/source অপরিবর্তিত থাকে।
-  - Maintenance (Nod-এর repair, no-model): maintenance_repair() —
-    ৬০ দিনের বেশি পুরোনো tentative entry archive + duplicate archive।
-    Reflect শুধু proposal: validate_proposals() — quote-verify পাস
-    করা candidate "ready", বাকি "rejected"; কিছু লেখে না।
-  - context_for(box) — CEO/Chief routing-এ attach করার compact view।
+    worker:<specialist-slug>).
+  - Boss's words go only to the shared box (learn() takes no other box).
+  - Agents' work notes go only to their own box (note_work()) —
+    one box's note cannot be read by another box; no work note can be
+    written to the shared box.
+  - A work note carries no Boss quote — it is the agent's writing, not owner
+    memory, not permission. verify() runs only on owner entries.
+  - Old entries (without box/origin) migrate on load: box="shared",
+    origin="owner" — text/quote/source stay unchanged.
+  - Maintenance (Nod's repair, no-model): maintenance_repair() —
+    archives tentative entries older than 60 days + duplicate archives.
+    Reflect is proposal-only: validate_proposals() — candidates that pass
+    quote-verify are "ready", the rest "rejected"; it writes nothing.
+  - context_for(box) — a compact view to attach in CEO/Chief routing.
 """
 
 import json
@@ -77,13 +76,13 @@ DEFAULT_EXPORT_PATH = os.path.join(_STORE_DIR, "MEMORY.md")
 
 AREAS = ("about", "preferences", "people", "routines", "lessons")
 STATUSES = ("tentative", "observed", "stated", "archived")
-MAX_DOC_BYTES = 256 * 1024  # Nod-এর মতো 256 KiB cap
+MAX_DOC_BYTES = 256 * 1024  # 256 KiB cap, like Nod's
 MAX_ENTRY_CHARS = 4000
-STALE_TENTATIVE_DAYS = 60  # Nod: ৬০ দিন unrepeated tentative entry stale
+STALE_TENTATIVE_DAYS = 60  # Nod: a tentative entry unrepeated for 60 days is stale
 
-# Drawer boxes — একটাই drawer (store/memory.json), ভেতরে আলাদা box।
-# "shared": Boss-এর কথা — প্রত্যেক agent পড়ে। বাকিগুলো একেক agent-এর
-# নিজের box; worker box-এর নাম "worker:<specialist-slug>"।
+# Drawer boxes — one drawer (store/memory.json), separate boxes inside.
+# "shared": Boss's words — every agent reads them. The rest are one agent's
+# own box each; a worker box is named "worker:<specialist-slug>".
 SHARED_BOX = "shared"
 BOXES = (
     "shared",
@@ -101,7 +100,7 @@ BOXES = (
 
 
 def _is_valid_box(box):
-    """Fixed box, বা worker:<slug> — অন্য নাম নয়।"""
+    """A fixed box, or worker:<slug> — no other name."""
     if box in BOXES:
         return True
     if isinstance(box, str) and box.startswith("worker:"):
@@ -119,20 +118,20 @@ def _normalize(text):
 
 
 def quote_in_source(quote, source_message):
-    """Quote-টা source message-এ verbatim আছে কি না। খালি quote নয়।"""
+    """Whether the quote is verbatim in the source message. No empty quote."""
     q = _normalize(quote)
     if not q:
         return False
     return q in _normalize(source_message)
 
 
-# Seed entries — Boss-এর রেকর্ড করা সঠিক কথা (verbatim quote সহ)।
-# Source: MEMORY.md 2026-11-21 + human_approval_gateway.py।
+# Seed entries — Boss's recorded exact words (with verbatim quotes).
+# Source: MEMORY.md 2026-11-21 + human_approval_gateway.py.
 SEED_ENTRIES = [
     {
         "area": "about",
         "slug": "assistant-name",
-        "text": "Assistant-এর নাম Mira — Boss 2026-11-21-এ স্থায়ীভাবে বদলেছেন।",
+        "text": "The assistant's name is Mira — Boss changed it permanently on 2026-11-21.",
         "quote": "Your name is Mira",
         "source_message": ("Boss (voice call, 2026-11-21 ~08:38 Dhaka): "
                            "'Basanti is not your name. Your name is Mira. "
@@ -143,7 +142,7 @@ SEED_ENTRIES = [
     {
         "area": "preferences",
         "slug": "reply-language",
-        "text": "Boss-কে বাংলায় উত্তর দিতে হবে; client-facing copy US English।",
+        "text": "Boss must be answered in Bengali; client-facing copy in US English.",
         "quote": "তুমি এখন থেকে বাংলায় কথা বলবা",
         "source_message": ("Boss (voice call, 2026-11-21 ~08:36 Dhaka): "
                            "'তুমি এখন থেকে বাংলায় কথা বলবা'"),
@@ -154,9 +153,9 @@ SEED_ENTRIES = [
         "area": "routines",
         "slug": "gate-words",
         "text": ("Gate words: ok = plan/asset approval; post it = publish; "
-                 "send = send; go = phase advance; upload it = video upload।"),
+                 "send = send; go = phase advance; upload it = video upload."),
         "quote": "post it",
-        "source_message": ("Gate words (Boss-এর সিদ্ধান্ত): ok = plan / finished "
+        "source_message": ("Gate words (Boss's decision): ok = plan / finished "
                            "asset approval; post it = publish; upload it = "
                            "upload a video; send = send a message or email; "
                            "go = advance a build phase"),
@@ -167,7 +166,7 @@ SEED_ENTRIES = [
 
 
 class OwnerMemory:
-    """Boss-এর কথা থেকে শেখা memory — quote-verified, visible, editable।"""
+    """Memory learned from Boss's words — quote-verified, visible, editable."""
 
     def __init__(self, memory_path=None):
         self.memory_path = memory_path or DEFAULT_MEMORY_PATH
@@ -180,17 +179,17 @@ class OwnerMemory:
             self.entries = data.get("entries", []) if isinstance(data, dict) else []
         except (FileNotFoundError, json.JSONDecodeError):
             self.entries = []
-        # Drawer migration: box/origin ছাড়া পুরোনো entry shared + owner
-        # হয় — text/quote/source অপরিবর্তিত থাকে।
+        # Drawer migration: an old entry without box/origin becomes
+        # shared + owner — text/quote/source stay unchanged.
         for entry in self.entries:
             entry.setdefault("box", SHARED_BOX)
             entry.setdefault("origin", "owner")
 
     def migrate_legacy(self):
-        """box/origin ছাড়া entry থাকলে (disk-এর file-এ) ভরে save করে —
-        বদল না থাকলে file ছোঁয়া হয় না। আসল store-এ একবারই চালাতে হয়।
-        (_load() memory-তে default ভরে দেয়, তাই disk-এর আসল file-টা
-        আলাদা করে পড়ে দেখা হয় — নইলে migration কখনো save করত না।)"""
+        """If entries without box/origin exist (in the file on disk), fill them
+        in and save — the file is not touched if nothing changed. Run once on
+        the real store. (_load() fills defaults in memory, so the real file on
+        disk is read separately — otherwise migration would never save.)"""
         try:
             with open(self.memory_path, "r", encoding="utf-8") as f:
                 raw = json.load(f)
@@ -235,8 +234,8 @@ class OwnerMemory:
             return 0
 
     def seed_defaults(self):
-        """৩টা seed entry (Boss-এর রেকর্ড করা কথা) — শুধু খালি memory-তে।"""
-        self._load()  # Disk থেকে fresh — অন্য instance-এর লেখা হারায় না।
+        """3 seed entries (Boss's recorded words) — only in an empty memory."""
+        self._load()  # Fresh from disk — another instance's write is not lost.
         if self.entries:
             return [dict(e) for e in self.entries]
         seeded = []
@@ -249,11 +248,11 @@ class OwnerMemory:
 
     def learn(self, area, slug, text, quote, source_message,
               source_ref="", status="stated", box=SHARED_BOX):
-        """Owner-এর message থেকে নতুন entry। Quote verbatim না থাকলে
-        ValueError — quote ছাড়া note রাখা হয় না।
-        Boss-এর কথা সবসময় shared box-এ যায় — অন্য box দিলে ValueError
-        (এক agent-এর box-এ Boss-এর কথা আটকে রাখা যায় না)।"""
-        self._load()  # Disk থেকে fresh — অন্য instance-এর লেখা হারায় না।
+        """A new entry from the owner's message. If the quote is not verbatim,
+        ValueError — a note without a quote is not kept.
+        Boss's words always go to the shared box — another box raises ValueError
+        (Boss's words cannot be locked away in one agent's box)."""
+        self._load()  # Fresh from disk — another instance's write is not lost.
         if box != SHARED_BOX:
             raise ValueError(
                 "Owner entries always go to the shared box — an agent box "
@@ -294,14 +293,14 @@ class OwnerMemory:
         return dict(entry)
 
     def note_work(self, box, slug, text, area="lessons", source_ref=""):
-        """Agent-এর নিজের কাজের note — শুধু তার নিজের box-এ।
-        Boss-এর quote লাগে না (এটা owner memory নয়), তবে:
-          - box অবশ্যই agent-এর নিজের box হতে হবে — "shared" নয়,
-            অচেনা box নয় (ValueError)।
-          - একই (box, area, slug) দুবার নয় — edit করতে হবে।
-        Note-এ origin="agent" লেখা থাকে — এটা Boss-এর কথা নয়,
-        কখনো permission হিসেবে গণ্য হয় না।"""
-        self._load()  # Disk থেকে fresh — অন্য instance-এর লেখা হারায় না।
+        """An agent's own work note — only in its own box.
+        No Boss quote is needed (this is not owner memory), but:
+          - box must be the agent's own box — not "shared",
+            not an unknown box (ValueError).
+          - The same (box, area, slug) cannot appear twice — edit it instead.
+        The note carries origin="agent" — it is not Boss's words and
+        is never treated as permission."""
+        self._load()  # Fresh from disk — another instance's write is not lost.
         if not _is_valid_box(box):
             raise ValueError(f"Unknown memory box {box!r}.")
         if box == SHARED_BOX:
@@ -338,9 +337,9 @@ class OwnerMemory:
         return dict(entry)
 
     def verify(self, area, slug, box=None):
-        """এই entry-র quote এখনো তার source message-এ verbatim আছে কি না।
-        Agent work note-এর কোনো owner quote নেই — verify() সেখানে
-        ValueError (কাজের note কখনো Boss-এর কথা হিসেবে verify হয় না)।"""
+        """Whether this entry's quote is still verbatim in its source message.
+        An agent work note has no owner quote — verify() raises ValueError
+        there (a work note is never verified as Boss's words)."""
         entry = self.get(area, slug, box=box)
         if entry.get("origin", "owner") != "owner":
             raise ValueError(
@@ -349,24 +348,24 @@ class OwnerMemory:
         return quote_in_source(entry["quote"], entry["source_message"])
 
     def verify_all(self):
-        """সব active OWNER entry verify — {area/slug: bool}। Agent work
-        note এখানে আসে না (তাদের quote নেই)।"""
+        """Verify all active OWNER entries — {area/slug: bool}. Agent work
+        notes do not appear here (they have no quote)."""
         return {f"{e['area']}/{e['slug']}": self.verify(e["area"], e["slug"])
                 for e in self.entries
                 if e["status"] != "archived"
                 and e.get("origin", "owner") == "owner"}
 
     def maintenance_repair(self, now=None):
-        """Nod-style repair — কোনো model নয়, কোনো live call নয়।
+        """Nod-style repair — no model, no live call.
 
-        - ৬০ দিনের বেশি পুরোনো tentative entry (একবার বলা, আর repeat
-          হয়নি) archive হয়। Stated/observed কখনো auto-archive হয় না
-          (ওগুলো confirmed/learned)।
-        - একই (box, area, slug)-এর দুটো active entry থাকলে পরেরটা
-          archive হয় (duplicate)।
-        - কিছু বদলালে তবেই save হয়। ফেরত: {"archived": [...],
-          "deduped": [...]} — "box:area/slug" আকারে।"""
-        self._load()  # Disk থেকে fresh — অন্য instance-এর লেখা হারায় না।
+        - A tentative entry older than 60 days (said once, never
+          repeated) is archived. Stated/observed are never auto-archived
+          (they are confirmed/learned).
+        - If the same (box, area, slug) has two active entries, the later one
+          is archived (duplicate).
+        - Saves only if something changed. Returns: {"archived": [...],
+          "deduped": [...]} — in "box:area/slug" form."""
+        self._load()  # Fresh from disk — another instance's write is not lost.
         now_dt = now or datetime.now(timezone.utc)
         archived = []
         deduped = []
@@ -401,14 +400,14 @@ class OwnerMemory:
         return {"archived": archived, "deduped": deduped}
 
     def validate_proposals(self, candidates):
-        """Reflect proposal — শুধু যাচাই, কখনো লেখা নয়।
+        """Reflect proposal — verification only, never written.
 
         Candidate: {"area", "slug", "text", "quote", "source_message",
-        "source_ref"?} — proposal লেখে ভবিষ্যৎ live brain / Mira;
-        server শুধু quote-verify পাস করা candidate-ই "ready" বলে।
-        ফেরত: {"ready": [...], "rejected": [{"candidate": ..., "reason": ...}]}।
-        Store-এ কিছু বদলায় না — ready candidate শেখাতে learn() ডাকতে হয়।"""
-        self._load()  # Disk থেকে fresh — duplicate check সঠিক থাকে।
+        "source_ref"?} — a future live brain / Mira writes the proposal;
+        the server only calls a candidate "ready" if it passes quote-verify.
+        Returns: {"ready": [...], "rejected": [{"candidate": ..., "reason": ...}]}.
+        Nothing changes in the store — learn() must be called to teach a ready candidate."""
+        self._load()  # Fresh from disk — the duplicate check stays correct.
         ready = []
         rejected = []
         for cand in candidates or []:
@@ -445,9 +444,9 @@ class OwnerMemory:
         return {"ready": ready, "rejected": rejected}
 
     def context_for(self, box):
-        """CEO/Chief routing-এ attach করার compact view: shared owner
-        entry + এই box-এর নিজের note। source_message নেই — ছোট রাখার
-        জন্য। অন্য box-এর note এখানে আসে না।"""
+        """A compact view to attach in CEO/Chief routing: shared owner
+        entries + this box's own notes. No source_message — to keep it
+        small. Another box's notes do not appear here."""
         if not _is_valid_box(box):
             raise ValueError(f"Unknown memory box {box!r}.")
 
@@ -473,8 +472,8 @@ class OwnerMemory:
         }
 
     def get(self, area, slug, box=None):
-        """box=None: shared-এ আগে খোঁজা হয়, তারপর অন্য box (পুরোনো
-        caller-দের জন্য)। box দিলে শুধু সেই box-এই খোঁজা হয়।"""
+        """box=None: shared is searched first, then other boxes (for old
+        callers). If a box is given, only that box is searched."""
         if box is not None:
             for entry in self.entries:
                 if (entry["area"] == area and entry["slug"] == slug
@@ -491,9 +490,9 @@ class OwnerMemory:
         raise KeyError(f"No memory entry {area}/{slug}.")
 
     def list_entries(self, area=None, box=None, include_archived=False):
-        """box=None: সব entry (admin / export view)।
-        box=X: শুধু shared + X box — অর্থাৎ X agent যা পড়তে পারে।
-        এক box-এর কাজের note অন্য box-এর list-এ কখনো আসে না।"""
+        """box=None: all entries (admin / export view).
+        box=X: only shared + box X — i.e. what agent X can read.
+        One box's work note never appears in another box's list."""
         out = []
         for entry in self.entries:
             if area is not None and entry["area"] != area:
@@ -508,15 +507,15 @@ class OwnerMemory:
         return out
 
     def read_box(self, box):
-        """এক agent-এর পড়ার view: shared compartment + নিজের box।
-        অন্য agent-এর box-এর note এখানে আসে না।"""
+        """One agent's read view: shared compartment + its own box.
+        Another agent's box notes do not appear here."""
         if not _is_valid_box(box):
             raise ValueError(f"Unknown memory box {box!r}.")
         return self.list_entries(box=box)
 
     def list_own(self, box):
-        """শুধু এই box-এর নিজের entry (shared ছাড়া) — isolation
-        যাচাইয়ের জন্য।"""
+        """Only this box's own entries (without shared) — to check
+        isolation."""
         if not _is_valid_box(box):
             raise ValueError(f"Unknown memory box {box!r}.")
         return [dict(e) for e in self.entries
@@ -525,12 +524,13 @@ class OwnerMemory:
 
     def edit(self, area, slug, new_text=None, quote=None,
              source_message=None, source_ref=None, status=None, box=None):
-        """Entry বদলানো। Quote / source বদলালে নতুন quote-ও verify হতে
-        হবে — নইলে ValueError (ভুল quote দিয়ে memory বদলানো যায় না)।
-        Box নিয়ম: box দিলে entry সেই box-এই থাকতে হবে — অন্য box-এর
-        entry বদলাতে গেলে ValueError; box না দিলে agent note বদলানো
-        যায় না (নিজের box বলতে হবে), shared entry বদলানো যায়।"""
-        self._load()  # Disk থেকে fresh — অন্য instance-এর লেখা হারায় না।
+        """Change an entry. If the quote / source changes, the new quote must
+        also verify — otherwise ValueError (memory cannot be changed with a
+        wrong quote). Box rule: if a box is given, the entry must be in that
+        box — changing another box's entry raises ValueError; without a box,
+        an agent note cannot be changed (its own box must be named), but a
+        shared entry can."""
+        self._load()  # Fresh from disk — another instance's write is not lost.
         entry = self._find_for_write(area, slug, box)
         if entry.get("origin", "owner") == "agent":
             if box is None or box != entry.get("box", SHARED_BOX):
@@ -568,9 +568,9 @@ class OwnerMemory:
         return self.edit(area, slug, status="archived", box=box)
 
     def forget(self, area, slug, box=None):
-        """Entry মুছে ফেলা (Boss-এর forget — ফেরত আসে না)। Box নিয়ম
-        edit()-এর মতোই: অন্য box-এর note মোছা যায় না।"""
-        self._load()  # Disk থেকে fresh — অন্য instance-এর লেখা হারায় না।
+        """Delete an entry (Boss's forget — it does not come back). The box rule
+        is the same as edit()'s: another box's note cannot be deleted."""
+        self._load()  # Fresh from disk — another instance's write is not lost.
         entry = self._find_for_write(area, slug, box)
         if entry.get("origin", "owner") == "agent":
             if box is None or box != entry.get("box", SHARED_BOX):
@@ -586,10 +586,10 @@ class OwnerMemory:
         return dict(entry)
 
     def _find_for_write(self, area, slug, box):
-        """Write-path lookup: box দিলে entry সেই box-এই থাকতে হবে।
-        Entry অন্য box-এ থাকলে ValueError (cross-box লেখা বারণ);
-        কোথাও না থাকলে KeyError। box=None হলে legacy lookup
-        (shared আগে, তারপর অন্য box)।"""
+        """Write-path lookup: if a box is given, the entry must be in that box.
+        If the entry is in another box, ValueError (cross-box writing is refused);
+        if it is nowhere, KeyError. box=None is the legacy lookup
+        (shared first, then other boxes)."""
         if box is None:
             return self._find(area, slug)
         for entry in self.entries:
@@ -605,9 +605,9 @@ class OwnerMemory:
         raise KeyError(f"No memory entry {area}/{slug} in box {box!r}.")
 
     def export_markdown(self, export_path=None):
-        """Visible memory — box অনুযায়ী Markdown (store/MEMORY.md)।
-        প্রথমে shared compartment (Boss-এর কথা — সবাই পড়ে), তারপর
-        প্রত্যেক agent box-এর কাজের note (agent note লেবেল সহ)।"""
+        """Visible memory — Markdown by box (store/MEMORY.md).
+        First the shared compartment (Boss's words — everyone reads), then
+        each agent box's work notes (with the agent-note label)."""
         path = export_path or DEFAULT_EXPORT_PATH
         lines = [
             "# Owner Memory — Talvenor Master OS",
@@ -619,7 +619,7 @@ class OwnerMemory:
             "Boss's words (readable by every agent); each agent box holds "
             "only that agent's work notes.",
             "",
-            "## Shared compartment — Boss-এর কথা (সবাই পড়ে)",
+            "## Shared compartment — Boss's words (everyone reads)",
             "",
         ]
         shared = [e for e in self.list_entries(include_archived=False)
@@ -642,12 +642,12 @@ class OwnerMemory:
             own = self.list_own(box)
             if not own:
                 continue
-            lines.append(f"## Box: {box} — শুধু এই agent-এর কাজের note")
+            lines.append(f"## Box: {box} — only this agent's work notes")
             lines.append("")
             for entry in own:
                 lines.append(f"- **{entry['slug']}** ({entry['area']}, "
-                             f"{entry['status']}) [agent note — Boss-এর কথা "
-                             f"নয়, permission নয়]: {entry['text']}")
+                             f"{entry['status']}) [agent note — not Boss's words, "
+                             f"not permission]: {entry['text']}")
             lines.append("")
         worker_boxes = sorted({e.get("box", SHARED_BOX) for e in self.entries
                                if e.get("box", SHARED_BOX).startswith("worker:")})
@@ -655,12 +655,12 @@ class OwnerMemory:
             own = self.list_own(box)
             if not own:
                 continue
-            lines.append(f"## Box: {box} — শুধু এই worker-এর কাজের note")
+            lines.append(f"## Box: {box} — only this worker's work notes")
             lines.append("")
             for entry in own:
                 lines.append(f"- **{entry['slug']}** ({entry['area']}, "
-                             f"{entry['status']}) [agent note — Boss-এর কথা "
-                             f"নয়, permission নয়]: {entry['text']}")
+                             f"{entry['status']}) [agent note — not Boss's words, "
+                             f"not permission]: {entry['text']}")
             lines.append("")
         text = "\n".join(lines)
         parent = os.path.dirname(path)
@@ -688,7 +688,7 @@ class OwnerMemory:
 
 
 if __name__ == "__main__":
-    # হাতে চেক: TEMP file-এ, আসল store ছোঁয়া হয় না।
+    # Manual check: in a TEMP file, the real store is never touched.
     import tempfile
 
     tmp_dir = tempfile.mkdtemp()
@@ -700,22 +700,22 @@ if __name__ == "__main__":
     assert len(seeded) == 3, seeded
     assert all(mem.verify(e["area"], e["slug"]) for e in seeded)
 
-    # Quote ছাড়া শেখা যায় না।
+    # Nothing can be learned without a quote.
     try:
-        mem.learn("preferences", "bad", "x", quote="Boss কখনো বলেনি",
-                  source_message="Boss: আজ ছুটি")
+        mem.learn("preferences", "bad", "x", quote="Boss never said that",
+                  source_message="Boss: today is off")
         raise SystemExit("FAIL: unverified quote was learned")
     except ValueError:
         pass
 
-    # শেখা -> verify -> edit (ভুল quote-এ edit বারণ) -> archive -> forget।
+    # Learn -> verify -> edit (edit with a bad quote is refused) -> archive -> forget.
     e = mem.learn("routines", "test-rule", "Test rule.",
-                  quote="test করো",
-                  source_message="Boss: test করো, তারপর বলো",
+                  quote="test this",
+                  source_message="Boss: test this, then say it",
                   source_ref="test")
     assert mem.verify("routines", "test-rule") is True
     try:
-        mem.edit("routines", "test-rule", quote="বানানো কথা")
+        mem.edit("routines", "test-rule", quote="invented words")
         raise SystemExit("FAIL: edit with a bad quote was allowed")
     except ValueError:
         pass
@@ -737,19 +737,19 @@ if __name__ == "__main__":
     out = mem.export_markdown(tmp_md)
     with open(out, encoding="utf-8") as f:
         md = f.read()
-    assert "Mira" in md and "বাংলায়" in md and "post it" in md
+    assert "Mira" in md and "Bengali" in md and "post it" in md
 
-    # Drawer: shared box-এ ৩ seed; learn() অন্য box নেয় না।
+    # Drawer: 3 seeds in the shared box; learn() takes no other box.
     assert all(e.get("box") == "shared" and e.get("origin") == "owner"
                for e in seeded)
     try:
-        mem.learn("preferences", "bad-box", "x", quote="test করো",
-                  source_message="Boss: test করো", box="dept_sales")
+        mem.learn("preferences", "bad-box", "x", quote="test this",
+                  source_message="Boss: test this", box="dept_sales")
         raise SystemExit("FAIL: owner entry went to an agent box")
     except ValueError:
         pass
 
-    # Work note: shared-এ যায় না, অচেনা box-এ যায় না; নিজের box-এ যায়।
+    # Work note: not to shared, not to an unknown box; to its own box.
     try:
         mem.note_work("shared", "n", "x")
         raise SystemExit("FAIL: work note went to the shared box")
@@ -764,22 +764,22 @@ if __name__ == "__main__":
                       area="lessons", source_ref="test")
     assert w["box"] == "dept_sales" and w["origin"] == "agent"
     assert w["slug"] == "day-note"
-    # Isolation: Sales-এর note Marketing পড়তে পারে না, Sales পারে।
+    # Isolation: Marketing cannot read Sales' note; Sales can.
     assert any(e["slug"] == "day-note" for e in mem.read_box("dept_sales"))
     assert all(e["slug"] != "day-note" for e in mem.read_box("dept_marketing"))
     assert all(e["slug"] != "day-note" for e in mem.list_own("dept_marketing"))
-    # Shared সব box থেকে পড়া যায়।
+    # Shared can be read from every box.
     assert len(mem.read_box("dept_marketing")) == 3
     assert len(mem.read_box("worker:outreach-drafter")) == 3
-    # Agent note verify হয় না; verify_all শুধু owner ৩টা।
+    # An agent note is not verified; verify_all covers only the 3 owner entries.
     try:
         mem.verify("lessons", "day-note", box="dept_sales")
         raise SystemExit("FAIL: agent note was quote-verified")
     except ValueError:
         pass
     assert len(mem.verify_all()) == 3 and all(mem.verify_all().values())
-    # ভুল box থেকে edit/forget বারণ (day-note শুধু Sales-এর);
-    # নিজের box থেকে চলে; shared entry agent box থেকে বদলানো যায় না।
+    # Edit/forget from the wrong box is refused (day-note belongs only to Sales);
+    # from its own box it works; a shared entry cannot be changed from an agent box.
     try:
         mem.edit("lessons", "day-note", new_text="x", box="dept_marketing")
         raise SystemExit("FAIL: wrong-box edit of a work note")
@@ -802,7 +802,7 @@ if __name__ == "__main__":
                   area="lessons")
     mem.forget("lessons", "tmp-note", box="dept_quality")
     assert all(e["slug"] != "tmp-note" for e in mem.read_box("dept_quality"))
-    # একই slug অন্য box-এ চলে; একই box-এ দুবার নয়।
+    # The same slug works in another box; not twice in the same box.
     mem.note_work("dept_marketing", "day-note", "Marketing: 2 caption ready.")
     try:
         mem.note_work("dept_sales", "day-note", "Again.")
@@ -815,11 +815,11 @@ if __name__ == "__main__":
     assert "Shared compartment" in md and "Box: dept_sales" in md
     assert "Box: dept_marketing" in md and "agent note" in md
 
-    # Maintenance repair: ৭০ দিনের পুরোনো tentative archive হয়;
-    # নতুন tentative থাকে; stated কখনো auto-archive হয় না।
+    # Maintenance repair: a tentative older than 70 days is archived;
+    # a new tentative stays; stated is never auto-archived.
     old = mem.learn("lessons", "old-rule", "Old rule.",
-                    quote="পুরোনো কথা",
-                    source_message="Boss: পুরোনো কথা", status="tentative")
+                    quote="old words",
+                    source_message="Boss: old words", status="tentative")
     assert old["status"] == "tentative"
     for e in mem.entries:
         if e["slug"] == "old-rule":
@@ -830,7 +830,7 @@ if __name__ == "__main__":
     assert any("old-rule" in s for s in rep["archived"]), rep
     assert mem.get("lessons", "old-rule")["status"] == "archived"
     assert mem.get("routines", "gate-words")["status"] == "stated"
-    # Duplicate (box, area, slug) থাকলে পরেরটা archive হয়।
+    # If a duplicate (box, area, slug) exists, the later one is archived.
     mem.entries.append(dict(mem.entries[0], slug="dup-rule",
                             learned_at="2026-11-21T00:00:00+00:00"))
     mem.entries.append(dict(mem.entries[0], slug="dup-rule",
@@ -841,18 +841,18 @@ if __name__ == "__main__":
     assert any("dup-rule" in s for s in rep2["deduped"]), rep2
 
     # validate_proposals: valid quote -> ready, bad quote -> rejected,
-    # কিছু লেখে না।
+    # writes nothing.
     before = len(mem.list_entries())
     v = mem.validate_proposals([
         {"area": "preferences", "slug": "new-rule", "text": "New.",
-         "quote": "নতুন কথা", "source_message": "Boss: নতুন কথা"},
+         "quote": "new words", "source_message": "Boss: new words"},
         {"area": "preferences", "slug": "bad-rule", "text": "Bad.",
-         "quote": "বানানো", "source_message": "Boss: অন্য কথা"},
+         "quote": "invented", "source_message": "Boss: other words"},
     ])
     assert len(v["ready"]) == 1 and len(v["rejected"]) == 1, v
-    assert len(mem.list_entries()) == before  # কিছু লেখা হয়নি
+    assert len(mem.list_entries()) == before  # nothing was written
 
-    # context_for: shared-এ ৩ seed আছে, source_message নেই।
+    # context_for: 3 seeds in shared, no source_message.
     ctx = mem.context_for("main_ceo_bot")
     assert ctx["box"] == "main_ceo_bot"
     assert {"assistant-name", "reply-language", "gate-words"} <= {
