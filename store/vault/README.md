@@ -1,16 +1,16 @@
-# Vault — ফলাফল এখানে থাকে
+# Vault — Results Live Here
 
-Worker-দের আসল ফলাফল (draft, plan, script, report) text file হিসেবে
-এখানে জমা হয়। একটা task শেষ হলে তার result-এর file এখানে থাকে।
+The workers' real results (draft, plan, script, report) are stored here
+as text files. When a task finishes, its result file lives here.
 
-## নিয়ম
+## Rules
 
-- শুধু text file — video file এখানে থাকে না (video workspace-এ
-  আলাদা path-এ থাকে, result text-এ সেই path লেখা হয়)।
-- কোনো file delete করা হয় না — ভুল হলে নতুন version লেখা হয়।
-- File-এর নাম: `<date>-<business>-<short-title>.md`
+- Text files only — no video file lives here (a video lives at a
+  separate path in the workspace, and that path is written in the result text).
+- No file is ever deleted — if something is wrong, a new version is written.
+- File name: `<date>-<business>-<short-title>.md`
 
-## এখনকার অবস্থা (2026-11-16)
+## Current status (2026-11-16)
 
-খালি — Phase 0-তে কোনো task এখনো run হয়নি। প্রথম Vault file আসবে
-Phase 1-এর প্রথম আসল task থেকে।
+Empty — no task has run yet in Phase 0. The first Vault file will come
+from the first real task of Phase 1.
