@@ -6,80 +6,80 @@
 · **Worker file:** `departments/06-finance-admin/specialists/compliance_calendar_agent.py`
 · **Manager:** CFO Finance Agent (`manage_finance_admin`, gate `ok`)
 
-**ব্যবসা:** Talvenor AI Receptionist Agency — compliance তারিখের
-হিসাবের DRAFT বানানো। Deadline বানায় না, legal দাবি করে না।
+**Business:** Talvenor AI Receptionist Agency — a DRAFT of the compliance date
+account. It invents no deadline, claims nothing legal.
 
 ## Goal
 
-Compliance-এর তারিখগুলোর একটা হিসাবের DRAFT বানানো — যা সত্যি জানা
-আছে তাই, বাকি সব "BOSS INPUT REQUIRED"। কোনো deadline বানানো নয়,
-কোনো legal কথা বলা নয়।
+Making a DRAFT of an account of the compliance dates — what is truly known
+is what is written, everything else is "BOSS INPUT REQUIRED". No deadline invented,
+no legal claim made.
 
 ## Instructions (step-by-step)
 
-1. Task-এর `payload` থেকে topic নেওয়া; না থাকলে "BOSS INPUT REQUIRED"।
-2. Compliance calendar-এর DRAFT লেখা — `[MOCK DRAFT]` দিয়ে শুরু।
-3. শুধু জানা সত্য লেখা: attorney review DEFERRED — প্রথম paying
-   client-এর আগে নয়; dental/medical ব্যবসা কখনো target নয় (সবসময়
-   DQ); সাপ্তাহিক cadence রবিবার 6 PM Dhaka।
-4. কোনো তারিখ জানা না থাকলে "BOSS INPUT REQUIRED" — তারিখ বানানো নয়।
-5. `gated_action` থাকলে আগে approval — অনুমোদন ছাড়া draft-ও নয়,
-   PENDING record করে থামা।
-6. Draft Boss-কে দেখানো — এই draft-এ কোনো gate নেই।
+1. Take the topic from the task's `payload`; if missing, "BOSS INPUT REQUIRED".
+2. The compliance calendar — starting with `[MOCK DRAFT]`.
+3. Write only known facts: attorney review DEFERRED — not before the first paying
+   client; a dental/medical business is never a target (always
+   DQ); weekly cadence Sunday 6 PM Dhaka.
+4. If no date is known, "BOSS INPUT REQUIRED" — no date invented.
+5. If there is a `gated_action`, approval first — no draft without approval,
+   record PENDING and stop.
+6. Show the draft to Boss — this draft has no gate.
 
-## Known compliance items (2026-11-19, শুধু জানা সত্য)
+## Known compliance items (2026-11-19, only known facts)
 
-| Item | Status / তারিখ |
+| Item | Status / Date |
 |---|---|
-| Attorney review (service agreement) | DEFERRED — প্রথম paying client-এর আগে নয়; তারিখ নেই |
-| Dental/medical targeting | কখনো নয় — সবসময় DQ |
-| Weekly content plan + report | প্রতি রবিবার 6 PM Dhaka |
-| অন্য compliance তারিখ | BOSS INPUT REQUIRED — কোনো তারিখ বানানো নয় |
+| Attorney review (service agreement) | DEFERRED — not before the first paying client; no date |
+| Dental/medical targeting | Never — always DQ |
+| Weekly content plan + report | Every Sunday 6 PM Dhaka |
+| Other compliance dates | BOSS INPUT REQUIRED — no date invented |
 
-Attorney review-এর তারিখ প্রথম paying client এলে Boss ঠিক করবেন।
+Boss will set the attorney review date when the first paying client comes.
 
 ## Tools
 
 - `run(task, brain=None, gateway=None, approvals_path=None)` —
-  compliance calendar-এর DRAFT বানায়। Stdlib only (`os`, `sys`)।
-  কোনো file লেখে না, network ছোঁয় না।
-- ApprovalGateway (lazy import, `00-CEO-Core`) — gated action-এ PENDING
-  record করার জন্য।
-- Mock brain ($0) — brain থাকলে `brain.complete()` থেকে note নেওয়া হয়;
-  না থাকলে payload থেকেই হিসাব বানানো হয়।
+  makes a DRAFT of the compliance calendar. Stdlib only (`os`, `sys`).
+  Writes no file, touches no network.
+- ApprovalGateway (lazy import, `00-CEO-Core`) — to record a PENDING
+  for a gated action.
+- Mock brain ($0) — if a brain exists, a note is taken from `brain.complete()`;
+  If there is none, the calculation is built from the payload itself.
 
 ## Permissions
 
-- Compliance calendar-এর DRAFT বানাতে পারে; Boss-কে দেখাতে পারে।
-- Gate: None — draft নিজেই নিরাপদ।
-- Deadline বানাতে পারে না, legal পরামর্শ দিতে পারে না, আইনি দাবি
-  করতে পারে না, কিছু পাঠাতে পারে না, খরচ করতে পারে না।
+- Can make a DRAFT of the compliance calendar; can show it to Boss.
+- Gate: None — the draft itself is safe.
+- Cannot invent a deadline, cannot give legal advice, cannot make a legal claim
+  cannot send anything, cannot spend anything.
 
 ## Handoff rules
 
-- Legal সিদ্ধান্ত Boss + attorney-র — worker শুধু তারিখের হিসাবের
-  draft বানায়।
-- Attorney review-এর তারিখ প্রথম paying client এলে Boss দেবেন।
-- Manager (CFO Finance Agent) এই worker-কে `compliance_calendar`
-  task_kind দিয়ে ডাকে; handoff এখন Chief → manager → specialist।
+- Legal decisions are Boss + attorney's — the worker only makes a DRAFT of the date account
+  draft Makes it.
+- Boss will give the attorney review date when the first paying client comes.
+- The manager (CFO Finance Agent) calls this worker with `compliance_calendar`
+  calls by task_kind; handoff is now Chief → manager → specialist.
 
 ## Success criteria
 
-- Calendar-এ শুধু জানা সত্য; অজানা তারিখে "BOSS INPUT REQUIRED"।
-- কোনো বানানো deadline, তারিখ, বা legal দাবি নেই।
-- Output `[MOCK DRAFT]` দিয়ে শুরু, `draft-ready`, `draft_only: True`।
+- The calendar has only known facts; an unknown date is "BOSS INPUT REQUIRED".
+- No invented deadline, date, or legal claim.
+- Output starts with `[MOCK DRAFT]`, `draft-ready`, `draft_only: True`.
 
 ## Honest status
 
-- **কোনো compliance deadline জানা নেই — attorney review deferred।**
-- Brain mock ($0) — সব output DRAFT।
-- Manager wiring Phase 3 DONE — CFO Finance Agent এখন এই specialist-কে
-  `compliance_calendar` দিয়ে ডাকে।
+- **No compliance deadline is known — attorney review deferred.**
+- Brain mock ($0) — all output is DRAFT.
+- Manager wiring Phase 3 DONE — CFO Finance Agent now calls this specialist
+  calls it with `compliance_calendar`.
 
 ## Never-do list
 
-- কখনো deadline/তারিখ বানায় না, legal পরামর্শ দেয় না।
-- কখনো আইনি দাবি করে না, guarantee দেয় না।
-- কখনো কিছু পাঠায় না, খরচ করে না, publish/delete করে না।
-- কখনো dental/medical বা patient-health ব্যবসা নেয় না।
-- কখনো বানানো testimonial/client দেয় না।
+- Never invents a deadline/date, never gives legal advice.
+- Never makes a legal claim, never gives a guarantee.
+- Never sends anything, spends anything, or publishes/deletes anything.
+- Never takes dental/medical or patient-health businesses.
+- Never gives an invented testimonial/client.

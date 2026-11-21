@@ -1,15 +1,15 @@
 """Pricing Research Agent — pricing research draft (Phase 3).
 
-ভূমিকা (role): শুধু pricing research-এর DRAFT লেখা — INTERNAL ONLY, কখনো পাঠায় না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: write a DRAFT of pricing research only — INTERNAL ONLY, never send it.
+Gate: none — the draft itself is safe, there is no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-Talvenor pricing LOCKED (2026-11-12): $547/$1,109/$1,672/mo + build $597/$1,297/$1,997 — এই দাম কখনো বদলানো যাবে না, আর prospect-কে কখনো quote করা যাবে না। এই draft INTERNAL ONLY।
+Talvenor pricing LOCKED (2026-11-12): $547/$1,109/$1,672/mo + build $597/$1,297/$1,997 — this price must never be changed, and must never be quoted to a prospect. This draft is INTERNAL ONLY.
 
-এই agent কখনো করে না: কিছু পাঠায় না, publish করে না, খরচ করে না,
-delete করে না, client/প্রতিযোগী/দাম/পরিসংখ্যান বানায় না, কোনো
-guarantee দেয় না, dental/medical বা patient-health ব্যবসা নেয় না।
-Email PAUSED (2026-11-14 থেকে) — draft-ই শেষ কথা।
+This agent never: sends anything, publishes anything, spends anything,
+does not delete, does not invent client/competitor/price/statistic facts,
+gives no guarantee, takes no dental/medical or patient-health business.
+Email PAUSED (since 2026-11-14) — the draft is the final word.
 """
 
 import os
@@ -23,7 +23,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class PricingResearchAgent:
-    """pricing research draft — DRAFT ONLY, কখনো পাঠায় না।"""
+    """pricing research draft — DRAFT ONLY, never sends it."""
 
     task_kind = "pricing_research"
     gate = None
@@ -31,7 +31,7 @@ class PricingResearchAgent:
     role = "Pricing Research Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -43,7 +43,7 @@ class PricingResearchAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -68,7 +68,7 @@ class PricingResearchAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """pricing research draft। কোনো file লেখে না, network ছোঁয় না।"""
+        """pricing research draft. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Pricing research draft"
         gated_action = task.get("gated_action")
@@ -106,13 +106,13 @@ class PricingResearchAgent:
         output = (
             "[MOCK DRAFT] Pricing research (INTERNAL ONLY) — DRAFT ONLY\n"
             f"Topic: {topic}\n"
-            "Talvenor pricing LOCKED (2026-11-12, internal only): Starter $547/mo + build $597; Growth $1,109/mo + build $1,297; Scale $1,672/mo + build $1,997.\nWARNING: এই দাম prospect-কে কখনো quote করা যাবে না — Boss confirm না করলে দাম নিয়ে কোনো কথা নয়।\nMarket price comparison: BOSS INPUT REQUIRED — verified source ছাড়া বাজারের কোনো দাম লেখা হয়নি।\n"
+            "Talvenor pricing LOCKED (2026-11-12, internal only): Starter $547/mo + build $597; Growth $1,109/mo + build $1,297; Scale $1,672/mo + build $1,997.\nWARNING: this price must never be quoted to a prospect — unless Boss confirms it, there is no talk about price.\nMarket price comparison: BOSS INPUT REQUIRED — no market price was written without a verified source.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Pricing research draft ONLY, INTERNAL ONLY। LOCKED pricing বদলানো হয়নি, prospect-কে quote নয়। "
-            "কখনো পাঠানো নয়, কোনো খরচ নয়। Gate: none।"
+            "DRAFT ONLY — mock brain ($0). Pricing research draft ONLY, INTERNAL ONLY. LOCKED pricing was not changed, no quote to a prospect. "
+            "Never sending, never spending. Gate: none."
         )
         return {
             "status": "draft-ready",

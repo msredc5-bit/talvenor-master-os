@@ -1,15 +1,15 @@
 """Niche Selection Agent — niche selection draft (Phase 3).
 
-ভূমিকা (role): শুধু niche বাছাইয়ের DRAFT লেখা — কখনো পাঠায় না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: write a DRAFT of niche selection only — never send it.
+Gate: none — the draft itself is safe, there is no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-Dental/medical সবসময় DQ — কখনো target নয়। Legal gated — 4th client-এর আগে legal নয়। বৈধ niche: plumbing, HVAC, roofing, garage door, septic, tree, foundation, restoration, pest, vet।
+Dental/medical always DQ — never a target. Legal gated — no legal before the 4th client. Valid niches: plumbing, HVAC, roofing, garage door, septic, tree, foundation, restoration, pest, vet.
 
-এই agent কখনো করে না: কিছু পাঠায় না, publish করে না, খরচ করে না,
-delete করে না, client/প্রতিযোগী/দাম/পরিসংখ্যান বানায় না, কোনো
-guarantee দেয় না, dental/medical বা patient-health ব্যবসা নেয় না।
-Email PAUSED (2026-11-14 থেকে) — draft-ই শেষ কথা।
+This agent never: sends anything, publishes anything, spends anything,
+does not delete, does not invent client/competitor/price/statistic facts,
+gives no guarantee, takes no dental/medical or patient-health business.
+Email PAUSED (since 2026-11-14) — the draft is the final word.
 """
 
 import os
@@ -23,7 +23,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class NicheSelectionAgent:
-    """niche selection draft — DRAFT ONLY, কখনো পাঠায় না।"""
+    """niche selection draft — DRAFT ONLY, never sends it."""
 
     task_kind = "niche_selection"
     gate = None
@@ -31,7 +31,7 @@ class NicheSelectionAgent:
     role = "Niche Selection Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -43,7 +43,7 @@ class NicheSelectionAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -68,7 +68,7 @@ class NicheSelectionAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """niche selection draft। কোনো file লেখে না, network ছোঁয় না।"""
+        """niche selection draft. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Niche selection draft"
         gated_action = task.get("gated_action")
@@ -106,13 +106,13 @@ class NicheSelectionAgent:
         output = (
             "[MOCK DRAFT] Niche selection — DRAFT ONLY\n"
             f"Topic: {topic}\n"
-            "Valid niches: plumbing, HVAC, roofing, garage door, septic, tree, foundation, restoration, pest, vet.\nALWAYS DQ: dental/medical/patient-health — কখনো target নয়।\nGATED until 4th client: legal.\nRecommended next niche: BOSS INPUT REQUIRED — Boss-এর সিদ্ধান্ত ছাড়া কোনো niche চূড়ান্ত নয়।\n"
+            "Valid niches: plumbing, HVAC, roofing, garage door, septic, tree, foundation, restoration, pest, vet.\nALWAYS DQ: dental/medical/patient-health — never a target.\nGATED until 4th client: legal.\nRecommended next niche: BOSS INPUT REQUIRED — no niche is final without Boss's decision.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Niche selection draft ONLY। Dental/medical DQ, legal gated — নিয়ম মানা হয়েছে। "
-            "কখনো পাঠানো নয়, কোনো খরচ নয়। Gate: none।"
+            "DRAFT ONLY — mock brain ($0). Niche selection draft ONLY. Dental/medical DQ, legal gated — the rule was followed. "
+            "Never sending, never spending. Gate: none."
         )
         return {
             "status": "draft-ready",

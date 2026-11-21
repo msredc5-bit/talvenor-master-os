@@ -1,15 +1,15 @@
 """Industry Research Agent — industry research draft (Phase 3).
 
-ভূমিকা (role): শুধু home-service industry research-এর DRAFT লেখা — কখনো পাঠায় না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: write a DRAFT of home-service industry research only — never send it.
+Gate: none — the draft itself is safe, there is no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-প্রতিটা পরিসংখ্যানের source লাগবে — source না থাকলে "UNVERIFIED" লেবেল দিতে হবে, কখনো source ছাড়া সংখ্যা সত্য বলে লেখা যাবে না।
+Every statistic needs a source — if there is no source, an "UNVERIFIED" label must be given; a number must never be written as true without a source.
 
-এই agent কখনো করে না: কিছু পাঠায় না, publish করে না, খরচ করে না,
-delete করে না, client/প্রতিযোগী/দাম/পরিসংখ্যান বানায় না, কোনো
-guarantee দেয় না, dental/medical বা patient-health ব্যবসা নেয় না।
-Email PAUSED (2026-11-14 থেকে) — draft-ই শেষ কথা।
+This agent never: sends anything, publishes anything, spends anything,
+does not delete, does not invent client/competitor/price/statistic facts,
+gives no guarantee, takes no dental/medical or patient-health business.
+Email PAUSED (since 2026-11-14) — the draft is the final word.
 """
 
 import os
@@ -23,7 +23,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class IndustryResearchAgent:
-    """industry research draft — DRAFT ONLY, কখনো পাঠায় না।"""
+    """industry research draft — DRAFT ONLY, never sends it."""
 
     task_kind = "industry_research"
     gate = None
@@ -31,7 +31,7 @@ class IndustryResearchAgent:
     role = "Industry Research Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -43,7 +43,7 @@ class IndustryResearchAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -68,7 +68,7 @@ class IndustryResearchAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """industry research draft। কোনো file লেখে না, network ছোঁয় না।"""
+        """industry research draft. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Industry research draft"
         gated_action = task.get("gated_action")
@@ -106,13 +106,13 @@ class IndustryResearchAgent:
         output = (
             "[MOCK DRAFT] Industry research — DRAFT ONLY\n"
             f"Topic: {topic}\n"
-            "Focus: US home-service SMBs (plumbing, HVAC, roofing, garage door, septic, tree, foundation, restoration, pest, vet).\nKey theme: missed calls mean lost jobs; AI receptionist answers 24/7.\nStatistics: BOSS INPUT REQUIRED — source ছাড়া কোনো সংখ্যা লেখা হয়নি; source না থাকলে UNVERIFIED লেবেল লাগবে।\n"
+            "Focus: US home-service SMBs (plumbing, HVAC, roofing, garage door, septic, tree, foundation, restoration, pest, vet).\nKey theme: missed calls mean lost jobs; AI receptionist answers 24/7.\nStatistics: BOSS INPUT REQUIRED — no number was written without a source; if there is no source, an UNVERIFIED label is needed.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Industry research draft ONLY। Source ছাড়া কোনো সংখ্যা সত্য বলে লেখা হয়নি। "
-            "কখনো পাঠানো নয়, কোনো খরচ নয়। Gate: none।"
+            "DRAFT ONLY — mock brain ($0). Industry research draft ONLY. No number was written as true without a source. "
+            "Never sending, never spending. Gate: none."
         )
         return {
             "status": "draft-ready",

@@ -1,15 +1,15 @@
 """Offer Development Agent — offer draft (Phase 3).
 
-ভূমিকা (role): শুধু offer-এর DRAFT লেখা — কখনো পাঠায় না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: write a DRAFT of the offer only — never send it.
+Gate: none — the draft itself is safe, there is no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-কোনো guarantee কখনো নয় — আসল business term-ও public content-এ guarantee হিসেবে লেখা যাবে না।
+Never any guarantee — not even a real business term may be written as a guarantee in public content.
 
-এই agent কখনো করে না: কিছু পাঠায় না, publish করে না, খরচ করে না,
-delete করে না, client/প্রতিযোগী/দাম/পরিসংখ্যান বানায় না, কোনো
-guarantee দেয় না, dental/medical বা patient-health ব্যবসা নেয় না।
-Email PAUSED (2026-11-14 থেকে) — draft-ই শেষ কথা।
+This agent never: sends anything, publishes anything, spends anything,
+does not delete, does not invent client/competitor/price/statistic facts,
+gives no guarantee, takes no dental/medical or patient-health business.
+Email PAUSED (since 2026-11-14) — the draft is the final word.
 """
 
 import os
@@ -23,7 +23,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class OfferDevelopmentAgent:
-    """offer draft — DRAFT ONLY, কখনো পাঠায় না।"""
+    """offer draft — DRAFT ONLY, never sends it."""
 
     task_kind = "offer_development"
     gate = None
@@ -31,7 +31,7 @@ class OfferDevelopmentAgent:
     role = "Offer Development Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -43,7 +43,7 @@ class OfferDevelopmentAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -68,7 +68,7 @@ class OfferDevelopmentAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """offer draft। কোনো file লেখে না, network ছোঁয় না।"""
+        """offer draft. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Offer draft"
         gated_action = task.get("gated_action")
@@ -106,13 +106,13 @@ class OfferDevelopmentAgent:
         output = (
             "[MOCK DRAFT] Offer development — DRAFT ONLY\n"
             f"Topic: {topic}\n"
-            "Core offer (draft): AI receptionist answers 24/7 so no missed call becomes a lost job; booking link on a 15-min call.\nGuarantees: NONE — কোনো guarantee দেওয়া হয় না।\nPrice in offer: LOCKED pricing internal only — prospect-কে দাম Boss confirm না করলে লেখা হয় না।\n"
+            "Core offer (draft): AI receptionist answers 24/7 so no missed call becomes a lost job; booking link on a 15-min call.\nGuarantees: NONE — no guarantee is given.\nPrice in offer: LOCKED pricing internal only — a price is not written for a prospect unless Boss confirms it.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Offer draft ONLY। কোনো guarantee নেই, বানানো client/testimonial নেই। "
-            "কখনো পাঠানো নয়, কোনো খরচ নয়। Gate: none।"
+            "DRAFT ONLY — mock brain ($0). Offer draft ONLY. No guarantee, no invented client/testimonial. "
+            "Never sending, never spending. Gate: none."
         )
         return {
             "status": "draft-ready",

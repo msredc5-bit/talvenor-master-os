@@ -1,34 +1,33 @@
 """CFO Finance Agent — finance & admin department manager (Phase 1).
 
-ভূমিকা (role): 06-finance-admin department-এর manager — finance/admin
-task এলে কোন specialist-এর কাজ, তা ঠিক করে DELEGATION PLAN-এর DRAFT
-বানানো, আর Phase 3-এর dept-06 specialist-দের (draft-only) চালানো।
-নিজে কোনো invoice/report লেখে না। Section/engine-এর পুরনো worker
-(BillingInvoiceAgent / ReportCompiler) চালায় না — তাদের জন্য শুধু
-delegation plan-এর DRAFT। Gate: ok — delegation plan ব্যবহার করতে
-Boss-এর "ok" লাগে।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
-Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।
-Specialist wiring Phase 3 DONE — manager এখন dept-06 specialist-দের
-importlib দিয়ে load করে চালায় (draft-only)।
+Role: manager of the 06-finance-admin department — finance/admin
+when a task comes in, decide which specialist's job it is and make a DRAFT of the DELEGATION PLAN
+and run the Phase 3 dept-06 specialists (draft-only).
+It writes no invoice/report itself. The section/engine's old workers
+(BillingInvoiceAgent / ReportCompiler) it does not run — for them only
+a DRAFT of the delegation plan. Gate: ok — Boss's "ok" is needed to use the delegation plan.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
+Chief wiring Phase 2 DONE — the Agency Chief now calls this manager via DEPARTMENT_ROUTING.
+Specialist wiring Phase 3 DONE — the manager now loads and runs the dept-06 specialists
+with importlib (draft-only).
 
-Mapped existing staff (6): BillingInvoiceAgent (billing_invoice, ok —
-LOCKED pricing, invoice শুধু paying client-এর জন্য Boss-এর কথায়,
-prospect-কে কখনো দাম quote নয়), ReportCompiler (report_compile, no
-gate — দেখা যায় এমন metric ছাড়া কিছু নয়, সংখ্যা বানায় না), +
-Phase 3 specialists (4, no gate): RevenueTrackingAgent
+Mapped existing staff (7): BillingInvoiceAgent (billing_invoice, ok —
+LOCKED pricing, invoice only for a paying client on Boss's word,
+never quote a price to a prospect), ReportCompiler (report_compile, no
+gate — nothing but visible metrics, invents no numbers), +
+Phase 3 specialists (5, no gate): RevenueTrackingAgent
 (revenue_tracking — revenue $0, template only), SubscriptionTrackingAgent
 (subscription_tracking — paid $0 so far), DocumentManagementAgent
 (document_management — organisation draft only),
 ComplianceCalendarAgent (compliance_calendar — attorney review
-deferred, কোনো deadline বানানো নয়)।
+deferred, no deadline invented), ExpenseTrackingAgent
+(expense_tracking — $0 cap, entry DRAFT only, no spend approval).
 LOCKED pricing (2026-11-12, internal only): Starter $547/mo + $597;
-Growth $1,109/mo + $1,297; Scale $1,672/mo + $1,997 — prospect-কে
-কখনো quote নয়।
-এই manager কখনো করে না: section/engine-এর পুরনো worker execute করে না,
-payment নেয় না, invoice issue করে না, কিছু পাঠায় না, খরচ করে না,
-দাম বানায় না, client-এর তথ্য/পরিসংখ্যান বানায় না, কোনো guarantee
-দেয় না, dental/medical বা patient-health ব্যবসা নেয় না।
+Growth $1,109/mo + $1,297; Scale $1,672/mo + $1,997 — never quote to a prospect.
+This manager never does: execute a section/engine old worker,
+take payment, issue an invoice, send anything, spend anything,
+invent prices, invent client information/statistics, give any guarantee,
+dental/medical or patient-health businesses.
 """
 
 import importlib.util
@@ -42,9 +41,9 @@ _GATE_ACTION_MAP = {"post it": "publish", "upload it": "publish"}
 _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 # Department task kinds.
-# EXISTING: worker আছে — file = 01-Agency-Department-এর ভেতরের relative path।
-# ROLE-ONLY: role definition আছে, worker নেই — file = planned skill path।
-# GAP: worker-ও নেই, skill-ও নেই।
+# EXISTING: a worker exists — file = relative path inside 01-Agency-Department.
+# ROLE-ONLY: a role definition exists, no worker — file = planned skill path.
+# GAP: neither a worker nor a skill.
 DEPARTMENT_TASKS = {
     "billing_invoice": {
         "specialist": "BillingInvoiceAgent",
@@ -79,9 +78,10 @@ DEPARTMENT_TASKS = {
     },
     "expense_tracking": {
         "specialist": "Expense Tracking Agent",
-        "file": "GAP — no worker, no skill yet ($0 spend cap — no expenses to track)",
+        "class": "ExpenseTrackingAgent",
+        "file": "departments/06-finance-admin/specialists/expense_tracking_agent.py",
         "gate": "ok",
-        "status": "GAP",
+        "status": "EXISTING",
     },
     "subscription_tracking": {
         "specialist": "Subscription Tracking Agent",
@@ -108,7 +108,7 @@ DEPARTMENT_TASKS = {
 
 
 class CFOFinanceAgent:
-    """Finance/admin task-এর delegation plan DRAFT বানায়; dept-06 specialist (Phase 3) চালায় — DRAFT only।"""
+    """Makes a DRAFT of the delegation plan for a finance/admin task; runs the dept-06 specialists (Phase 3) — DRAFT only."""
 
     task_kind = "manage_finance_admin"
     gate = "ok"
@@ -116,7 +116,7 @@ class CFOFinanceAgent:
     role = "CFO Finance Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -128,7 +128,7 @@ class CFOFinanceAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -168,14 +168,14 @@ class CFOFinanceAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Delegation plan DRAFT বানানো; dept-06 specialist (Phase 3) চালানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Making a DRAFT of the delegation plan; running the dept-06 specialists (Phase 3). Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Finance & admin delegation"
         gated_action = task.get("gated_action")
         approval_id = task.get("approval_id")
 
-        # Gated action থাকলে আগে approval — অনুমোদন ছাড়া draft-ও নয়,
-        # PENDING record করে থামা।
+        # If there is a gated action, approval first — no draft without approval,
+        # record PENDING and stop.
         if gated_action:
             gw = gateway if gateway is not None else self._gateway(approvals_path)
             approved = False
@@ -196,8 +196,8 @@ class CFOFinanceAgent:
 
         task_kind = task.get("task_kind")
 
-        # Overview — task_kind না থাকলে (বা manager-এর নিজের kind হলে):
-        # department-এর সব specialist-এর তালিকা সহ overview DRAFT।
+        # Overview — if there is no task_kind (or the manager's own kind):
+        # an overview DRAFT with the list of all the department's specialists.
         if not task_kind or task_kind == self.task_kind:
             if brain is not None:
                 try:
@@ -227,17 +227,17 @@ class CFOFinanceAgent:
                     f"{overview_entry['status']}"
                 )
             lines.append(
-                "Note: Paying client 0, revenue $0; invoice শুধু paying "
-                "client-এর জন্য Boss-এর কথায়। Email PAUSED since 2026-11-14।"
+                "Note: Paying client 0, revenue $0; invoice only for a paying "
+                "client, on Boss's word. Email PAUSED since 2026-11-14."
             )
             lines.append(
                 f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}")
             lines.append(f"Brain note: {brain_text}")
             notes = (
                 "DRAFT ONLY — mock brain ($0). Overview delegation plan, "
-                "section/engine-এর পুরনো worker execute নয়। Chief wiring "
-                "Phase 2 DONE — Chief এখন এই manager-কে DEPARTMENT_ROUTING "
-                "দিয়ে call করে।"
+                "no execution of a section/engine old worker. Chief wiring "
+                "Phase 2 DONE — the Chief now calls this manager with DEPARTMENT_ROUTING "
+                "calls it."
             )
             return {
                 "status": "draft-ready",
@@ -257,13 +257,13 @@ class CFOFinanceAgent:
                 f"Department: {self.department} | Manager: {self.role}\n"
                 f"Unknown task_kind: {task_kind or 'BOSS INPUT REQUIRED'}\n"
                 f"Known task kinds in this department: {kinds}\n"
-                "No worker was executed. সঠিক task_kind Boss-কে দিতে হবে।\n"
+                "No worker was executed. The correct task_kind must be given to Boss.\n"
                 f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}"
             )
             notes = (
                 "DRAFT ONLY — mock brain ($0). Unknown task_kind — delegation "
-                "হয়নি, কোনো worker চালানো হয়নি। Chief wiring Phase 2 DONE — "
-                "এই manager-কে এখন DEPARTMENT_ROUTING দিয়ে Agency Chief ডাকে।"
+                "did not happen, no worker was run. Chief wiring Phase 2 DONE — "
+                "the Agency Chief now calls this manager via DEPARTMENT_ROUTING."
             )
             return {
                 "status": "unknown-task",
@@ -274,10 +274,10 @@ class CFOFinanceAgent:
                 "gate": self.gate,
             }
 
-        # Phase 3 specialist — standalone .py আছে এমন kind হলে specialist-কে
-        # importlib দিয়ে load করে চালানো (Chief-এর loader-এর মতো); তার
-        # result-ই ফেরানো। Section/engine-এর পুরনো worker-দের জন্য নিচের
-        # plan-draft behavior অপরিবর্তিত।
+        # Phase 3 specialist — for a kind with a standalone .py, load the specialist
+        # and run it with importlib (like the Chief's loader); return its
+        # result. For the section/engine's old workers, the plan-draft behavior below is
+        # unchanged.
         if (entry["status"] == "EXISTING"
                 and entry["file"].startswith(
                     "departments/06-finance-admin/specialists/")):
@@ -303,16 +303,17 @@ class CFOFinanceAgent:
 
         gate = entry["gate"]
         gate_line = (
-            f"Gate: {gate} — Boss-এর \"{gate}\" লাগবে এই কাজের output ব্যবহার করতে।"
+            f"Gate: {gate} — Boss's \"{gate}\" is needed to use this work's output."
             if gate else
-            "Gate: None — draft নিজেই নিরাপদ, কোনো gate নেই।"
+            "Gate: None — the draft itself is safe, there is no gate."
         )
         status_note = (
             "worker exists; this plan routes only, never executes."
             if entry["status"] == "EXISTING" else
             "no worker yet — this plan routes only; it never executes a worker."
             if entry["status"] == "ROLE-ONLY" else
-            "no worker, no skill yet — nothing to route to; Boss-কে সিদ্ধান্ত দিতে হবে।"
+            "worker + skill now exist (2026-11-21) — worker path in File/skill "
+            "above; this plan routes only, never executes."
         )
         output = (
             "[MOCK DRAFT] Delegation plan — DRAFT ONLY\n"
@@ -322,14 +323,14 @@ class CFOFinanceAgent:
             f"File/skill: {entry['file']}\n"
             f"{gate_line}\n"
             f"Status: {entry['status']} — {status_note}\n"
-            "Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।\n"
+            "Chief wiring Phase 2 DONE — the Agency Chief now calls this manager via DEPARTMENT_ROUTING.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Delegation plan, execution নয়। "
-            "Invoice শুধু paying client-এর জন্য Boss-এর কথায়; paying client 0। "
-            "LOCKED pricing internal only — prospect-কে দাম quote নয়। Gate: ok।"
+            "DRAFT ONLY — mock brain ($0). Delegation plan, not execution. "
+            "Invoice only for a paying client, on Boss's word; paying client 0. "
+            "LOCKED pricing internal only — never quote a price to a prospect. Gate: ok."
         )
         return {
             "status": "draft-ready",

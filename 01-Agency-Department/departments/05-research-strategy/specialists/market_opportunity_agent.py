@@ -1,15 +1,15 @@
 """Market Opportunity Agent — market opportunity draft (Phase 3).
 
-ভূমিকা (role): শুধু market opportunity-র DRAFT লেখা — কখনো পাঠায় না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: write a DRAFT of market opportunity only — never send it.
+Gate: none — the draft itself is safe, there is no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-কোনো বানানো market size বা পরিসংখ্যান নয় — সংখ্যা থাকলে source লাগবে, না থাকলে "BOSS INPUT REQUIRED"।
+No invented market size or statistics — if there is a number it needs a source, otherwise "BOSS INPUT REQUIRED".
 
-এই agent কখনো করে না: কিছু পাঠায় না, publish করে না, খরচ করে না,
-delete করে না, client/প্রতিযোগী/দাম/পরিসংখ্যান বানায় না, কোনো
-guarantee দেয় না, dental/medical বা patient-health ব্যবসা নেয় না।
-Email PAUSED (2026-11-14 থেকে) — draft-ই শেষ কথা।
+This agent never: sends anything, publishes anything, spends anything,
+does not delete, does not invent client/competitor/price/statistic facts,
+gives no guarantee, takes no dental/medical or patient-health business.
+Email PAUSED (since 2026-11-14) — the draft is the final word.
 """
 
 import os
@@ -23,7 +23,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class MarketOpportunityAgent:
-    """market opportunity draft — DRAFT ONLY, কখনো পাঠায় না।"""
+    """market opportunity draft — DRAFT ONLY, never sends it."""
 
     task_kind = "market_opportunity"
     gate = None
@@ -31,7 +31,7 @@ class MarketOpportunityAgent:
     role = "Market Opportunity Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -43,7 +43,7 @@ class MarketOpportunityAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -68,7 +68,7 @@ class MarketOpportunityAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """market opportunity draft। কোনো file লেখে না, network ছোঁয় না।"""
+        """market opportunity draft. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Market opportunity draft"
         gated_action = task.get("gated_action")
@@ -106,13 +106,13 @@ class MarketOpportunityAgent:
         output = (
             "[MOCK DRAFT] Market opportunity — DRAFT ONLY\n"
             f"Topic: {topic}\n"
-            "Opportunity lens: US home-service SMBs that miss calls after hours and lose jobs — AI receptionist answers 24/7.\nMarket size: BOSS INPUT REQUIRED — verified source ছাড়া কোনো market size/সংখ্যা লেখা হয়নি।\nNext step (draft): Boss-এর সিদ্ধান্তে niche + state বেছে research করা।\n"
+            "Opportunity lens: US home-service SMBs that miss calls after hours and lose jobs — AI receptionist answers 24/7.\nMarket size: BOSS INPUT REQUIRED — no market size/number was written without a verified source.\nNext step (draft): pick a niche + state by Boss's decision and research it.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Market opportunity draft ONLY। কোনো বানানো market size/stat নেই। "
-            "কখনো পাঠানো নয়, কোনো খরচ নয়। Gate: none।"
+            "DRAFT ONLY — mock brain ($0). Market opportunity draft ONLY. No invented market size/stat. "
+            "Never sending, never spending. Gate: none."
         )
         return {
             "status": "draft-ready",

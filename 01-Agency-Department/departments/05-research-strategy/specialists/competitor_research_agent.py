@@ -1,15 +1,15 @@
 """Competitor Research Agent — competitor research draft (Phase 3).
 
-ভূমিকা (role): শুধু প্রতিযোগী research-এর DRAFT লেখা — কখনো পাঠায় না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: write a DRAFT of competitor research only — never send it.
+Gate: none — the draft itself is safe, there is no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-জানা প্রতিযোগী শুধু এরাই: Smith.ai, Abby, Ruby, CallRail Voice Assist — এই নামগুলোর বাইরে কোনো প্রতিযোগী বানানো যাবে না। কোনো প্রতিযোগীর দাম/পরিসংখ্যান/বৈশিষ্ট্য জানা না থাকলে "BOSS INPUT REQUIRED" — অনুমান করে লেখা যাবে না।
+The known competitors are only these: Smith.ai, Abby, Ruby, CallRail Voice Assist — no competitor may be invented outside these names. If a competitor's price/statistics/features are not known, "BOSS INPUT REQUIRED" — do not write by guessing.
 
-এই agent কখনো করে না: কিছু পাঠায় না, publish করে না, খরচ করে না,
-delete করে না, client/প্রতিযোগী/দাম/পরিসংখ্যান বানায় না, কোনো
-guarantee দেয় না, dental/medical বা patient-health ব্যবসা নেয় না।
-Email PAUSED (2026-11-14 থেকে) — draft-ই শেষ কথা।
+This agent never: sends anything, publishes anything, spends anything,
+does not delete, does not invent client/competitor/price/statistic facts,
+gives no guarantee, takes no dental/medical or patient-health business.
+Email PAUSED (since 2026-11-14) — the draft is the final word.
 """
 
 import os
@@ -23,7 +23,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class CompetitorResearchAgent:
-    """competitor research draft — DRAFT ONLY, কখনো পাঠায় না।"""
+    """competitor research draft — DRAFT ONLY, never sends it."""
 
     task_kind = "competitor_research"
     gate = None
@@ -31,7 +31,7 @@ class CompetitorResearchAgent:
     role = "Competitor Research Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -43,7 +43,7 @@ class CompetitorResearchAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -68,7 +68,7 @@ class CompetitorResearchAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """competitor research draft। কোনো file লেখে না, network ছোঁয় না।"""
+        """competitor research draft. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Competitor research draft"
         gated_action = task.get("gated_action")
@@ -106,13 +106,13 @@ class CompetitorResearchAgent:
         output = (
             "[MOCK DRAFT] Competitor research — DRAFT ONLY\n"
             f"Topic: {topic}\n"
-            "Known competitors (verified names only): Smith.ai, Abby, Ruby, CallRail Voice Assist.\nPositioning note: Talvenor AI receptionist answers 24/7 so no missed call becomes a lost job.\nCompetitor prices/features: BOSS INPUT REQUIRED — verified source ছাড়া কোনো দাম/সংখ্যা লেখা হয়নি।\n"
+            "Known competitors (verified names only): Smith.ai, Abby, Ruby, CallRail Voice Assist.\nPositioning note: Talvenor AI receptionist answers 24/7 so no missed call becomes a lost job.\nCompetitor prices/features: BOSS INPUT REQUIRED — no price/number was written without a verified source.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Competitor research draft ONLY। শুধু verified নাম ব্যবহার করা হয়েছে। "
-            "কখনো পাঠানো নয়, কোনো খরচ নয়। Gate: none।"
+            "DRAFT ONLY — mock brain ($0). Competitor research draft ONLY. Only verified names were used. "
+            "Never sending, never spending. Gate: none."
         )
         return {
             "status": "draft-ready",

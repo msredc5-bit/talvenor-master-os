@@ -1,15 +1,15 @@
 # Department 06: Finance & Admin — Agency (Phase 1)
 
-**উদ্দেশ্য (purpose):** Talvenor Agency-র টাকা আর কাগজপত্রের হিসাব —
-paying client-এর invoice DRAFT, revenue/subscription tracking-এর ভাবনা,
-আর দেখা যায় এমন number দিয়ে financial report। এই department payment
-নেয় না, invoice issue করে না — manager শুধু task-কে specialist-এর
-কাছে route করার DELEGATION PLAN-এর DRAFT বানায়।
+**Purpose:** Talvenor Agency's money and paperwork accounting —
+a paying client's invoice DRAFT, thinking on revenue/subscription tracking,
+and a financial report with visible numbers. This department takes no payment
+and issues no invoice — the manager only
+makes a DRAFT of the DELEGATION PLAN for routing the task to the specialist.
 
-**সত্য অবস্থা (2026-11-19):** Paying client 0। প্রথম মেইল 162। Email PAUSED
-(2026-11-14 থেকে, DNS fix বাকি)। Brain mock ($0)। $0 spend cap — কোনো
-খরচ নেই। Booking: https://calendar.app.google/WLoxBfnLGTdjK3LB8 ·
-ফোন +1 (947) 223-0244।
+**Honest status (2026-11-19):** Paying client 0. First mail 162. Email PAUSED
+(since 2026-11-14, DNS fix pending). Brain mock ($0). $0 spend cap — no
+spending. Booking: https://calendar.app.google/WLoxBfnLGTdjK3LB8 ·
+Phone +1 (947) 223-0244.
 
 ## Manager
 
@@ -17,9 +17,9 @@ paying client-এর invoice DRAFT, revenue/subscription tracking-এর ভা�
 |---|---|---|---|
 | CFOFinanceAgent | `departments/06-finance-admin/manager/cfo_finance_agent.py` | `departments/06-finance-admin/skills/cfo-finance-agent.md` | `ok` |
 
-Manager-এর কাজ: `manage_finance_admin` — task_kind দেখে specialist ঠিক
-করা, delegation plan-এর DRAFT বানানো। Worker execute নয়, invoice issue
-নয়, payment নয়। Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।
+The manager's job: `manage_finance_admin` — pick the specialist by task_kind
+and make a DRAFT of the delegation plan. No worker execution, no invoice issue
+no payment. Chief wiring Phase 2 DONE — the Agency Chief now calls this manager via DEPARTMENT_ROUTING.
 
 ## Mapped existing staff
 
@@ -28,47 +28,47 @@ Manager-এর কাজ: `manage_finance_admin` — task_kind দেখে spec
 | BillingInvoiceAgent | `billing_invoice` | `sections/ops/agents/billing_invoice_agent.py` | `ok` | EXISTING |
 | ReportCompiler | `report_compile` | `engine/workers/src/workers/admin.py` | None | EXISTING |
 
-- **BillingInvoiceAgent** — invoice DRAFT, শুধু LOCKED pricing (2026-11-12)
-  থেকে: Starter $547/mo + $597 build; Growth $1,109/mo + $1,297 build;
-  Scale $1,672/mo + $1,997 build। Invoice শুধু paying client-এর জন্য,
-  Boss-এর কথায়। Paying client 0 — confirm না হলে TEMPLATE only, NOT
-  ISSUED। Prospect-কে কখনো দাম quote নয়, payment collect নয়।
-- **ReportCompiler** — সাপ্তাহিক performance report: কী post হয়েছে, দেখা
-  যায় এমন platform number দিয়ে best/worst, lead list, পরের সপ্তাহে কী
-  বদলাবে। Number না থাকলে "নেই" — কখনো অনুমান বা বানানো metric নয়।
+- **BillingInvoiceAgent** — invoice DRAFT, only from the LOCKED pricing (2026-11-12)
+  — Starter $547/mo + $597 build; Growth $1,109/mo + $1,297 build;
+  Scale $1,672/mo + $1,997 build. An invoice is only for a paying client,
+  on Boss's word. Paying client 0 — if not confirmed, TEMPLATE only, NOT
+  ISSUED. Never quote a price to a prospect, never collect a payment.
+- **ReportCompiler** — weekly performance report: what was posted, visible
+  platform numbers for best/worst, lead list, what changes next week.
+  If there is no number, "none" — never a guess or invented metric.
 
 ## Brief roles (role → status)
 
 | Role | Status | Note |
 |---|---|---|
-| Revenue Tracking Agent | EXISTING | `departments/06-finance-admin/specialists/revenue_tracking_agent.py` (`revenue_tracking`, gate None) — revenue $0, template only; paying client 0, তাই track করার revenue এখনো নেই। |
-| Expense Tracking Agent | GAP | $0 spend cap — কোনো expense নেই, তাই track করার কিছু নেই; worker-ও নেই, skill-ও নেই। |
-| Invoice Management Agent | EXISTING | BillingInvoiceAgent-ই করে (`billing_invoice` / `invoice_management`, gate `ok`)। |
-| Subscription Tracking Agent | EXISTING | `departments/06-finance-admin/specialists/subscription_tracking_agent.py` (`subscription_tracking`, gate None) — Vapi free credit, paid $0 so far; কোনো subscription/cost বানানো নয়। |
-| Financial Reporting Agent | EXISTING | ReportCompiler-ই করে (`report_compile` / `financial_reporting`, no gate) — visible metrics only। |
-| Document Management Agent | EXISTING | `departments/06-finance-admin/specialists/document_management_agent.py` (`document_management`, gate None) — organisation draft only; কোনো file লেখা/সরানো হয় না। |
-| Compliance Calendar Agent | EXISTING | `departments/06-finance-admin/specialists/compliance_calendar_agent.py` (`compliance_calendar`, gate None) — attorney review deferred; কোনো deadline বানানো নয়। |
+| Revenue Tracking Agent | EXISTING | `departments/06-finance-admin/specialists/revenue_tracking_agent.py` (`revenue_tracking`, gate None) — revenue $0, template only; paying client 0, so there is no revenue to track yet. |
+| Expense Tracking Agent | EXISTING | `departments/06-finance-admin/specialists/expense_tracking_agent.py` (`expense_tracking`, gate None) — entry DRAFT + monthly report only; ledger empty ($0 spent); no spend approval. |
+| Invoice Management Agent | EXISTING | BillingInvoiceAgent does it (`billing_invoice` / `invoice_management`, gate `ok`). |
+| Subscription Tracking Agent | EXISTING | `departments/06-finance-admin/specialists/subscription_tracking_agent.py` (`subscription_tracking`, gate None) — Vapi free credit, paid $0 so far; no subscription/cost invented. |
+| Financial Reporting Agent | EXISTING | ReportCompiler does it (`report_compile` / `financial_reporting`, no gate) — visible metrics only. |
+| Document Management Agent | EXISTING | `departments/06-finance-admin/specialists/document_management_agent.py` (`document_management`, gate None) — organisation draft only; no file is written/moved. |
+| Compliance Calendar Agent | EXISTING | `departments/06-finance-admin/specialists/compliance_calendar_agent.py` (`compliance_calendar`, gate None) — attorney review deferred; no deadline invented. |
 
-## Missing roles (worker নেই)
+## Missing roles (no worker)
 
-- Expense Tracking Agent — GAP ($0 spend cap, কোনো expense নেই)।
+- No missing role — Expense Tracking Agent built on 2026-11-21 (skill + worker EXISTING).
 
 Phase 3 DONE (2026-11-19): Revenue Tracking, Subscription Tracking,
-Document Management, Compliance Calendar — 4টাই EXISTING এখন
-(specialist worker + skill .md আছে, CFO Finance Agent চালায়)।
+Document Management, Compliance Calendar — all 4 are EXISTING now
+(specialist worker + skill .md exist, the CFO Finance Agent runs them).
 
 ## Gate
 
 - `ok` (CFOFinanceAgent, BillingInvoiceAgent): delegation plan / invoice
-  ব্যবহার করতে Boss-এর "ok" লাগে।
-- None (ReportCompiler): report নিজেই নিরাপদ।
+  Boss's "ok" is needed to use it.
+- None (ReportCompiler): the report itself is safe.
 
-## সৎ সীমা (honest limits)
+## Honest limits
 
-- সব output DRAFT, mock brain ($0)। Delegation plan-ই শেষ কথা — execution নয়।
-- LOCKED pricing (2026-11-12) internal only — prospect-কে কখনো দাম quote নয়।
-- Payment collect নয় — কোনো payment link/charge নেই।
-- কোনো metric/সংখ্যা অনুমান নয় — দেখা যায় এমন number ছাড়া report-এ "নেই"।
-- $0 spend cap — কোনো খরচ নেই, কোনো expense track করার নেই।
-- Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।
-- Paying client 0; প্রথম মেইল 162; Email PAUSED (2026-11-14 থেকে)।
+- All output is DRAFT, mock brain ($0). The delegation plan is the final word — no execution.
+- LOCKED pricing (2026-11-12) internal only — never quote a price to a prospect.
+- No payment collection — no payment link/charge.
+- No metric/number is a guess — without a visible number, the report says "none".
+- $0 spend cap — no spending, no expense to track.
+- Chief wiring Phase 2 DONE — the Agency Chief now calls this manager via DEPARTMENT_ROUTING.
+- Paying client 0; first mail 162; Email PAUSED (since 2026-11-14).
