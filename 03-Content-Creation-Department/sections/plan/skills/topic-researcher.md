@@ -1,21 +1,21 @@
 # Skill: Topic Researcher
 
-**Role:** Topic Researcher — Plan section-এর topic বাছাইকারী। Agent: `TopicResearcherAgent` (`sections/plan/agents/topic_researcher.py`, task_kind `content_plan`, gate `ok`)। Worker: `TopicResearcher` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `topic_research`, gate `ok`)।
-**Chief task type:** `content_plan`। **Stage:** 1-research (+ 0a-niche, 2a-concept) — MOCK।
+**Role:** Topic Researcher — topic picker for the Plan section. Agent: `TopicResearcherAgent` (`sections/plan/agents/topic_researcher.py`, task_kind `content_plan`, gate `ok`). Worker: `TopicResearcher` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `topic_research`, gate `ok`).
+**Chief task type:** `content_plan`. **Stage:** 1-research (+ 0a-niche, 2a-concept) — MOCK.
 
 ## Input
 
-- niche (যেমন "AI Tools & Tutorials"), audience (US viewers)
-- Boss-এর দেওয়া trend/topic থাকলে সেটা
-- আগের সপ্তাহের report (থাকলে — stage 10-next-plan থেকে)
+- niche (e.g. "AI Tools & Tutorials"), audience (US viewers)
+- Boss's trend/topic if given
+- last week's report (if there is one — from stage 10-next-plan)
 
 ## Method (step-by-step)
 
-1. Niche জানা থাকলে 0a-niche stage skip হয় — সরাসরি topic বাছো। Niche না থাকলে `tools/niche_score.py` (৪ axis-এ ১–১০ score) দিয়ে niche যাচাই করো।
-2. CEO-র সিদ্ধান্ত নিয়ে niche + audience-এর জন্য **৩টি content topic** বাছো — প্রতিটার angle, কেন fit করে, আর পরের research step কী।
-3. প্রতিটা topic-এর জন্য ৩–৫ concept লেখো, `concept_score.py` দিয়ে ১–১০ score করো (stage 2a-concept) — score scaffold মাত্র, আসল trend data নয়।
-4. কোনো invented client / testimonial / case study / stat / price লিখো না।
-5. Output-এ `[MOCK DRAFT]` লিখো — mock brain ($0), আসল trend data পড়া হয়নি।
+1. If the niche is known, stage 0a-niche is skipped — pick topics directly. If there is no niche, check the niche with `tools/niche_score.py` (1–10 score on 4 axes).
+2. Take the CEO's decision and pick **3 content topics** for the niche + audience — each one's angle, why it fits, and what the next research step is.
+3. For each topic write 3–5 concepts, score them 1–10 with `concept_score.py` (stage 2a-concept) — scores are a scaffold only, not real trend data.
+4. Do not write any invented client / testimonial / case study / stat / price.
+5. Write `[MOCK DRAFT]` in the output — mock brain ($0), no real trend data was read.
 
 ## Output format
 
@@ -23,8 +23,8 @@
 [MOCK DRAFT] — Topic research (niche: ... | audience: ...)
 1. Topic: "..."
    Angle: ...
-   কেন fit করে: ...
-   পরের research step: ...
+   Why it fits: ...
+   Next research step: ...
 2. Topic: "..."
    ...
 3. Topic: "..."
@@ -33,10 +33,10 @@
 
 ## Gate
 
-`ok` — Boss-এর "ok" ছাড়া topic final নয়।
+`ok` — no topic is final without Boss's "ok".
 
-## সৎ সীমা
+## Honest limits
 
-- **Mock brain** — আসল trend data পড়ে না; score scaffold মাত্র।
-- **Week 1 উদাহরণ (আসল):** ToolPilot Week 1 long video — "Google's Nano Banana 2 Is Free - But Is It Good?" (48 chars, title lint 100/100; thumbnail text "5 EDITS TESTED") — READY TO RECORD, verdict [FILL AFTER TEST]।
-- Niche জানা থাকলে 0a stage skip হয়।
+- **Mock brain** — it does not read real trend data; scores are a scaffold only.
+- **Week 1 example (real):** ToolPilot Week 1 long video — "Google's Nano Banana 2 Is Free - But Is It Good?" (48 chars, title lint 100/100; thumbnail text "5 EDITS TESTED") — READY TO RECORD, verdict [FILL AFTER TEST].
+- If the niche is known, stage 0a is skipped.

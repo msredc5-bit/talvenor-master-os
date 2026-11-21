@@ -1,28 +1,28 @@
 # Skill: Content Planner
 
-**Role:** Content Planner — Plan section-এর weekly/monthly plan বানানো। Agent: `ContentPlannerAgent` (`sections/plan/agents/content_planner.py`, task_kind `plan_weekly`, gate `ok`)। Worker: নেই — Chief-level role।
-**Chief task type:** `plan_weekly` (Phase 7 — নতুন)। **Stage:** 0b-plan + 10-next-plan — MOCK।
-**Method-এর source:** `youtube-skills/yt-plan/SKILL.md` (সপ্তাহের plan — anchor video + cheap video, Boss-এর আসল ঘণ্টা জিজ্ঞেস করে) + `scripts/loop_next.py` (stage 10-next-plan — আগের report পড়ে পরের brief) + `pipeline.md`।
+**Role:** Content Planner — making the Plan section's weekly/monthly plan. Agent: `ContentPlannerAgent` (`sections/plan/agents/content_planner.py`, task_kind `plan_weekly`, gate `ok`). Worker: none — Chief-level role.
+**Chief task type:** `plan_weekly` (Phase 7 — new). **Stage:** 0b-plan + 10-next-plan — MOCK.
+**Method source:** `youtube-skills/yt-plan/SKILL.md` (weekly plan — anchor video + cheap video, asks for Boss's real hours) + `scripts/loop_next.py` (stage 10-next-plan — reads the previous report and writes the next brief) + `pipeline.md`.
 
 ## Input
 
-- আগের সপ্তাহের report (থাকলে)
-- Boss-এর দেওয়া ঘণ্টা (সপ্তাহে কত ঘণ্টা দেবেন)
-- half-made content-এর list, niche/topic
+- last week's report (if there is one)
+- Boss's hours (how many hours a week he will give)
+- list of half-made content, niche/topic
 
 ## Method (step-by-step)
 
-1. Boss-এর আসল ঘণ্টা জিজ্ঞেস করো — ঘণ্টা না জেনে plan বানিও না। Anchor video (long) + cheap video (Shorts) — দুটোই plan-এ রাখো।
-2. ToolPilot rhythm ধরো: **১ long/week (Sat 10 AM ET = Sat 9 PM Dhaka) + ২ Shorts/week (Wed + Fri 9 AM ET = 8 PM Dhaka)**।
-3. Talvenor weekly social (৫ post) একই plan-এ রাখো — Mon Reel, Tue Carousel, Wed Image, Thu Carousel, Fri LinkedIn (LinkedIn = Boss নিজে post করেন, personal profile)।
-4. Table বানাও: pillar + format + platform + posting time।
-5. আগের report থাকলে সেটা পড়ে পরের brief লেখো (stage 10-next-plan) — report না থাকলে সেটা বলো, বানিও না।
-6. Plan-এর ভেতরে কোনো metric/claim invent করো না। Output-এ `[MOCK DRAFT]` লিখো।
+1. Ask for Boss's real hours — do not make a plan without knowing the hours. Anchor video (long) + cheap video (Shorts) — keep both in the plan.
+2. Take the ToolPilot rhythm: **1 long/week (Sat 10 AM ET = Sat 9 PM Dhaka) + 2 Shorts/week (Wed + Fri 9 AM ET = 8 PM Dhaka)**.
+3. Keep the Talvenor weekly social (5 posts) in the same plan — Mon Reel, Tue Carousel, Wed Image, Thu Carousel, Fri LinkedIn (LinkedIn = Boss posts himself, personal profile).
+4. Make a table: pillar + format + platform + posting time.
+5. If there is a previous report, read it and write the next brief (stage 10-next-plan) — if there is none, say so, do not make one up.
+6. Do not invent any metric/claim inside a plan. Write `[MOCK DRAFT]` in the output.
 
 ## Output format
 
 ```
-[MOCK DRAFT] — Weekly plan (week: ... | Boss-এর ঘণ্টা: ...)
+[MOCK DRAFT] — Weekly plan (week: ... | Boss's hours: ...)
 | Day | Pillar | Format | Platform | Posting time |
 | Mon | ... | Reel | ... | ... |
 | Tue | ... | Carousel | ... | ... |
@@ -33,10 +33,10 @@
 
 ## Gate
 
-`ok` — Boss-এর "ok" বা edit ছাড়া plan চলে না।
+`ok` — no plan runs without Boss's "ok" or edits.
 
-## সৎ সীমা
+## Honest limits
 
-- **Nov 16–22 Talvenor weekly plan (৫ post: Mon Reel, Tue Carousel, Wed Image, Thu Carousel, Fri LinkedIn) 2026-11-15 18:00-তে দেওয়া হয়েছে — Boss-এর "ok" এখনো বাকি।** Nov 9–15-এ কিছু post হয়নি (plan approve হয়নি)।
-- **Week 1 উদাহরণ (আসল):** ToolPilot Week 1 long video — "Google's Nano Banana 2 Is Free - But Is It Good?" — READY TO RECORD, verdict [FILL AFTER TEST]।
-- কোনো plan-ই approved বলে দাবি করা হয় না — "ok" না আসা পর্যন্ত সব draft।
+- **Nov 16–22 Talvenor weekly plan (5 posts: Mon Reel, Tue Carousel, Wed Image, Thu Carousel, Fri LinkedIn) was given 2026-11-15 18:00 — Boss's "ok" is still pending.** Nothing was posted Nov 9–15 (the plan was not approved).
+- **Week 1 example (real):** ToolPilot Week 1 long video — "Google's Nano Banana 2 Is Free - But Is It Good?" — READY TO RECORD, verdict [FILL AFTER TEST].
+- No plan is claimed to be approved — everything is a draft until "ok" comes.

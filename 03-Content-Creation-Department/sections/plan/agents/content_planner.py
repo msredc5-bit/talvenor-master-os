@@ -1,34 +1,34 @@
 """Content Planner Agent — plan section (Phase 7, Chief-level role).
 
-ভূমিকা (role): Weekly / monthly content plan বানানো — কী post হবে, কখন,
-কোন order-এ, Boss-এর আসল capacity অনুযায়ী। Talvenor weekly social plan
-(৫ post) আর ToolPilot-এর rhythm (১ long/week + ২ Shorts/week) — দুটোই
-এই role-এর কাজ।
-Worker: নেই — Chief-level role, standalone draft logic (brain.complete)।
-Method-এর source: youtube-skills/yt-plan/SKILL.md + scripts/loop_next.py
-(stage 10-next-plan) + pipeline.md।
-Channel: ToolPilot @ToolPilotai69 — AI Tools & Tutorials, faceless, US viewers।
-Pipeline stage: 0b-plan + 10-next-plan — MOCK।
-Status: DRAFT ONLY — mock brain ($0), সব output [MOCK DRAFT]।
-Gate: "ok" — Boss-এর "ok" বা edit ছাড়া plan চলে না।
+Role: make a weekly / monthly content plan — what gets posted, when,
+in which order, per Boss's real capacity. The Talvenor weekly social plan
+(5 posts) and ToolPilot's rhythm (1 long/week + 2 Shorts/week) — both are
+this role's work.
+Worker: none — Chief-level role, standalone draft logic (brain.complete).
+Method source: youtube-skills/yt-plan/SKILL.md + scripts/loop_next.py
+(stage 10-next-plan) + pipeline.md.
+Channel: ToolPilot @ToolPilotai69 — AI Tools & Tutorials, faceless, US viewers.
+Pipeline stage: 0b-plan + 10-next-plan — MOCK.
+Status: DRAFT ONLY — mock brain ($0), all output [MOCK DRAFT].
+Gate: "ok" — no plan runs without Boss's "ok" or edits.
 
-সৎ সত্য: Nov 16–22 Talvenor weekly plan (৫ post: Mon Reel, Tue Carousel,
-Wed Image, Thu Carousel, Fri LinkedIn) 2026-11-15 18:00-তে দেওয়া হয়েছে —
-Boss-এর "ok" এখনো বাকি। কোনো plan-ই approved বলে দাবি করা হয় না।
+Honest truth: the Nov 16–22 Talvenor weekly plan (5 posts: Mon Reel, Tue Carousel,
+Wed Image, Thu Carousel, Fri LinkedIn) was given 2026-11-15 18:00 —
+Boss's "ok" is still pending. No plan is claimed to be approved.
 
-কখনো করে না: publish করে না, upload করে না, send করে না, খরচ করে না,
-delete করে না। Plan-এর ভেতরে কোনো metric/claim invent করে না।
-Upload OFF — this agent never uploads।
+Never does: does not publish, upload, send, spend, or
+delete. Does not invent any metric/claim inside a plan.
+Upload OFF — this agent never uploads.
 """
 
 import os
 import sys
 
-# Import time-এ শুধু stdlib। Brain / gateway — সব lazy, run()-এর ভিতরে।
+# Only stdlib at import time. Brain / gateway — all lazy, inside run().
 
 
 class ContentPlannerAgent:
-    """Content Planner — weekly plan-এর draft agent (standalone, no worker)।"""
+    """Content Planner — weekly plan draft agent (standalone, no worker)."""
 
     task_kind = "plan_weekly"
     gate = "ok"
@@ -67,7 +67,7 @@ class ContentPlannerAgent:
         return BrainFactory.get_brain("content")
 
     def _draft(self, prompt, brain):
-        """brain.complete(prompt) দিয়ে draft — brain না থাকলে scaffold।"""
+        """Draft via brain.complete(prompt) — scaffold if there is no brain."""
         llm = brain
         if llm is None:
             try:
@@ -98,12 +98,12 @@ class ContentPlannerAgent:
             "mock_brain": True,
             "gate": self.gate,
             "note": "Gated action — PENDING approval recorded. Nothing was "
-                    "sent/published/uploaded/spent/deleted. Boss-এর gate word "
-                    "ছাড়া এগোবে না।",
+                    "sent/published/uploaded/spent/deleted. Without Boss's gate word " 
+                    "it will not go ahead.",
         }
 
     def _gate_check(self, task, gateway, approvals_path):
-        """Gated action থাকলে draft চালানো যাবে না — PENDING-এ আটকাও।"""
+        """If there is a gated action, the draft may not run — hold it as PENDING."""
         gated_action = task.get("gated_action")
         if not gated_action:
             return None
@@ -116,8 +116,8 @@ class ContentPlannerAgent:
                 "draft_only": True,
                 "mock_brain": True,
                 "gate": self.gate,
-                "upload_stage": "OFF by default — needs Boss-এর 'upload it' + "
-                                "YOUTUBE_UPLOAD_ENABLED=1 + Boss-এর নিজের "
+                "upload_stage": "OFF by default — needs Boss's 'upload it' + " 
+                                "YOUTUBE_UPLOAD_ENABLED=1 + Boss's own " 
                                 "YouTube credential",
                 "note": "Upload stage 9 is OFF by default. This agent never uploads.",
             }
@@ -126,7 +126,7 @@ class ContentPlannerAgent:
         if approval_id:
             try:
                 if gw.is_approved(approval_id):
-                    return None  # approved — তবুও শুধু draft, action execute নয়
+                    return None  # approved — still only a draft, no action executed
             except KeyError:
                 pass
         if gated_action in ("send", "publish", "spend", "delete"):
@@ -142,19 +142,19 @@ class ContentPlannerAgent:
             "draft_only": True,
             "mock_brain": True,
             "gate": self.gate,
-            "note": f"Gate word '{self.gate}' ছাড়া এগোবে না — Boss-এর "
-                    f"অনুমোদন বাকি। Gated action {gated_action!r}-এর জন্য "
-                    "কোনো approval record বানানো যায়নি।",
+            "note": f"Gate word '{self.gate}' is needed to go ahead — Boss's " 
+                    f"approval is pending. For gated action {gated_action!r} " 
+                    "no approval record could be made.",
         }
 
     # -- run ---------------------------------------------------------------
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Weekly plan DRAFT বানানো — standalone, brain.complete দিয়ে।
+        """Make a weekly plan DRAFT — standalone, via brain.complete.
 
         task = {"type": "plan_weekly", "title": "...",
                 "payload": {"hours": ..., "niche": ..., ...},
                 "gated_action": ... (optional), "approval_id": ... (optional)}
-        কোনো file লেখে না, network ছোঁয় না, কিছু publish/upload করে না।
+        It writes no file, touches no network, and publishes/uploads nothing.
         """
         task = dict(task or {})
         payload = dict(task.get("payload") or {})
@@ -175,11 +175,11 @@ class ContentPlannerAgent:
         )
         text = self._draft(prompt, brain)
         notes = text + (
-            "\n[MOCK DRAFT] — mock brain ($0), DRAFT ONLY। Output পাঠাতে/ব্যবহার "
-            "করতে Boss-এর gate word লাগবে: 'ok'।\n"
-            "সৎ নোট: Nov 16–22 Talvenor weekly plan (৫ post: Mon Reel, Tue Carousel, "
-            "Wed Image, Thu Carousel, Fri LinkedIn) 2026-11-15 18:00-তে দেওয়া হয়েছে — "
-            "Boss-এর \"ok\" এখনো বাকি। এই draft-ও approved নয়।")
+            "\n[MOCK DRAFT] — mock brain ($0), DRAFT ONLY. To send/use the output, "
+            "Boss's gate word is needed: 'ok'.\n"
+            "Honest note: the Nov 16–22 Talvenor weekly plan (5 posts: Mon Reel, Tue Carousel, "
+            "Wed Image, Thu Carousel, Fri LinkedIn) was given 2026-11-15 18:00 — "
+            "Boss's \"ok\" is still pending. This draft is not approved either.")
         return {
             "status": "draft-ready",
             "type": self.task_kind,

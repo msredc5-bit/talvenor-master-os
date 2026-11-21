@@ -1,38 +1,38 @@
 """Script Writer Agent — produce section (Phase 7).
 
-ভূমিকা (role): বাছা topic-কে script বানানো — প্রথম ২ সেকেন্ডে hook,
-একটা পরিষ্কার idea, simple CTA।
-Vendored worker: ScriptWriter (Chief task script_write, gate ok)।
-Channel: ToolPilot @ToolPilotai69 — AI Tools & Tutorials, faceless, US viewers।
-Pipeline stage: 2b-script (yt-script + hookscore.py) — MOCK।
-Status: DRAFT ONLY — mock brain ($0), সব output [MOCK DRAFT]।
-Gate: "ok" — Boss-এর "ok" ছাড়া script ব্যবহার করা যাবে না।
+Role: turn a chosen topic into a script — hook in the first 2 seconds,
+one clear idea, simple CTA.
+Vendored worker: ScriptWriter (Chief task script_write, gate ok).
+Channel: ToolPilot @ToolPilotai69 — AI Tools & Tutorials, faceless, US viewers.
+Pipeline stage: 2b-script (yt-script + hookscore.py) — MOCK.
+Status: DRAFT ONLY — mock brain ($0), all output [MOCK DRAFT].
+Gate: "ok" — a script may not be used without Boss's "ok".
 
-⚠️ VOICE.md DRAFT সতর্কতা (প্রতিটা output-এ থাকে): VOICE.md এখনো DRAFT —
-Boss ঠিক না করা পর্যন্ত কোনো script-ই "final" নয়। Boss-এর কোনো YouTube
-video এখনো নেই, তাই copy করার মতো আসল transcript নেই।
-Boss live English বলেন না — read-aloud script-এ প্রতিটা English line-এর
-নিচে Bengali transliteration লাগে।
+⚠️ VOICE.md DRAFT warning (in every output): VOICE.md is still DRAFT —
+no script is "final" until Boss fixes it. Boss has no YouTube
+video yet, so there is no real transcript to copy from.
+Boss does not speak live English — in a read-aloud script, under each English line
+Bengali transliteration is needed.
 
-কখনো করে না: publish করে না, upload করে না, send করে না, খরচ করে না,
-delete করে না। Test না দেখে verdict লেখে না। কোনো invented client /
-testimonial / case study / stat / price লেখে না।
-Upload OFF — this agent never uploads।
+Never does: does not publish, upload, send, spend, or
+delete. Does not write a verdict without seeing the test. Does not write any invented client /
+testimonial / case study / stat / price.
+Upload OFF — this agent never uploads.
 """
 
 import os
 import sys
 import uuid
 
-# Import time-এ শুধু stdlib। Worker / brain / gateway — সব lazy, run()-এর ভিতরে
-# (দুই department-এর vendored tree-ই top-level `src` দেয় — module level-এ
-# src.creator_workers import করলে package collision হয়)।
+# Only stdlib at import time. Brain / gateway — all lazy, inside run().
+# (both departments' vendored trees give a top-level `src` — importing
+# src.creator_workers at module level causes a package collision).
 
 VOICE_STATUS = "DRAFT — Boss must correct before any real script ships"
 
 
 class ScriptWriterAgent:
-    """Script Writer — produce section-এর script draft agent।"""
+    """Script Writer — script draft agent for the produce section."""
 
     task_kind = "script_write"
     gate = "ok"
@@ -106,12 +106,12 @@ class ScriptWriterAgent:
             "mock_brain": True,
             "gate": self.gate,
             "note": "Gated action — PENDING approval recorded. Nothing was "
-                    "sent/published/uploaded/spent/deleted. Boss-এর gate word "
-                    "ছাড়া এগোবে না।",
+                    "sent/published/uploaded/spent/deleted. Without Boss's gate word " 
+                    "it will not go ahead.",
         }
 
     def _gate_check(self, task, gateway, approvals_path):
-        """Gated action থাকলে worker চালানো যাবে না — PENDING-এ আটকাও।"""
+        """If there is a gated action, the draft may not run — hold it as PENDING."""
         gated_action = task.get("gated_action")
         if not gated_action:
             return None
@@ -124,8 +124,8 @@ class ScriptWriterAgent:
                 "draft_only": True,
                 "mock_brain": True,
                 "gate": self.gate,
-                "upload_stage": "OFF by default — needs Boss-এর 'upload it' + "
-                                "YOUTUBE_UPLOAD_ENABLED=1 + Boss-এর নিজের "
+                "upload_stage": "OFF by default — needs Boss's 'upload it' + " 
+                                "YOUTUBE_UPLOAD_ENABLED=1 + Boss's own " 
                                 "YouTube credential",
                 "note": "Upload stage 9 is OFF by default. This agent never uploads.",
             }
@@ -134,7 +134,7 @@ class ScriptWriterAgent:
         if approval_id:
             try:
                 if gw.is_approved(approval_id):
-                    return None  # approved — তবুও শুধু draft, action execute নয়
+                    return None  # approved — still only a draft, no action executed
             except KeyError:
                 pass
         if gated_action in ("send", "publish", "spend", "delete"):
@@ -150,19 +150,19 @@ class ScriptWriterAgent:
             "draft_only": True,
             "mock_brain": True,
             "gate": self.gate,
-            "note": f"Gate word '{self.gate}' ছাড়া এগোবে না — Boss-এর "
-                    f"অনুমোদন বাকি। Gated action {gated_action!r}-এর জন্য "
-                    "কোনো approval record বানানো যায়নি।",
+            "note": f"Gate word '{self.gate}' is needed to go ahead — Boss's " 
+                    f"approval is pending. For gated action {gated_action!r} " 
+                    "no approval record could be made.",
         }
 
     # -- run ---------------------------------------------------------------
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Script draft বানানো — vendored ScriptWriter worker-কে delegate করে।
+        """Make a script draft — delegates to the vendored ScriptWriter worker.
 
         task = {"type": "script_write", "title": "...",
                 "payload": {"topic": ..., "format": ...},
                 "gated_action": ... (optional), "approval_id": ... (optional)}
-        কোনো file লেখে না, network ছোঁয় না, কিছু publish/upload করে না।
+        It writes no file, touches no network, and publishes/uploads nothing.
         """
         task = dict(task or {})
         payload = dict(task.get("payload") or {})
@@ -189,12 +189,12 @@ class ScriptWriterAgent:
         worker_result = worker.execute(creator_task)
 
         notes = (worker_result.notes or "") + (
-            "\n[MOCK DRAFT] — mock brain ($0), DRAFT ONLY। Output পাঠাতে/ব্যবহার "
-            "করতে Boss-এর gate word লাগবে: 'ok'।\n"
-            f"⚠️ VOICE.md {VOICE_STATUS} — এই script final নয়।\n"
-            "Boss live English বলেন না — read-aloud script-এ প্রতিটা English "
-            "line-এর নিচে Bengali transliteration লাগে।\n"
-            "Verdict: [FILL AFTER TEST] — Boss-এর আসল recording না দেখে লেখা হয়নি।")
+            "\n[MOCK DRAFT] — mock brain ($0), DRAFT ONLY. To send/use the output, "
+            "Boss's gate word is needed: 'ok'.\n"
+            f"⚠️ VOICE.md {VOICE_STATUS} — this script is not final.\n"
+            "Boss does not speak live English — in a read-aloud script, under each English "
+            "line Bengali transliteration is needed.\n"
+            "Verdict: [FILL AFTER TEST] — not written without seeing Boss's real recording.")
         return {
             "status": "draft-ready",
             "type": self.task_kind,

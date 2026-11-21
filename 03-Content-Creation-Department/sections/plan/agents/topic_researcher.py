@@ -1,30 +1,30 @@
 """Topic Researcher Agent — plan section (Phase 7).
 
-ভূমিকা (role): niche + audience-এর জন্য ৩টি content topic বাছা —
-প্রতিটার angle, কেন fit করে, আর পরের research step কী।
-Vendored worker: TopicResearcher (Chief task content_plan, gate ok)।
-Channel: ToolPilot @ToolPilotai69 — AI Tools & Tutorials, faceless, US viewers।
-Pipeline stage: 1-research (+ 0a-niche, 2a-concept) — MOCK।
-Status: DRAFT ONLY — mock brain ($0), সব output [MOCK DRAFT]।
-Gate: "ok" — Boss-এর "ok" ছাড়া topic final নয়।
+Role: pick 3 content topics for a niche + audience —
+each one's angle, why it fits, and what the next research step is.
+Vendored worker: TopicResearcher (Chief task content_plan, gate ok).
+Channel: ToolPilot @ToolPilotai69 — AI Tools & Tutorials, faceless, US viewers.
+Pipeline stage: 1-research (+ 0a-niche, 2a-concept) — MOCK.
+Status: DRAFT ONLY — mock brain ($0), all output [MOCK DRAFT].
+Gate: "ok" — no topic is final without Boss's "ok".
 
-কখনো করে না: publish করে না, upload করে না, send করে না, খরচ করে না,
-delete করে না। আসল trend data পড়ে না (mock brain — score scaffold মাত্র)।
-কোনো invented client / stat / testimonial / price লেখে না।
-Upload OFF — this agent never uploads।
+Never does: does not publish, upload, send, spend, or
+delete. Does not read real trend data (mock brain — scores are a scaffold only).
+Does not write any invented client / stat / testimonial / price.
+Upload OFF — this agent never uploads.
 """
 
 import os
 import sys
 import uuid
 
-# Import time-এ শুধু stdlib। Worker / brain / gateway — সব lazy, run()-এর ভিতরে
-# (দুই department-এর vendored tree-ই top-level `src` দেয় — module level-এ
-# src.creator_workers import করলে package collision হয়)।
+# Only stdlib at import time. Brain / gateway — all lazy, inside run().
+# (both departments' vendored trees give a top-level `src` — importing
+# src.creator_workers at module level causes a package collision).
 
 
 class TopicResearcherAgent:
-    """Topic Researcher — plan section-এর topic বাছাই agent।"""
+    """Topic Researcher — topic-picking agent for the plan section."""
 
     task_kind = "content_plan"
     gate = "ok"
@@ -98,12 +98,12 @@ class TopicResearcherAgent:
             "mock_brain": True,
             "gate": self.gate,
             "note": "Gated action — PENDING approval recorded. Nothing was "
-                    "sent/published/uploaded/spent/deleted. Boss-এর gate word "
-                    "ছাড়া এগোবে না।",
+                    "sent/published/uploaded/spent/deleted. Without Boss's gate word " 
+                    "it will not go ahead.",
         }
 
     def _gate_check(self, task, gateway, approvals_path):
-        """Gated action থাকলে worker চালানো যাবে না — PENDING-এ আটকাও।"""
+        """If there is a gated action, the draft may not run — hold it as PENDING."""
         gated_action = task.get("gated_action")
         if not gated_action:
             return None
@@ -116,8 +116,8 @@ class TopicResearcherAgent:
                 "draft_only": True,
                 "mock_brain": True,
                 "gate": self.gate,
-                "upload_stage": "OFF by default — needs Boss-এর 'upload it' + "
-                                "YOUTUBE_UPLOAD_ENABLED=1 + Boss-এর নিজের "
+                "upload_stage": "OFF by default — needs Boss's 'upload it' + " 
+                                "YOUTUBE_UPLOAD_ENABLED=1 + Boss's own " 
                                 "YouTube credential",
                 "note": "Upload stage 9 is OFF by default. This agent never uploads.",
             }
@@ -126,7 +126,7 @@ class TopicResearcherAgent:
         if approval_id:
             try:
                 if gw.is_approved(approval_id):
-                    return None  # approved — তবুও শুধু draft, action execute নয়
+                    return None  # approved — still only a draft, no action executed
             except KeyError:
                 pass
         if gated_action in ("send", "publish", "spend", "delete"):
@@ -142,19 +142,19 @@ class TopicResearcherAgent:
             "draft_only": True,
             "mock_brain": True,
             "gate": self.gate,
-            "note": f"Gate word '{self.gate}' ছাড়া এগোবে না — Boss-এর "
-                    f"অনুমোদন বাকি। Gated action {gated_action!r}-এর জন্য "
-                    "কোনো approval record বানানো যায়নি।",
+            "note": f"Gate word '{self.gate}' is needed to go ahead — Boss's " 
+                    f"approval is pending. For gated action {gated_action!r} " 
+                    "no approval record could be made.",
         }
 
     # -- run ---------------------------------------------------------------
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Topic draft বানানো — vendored TopicResearcher worker-কে delegate করে।
+        """Make a topic draft — delegates to the vendored TopicResearcher worker.
 
         task = {"type": "content_plan", "title": "...",
                 "payload": {"niche": ..., "audience": ...},
                 "gated_action": ... (optional), "approval_id": ... (optional)}
-        কোনো file লেখে না, network ছোঁয় না, কিছু publish/upload করে না।
+        It writes no file, touches no network, and publishes/uploads nothing.
         """
         task = dict(task or {})
         payload = dict(task.get("payload") or {})
@@ -181,8 +181,8 @@ class TopicResearcherAgent:
         worker_result = worker.execute(creator_task)
 
         notes = (worker_result.notes or "") + (
-            "\n[MOCK DRAFT] — mock brain ($0), DRAFT ONLY। Output পাঠাতে/ব্যবহার "
-            "করতে Boss-এর gate word লাগবে: 'ok'। আসল trend data পড়া হয়নি।")
+            "\n[MOCK DRAFT] — mock brain ($0), DRAFT ONLY. To send/use the output, "
+            "Boss's gate word is needed: 'ok'. No real trend data was read.")
         return {
             "status": "draft-ready",
             "type": self.task_kind,

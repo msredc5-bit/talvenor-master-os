@@ -1,59 +1,59 @@
 """Visual Producer Agent — produce section (Phase 7).
 
-ভূমিকা (role): Visual plan বানানো — shot list, thumbnail idea, on-screen
-text (verbatim, ছোট, readable) + stage 4-video-র production plan +
-missing-inputs checklist।
-Vendored worker: VisualProducer (Chief task video_produce, gate ok)।
-Channel: ToolPilot @ToolPilotai69 — AI Tools & Tutorials, faceless, US viewers।
-Pipeline stage: 3-visual-pack (+ 4-video plan) — MOCK।
-Status: DRAFT ONLY — mock brain ($0), সব output [MOCK DRAFT]।
-Gate: "ok" — Boss-এর "ok" ছাড়া visual plan ব্যবহার করা যাবে না।
+Role: make a visual plan — shot list, thumbnail idea, on-screen
+text (verbatim, short, readable) + the stage 4-video production plan +
+missing-inputs checklist.
+Vendored worker: VisualProducer (Chief task video_produce, gate ok).
+Channel: ToolPilot @ToolPilotai69 — AI Tools & Tutorials, faceless, US viewers.
+Pipeline stage: 3-visual-pack (+ 4-video plan) — MOCK.
+Status: DRAFT ONLY — mock brain ($0), all output [MOCK DRAFT].
+Gate: "ok" — the visual plan may not be used without Boss's "ok".
 
-⚠️ Stage 4 BLOCKED: এই agent video file বানায় না — video_file সবসময়
-None + missing-inputs list। Real footage / OBS recording নেই, Boss-এর PC
-GPU-র নাম 2026-11-01 থেকে জানা যায়নি, AI video generation এখানে
-REGION-BLOCKED (retry করা হয় না)। কোনো shot film করা না গেলে সেটা বলতে
-হয়, fake করা যাবে না।
+⚠️ Stage 4 BLOCKED: this agent does not make a video file — video_file is always
+None + a missing-inputs list. No real footage / OBS recording, Boss's PC
+GPU name unknown since 2026-11-01, AI video generation is
+REGION-BLOCKED here (no retry). If a shot cannot be filmed, that must be said;
+it may not be faked.
 
-কখনো করে না: video render করে না, publish করে না, upload করে না, send
-করে না, খরচ করে না, delete করে না। কোনো invented client / stat /
-testimonial / price লেখে না।
-Upload OFF — this agent never uploads।
+Never does: does not render video, publish, upload, send,
+spend, or delete. Does not write any invented client / stat /
+testimonial / price.
+Upload OFF — this agent never uploads.
 """
 
 import os
 import sys
 import uuid
 
-# Import time-এ শুধু stdlib। Worker / brain / gateway — সব lazy, run()-এর ভিতরে
-# (দুই department-এর vendored tree-ই top-level `src` দেয় — module level-এ
-# src.creator_workers import করলে package collision হয়)।
+# Only stdlib at import time. Brain / gateway — all lazy, inside run().
+# (both departments' vendored trees give a top-level `src` — importing
+# src.creator_workers at module level causes a package collision).
 
 
 def missing_video_inputs(payload):
-    """video_produce-এর জন্য ঠিক কী কী input বাকি — বানানো উত্তর নয়, checklist।"""
+    """Exactly which inputs are still missing for video_produce — not a made-up answer, a checklist."""
     missing = []
     if not payload.get("footage"):
         missing.append(
             "footage — real footage file (OBS recording / phone clip). "
-            "না থাকলে video stage শুধু plan লেখে, video বানায় না।")
+            "Without it, the video stage only writes a plan, it does not make a video.")
     if not payload.get("voice_lines") and not payload.get("script"):
         missing.append(
-            "voiceover lines / script — VOICE.md DRAFT, Boss-এর "
-            "correction বাকি; script ছাড়া voiceover line লেখা যায় না।")
+            "voiceover lines / script — VOICE.md DRAFT, Boss's " 
+            "correction pending; without a script no voiceover line can be written.")
     if payload.get("provider") == "local" and not payload.get("gpu_name"):
         missing.append(
-            "Boss-এর PC GPU নাম — true AI video motion-এর জন্য লাগে "
-            "(নাম 2026-11-01 থেকে জানা যায়নি)।")
+            "Boss's PC GPU name — needed for true AI video motion " 
+            "(name unknown since 2026-11-01).")
     if payload.get("provider") == "api" and not payload.get("video_api_key"):
         missing.append(
-            "paid video API key — $0 cap-এ এই agent key চায় না, Boss "
-            "নিজে দিলে তবেই।")
+            "paid video API key — under the $0 cap this agent does not ask for a key; only if Boss " 
+            "gives it himself.")
     return missing
 
 
 class VisualProducerAgent:
-    """Visual Producer — produce section-এর visual plan agent।"""
+    """Visual Producer — visual plan agent for the produce section."""
 
     task_kind = "video_produce"
     gate = "ok"
@@ -127,12 +127,12 @@ class VisualProducerAgent:
             "mock_brain": True,
             "gate": self.gate,
             "note": "Gated action — PENDING approval recorded. Nothing was "
-                    "sent/published/uploaded/spent/deleted. Boss-এর gate word "
-                    "ছাড়া এগোবে না।",
+                    "sent/published/uploaded/spent/deleted. Without Boss's gate word " 
+                    "it will not go ahead.",
         }
 
     def _gate_check(self, task, gateway, approvals_path):
-        """Gated action থাকলে worker চালানো যাবে না — PENDING-এ আটকাও।"""
+        """If there is a gated action, the draft may not run — hold it as PENDING."""
         gated_action = task.get("gated_action")
         if not gated_action:
             return None
@@ -145,8 +145,8 @@ class VisualProducerAgent:
                 "draft_only": True,
                 "mock_brain": True,
                 "gate": self.gate,
-                "upload_stage": "OFF by default — needs Boss-এর 'upload it' + "
-                                "YOUTUBE_UPLOAD_ENABLED=1 + Boss-এর নিজের "
+                "upload_stage": "OFF by default — needs Boss's 'upload it' + " 
+                                "YOUTUBE_UPLOAD_ENABLED=1 + Boss's own " 
                                 "YouTube credential",
                 "note": "Upload stage 9 is OFF by default. This agent never uploads.",
             }
@@ -155,7 +155,7 @@ class VisualProducerAgent:
         if approval_id:
             try:
                 if gw.is_approved(approval_id):
-                    return None  # approved — তবুও শুধু draft, action execute নয়
+                    return None  # approved — still only a draft, no action executed
             except KeyError:
                 pass
         if gated_action in ("send", "publish", "spend", "delete"):
@@ -171,22 +171,22 @@ class VisualProducerAgent:
             "draft_only": True,
             "mock_brain": True,
             "gate": self.gate,
-            "note": f"Gate word '{self.gate}' ছাড়া এগোবে না — Boss-এর "
-                    f"অনুমোদন বাকি। Gated action {gated_action!r}-এর জন্য "
-                    "কোনো approval record বানানো যায়নি।",
+            "note": f"Gate word '{self.gate}' is needed to go ahead — Boss's " 
+                    f"approval is pending. For gated action {gated_action!r} " 
+                    "no approval record could be made.",
         }
 
     # -- run ---------------------------------------------------------------
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Visual plan draft বানানো — vendored VisualProducer worker-কে delegate করে।
+        """Make a visual plan draft — delegates to the vendored VisualProducer worker.
 
         task = {"type": "video_produce", "title": "...",
                 "payload": {"topic": ..., "format": ..., "footage": ...,
                             "voice_lines": ..., "script": ...,
                             "provider": ..., "gpu_name": ...},
                 "gated_action": ... (optional), "approval_id": ... (optional)}
-        video_file সবসময় None — video render করা হয় না। কোনো file লেখে না,
-        network ছোঁয় না, কিছু publish/upload করে না।
+        video_file is always None — no video is rendered. It writes no file,
+        touches no network, and publishes/uploads nothing.
         """
         task = dict(task or {})
         payload = dict(task.get("payload") or {})
@@ -214,10 +214,10 @@ class VisualProducerAgent:
 
         missing = missing_video_inputs(payload)
         notes = (worker_result.notes or "") + (
-            "\n[MOCK DRAFT] — mock brain ($0), DRAFT ONLY। Output পাঠাতে/ব্যবহার "
-            "করতে Boss-এর gate word লাগবে: 'ok'।\n"
-            "Stage 4 BLOCKED — video file বানানো হয়নি, video_file=None। "
-            "Default stills + Ken Burns motion = সত্যিকারের motion নয়।")
+            "\n[MOCK DRAFT] — mock brain ($0), DRAFT ONLY. To send/use the output, "
+            "Boss's gate word is needed: 'ok'.\n"
+            "Stage 4 BLOCKED — no video file was made, video_file=None. "
+            "Default stills + Ken Burns motion are not real motion.")
         return {
             "status": "draft-ready",
             "type": self.task_kind,

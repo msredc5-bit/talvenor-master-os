@@ -1,14 +1,14 @@
-# Section: Produce (তৈরি)
+# Section: Produce
 
 **Department:** 03-Content-Creation-Department — Content Creation Engine (Creator OS)
 **Channel:** ToolPilot @ToolPilotai69 — AI Tools & Tutorials, faceless, US viewers
-**Phase:** 7 — Section agents + skills (Chief-এর ৬ worker routing-এর উপরে, বদলে নয়)
+**Phase:** 7 — Section agents + skills (on top of the Chief's 6 worker routings, not replacing them)
 
-## উদ্দেশ্য (Purpose)
+## Purpose
 
-বাছা topic-কে record করার মতো জিনিসে বদলানো — script (stage 2b-script) আর
-visual plan (stage 3-visual-pack + 4-video plan)। Video file বানানো এই
-section-এর কাজ নয় — stage 4 BLOCKED।
+Turning a chosen topic into something ready to record — a script (stage 2b-script) and a
+visual plan (stage 3-visual-pack + 4-video plan). Making a video file is not
+this section's job — stage 4 is BLOCKED.
 
 ## Staff roster
 
@@ -17,29 +17,29 @@ section-এর কাজ নয় — stage 4 BLOCKED।
 | Script Writer | `agents/script_writer.py` (`ScriptWriterAgent`) | `ScriptWriter` (vendored) | `skills/script-writer.md` | ok | WRAPPED |
 | Visual Producer | `agents/visual_producer.py` (`VisualProducerAgent`) | `VisualProducer` (vendored) | `skills/visual-producer.md` | ok | WRAPPED |
 
-## কাজের প্রবাহ (How work flows)
+## How work flows
 
-1. Boss / Main CEO Bot → Content Chief → task type `script_write` বা `video_produce`।
+1. Boss / Main CEO Bot → Content Chief → task type `script_write` or `video_produce`.
 2. `script_write` → vendored ScriptWriter worker (mock brain, $0) → script draft —
-   প্রতিটা output-এ VOICE.md DRAFT সতর্কতা থাকে।
-3. `video_produce` → vendored VisualProducer worker → visual plan draft + stage 4-এর
-   missing-inputs list। `video_file` সবসময় None।
-4. ফলাফল Main CEO Bot-এ ফেরে → Boss-এর "ok" — তারপরেই publish section কাজ করে।
+   Every output carries the VOICE.md DRAFT warning.
+3. `video_produce` → vendored VisualProducer worker → visual plan draft + stage 4
+   missing-inputs list. `video_file` is always None.
+4. The result returns to the Main CEO Bot → Boss's "ok" — only then does the publish section work.
 
 ## Gate
 
-- `ok` — script / visual plan approval। Boss-এর exact word ছাড়া কিছু ব্যবহার করা যাবে না।
+- `ok` — script / visual plan approval. Nothing may be used without Boss's exact word.
 
-## সৎ সীমা (Honest limits)
+## Honest limits
 
-- **VOICE.md DRAFT** — Boss ঠিক না করা পর্যন্ত কোনো script-ই "final" নয়। Boss-এর কোনো
-  YouTube video এখনো নেই, তাই copy করার মতো আসল transcript নেই। Boss live English
-  বলেন না — read-aloud script-এ প্রতিটা English line-এর নিচে Bengali transliteration লাগে।
-- **Stage 4 BLOCKED** — real footage / OBS recording নেই, Boss-এর PC GPU-র নাম 2026-11-01
-  থেকে জানা যায়নি, AI video generation REGION-BLOCKED (retry করা হয় না)। Default stills
-  + Ken Burns motion = সত্যিকারের motion নয়। কোনো shot film করা না গেলে সেটা বলতে হয়,
-  fake করা যাবে না।
-- **Week 1 long video** ("Google's Nano Banana 2 Is Free - But Is It Good?", ১,৪৩১ words,
-  ~৯.৫ min, ৫ test) READY TO RECORD — কিন্তু verdict **[FILL AFTER TEST]**; Boss-এর OBS
-  recording-এর ৫ test না দেখে verdict লেখা হবে না।
-- Upload OFF — এই section কিছু upload করে না।
+- **VOICE.md DRAFT** — no script is "final" until Boss fixes it. Boss has no
+  YouTube video yet, so there is no real transcript to copy from. Boss does not speak live English
+  — read-aloud scripts need Bengali transliteration under each English line.
+- **Stage 4 BLOCKED** — no real footage / OBS recording, Boss's PC GPU name unknown since 2026-11-01,
+  AI video generation REGION-BLOCKED (no retry). Default stills
+  + Ken Burns motion are not real motion. If a shot cannot be filmed, that must be said;
+  it may not be faked.
+- **Week 1 long video** ("Google's Nano Banana 2 Is Free - But Is It Good?", 1,431 words,
+  ~9.5 min, 5 tests) READY TO RECORD — but the verdict is **[FILL AFTER TEST]**; no verdict will be written
+  without seeing the 5 tests in Boss's OBS recording.
+- Upload OFF — this section uploads nothing.
