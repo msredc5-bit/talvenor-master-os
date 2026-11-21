@@ -1,40 +1,41 @@
 #!/usr/bin/env python3
 """Phase 7 self-check — Talvenor Master OS, Full Offices (sections).
 
-যাচাই করে:
-  1. ১৬টা section-এর প্রতিটায় SECTION.md আছে
+Verifies:
+  1. Each of the 16 sections has a SECTION.md
      (Agency 5, Products 6, Content 5)
-  2. ২৩টা নতুন section agent file আছে + python3 -I-তে
-     standalone import হয় (stdlib only) + class attrs ঠিক
+  2. The 23 new section agent files exist + under python3 -I
+     they import standalone (stdlib only) + class attrs correct
      (task_kind / gate / section / role)
-  3. ২৩টা section skill file আছে (প্রতি agent-এর একটা করে)
-  4. Agency-র ১৫ mapped staff-এর engine skill আছে + SECTION.md-এ নাম আছে
-  5. Chief-রা নতুন task type route করে (run_office.py, TEMP store):
+  3. The 23 section skill files exist (one per agent)
+  4. The Agency's 15 mapped staff have engine skills + names in SECTION.md
+  5. The Chiefs route the new task types (run_office.py, TEMP store):
      agency client_intake / followup_draft, products kit_qa,
      content plan_weekly — draft-ready, [MOCK DRAFT]
-  6. Gated action -> PENDING, execute হয় না (TEMP store):
+  6. Gated action -> PENDING, never executes (TEMP store):
      agency followup_draft + send, products kit_sales + send,
-     content growth_research + send — প্রতিটায় ঠিক ১ pending approval
+     content growth_research + send — exactly 1 pending approval in each
   7. Gate 0 fail-closed: KitBuilder / LaunchManager -> blocked-gate0
-     (mark_sold / mark_launched payload-ও); KitSales draft-এ
-     "Gate 0 NOT passed" warning; কোনো section file-এ
-     "status": "sold" / "launched" নেই
+     (mark_sold / mark_launched payloads too); the KitSales draft has a
+     "Gate 0 NOT passed" warning; no section file has
+     "status": "sold" / "launched"
   8. Content: VisualProducer wrapper -> video_file None +
-     missing-inputs; কোনো section .py-তে YOUTUBE_UPLOAD_ENABLED /
-     upload_youtube( call নেই (upload OFF)
-  9. নতুন section file-এ ~/workspace/boss-ceo /
-     ~/workspace/creator-os-combined reference নেই
- 10. config.json phase 9 + v0.9.0 + brain mock + 3 business +
+     missing-inputs; no section .py has YOUTUBE_UPLOAD_ENABLED /
+     no upload_youtube( call (upload OFF)
+  9. New section files have no ~/workspace/boss-ceo /
+     ~/workspace/creator-os-combined reference
+ 10. config.json phase 11 + v0.9.0 + brain mock + 3 business +
      phase_7_sections + agentic_phase_3 + unified_os + phase_9 entry
+     + phase_11 entry (2026-11-21: config drift fix D1 — phase 9 -> 11)
  11. Real store unchanged by this run (Phase 9: live queue)
- 12. পুরনো check (phase0/1/2/3/4 + engines + phase6) এখনো PASS
+ 12. Old checks (phase0/1/2/3/4 + engines + phase6) still PASS
 
-Chief-level test run_office.py subprocess-এ চলে (এক process-এ
-দুই Chief-এর vendored `src` collision এড়াতে)। Agent run() test
-in-process: agency + products agent brain দিয়ে, content wrapper
-আলাদা subprocess-এ (শুধু content brain)। সব store-touching step
-TEMP file-এ। Stdlib only, no network, no send, no publish,
-no spend, no delete। Exit 0 = PASS.
+Chief-level tests run in a run_office.py subprocess (to avoid the vendored `src` collision of two Chiefs in one process).
+Agent run() tests
+are in-process: agency + products agents with a brain, content wrappers
+in a separate subprocess (content brain only). All store-touching steps
+use TEMP files. Stdlib only, no network, no send, no publish,
+no spend, no delete. Exit 0 = PASS.
 """
 
 import importlib.util
@@ -175,9 +176,9 @@ def _load_agent_file(path):
 
 
 def _snapshot_store():
-    """Real store-এর snapshot (Phase 9: store এখন live queue — taskboard /
-    bridge সত্যিই task লেখে, তাই 'খালি' আর invariant নয়)। Check-এর
-    কাজ শুধু প্রমাণ করা যে এই run store বদলায়নি।"""
+    """Snapshot of the real store (Phase 9: store is now a live queue — taskboard /
+    bridge really writes tasks, so 'empty' is no longer an invariant). The check's
+    only job is to prove this run did not change the store."""
     snap = {}
     for name in ("store/tasks.json", "store/approvals.json"):
         try:
@@ -535,13 +536,13 @@ def main():
         check("section files: no boss-ceo / creator-os-combined refs",
               False, str(e))
 
-    # 10. Config: phase 9 + v0.9.0 + brain mock + 3 businesses + phase_7
+    # 10. Config: phase 11 + v0.9.0 + brain mock + 3 businesses + phase_7
     try:
         with open(os.path.join(BASE, "00-CEO-Core", "config.json"),
                   encoding="utf-8") as f:
             cfg = json.load(f)
         phases = cfg.get("honest_status", {}).get("phases", {})
-        ok = (cfg.get("phase") == 9 and cfg.get("version") == "0.9.0"
+        ok = (cfg.get("phase") == 11 and cfg.get("version") == "0.9.0"
               and cfg.get("brain") == "mock"
               and len(cfg.get("businesses", [])) == 3
               and "phase_7_sections" in phases
@@ -549,12 +550,14 @@ def main():
               and "phase_5_three_engines" in phases
               and "agentic_phase_3" in phases
               and "unified_os" in phases
-              and "phase_9_connections" in phases)
-        check("config.json phase 9 + v0.9.0 + brain mock + 3 biz + phase_7 + agentic 1-3 + unified + phase_9",
+              and "phase_9_connections" in phases
+              and "phase_11_providers" in phases
+              and "phase_10_live_brain" in phases)
+        check("config.json phase 11 + v0.9.0 + brain mock + 3 biz + phase_7 + agentic 1-3 + unified + phase_9 + phase_11",
               ok, f"phase={cfg.get('phase')}, version={cfg.get('version')}, "
               f"brain={cfg.get('brain')}")
     except Exception as e:  # noqa: BLE001
-        check("config.json phase 9 + v0.9.0 + brain mock + 3 biz + phase_7 + agentic 1-3 + unified + phase_9",
+        check("config.json phase 11 + v0.9.0 + brain mock + 3 biz + phase_7 + agentic 1-3 + unified + phase_9 + phase_11",
               False, str(e))
 
     # 11. Real store unchanged by this check run (Phase 9: live queue)

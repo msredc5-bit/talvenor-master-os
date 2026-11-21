@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
 """Phase 2 self-check — Talvenor Master OS, Digital Product department.
 
-যাচাই করে:
-  1. Phase 2 ফাইল আছে (Chief, kit blueprint, Gate 0 status, PA list, skill)
-  2. Chief import হয় + ROUTING-এ ৪টা task type আছে
-  3. kit_build -> draft-ready, blueprint আছে, ৬ অংশ, Gate 0 NOT PASSED
+Verifies:
+  1. Phase 2 files exist (Chief, kit blueprint, Gate 0 status, PA list, skill)
+  2. Chief imports + ROUTING has 4 task types
+  3. kit_build -> draft-ready, blueprint exists, 6 parts, Gate 0 NOT PASSED
   4. gate0_check -> NOT PASSED (fail-closed)
-  5. mark_launched চাইলে blocked-gate0 — কোনো sale লেখা হয় না
-  6. gated send refuse হয়: PENDING, granted 0, worker চালানো হয় না
-  7. অচেনা task type -> error, crash নয়
-  8. Main CEO Bot -> Products Chief end-to-end routing কাজ করে
-  9. PA list CSV: ≥25 row, প্রতিটা row-এ নাম/শহর/website আছে, email
-     হয় @ থাকে নইলে "Not publicly listed" (বানানো email নেই)
-  10. tasks.json valid থাকে + অন্য department-এর entry মোছা হয় না
-  11. আসল store এই run-এ বদলায়নি (Phase 9: live queue)
-  12. Dashboard-এ Phase 2 + Gate 0 NOT PASSED + PA list সংখ্যা আছে
-  13. config.json-এর gate ON + $0 cap + phase 2 ঠিক আছে
-  14. check_phase0.py + check_phase1.py এখনো PASS (Phase 0/1 ভাঙেনি)
+  5. mark_launched if asked -> blocked-gate0 — no sale is written
+  6. Gated send is refused: PENDING, granted 0, worker not run
+  7. Unknown task type -> error, not a crash
+  8. Main CEO Bot -> Products Chief end-to-end routing works
+  9. PA list CSV: ≥25 rows, each row has a name/city/website, email
+     either has @ or says "Not publicly listed" (no invented emails)
+ 10. tasks.json stays valid + other departments' entries are not deleted
+ 11. The real store did not change in this run (Phase 9: live queue)
+ 12. The dashboard has Phase 2 + Gate 0 NOT PASSED + PA list numbers
+ 13. config.json's gate ON + $0 cap + phase 2 are correct
+ 14. check_phase0.py + check_phase1.py still PASS (Phase 0/1 not broken)
 
-সব check TEMP file-এ চলে — আসল store/ শুধু ১১ নম্বর check-এ পড়া হয়,
-লেখা হয় না। Stdlib only, no network, no spend, no send। Exit 0 = PASS।
+All checks run in TEMP files — the real store/ is only read in check 11,
+never written. Stdlib only, no network, no spend, no send. Exit 0 = PASS.
 """
 
 import csv
@@ -73,9 +73,9 @@ def tmp_paths():
 
 
 def _snapshot_store():
-    """Real store-এর snapshot (Phase 9: store এখন live queue — taskboard /
-    bridge সত্যিই task লেখে, তাই 'খালি' আর invariant নয়)। Check-এর
-    কাজ শুধু প্রমাণ করা যে এই run store বদলায়নি।"""
+    """Snapshot of the real store (Phase 9: store is now a live queue — taskboard /
+    bridge really writes tasks, so 'empty' is no longer an invariant). The check's
+    only job is to prove this run did not change the store."""
     snap = {}
     for name in ("store/tasks.json", "store/approvals.json"):
         try:

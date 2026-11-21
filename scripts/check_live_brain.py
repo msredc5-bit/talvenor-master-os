@@ -54,7 +54,7 @@ def check(name, ok, detail=""):
 
 
 def _snapshot_store():
-    """Real store-এর snapshot (Phase 9: store এখন live queue)।"""
+    """Snapshot of the real store (Phase 9: store is now a live queue)."""
     snap = {}
     for name in ("store/tasks.json", "store/approvals.json"):
         try:

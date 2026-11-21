@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 """Phase 1 self-check — Talvenor Master OS, Agency department.
 
-যাচাই করে:
-  1. Agency Chief import হয় + ROUTING-এ ১৫টা আসল worker আছে
-  2. outreach_draft -> OutreachDrafter, draft-ready ফেরত আসে (mock brain, DRAFT ONLY)
-  3. prospect_research -> ProspectResearcher (gate নেই)
-  4. gated send refuse হয়: status pending-approval, PENDING record লেখা
-     হয়, কোনো approval granted হয় না, কোনো send হয় না
-  5. অচেনা task type -> error, crash নয়
-  6. Main CEO Bot -> Chief end-to-end routing কাজ করে
-  7. tasks.json valid থাকে + অন্য department-এর entry মোছা হয় না
-  8. আসল store/approvals.json-এ test record লেখা হয় না
-  9. Dashboard-এ Phase 1 + PAUSED সত্য অবস্থা আছে
-  10. config.json-এর gate ON + $0 cap ঠিক আছে
+Verifies:
+  1. Agency Chief imports + ROUTING has 15 real workers
+  2. outreach_draft -> OutreachDrafter, returns draft-ready (mock brain, DRAFT ONLY)
+  3. prospect_research -> ProspectResearcher (no gate)
+  4. Gated send is refused: status pending-approval, PENDING record written
+     , no approval granted, no send happens
+  5. Unknown task type -> error, not a crash
+  6. Main CEO Bot -> Chief end-to-end routing works
+  7. tasks.json stays valid + other departments' entries are not deleted
+  8. No test record is written to the real store/approvals.json
+  9. The dashboard has Phase 1 + PAUSED true state
+ 10. config.json's gate ON + $0 cap are correct
 
-সব check TEMP file-এ চলে — আসল store/ শুধু ৮ নম্বর check-এ পড়া হয়,
-লেখা হয় না। Stdlib only, no network, no spend, no send। Exit 0 = PASS।
+All checks run in TEMP files — the real store/ is only read in check 8,
+never written. Stdlib only, no network, no spend, no send. Exit 0 = PASS.
 """
 
 import json
@@ -67,9 +67,9 @@ def tmp_paths():
 
 
 def _snapshot_store():
-    """Real store-এর snapshot (Phase 9: store এখন live queue — taskboard /
-    bridge সত্যিই task লেখে, তাই 'খালি' আর invariant নয়)। Check-এর
-    কাজ শুধু প্রমাণ করা যে এই run store বদলায়নি।"""
+    """Snapshot of the real store (Phase 9: store is now a live queue — taskboard /
+    bridge really writes tasks, so 'empty' is no longer an invariant). The check's
+    only job is to prove this run did not change the store."""
     snap = {}
     for name in ("store/tasks.json", "store/approvals.json"):
         try:
@@ -143,7 +143,7 @@ def main():
         ok = (r["status"] == "pending-approval"
               and r["approval"]["status"] == "pending"
               and len(pending) == 1 and len(granted) == 0
-              and r.get("worker") is None)  # worker একদম চালানো হয়নি
+              and r.get("worker") is None)  # worker not run at all
         check("gated send refused (PENDING, nothing granted)", ok,
               f"status={r['status']}, pending={len(pending)}, granted={len(granted)}")
     except Exception as e:  # noqa: BLE001

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phase 6 self-check — Talvenor Master OS, Brain + Runner.
 
-যাচাই করে:
+Verifies:
   1. Vendored agency workers import with ONLY the repo on sys.path
      (python3 -I, clean env) — no boss-ceo path anywhere
   2. Vendored content workers import the same way — no
@@ -72,9 +72,9 @@ def _isolated_import_test(workers_dir, imports_code, label):
 
 
 def _snapshot_store():
-    """Real store-এর snapshot (Phase 9: store এখন live queue — taskboard /
-    bridge সত্যিই task লেখে, তাই 'খালি' আর invariant নয়)। Check-এর
-    কাজ শুধু প্রমাণ করা যে এই run store বদলায়নি।"""
+    """Snapshot of the real store (Phase 9: store is now a live queue — taskboard /
+    bridge really writes tasks, so 'empty' is no longer an invariant). The check's
+    only job is to prove this run did not change the store."""
     snap = {}
     for name in ("store/tasks.json", "store/approvals.json"):
         try:
@@ -362,8 +362,8 @@ def main():
         needles = ("136", "1189", "1,189")
         bad_lines = []
         for root, dirs, files in os.walk(BASE):
-            # models/ বাদ: upstream voice/model data file (Piper
-            # .onnx.json-এ "136" সংখ্যা আছে — voice config value, scope নয়)
+            # models/ excluded: upstream voice/model data file (Piper
+            # .onnx.json has the number "136" — a voice config value, not scope)
             dirs[:] = [d for d in dirs
                        if d not in ("__pycache__", ".git", "models")]
             for name in files:

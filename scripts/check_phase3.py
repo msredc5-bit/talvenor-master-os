@@ -1,32 +1,32 @@
 #!/usr/bin/env python3
 """Phase 3 self-check — Talvenor Master OS, Content Creation department.
 
-যাচাই করে:
-  1. Phase 3 ফাইল আছে (Chief, pipeline.md, toolpilot-status.md, skill)
-  2. Chief import হয় + ROUTING-এ ৬টা task type আছে
+Verifies:
+  1. Phase 3 files exist (Chief, pipeline.md, toolpilot-status.md, skill)
+  2. Chief imports + ROUTING has 6 task types
   3. content_plan -> draft-ready, TopicResearcher, gate ok, mock brain
-  4. script_write -> draft-ready + VOICE.md DRAFT সতর্কতা আছে
-  5. video_produce (input ছাড়া) -> draft-ready, video_file None,
-     video_built False, missing_inputs >= 2 (ভুয়া video নেই)
+  4. script_write -> draft-ready + VOICE.md DRAFT warning present
+  5. video_produce (without input) -> draft-ready, video_file None,
+     video_built False, missing_inputs >= 2 (no fake video)
   6. caption_write -> draft-ready, CaptionWriter
   7. publish_prep -> draft-ready, ready_to_publish False, gate "post it"
-  8. gated upload -> blocked-upload-off (stage 9 OFF, upload হয়নি)
-  9. gated publish -> pending-approval, granted 0, worker চালানো হয়নি
- 10. অচেনা task type -> error, crash নয়
- 11. Main CEO Bot -> Content Chief end-to-end routing কাজ করে
- 12. pipeline.md-এ ১৩ stage আছে, REAL 0 / MOCK 10 / BLOCKED 3, VOICE.md
-     + GPU নামের কথা আছে
- 13. toolpilot-status.md-এ @ToolPilotai69, 0 subs, READY TO RECORD,
-     [FILL AFTER TEST], ToolPilot-vs-new-channel প্রশ্ন unanswered
- 14. tasks.json valid থাকে + অন্য department-এর entry মোছা হয় না
- 15. আসল store এই run-এ বদলায়নি (Phase 9: live queue)
- 16. Dashboard-এ Phase 3 BUILT + Content Engine REAL + upload OFF আছে
- 17. config.json-এর gate ON + $0 cap + phase 3 ঠিক আছে
- 18. check_phase0.py + check_phase1.py + check_phase2.py এখনো PASS
+  8. Gated upload -> blocked-upload-off (stage 9 OFF, no upload)
+  9. Gated publish -> pending-approval, granted 0, worker not run
+ 10. Unknown task type -> error, not a crash
+ 11. Main CEO Bot -> Content Chief end-to-end routing works
+ 12. pipeline.md has 13 stages, REAL 0 / MOCK 10 / BLOCKED 3, VOICE.md
+     + GPU name mentioned
+ 13. toolpilot-status.md has @ToolPilotai69, 0 subs, READY TO RECORD,
+     [FILL AFTER TEST], ToolPilot-vs-new-channel question unanswered
+ 14. tasks.json stays valid + other departments' entries are not deleted
+ 15. The real store did not change in this run (Phase 9: live queue)
+ 16. The dashboard has Phase 3 BUILT + Content Engine REAL + upload OFF
+ 17. config.json's gate ON + $0 cap + phase 3 are correct
+ 18. check_phase0.py + check_phase1.py + check_phase2.py still PASS
 
-সব check TEMP file-এ চলে — আসল store/ শুধু ১৫ নম্বর check-এ পড়া হয়,
-লেখা হয় না। Stdlib only, no network, no spend, no send, no upload।
-Exit 0 = PASS।
+All checks run in TEMP files — the real store/ is only read in check 15,
+never written. Stdlib only, no network, no spend, no send, no upload.
+Exit 0 = PASS.
 """
 
 import json
@@ -77,9 +77,9 @@ def tmp_paths():
 
 
 def _snapshot_store():
-    """Real store-এর snapshot (Phase 9: store এখন live queue — taskboard /
-    bridge সত্যিই task লেখে, তাই 'খালি' আর invariant নয়)। Check-এর
-    কাজ শুধু প্রমাণ করা যে এই run store বদলায়নি।"""
+    """Snapshot of the real store (Phase 9: store is now a live queue — taskboard /
+    bridge really writes tasks, so 'empty' is no longer an invariant). The check's
+    only job is to prove this run did not change the store."""
     snap = {}
     for name in ("store/tasks.json", "store/approvals.json"):
         try:
@@ -269,7 +269,7 @@ def main():
             md = f.read()
         ok = ("@ToolPilotai69" in md and "Subscribers: **0**" in md
               and "READY TO RECORD" in md and "[FILL AFTER TEST]" in md
-              and "ToolPilot, নাকি brand-new channel" in md)
+              and "ToolPilot, or a brand-new channel" in md)
         check("toolpilot-status.md: channel facts + unanswered question", ok)
     except Exception as e:  # noqa: BLE001
         check("toolpilot-status.md: channel facts + unanswered question", False, str(e))

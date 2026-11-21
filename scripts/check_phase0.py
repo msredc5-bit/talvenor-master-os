@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """Phase 0 self-check — Talvenor Master OS.
 
-যাচাই করে:
-  1. সব folder/file আছে কি না
-  2. config.json parse হয় কি না + locked fact-গুলো ঠিক আছে কি না
-  3. gateway import হয় + approve/reject কাজ করে (TEMP file-এ — আসল
-     store/approvals.json-এ কোনো test record লেখা হয় না)
-  4. main_ceo_bot routing কাজ করে (non-gated task)
-  5. jarvis_voice STUB — ডাকলে NotImplementedError দেয়
-  6. dashboard HTML আছে + "Phase 0" লেখা আছে
+Verifies:
+  1. Whether all folders/files exist
+  2. Whether config.json parses + the locked facts are correct
+  3. Gateway imports + approve/reject work (in TEMP files — no test record
+     is written to the real store/approvals.json)
+  4. main_ceo_bot routing works (non-gated task)
+  5. jarvis_voice STUB — raises NotImplementedError when called
+  6. Dashboard HTML exists + "Phase 0" is written in it
 
-Stdlib only, no network, no spend. Exit 0 = সব PASS।
+Stdlib only, no network, no spend. Exit 0 = all PASS.
 """
 
 import json
@@ -57,9 +57,9 @@ def check(name, ok, detail=""):
 
 
 def _snapshot_store():
-    """Real store-এর snapshot (Phase 9: store এখন live queue — taskboard /
-    bridge সত্যিই task লেখে, তাই 'খালি' আর invariant নয়)। Check-এর
-    কাজ শুধু প্রমাণ করা যে এই run store বদলায়নি।"""
+    """Snapshot of the real store (Phase 9: store is now a live queue — taskboard /
+    bridge really writes tasks, so 'empty' is no longer an invariant). The check's
+    only job is to prove this run did not change the store."""
     snap = {}
     for name in ("store/tasks.json", "store/approvals.json"):
         try:
@@ -97,8 +97,8 @@ def main():
     except Exception as e:  # noqa: BLE001
         check("config.json parses + locked facts", False, str(e))
 
-    # 3. Store JSON files parse (Phase 9: store এখন live queue — records
-    #    খালি থাকার দরকার নেই, শুধু parse হতে হবে + records list হতে হবে)
+    # 3. Store JSON files parse (Phase 9: store is now a live queue — records
+    #    need not be empty, they only need to parse + records must be a list)
     for name in ("store/tasks.json", "store/approvals.json"):
         try:
             with open(os.path.join(BASE, name), encoding="utf-8") as f:
@@ -126,15 +126,15 @@ def main():
         req2 = gw.request("publish", "phase0 check 2", "check_phase0")
         gw.reject(req2["id"])
         assert not gw.is_approved(req2["id"]) and len(gw.pending()) == 0
-        # আসল approvals.json ছোঁয়া হয়নি — verify (Phase 9: snapshot compare)
+        # The real approvals.json was not touched — verify (Phase 9: snapshot compare)
         with open(os.path.join(BASE, "store", "approvals.json"), encoding="utf-8") as f:
             assert f.read() == store_before["store/approvals.json"]
         check("approval gateway works (temp file only)", True)
     except Exception as e:  # noqa: BLE001
         check("approval gateway works (temp file only)", False, str(e))
 
-    # 5. Main CEO Bot routing — Phase 1: agency task আসল Chief-এর কাছে
-    #    যায় (TEMP paths — আসল store/tasks.json-এ test record লেখা হয় না)
+    # 5. Main CEO Bot routing — Phase 1: agency task goes to the real Chief
+    #    (TEMP paths — no test record is written to the real store/tasks.json)
     try:
         import main_ceo_bot  # noqa: PLC0415
 
@@ -143,14 +143,14 @@ def main():
         r = main_ceo_bot.route_task({"business": "agency", "title": "check"},
                                     tasks_path=tmp_tasks, approvals_path=tmp_appr)
         assert r["routed_to"].endswith("chief_of_staff_agency")
-        assert r["status"] == "route-only"  # type ছাড়া task = probe only
+        assert r["status"] == "route-only"  # task without a type = probe only
         assert r["chief_result"]["department"] == "agency"
         check("main_ceo_bot routes non-gated task", True)
     except Exception as e:  # noqa: BLE001
         check("main_ceo_bot routes non-gated task", False, str(e))
 
-    # 6. Jarvis voice REAL (2026-11-17 voice loop — STUB ছিল, এখন
-    # Piper+Vosk/sherpa, offline, $0; একই 3 public function)
+    # 6. Jarvis voice REAL (2026-11-17 voice loop — was a STUB, now
+    # Piper+Vosk/sherpa, offline, $0; same 3 public functions)
     try:
         import jarvis_voice  # noqa: PLC0415
 
@@ -171,7 +171,7 @@ def main():
     try:
         with open(os.path.join(BASE, "dashboards", "status.html"), encoding="utf-8") as f:
             html = f.read()
-        ok = "Phase 0" in html and "Paying clients" in html and "১৩৬" in html
+        ok = "Phase 0" in html and "Paying clients" in html and "136" in html  # "136" appears only in the DROPPED scope note
         check("dashboard status.html present + honest", ok)
     except Exception as e:  # noqa: BLE001
         check("dashboard status.html present + honest", False, str(e))
