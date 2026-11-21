@@ -1,12 +1,12 @@
 # Section: Receive — Agency (Phase 7)
 
-**উদ্দেশ্য (purpose):** নতুন lead আসা থেকে research-এর হাতে দেওয়া পর্যন্ত —
-lead গ্রহণ, inbox সাজানো, research, আর scheduling-এ সাহায্য। এই section
-কিছু পাঠায় না, কাউকে call করে না — শুধু গ্রহণ আর সাজানো।
+**Purpose:** From a new lead arriving to handing it to research —
+receiving leads, organizing the inbox, research, and helping with scheduling. This section
+sends nothing, calls nobody — only receiving and organizing.
 
-**সত্য অবস্থা (2026-11-16):** Email PAUSED (2026-11-14 থেকে, DNS fix বাকি)।
-Paying client 0। প্রথম মেইল 162। Booking:
-https://calendar.app.google/WLoxBfnLGTdjK3LB8 · ফোন +1 (947) 223-0244।
+**True status (2026-11-16):** Email PAUSED (since 2026-11-14, DNS fix pending).
+Paying client 0. First mail 162. Booking:
+https://calendar.app.google/WLoxBfnLGTdjK3LB8 · Phone +1 (947) 223-0244.
 
 ## Staff roster
 
@@ -17,26 +17,26 @@ https://calendar.app.google/WLoxBfnLGTdjK3LB8 · ফোন +1 (947) 223-0244।
 | ProspectResearcher | `engine/workers/src/workers/acquisition.py` (`ProspectResearcher`) | `engine/skills/prospect-researcher.md` | None | MAPPED |
 | SchedulerAssistant | `engine/workers/src/workers/admin.py` (`SchedulerAssistant`) | `engine/skills/scheduler.md` | None | MAPPED |
 
-## কাজের প্রবাহ (how work flows)
+## How work flows
 
-1. **ClientIntakeReceiver** — নতুন lead এলে intake log + checklist DRAFT।
-   তথ্য শুধু আসল source থেকে; না থাকলে "BOSS INPUT REQUIRED"।
-2. **InboxTriager** — inbox সাজানো (urgent / prospect / vendor / noise) +
-   draft reply; কিছু পাঠায় না।
+1. **ClientIntakeReceiver** — intake log + checklist DRAFT when a new lead arrives.
+   Information only from the real source; without it, "BOSS INPUT REQUIRED".
+2. **InboxTriager** — organizing the inbox (urgent / prospect / vendor / noise) +
+   draft reply; it sends nothing.
 3. **ProspectResearcher** — US home-service SMB research: owner, missed-call
-   pain signal, tech gap, personalization angle। Dental/medical নয়।
-4. **SchedulerAssistant** — ৩টা slot প্রস্তাব (Asia/Dhaka + US-Eastern) +
-   draft invite; booking link আসলটা। Boss confirm করার আগে কিছু পাঠানো হয় না।
+   pain signal, tech gap, personalization angle. No dental/medical.
+4. **SchedulerAssistant** — proposing 3 slots (Asia/Dhaka + US-Eastern) +
+   draft invite; the booking link is the real one. Nothing is sent before Boss confirms.
 
 ## Gate
 
-- `send` (ClientIntakeReceiver): intake-সংক্রান্ত কিছু পাঠাতে Boss-এর
-  "send" লাগে; পাঠানো Boss নিজে করেন।
-- বাকি ৩ জনের gate None — ওদের draft নিজেই নিরাপদ।
+- `send` (ClientIntakeReceiver): sending anything intake-related needs Boss's
+  "send"; Boss sends it himself.
+- The other 3 have gate None — their drafts are themselves safe.
 
-## সৎ সীমা (honest limits)
+## Honest limits
 
-- Email PAUSED (2026-11-14 থেকে) — draft-ই শেষ কথা, send-এর চেষ্টাও নয়।
-- সব output DRAFT, mock brain ($0)। কোনো lead/client তথ্য বানানো হয় না।
-- Paying client 0; প্রথম মেইল 162।
-- কোনো price, guarantee, বানানো testimonial/statistic নেই।
+- Email PAUSED (since 2026-11-14) — the draft is the final word, not even an attempt to send.
+- All output is DRAFT, mock brain ($0). No lead/client information is invented.
+- Paying client 0; first mail 162.
+- No price, guarantee, or invented testimonial/statistic.

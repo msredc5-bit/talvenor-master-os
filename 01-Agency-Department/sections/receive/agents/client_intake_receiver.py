@@ -1,13 +1,13 @@
-"""Client Intake Receiver — নতুন lead গ্রহণ (receive section, Phase 7).
+"""Client Intake Receiver — receiving a new lead (receive section, Phase 7).
 
-ভূমিকা (role): নতুন lead এলে তার তথ্য নেওয়া, returned draft-এ log করা,
-আর intake checklist-এর DRAFT বানানো।
-Gate: send — intake-সংক্রান্ত কোনো reply/বার্তা Boss-এর "send" শব্দ
-ছাড়া পাঠানো যাবে না; এই agent নিজে কিছু পাঠায় না।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
-এই agent কখনো করে না: কিছু পাঠায় না, কাউকে call করে না, client-এর
-তথ্য/দাম/পরিসংখ্যান বানায় না, কোনো guarantee দেয় না, dental/medical
-বা patient-health ব্যবসা নেয় না।
+Role: taking a new lead's information when it arrives, logging it in the returned draft,
+and building an intake checklist DRAFT.
+Gate: send — no intake-related reply/message can be sent without Boss's send word
+; this agent itself sends nothing.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
+This agent never does this: it sends nothing, calls nobody, invents no client's
+information/price/statistics, gives no guarantee, no dental/medical
+or patient-health business.
 """
 
 import os
@@ -21,7 +21,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class ClientIntakeReceiverAgent:
-    """নতুন lead-এর intake log + checklist DRAFT বানায়। কখনো পাঠায় না।"""
+    """Builds a new lead's intake log + checklist DRAFT. Never sends."""
 
     task_kind = "client_intake"
     gate = "send"
@@ -29,7 +29,7 @@ class ClientIntakeReceiverAgent:
     role = "Client Intake Receiver"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -41,7 +41,7 @@ class ClientIntakeReceiverAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -75,14 +75,14 @@ class ClientIntakeReceiverAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Intake DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Building an intake DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Client intake"
         gated_action = task.get("gated_action")
         approval_id = task.get("approval_id")
 
-        # Gated action থাকলে আগে approval — অনুমোদন ছাড়া draft-ও নয়,
-        # PENDING record করে থামা।
+        # If there is a gated action, approval first — not even a draft without approval,
+        # record PENDING and stop.
         if gated_action:
             gw = gateway if gateway is not None else self._gateway(approvals_path)
             approved = False
@@ -126,7 +126,7 @@ class ClientIntakeReceiverAgent:
             "1. Confirm business + owner name from a real source (never guess).\n"
             "2. Confirm trade is a Talvenor niche (plumbing, HVAC, roofing, "
             "garage door, septic, tree, foundation, restoration, pest, vet) — "
-            "dental/medical/patient-health নয়.\n"
+            "not dental/medical/patient-health.\n"
             "3. Note missed-call pain signal, if seen on website/reviews.\n"
             "4. Hand to ProspectResearcher for research before any outreach.\n"
             "5. No reply sent from intake — any reply needs Boss 'send'.\n"
@@ -134,9 +134,9 @@ class ClientIntakeReceiverAgent:
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Intake log + checklist, কোনো পাঠানো নয়। "
-            "কোনো তথ্য না থাকলে 'BOSS INPUT REQUIRED' — বানানো তথ্য নেই। "
-            "Gate: send — intake-সংক্রান্ত কিছু পাঠাতে Boss-এর 'send' লাগবে।"
+            "DRAFT ONLY — mock brain ($0). Intake log + checklist, no sending. "
+            "Without any information, 'BOSS INPUT REQUIRED' — no invented information. "
+            "Gate: send — sending anything intake-related needs Boss's 'send'."
         )
         return {
             "status": "draft-ready",

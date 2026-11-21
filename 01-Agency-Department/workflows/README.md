@@ -1,23 +1,23 @@
 # Agency — workflows
 
-এই folder-এ Agency-র workflow (n8n / script) থাকবে। Phase 0-তে
-এখানে কোনো workflow নেই — Phase 4 (n8n wiring)-এ আসবে।
+This folder will hold the Agency's workflows (n8n / scripts). In Phase 0,
+there is no workflow here — it comes in Phase 4 (n8n wiring).
 
-## সত্য অবস্থা (2026-11-16)
+## True status (2026-11-16)
 
-- **Email পাঠানো PAUSED** — Boss-এর নির্দেশ 2026-11-14। কোনো মেইল
-  যাবে না যতক্ষণ Boss DNS fix করে "check koro" না বলেন।
-- **DNS fix বাকি:** SPF-এ `include:_spf.google.com` যোগ করা + নতুন
-  `_dmarc` record — Boss-এর DNS panel-এর কাজ। ফাইল:
+- **Email sending PAUSED** — Boss's order, 2026-11-14. No mail
+  will go until Boss fixes the DNS and says "check koro".
+- **DNS fix pending:** adding `include:_spf.google.com` to SPF + a new
+  `_dmarc` record — work for Boss's DNS panel. File:
   `~/workspace/talvenor/outreach/dns-fix-copy-paste-2026-11-14.md`
-- **প্রথম মেইল:** 162টা পাঠানো (Day 1–3), paying client 0।
-- **Day 4/5/6 draft:** ২৫টা করে READY, পাঠানো হয়নি — pause উঠলে
-  Boss যেটা বলবেন সেটা যাবে।
-- **n8n auto-send:** READY, LIVE নয় — Boss-এর import + ১টা test
-  মেইল বাকি। কখনো দুই system একসাথে চলবে না।
+- **First mail:** 162 sent (Day 1–3), paying client 0.
+- **Day 4/5/6 drafts:** 25 each READY, not sent — once the pause lifts,
+  what Boss says goes.
+- **n8n auto-send:** READY, not LIVE — Boss's import + 1 test
+  mail pending. The two systems never run together.
 
-## Phase 1-এ এখানে যা আসবে
+## What comes here in Phase 1
 
-- Tier 2 send schedule-এর সাথে Chief-এর সংযোগ (draft -> approval -> send)
-- Reply watcher-এর সাথে সংযোগ (reply এলে Chief-কে জানানো)
-- কোনো workflow-ই Boss-এর gate word ছাড়া send/publish করবে না।
+- Chief's connection to the Tier 2 send schedule (draft -> approval -> send)
+- Connection to the reply watcher (telling the Chief when a reply arrives)
+- No workflow will send/publish without Boss's gate word.

@@ -2,28 +2,28 @@
 
 **Role:** Sales Closer · **Worker:** `SalesCloserAgent` (Phase 7, sell section)
 · **Task type:** `sales_close` · **Gate:** `ok`
-· **SOP ভিত্তি:** agency-os SKILL 16-sales-outreach (call prep / objection handling)
+· **SOP basis:** agency-os SKILL 16-sales-outreach (call prep / objection handling)
 
-**ব্যবসা:** Talvenor AI Receptionist — Boss-এর sales call-এর জন্য call-prep
-pack + close checklist-এর DRAFT। Call Boss নিজে নেন — এই agent শুধু তৈরি করে।
+**Business:** Talvenor AI Receptionist — a call-prep
+pack + close checklist DRAFT for Boss's sales call. Boss takes the call himself — this agent only prepares.
 
 ## Input
 
-- `prospect`: prospect-এর নাম/profile (research থেকে; না থাকলে BOSS INPUT REQUIRED)।
-- `business`: ব্যবসার নাম, `goal` (default: book the 15-min demo call)।
+- `prospect`: the prospect's name/profile (from research; without it, BOSS INPUT REQUIRED).
+- `business`: the business name, `goal` (default: book the 15-min demo call).
 
-## পদ্ধতি (step-by-step)
+## Method (step-by-step)
 
-1. Prospect-এর research থেকে নেওয়া — নাম, ব্যবসা, pain signal; না থাকলে
-   ProspectResearcher-কে আগে পাঠানো, অনুমান নয়।
-2. Opening লেখা (৬০ সেকেন্ড, plain US English): missed call = lost job,
-   AI receptionist 24/7 answers, একটা CTA (15-min demo call)।
-3. সম্ভাব্য প্রশ্ন + উত্তর: কী করে (answers, qualifies, books), live stack
-   Vapi/Sophia, booking link। দামের প্রশ্ন এলে short call-এর offer —
-   prep-এ কখনো দাম quote নয়।
-4. Close checklist বানানো (DRAFT): demo time confirm, booking link পাঠানো,
-   next step নোট করা, Boss হ্যাঁ বললে OnboardingAgent-কে দেওয়া।
-5. Pack Boss-কে দেখানো — call করা নয়, close করা নয়, চুক্তি নয়।
+1. Take from the prospect's research — name, business, pain signal; without it,
+   send it to ProspectResearcher first, no guessing.
+2. Write the opening (60 seconds, plain US English): missed call = lost job,
+   AI receptionist 24/7 answers, one CTA (15-min demo call).
+3. Likely questions + answers: what it does (answers, qualifies, books), live stack
+   Vapi/Sophia, booking link. If a price question comes, offer a short call —
+   never quote a price in the prep.
+4. Build the close checklist (DRAFT): confirm demo time, send the booking link,
+   note the next step, hand it to OnboardingAgent if Boss says yes.
+5. Show the pack to Boss — not calling, not closing, not contracting.
 
 ## Output format
 
@@ -37,28 +37,28 @@ Call-prep pack (DRAFT):
 4. Boss takes the call himself — this agent never calls, never closes.
 Booking link: https://calendar.app.google/WLoxBfnLGTdjK3LB8 | Phone: +1 (947) 223-0244
 ---
-Gate: ok — pack ব্যবহার করতে Boss-এর exact শব্দ লাগবে।
+Gate: ok — using the pack needs Boss's exact word.
 ```
 
 ## Gate
 
-`ok` — Boss-এর exact শব্দ লাগে। এই agent call করে না, close করে না,
-চুক্তি করে না — শুধু prep-এর DRAFT বানায়।
+`ok` — Boss's exact word is needed. This agent does not call, does not close,
+does not contract — it only builds the prep DRAFT.
 
-## সৎ সীমা (honest limits)
+## Honest limits
 
-- Mock brain ($0) — output DRAFT। Call Boss নিজে নেন।
-- কোনো price quote নয়, কোনো guarantee নয়, কোনো বানানো client /
-  testimonial / statistic নয়।
-- তথ্য না থাকলে "BOSS INPUT REQUIRED" — বানানো prospect তথ্য নেই।
-- Dental/medical/patient-health কখনো নয়।
+- Mock brain ($0) — output DRAFT. Boss takes the call himself.
+- No price quote, no guarantee, no invented client /
+  testimonial / statistic.
+- Without information, "BOSS INPUT REQUIRED" — no invented prospect information.
+- Never dental/medical/patient-health.
 
-## Worked example (আসল তথ্য দিয়ে)
+## Worked example (with real information)
 
 Input: `prospect` = BOSS INPUT REQUIRED, `business` = BOSS INPUT REQUIRED,
-`goal` = book the 15-min demo call।
+`goal` = book the 15-min demo call.
 
-Output: উপরের format-এ prep pack — opening-এ missed call = lost job,
-CTA-তে booking link https://calendar.app.google/WLoxBfnLGTdjK3LB8,
-ফোন +1 (947) 223-0244। দাম কোথাও নেই, কোনো close করা হয়নি —
-Boss call নেবেন, pack শুধু DRAFT।
+Output: prep pack in the format above — opening has missed call = lost job,
+CTA has the booking link https://calendar.app.google/WLoxBfnLGTdjK3LB8,
+phone +1 (947) 223-0244. No price anywhere, no close was made —
+Boss will take the call; the pack is only a DRAFT.

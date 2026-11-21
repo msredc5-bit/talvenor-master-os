@@ -1,12 +1,12 @@
-"""Sales Closer — sales call-এর প্রস্তুতি (sell section, Phase 7).
+"""Sales Closer — preparing for the sales call (sell section, Phase 7).
 
-ভূমিকা (role): Boss-এর sales call-এর জন্য call-prep pack + close
-checklist-এর DRAFT বানানো।
-Gate: ok — pack ব্যবহার করতে Boss-এর "ok" লাগে।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), prep-ই শেষ কথা।
-এই agent কখনো করে না: call করে না, close করে না, চুক্তি করে না,
-দাম quote করে না, client-এর তথ্য/পরিসংখ্যান বানায় না, কোনো guarantee
-দেয় না। Call Boss নিজে নেন — এই agent শুধু তৈরি করে।
+Role: building a call-prep pack + close
+checklist DRAFT for Boss's sales call.
+Gate: ok — using the pack needs Boss's ok.
+Status: DRAFT ONLY — mock brain ($0), the prep is the final word.
+This agent never does this: it never calls, never closes, never contracts,
+never quotes a price, never invents client information/statistics, never gives a guarantee.
+Boss takes the call himself — this agent only prepares.
 """
 
 import os
@@ -20,7 +20,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class SalesCloserAgent:
-    """Call-prep pack + close checklist DRAFT বানায়। কখনো call করে না।"""
+    """Builds a call-prep pack + close checklist DRAFT. Never calls."""
 
     task_kind = "sales_close"
     gate = "ok"
@@ -28,7 +28,7 @@ class SalesCloserAgent:
     role = "Sales Closer"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -40,7 +40,7 @@ class SalesCloserAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Recording a PENDING approval — not executing, not auto-approving."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -69,7 +69,7 @@ class SalesCloserAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Call-prep pack DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Building a call-prep pack DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Sales call prep"
         gated_action = task.get("gated_action")
@@ -125,8 +125,8 @@ class SalesCloserAgent:
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Call-prep pack + close checklist, "
-            "call নয়। Gate: ok — pack ব্যবহার করতে Boss-এর 'ok' লাগে। "
-            "কোনো তথ্য না থাকলে 'BOSS INPUT REQUIRED' — বানানো তথ্য নেই।"
+            "not a call. Gate: ok — using the pack needs Boss's 'ok'. "
+            "Without any information, 'BOSS INPUT REQUIRED' — no invented information."
         )
         return {
             "status": "draft-ready",

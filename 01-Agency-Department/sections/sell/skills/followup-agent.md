@@ -2,28 +2,28 @@
 
 **Role:** Follow-up Agent · **Worker:** `FollowUpAgent` (Phase 7, sell section)
 · **Task type:** `followup_draft` · **Gate:** `send`
-· **SOP ভিত্তি:** agency-os SKILL 16-sales-outreach (follow-up rule 2026-11-10)
+· **SOP basis:** agency-os SKILL 16-sales-outreach (follow-up rule 2026-11-10)
 
-**ব্যবসা:** Talvenor AI Receptionist — follow-up-এর DRAFT লেখা। কখনো পাঠানো নয়।
+**Business:** Talvenor AI Receptionist — writing a follow-up DRAFT. Never sent.
 
 ## Input
 
-- `prospect`: prospect-এর নাম/business (research থেকে; না থাকলে BOSS INPUT REQUIRED)।
-- `state`: US state (যেমন PA, FL, TX)।
-- `state_first_mails`: ওই state-এর first-mail সংখ্যা (আসল সংখ্যা; না থাকলে
-  BOSS INPUT REQUIRED — অনুমান নয়)।
+- `prospect`: the prospect's name/business (from research; without it, BOSS INPUT REQUIRED).
+- `state`: US state (e.g. PA, FL, TX).
+- `state_first_mails`: that state's first-mail count (the real number; without it,
+  BOSS INPUT REQUIRED — no guessing).
 
-## পদ্ধতি (step-by-step)
+## Method (step-by-step)
 
-1. **100-mail নিয়ম যাচাই করা (আগে):** কোনো state-এ 100টা first mail
-   complete না হলে ওই state-এর কোনো follow-up নয়। `state_first_mails`
-   100-এর নিচে হলে draft-এ "PARKED — follow-up not due" লেখা; সংখ্যা না
-   থাকলে BOSS INPUT REQUIRED, due বলা যাবে না।
-2. Follow-up draft লেখা — short, plain US English, hook প্রথমে, একটা CTA
-   (15-min call — booking link: https://calendar.app.google/WLoxBfnLGTdjK3LB8)।
-3. Check করা: কোনো price নেই, কোনো guarantee নেই, কোনো বানানো client /
-   testimonial / statistic নেই, dental/medical নয়।
-4. Draft Boss-কে দেখানো — পাঠানো নয়। পাঠানো Boss নিজে করেন, "send" বললে।
+1. **Check the 100-mail rule (first):** without 100 first mails
+   complete in a state, no follow-up for that state. If `state_first_mails` is
+   below 100, write "PARKED — follow-up not due" in the draft; without the number,
+   BOSS INPUT REQUIRED, it cannot be called due.
+2. Write the follow-up draft — short, plain US English, hook first, one CTA
+   (15-min call — booking link: https://calendar.app.google/WLoxBfnLGTdjK3LB8).
+3. Check: no price, no guarantee, no invented client /
+   testimonial / statistic, no dental/medical.
+4. Show the draft to Boss — not send it. Boss sends it himself, when he says "send".
 
 ## Output format
 
@@ -37,32 +37,32 @@ Follow-up draft (short, plain US English, 1 CTA):
 Status: [DUE — draft ready for Boss review | PARKED — do NOT send]
 Phone: +1 (947) 223-0244
 ---
-Gate: send — Boss-এর exact শব্দ ছাড়া পাঠানো যাবে না।
+Gate: send — nothing can be sent without Boss's exact word.
 ```
 
 ## Gate
 
-`send` — Boss-এর exact শব্দ লাগে, আর পাঠানোর কাজ Boss নিজে করেন
-(main chat থেকে)। এই system শুধু DRAFT বানায়, auto-send নেই।
+`send` — Boss's exact word is needed, and Boss himself does the sending
+(from the main chat). This system only builds DRAFTs, no auto-send.
 
-## সৎ সীমা (honest limits)
+## Honest limits
 
-- **100-mail নিয়ম (Boss 2026-11-10, standing):** কোনো state 100 first mail
-  না হলে ওই state-এর follow-up নয়। বর্তমান সত্য: মোট first mail 162,
-  কোনো state-ই 100-তে নেই — এখন কোনো state-এর follow-up due নয়।
-  20টা ready PA follow-up draft PARKED আছে। FL-এর ceiling 98।
-- **Email PAUSED (2026-11-14 থেকে)** — SPF-এ Gmail include নেই, DMARC নেই;
-  DNS fix Boss-এর হাতে বাকি। Draft-ই শেষ কথা।
-- Mock brain ($0) — output DRAFT। Timeout মানে failure নয় — retry-এর আগে
-  Sent check করতে হয় (Metz/AAA double-send-এর শিক্ষা)।
-- n8n auto-send LIVE নয় (READY, Boss-এর import + test বাকি)।
+- **100-mail rule (Boss 2026-11-10, standing):** without 100 first mails in a state,
+  no follow-up for that state. Current truth: total first mail 162,
+  no state is at 100 — no state's follow-up is due now.
+  20 ready PA follow-up drafts are PARKED. FL's ceiling is 98.
+- **Email PAUSED (since 2026-11-14)** — SPF has no Gmail include, no DMARC;
+  the DNS fix is still in Boss's hands. The draft is the final word.
+- Mock brain ($0) — output DRAFT. A timeout does not mean failure — before retry,
+  Sent must be checked (the Metz/AAA double-send lesson).
+- n8n auto-send is not LIVE (READY, Boss's import + test pending).
 
-## Worked example (আসল তথ্য দিয়ে)
+## Worked example (with real information)
 
 Input: `prospect` = BOSS INPUT REQUIRED, `state` = PA,
-`state_first_mails` = 37 (আসল সংখ্যা, 2026-11-16)।
+`state_first_mails` = 37 (real number, 2026-11-16).
 
 Output: 100-mail rule check — PA first mails = 37 (threshold 100) —
-PARKED, follow-up not due yet। Overall first mails 162 — no state at 100 yet।
-Draft লেখা আছে, কিন্তু Status: PARKED — do NOT send। পাঠানো হয়নি,
-নিয়ম ভাঙা হয়নি।
+PARKED, follow-up not due yet. Overall first mails 162 — no state at 100 yet.
+The draft is written, but Status: PARKED — do NOT send. It was not sent,
+the rule was not broken.
