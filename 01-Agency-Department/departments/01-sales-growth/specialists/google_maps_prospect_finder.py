@@ -1,13 +1,13 @@
 """Google Maps Prospect Finder — discovery plan draft (Sales & Growth, Phase 3).
 
-ভূমিকা (role): Maps/Places data থেকে plumber/HVAC/etc. prospect খোঁজার
-plan-এর DRAFT বানানো — কখনো live search করে না, কোনো ব্যবসা খোঁজে না।
-Gate: none — plan DRAFT-এ কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: making a DRAFT of the plan for finding plumber/HVAC/etc. prospects from Maps/Places data
+— it never does a live search, searches for no business.
+Gate: none — the plan DRAFT has no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-এই agent কখনো করে না: live search/API call করে না, ব্যবসার নাম, ফোন,
-ইমেইল, ঠিকানা, রেটিং বানায় না, কিছু পাঠায় না, দাম quote করে না,
-কোনো guarantee দেয় না, dental/medical নয়।
+This agent never: does a live search/API call, invents a business name, phone,
+email, address, or rating, sends nothing, quotes no prices,
+Gives no guarantee, no dental/medical.
 """
 
 import os
@@ -19,7 +19,7 @@ TALVENOR_PHONE = "+1 (947) 223-0244"
 _GATE_ACTION_MAP = {"post it": "publish", "upload it": "publish"}
 _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
-# Record করতে হবে — এই field-গুলোই prospect তালিকার ছক।
+# To record — these fields are the prospect list's template.
 RECORD_FIELDS = (
     "business name",
     "address",
@@ -31,7 +31,7 @@ RECORD_FIELDS = (
 
 
 class GoogleMapsProspectFinder:
-    """Maps/Places discovery plan DRAFT ONLY — live search নয়, কিছু বানায় না।"""
+    """Maps/Places discovery plan DRAFT ONLY — no live search, nothing invented."""
 
     task_kind = "maps_prospect_find"
     gate = None
@@ -39,7 +39,7 @@ class GoogleMapsProspectFinder:
     role = "Google Maps Prospect Finder"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -51,7 +51,7 @@ class GoogleMapsProspectFinder:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -79,7 +79,7 @@ class GoogleMapsProspectFinder:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Discovery plan DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Makes a discovery plan DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Maps prospect discovery plan"
         gated_action = task.get("gated_action")
@@ -121,21 +121,21 @@ class GoogleMapsProspectFinder:
         output = (
             "[MOCK DRAFT] Google Maps Prospect Finder — discovery plan (DRAFT ONLY)\n"
             f"Business type: {business_type} | City: {city} | State: {state} | Area: {area}\n"
-            "Search-query pattern (Maps/Places, হাতে খুঁজতে হবে):\n"
-            f"\"{business_type} in {city}, {state}\" — তারপর আশেপাশের এলাকা একইভাবে।\n"
-            f"Record করার field: {fields_line}.\n"
-            "কোনো field না পাওয়া গেলে NOT_FOUND লিখতে হবে — কখনো বানানো যাবে না।\n"
-            "Dental/medical বা patient-health ব্যবসা পেলে DQ — কখনো target নয়।\n"
-            "পরের ধাপ: Business Verification Agent (business_verify) — পাওয়া ব্যবসার\n"
-            "website/phone/service area যাচাই; তারপর Lead Scoring Agent (lead_score)।\n"
-            "NOTE: এই worker কোনো live search করে না — plan DRAFT মাত্র। আসল খোঁজা\n"
-            "Boss/Elora হাতে করেন (ProspectResearcher + Apify/Places দিয়ে)।\n"
+            "Search-query pattern (Maps/Places, must be searched by hand):\n"
+            f"\"{business_type} in {city}, {state}\" — then the surrounding areas the same way.\n"
+            f"Fields to record: {fields_line}.\n"
+            "If any field is not found, NOT_FOUND must be written — it must never be invented.\n"
+            "If a dental/medical or patient-health business is found, DQ — never a target.\n"
+            "Next step: Business Verification Agent (business_verify) — the found business's\n"
+            "website/phone/service area verification; then Lead Scoring Agent (lead_score).\n"
+            "NOTE: This worker does no live search — only a plan DRAFT. The real search\n"
+            "is done by Boss/Elora by hand (with ProspectResearcher + Apify/Places).\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Discovery plan ONLY, live search নয়, "
-            "কোনো ব্যবসা/ফোন/ইমেইল বানানো হয়নি। Gate: none।"
+            "DRAFT ONLY — mock brain ($0). Discovery plan ONLY, no live search, "
+            "no business/phone/email was invented. Gate: none."
         )
         return {
             "status": "draft-ready",

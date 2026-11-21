@@ -1,16 +1,16 @@
 """Sales Intelligence Agent — reply/lead signal insight draft (Sales & Growth, Phase 3).
 
-ভূমিকা (role): Prospect-এর reply বা lead signal থেকে insight-এর DRAFT
-বানানো — intent কী, পরের ধাপ কী। Signal payload-এ না থাকলে insight
-বানায় না।
-Gate: none — insight DRAFT-এ কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: making a DRAFT insight from a prospect's reply or lead signal
+— what the intent is, what the next step is. If the signal is not in the payload, it makes no
+insight.
+Gate: none — the insight DRAFT has no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-এই agent কখনো করে না: signal/reply/intent বানায় না, কোনো reply
-পাঠায় না, কাউকে contact করে না, দাম quote করে না, কোনো guarantee
-দেয় না, dental/medical নয়।
+This agent never: invents a signal/reply/intent, sends any reply,
+contacts anybody, quotes prices, gives any guarantee
+gives none, no dental/medical.
 Locked rule: decline = polite exit; interest/question/pricing/demo
-request = draft only, কখনো price নয়, booking link দেওয়া যায়।
+request = draft only, never a price, a booking link may be given.
 """
 
 import os
@@ -24,7 +24,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class SalesIntelligenceAgent:
-    """Signal insight DRAFT ONLY — দেওয়া signal থেকে, আন্দাজে কিছু নয়।"""
+    """Signal insight DRAFT ONLY — from the given signal, nothing by guessing."""
 
     task_kind = "sales_intelligence"
     gate = None
@@ -32,7 +32,7 @@ class SalesIntelligenceAgent:
     role = "Sales Intelligence Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -44,7 +44,7 @@ class SalesIntelligenceAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -72,7 +72,7 @@ class SalesIntelligenceAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Insight DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Makes an insight DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Sales intelligence insight"
         gated_action = task.get("gated_action")
@@ -104,31 +104,31 @@ class SalesIntelligenceAgent:
         raw = (signal or reply_text).strip()
         lowered = raw.lower()
 
-        # Intent — শুধু দেওয়া signal/reply থেকে।
+        # Intent — only from the given signal/reply.
         if not raw:
             intent = "NO SIGNAL"
-            next_step = "NO SIGNAL — BOSS INPUT REQUIRED; insight দেওয়া যাচ্ছে না।"
+            next_step = "NO SIGNAL — BOSS INPUT REQUIRED; no insight can be given."
         elif any(w in lowered for w in ("not interested", "no thanks", "unsubscribe", "stop", "decline")):
             intent = "decline"
-            next_step = "Polite exit — আর contact নয়, আর pitch নয়।"
+            next_step = "Polite exit — no more contact, no more pitch."
         elif any(w in lowered for w in ("price", "pricing", "cost", "how much", "quote")):
             intent = "pricing question"
             next_step = (
-                "Reply DRAFT Boss-কে দেখানো — দাম কখনো বলা নয় (pricing LOCKED, "
-                "internal only); short call-এ details দেওয়ার কথা + booking link।"
+                "Show the reply DRAFT to Boss — never state a price (pricing LOCKED, "
+                "internal only); say details will be given on a short call + booking link."
             )
         elif any(w in lowered for w in ("demo", "call", "book", "interested", "tell me more")):
             intent = "interested / demo request"
             next_step = (
-                "Boss-কে জানানো; 15-min call-এর booking link দেওয়ার DRAFT — "
-                "Boss নিজে call নেন।"
+                "Tell Boss; a DRAFT giving the 15-min call's booking link — "
+                "Boss himself takes the call."
             )
         elif any(w in lowered for w in ("?", "how", "what", "when", "does it")):
             intent = "question"
-            next_step = "Reply DRAFT Boss-কে দেখানো — কখনো সরাসরি reply পাঠানো নয়।"
+            next_step = "Show the reply DRAFT to Boss — never send a reply directly."
         else:
             intent = "unclear — BOSS INPUT REQUIRED"
-            next_step = "Signal অস্পষ্ট — Boss/ReplyHandler দেখে triage করবেন।"
+            next_step = "Signal is unclear — Boss/ReplyHandler will triage after seeing it."
 
         if brain is not None:
             try:
@@ -145,15 +145,15 @@ class SalesIntelligenceAgent:
             f"Intent: {intent}\n"
             f"Suggested next step: {next_step}\n"
             "Locked rule: decline = polite exit; interest/question/pricing/demo "
-            "request = draft only, কখনো price নয়, booking link দেওয়া যায়।\n"
-            "NOTE: এই worker কোনো reply পাঠায় না — insight DRAFT মাত্র; reply "
-            "triage-এর মূল কাজ ReplyHandler (reply_triage, gate send) করে।\n"
+            "request = draft only, never a price, a booking link may be given.\n"
+            "NOTE: This worker sends no reply — only an insight DRAFT; reply "
+            "ReplyHandler (reply_triage, gate send) does the main triage work.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Insight DRAFT ONLY, দেওয়া signal থেকে; "
-            "কোনো signal/reply বানানো হয়নি, কোনো reply পাঠানো হয়নি। Gate: none।"
+            "DRAFT ONLY — mock brain ($0). Insight DRAFT ONLY, from the given signal; "
+            "No signal/reply was invented, no reply was sent. Gate: none."
         )
         return {
             "status": "draft-ready",

@@ -1,18 +1,18 @@
-"""Marketing Director Agent — Marketing department-এর manager (Phase 1).
+"""Marketing Director Agent — manager of the Marketing department (Phase 1).
 
-ভূমিকা (role): Marketing department-এর ৮ জন existing specialist-কে delegate
-করা — content plan, video produce, caption write, publish prep, market
-position, social manage, seo, analytics। এই manager শুধু delegation plan-এর
-DRAFT বানায়; নতুন ৪ জন standalone specialist-কে (Phase 3) importlib দিয়ে
-load করে তাদের draft ফেরত দেয় — নিজে কিছু post করে না।
-Gate: ok — delegation plan-এ Boss-এর "ok" লাগে; publish-এর gate "post it",
-send/spend/delete কোনো gated action এই manager নিজে করে না।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
-Agency Chief wiring Phase 2 DONE — Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে call করে।
-এই manager কখনো করে না: engine/section-এর পুরনো worker execute করে না, কিছু post/publish
-করে না, paid ad চালায় না, খরচ করে না, মুছে না, client-এর তথ্য/দাম/
-পরিসংখ্যান বানায় না, কোনো guarantee দেয় না, dental/medical বা
-patient-health ব্যবসা নেয় না।
+Role: delegate to the 9 existing specialists of the Marketing department —
+content plan, video produce, caption write, publish prep, market
+position, social manage, seo, analytics. This manager only makes a DRAFT of the delegation plan;
+it loads the new 5 standalone specialists (Phase 3 + 2026-11-21) with importlib and
+returns their drafts — it posts nothing itself.
+Gate: ok — the delegation plan needs Boss's "ok"; the publish gate is "post it",
+send/spend/delete This manager itself performs no gated action.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
+Agency Chief wiring Phase 2 DONE — the Chief now calls this manager via DEPARTMENT_ROUTING.
+This manager never: executes the engine/section's old workers, posts/publishes anything,
+runs paid ads, spends anything, deletes anything, invents client facts/prices/
+statistics, gives any guarantee, takes dental/medical or
+patient-health businesses.
 """
 
 import importlib.util
@@ -66,9 +66,10 @@ DEPARTMENT_TASKS = {
     },
     "ad_campaign": {
         "specialist": "Ad Campaign Agent",
-        "file": "GAP — no worker file; paid ads not planned ($0 spend cap)",
+        "class": "AdCampaignAgent",
+        "file": "departments/02-marketing/specialists/ad_campaign_agent.py",
         "gate": "ok",
-        "status": "GAP",
+        "status": "EXISTING",
     },
     "seo": {
         "specialist": "SEO Agent",
@@ -88,7 +89,7 @@ DEPARTMENT_TASKS = {
 
 
 class MarketingDirectorAgent:
-    """Marketing specialist-দের delegation plan DRAFT বানায় + Phase 3 specialist-দের load করে চালায় (DRAFT only); post করে না।"""
+    """Makes a DRAFT of the delegation plan for marketing specialists + loads and runs the Phase 3 specialists (DRAFT only); does not post."""
 
     task_kind = "manage_marketing"
     gate = "ok"
@@ -96,7 +97,7 @@ class MarketingDirectorAgent:
     role = "Marketing Director Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -108,7 +109,7 @@ class MarketingDirectorAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -132,18 +133,18 @@ class MarketingDirectorAgent:
             "honest status. PublishPrep prepares only — it never posts. "
             "Do not invent any client fact; mark missing facts "
             "'BOSS INPUT REQUIRED'. No price, no guarantee, "
-            "no dental/medical. Paid ads are GAP — $0 spend cap."
+            "no dental/medical. Paid ads: DRAFT plan only — $0 spend cap, no live ads."
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Delegation plan DRAFT বানানো + Phase 3 specialist load+run (DRAFT only)। কোনো file লেখে না, network ছোঁয় না।"""
+        """Build a delegation plan DRAFT + Phase 3 specialist load+run (DRAFT only). Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Manage Marketing"
         gated_action = task.get("gated_action")
         approval_id = task.get("approval_id")
 
-        # Gated action থাকলে আগে approval — অনুমোদন ছাড়া draft-ও নয়,
-        # PENDING record করে থামা।
+        # If there is a gated action, approval first — no draft without approval,
+        # record PENDING and stop.
         if gated_action:
             gw = gateway if gateway is not None else self._gateway(approvals_path)
             approved = False
@@ -177,7 +178,7 @@ class MarketingDirectorAgent:
             lines = [
                 "[MOCK DRAFT] Marketing — department overview delegation plan (DRAFT ONLY)",
                 "Manager: Marketing Director Agent | task_kind: manage_marketing | gate: ok",
-                "Specialists (8 EXISTING):",
+                "Specialists (9 EXISTING):",
             ]
             for kind in sorted(DEPARTMENT_TASKS.keys()):
                 entry = DEPARTMENT_TASKS[kind]
@@ -186,16 +187,16 @@ class MarketingDirectorAgent:
                     f"gate: {entry['gate'] or 'none'} | {entry['status']}"
                 )
             lines.append(
-                "Note: PublishPrep শুধু prep করে — কখনো post করে না; publish-এর "
-                "gate 'post it'। Ad Campaign Agent GAP — paid ads $0 cap-এ নেই। "
-                "Weekly reporting ReportCompiler-এর (Finance & Admin) আওতায়।"
+                "Note: PublishPrep only does prep — it never posts; the publish "
+                "gate is 'post it'. Ad Campaign Agent EXISTING — DRAFT plan only; paid ads $0 cap, no live ad. "
+                "Weekly reporting is under ReportCompiler (Finance & Admin)."
             )
             lines.append(f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}")
             lines.append(f"Brain note: {brain_text}")
             notes = (
-                "DRAFT ONLY — mock brain ($0). Overview delegation plan, কোনো "
-                "worker execute নয়, কোনো post নয়। Agency Chief wiring Phase 2 DONE — "
-                "Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে call করে।"
+                "DRAFT ONLY — mock brain ($0). Overview delegation plan, no "
+                "not a worker execution, no post. Agency Chief wiring Phase 2 DONE — "
+                "The Chief now calls this manager via DEPARTMENT_ROUTING."
             )
             return {
                 "status": "draft-ready",
@@ -210,13 +211,13 @@ class MarketingDirectorAgent:
         if entry is None:
             output = (
                 "[MOCK DRAFT] Marketing — unknown task (DRAFT ONLY)\n"
-                f"Requested task_kind '{task_kind}' এই department-এ নেই।\n"
+                f"Requested task_kind '{task_kind}' is not in this department.\n"
                 "Known task kinds: " + ", ".join(known_kinds) + ".\n"
-                "কোনো worker execute হয়নি; সঠিক task_kind দিয়ে আবার চাইতে হবে।"
+                "No worker executed; ask again with the correct task_kind."
             )
             notes = (
-                "Unknown task — delegation plan বানানো হয়নি। এই department-এর "
-                "task kind-গুলো উপরে তালিকায় আছে।"
+                "Unknown task — no delegation plan was made. This department's "
+                "task kinds are listed above."
             )
             return {
                 "status": "unknown-task",
@@ -228,10 +229,10 @@ class MarketingDirectorAgent:
             }
 
         # Phase 3 standalone specialists — departments/02-marketing/specialists/
-        # -এর .py থাকলে Chief-এর loader-এর মতো importlib দিয়ে load করে
-        # specialist-কে চালানো; তার result-ই ফেরত দেওয়া। Existing engine
-        # worker-দের (content_plan / video_produce / caption_write /
-        # publish_prep) plan-draft behavior নিচে অপরিবর্তিত থাকে।
+        # If it has a .py, load it with importlib like the Chief's loader and
+        # run the specialist; its result is returned. Existing engine
+        # workers' (content_plan / video_produce / caption_write /
+        # publish_prep) plan-draft behaviour stays unchanged below.
         if entry.get("status") == "EXISTING" and entry.get("class"):
             specialist_path = os.path.normpath(os.path.join(
                 os.path.dirname(os.path.abspath(__file__)), "..",
@@ -252,37 +253,38 @@ class MarketingDirectorAgent:
             f"Specialist: {entry['specialist']} | File/skill: {entry['file']}\n"
             f"Gate needed: {entry['gate'] or 'none'} | Status: {entry['status']}\n"
             "Plan (DRAFT):\n"
-            f"1. {entry['specialist']}-কে task দেওয়া হবে — manager নিজে কাজটি করে না।\n"
-            "2. Specialist-এর output DRAFT হিসেবে Boss-কে দেখানো হবে।\n"
+            f"1. {entry['specialist']} will be given the task — the manager does not do the work itself.\n"
+            "2. The specialist's output will be shown to Boss as a DRAFT.\n"
         )
         if entry["gate"]:
             output += (
-                f"3. Gate '{entry['gate']}' — Boss-এর exact word ছাড়া কিছু "
-                "প্রকাশ/পাঠানো/খরচ করা যাবে না।\n"
+                f"3. Gate '{entry['gate']}' — nothing without Boss's exact word "
+                "must not be published/sent/spent.\n"
             )
         if task_kind == "publish_prep":
             output += (
-                "4. PublishPrep শুধু prep করে — কখনো post করে না; আসল posting "
-                "Boss-এর 'post it' + হাতে করা।\n"
+                "4. PublishPrep only does prep — it never posts; the real posting "
+                "is done by Boss with 'post it' + by hand.\n"
             )
         if entry["status"] == "ROLE-ONLY":
             output += (
-                "4. ROLE-ONLY — এই role-এর কোনো worker code নেই; skill doc "
-                "অনুযায়ী Boss/Elora হাতে কাজটি করবেন।\n"
+                "4. ROLE-ONLY — this role has no worker code; the skill doc "
+                "says Boss/Elora will do the work by hand.\n"
             )
         if entry["status"] == "GAP":
             output += (
-                "4. GAP — এই role-এর কোনো worker/skill নেই; paid ads $0 spend "
-                "cap-এ planned নয়।\n"
+                "4. GAP — (worker + skill EXISTING on 2026-11-21) — Ad Campaign "
+                "Agent: departments/02-marketing/specialists/ad_campaign_agent.py; "
+                "paid ads are still DRAFT plan only, no live ad under the $0 spend cap.\n"
             )
         output += (
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Delegation plan মাত্র; worker "
-            "execute হয়নি, কিছু post হয়নি। Agency Chief wiring Phase 2 DONE — "
-            "Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে call করে।"
+            "DRAFT ONLY — mock brain ($0). Delegation plan only; the worker "
+            "was not executed, nothing was posted. Agency Chief wiring Phase 2 DONE — "
+            "The Chief now calls this manager via DEPARTMENT_ROUTING."
         )
         return {
             "status": "draft-ready",

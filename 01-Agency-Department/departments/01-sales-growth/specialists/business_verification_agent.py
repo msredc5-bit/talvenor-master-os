@@ -1,14 +1,14 @@
 """Business Verification Agent — verification checklist draft (Sales & Growth, Phase 3).
 
-ভূমিকা (role): Prospect-এর website/phone/service area যাচাইয়ের DRAFT
-checklist বানানো — SOP 11-signal scoring-এর ভিত্তিতে। নিজে কোনো website
-খোলে না, ফোন করে না।
-Gate: none — checklist DRAFT-এ কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: making a DRAFT verification checklist for a prospect's website/phone/service area
+— based on SOP 11-signal scoring. It opens no website itself,
+does not call.
+Gate: none — the checklist DRAFT has no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-এই agent কখনো করে না: live check করে না, যাচাইয়ের ফলাফল বানায় না,
-কিছু পাঠায় না, দাম quote করে না, কোনো guarantee দেয় না,
-dental/medical নয়।
+This agent never: does a live check, invents verification results,
+sends anything, quotes prices, gives any guarantee,
+no dental/medical.
 """
 
 import os
@@ -20,24 +20,24 @@ TALVENOR_PHONE = "+1 (947) 223-0244"
 _GATE_ACTION_MAP = {"post it": "publish", "upload it": "publish"}
 _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
-# SOP 11-signal — যাচাইয়ের ছক।
+# SOP 11-signal — the verification template.
 SIGNALS = (
-    "website আছে ও খোলে",
-    "phone নম্বর আছে",
-    "phone-এ উত্তর মেলে",
-    "service area স্পষ্ট",
-    "service area target state-এ",
-    "business নাম ঠিকানা-র সাথে মেলে",
-    "Google listing আছে",
-    "reviews আছে",
-    "services তালিকা আছে",
-    "contact/booking পথ আছে",
-    "dental/medical নয়",
+    "website exists and opens",
+    "phone number exists",
+    "the phone is answered",
+    "service area is clear",
+    "service area is in the target state",
+    "business name matches the address",
+    "Google listing exists",
+    "reviews exist",
+    "services list exists",
+    "contact/booking path exists",
+    "not dental/medical",
 )
 
 
 class BusinessVerificationAgent:
-    """Verification checklist DRAFT ONLY — live check নয়, ফলাফল বানায় না।"""
+    """Verification checklist DRAFT ONLY — no live check, no invented results."""
 
     task_kind = "business_verify"
     gate = None
@@ -45,7 +45,7 @@ class BusinessVerificationAgent:
     role = "Business Verification Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -57,7 +57,7 @@ class BusinessVerificationAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -84,7 +84,7 @@ class BusinessVerificationAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Verification checklist DRAFT বানানো। কোনো file লেখে না, network ছোঁয় না।"""
+        """Makes a verification checklist DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Business verification checklist"
         gated_action = task.get("gated_action")
@@ -113,7 +113,7 @@ class BusinessVerificationAgent:
         website = payload.get("website") or "BOSS INPUT REQUIRED"
         phone = payload.get("phone") or "BOSS INPUT REQUIRED"
         service_area = payload.get("service_area") or "BOSS INPUT REQUIRED"
-        # payload-এ দেওয়া signal ফলাফল থাকলে তাই ব্যবহার; না থাকলে NOT_VERIFIED।
+        # If the payload gives a signal result, use it; otherwise NOT_VERIFIED.
         given = payload.get("signals") or {}
         if not isinstance(given, dict):
             given = {}
@@ -129,7 +129,7 @@ class BusinessVerificationAgent:
         lines = [
             "[MOCK DRAFT] Business Verification Agent — verification checklist (DRAFT ONLY)",
             f"Business: {business} | Website: {website} | Phone: {phone} | Service area: {service_area}",
-            "SOP 11-signal checklist (ফলাফল শুধু দেওয়া তথ্য থেকে; না থাকলে NOT_VERIFIED):",
+            "SOP 11-signal checklist (results only from the given information; otherwise NOT_VERIFIED):",
         ]
         for i, signal in enumerate(SIGNALS, start=1):
             result = given.get(signal) or given.get(str(i)) or "NOT_VERIFIED"
@@ -137,15 +137,15 @@ class BusinessVerificationAgent:
                 result = "NOT_VERIFIED"
             lines.append(f"{i}. {signal}: {result}")
         lines.append(
-            "Dental/medical বা patient-health ব্যবসা হলে DQ — কখনো target নয়।"
+            "If it is a dental/medical or patient-health business, DQ — never a target."
         )
         lines.append(
-            "পরের ধাপ: যাচাই হওয়া lead → Lead Scoring Agent (lead_score); "
-            "fail/DQ হলে lead বাদ।"
+            "Next step: verified lead → Lead Scoring Agent (lead_score); "
+            "if fail/DQ, the lead is dropped."
         )
         lines.append(
-            "NOTE: এই worker কোনো live check করে না — checklist DRAFT মাত্র। "
-            "আসল যাচাই Boss/Elora হাতে করেন।"
+            "NOTE: This worker does no live check — only a checklist DRAFT. "
+            "The real verification is done by Boss/Elora by hand."
         )
         lines.append(
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}"
@@ -153,7 +153,7 @@ class BusinessVerificationAgent:
         lines.append(f"Brain note: {brain_text}")
         notes = (
             "DRAFT ONLY — mock brain ($0). Verification checklist ONLY, live check "
-            "নয়, কোনো যাচাইয়ের ফলাফল বানানো হয়নি। Gate: none।"
+            "not, no verification result was invented. Gate: none."
         )
         return {
             "status": "draft-ready",
