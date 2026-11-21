@@ -1,32 +1,32 @@
 """Caption Writer Agent — publish section (Phase 7).
 
-ভূমিকা (role): Platform অনুযায়ী caption + hashtag pack লেখা — প্রথম
-line-এ hook, একটা CTA, hashtag (Instagram ৫–৮, LinkedIn ৩, Facebook ০–২)।
-Vendored worker: CaptionWriter (Chief task caption_write, gate ok)।
-Channel: ToolPilot @ToolPilotai69 — AI Tools & Tutorials, faceless, US viewers।
-Pipeline stage: 6-caption-seo (yt-seo — description + tags) — MOCK।
-Status: DRAFT ONLY — mock brain ($0), সব output [MOCK DRAFT]।
-Gate: "ok" — Boss-এর "ok" ছাড়া caption pack ব্যবহার করা যাবে না।
+Role: write a caption + hashtag pack per platform — hook in the first
+line, one CTA, hashtags (Instagram 5–8, LinkedIn 3, Facebook 0–2).
+Vendored worker: CaptionWriter (Chief task caption_write, gate ok).
+Channel: ToolPilot @ToolPilotai69 — AI Tools & Tutorials, faceless, US viewers.
+Pipeline stage: 6-caption-seo (yt-seo — description + tags) — MOCK.
+Status: DRAFT ONLY — mock brain ($0), all output [MOCK DRAFT].
+Gate: "ok" — the caption pack may not be used without Boss's "ok".
 
-সৎ সীমা: Caption line-level — word-level karaoke নয় (Creator OS-এর সীমা)।
-কোনো platform-এ post করা এই role-এর কাজ নয়।
+Honest limits: captions are line-level — not word-level karaoke (a Creator OS limit).
+Posting on any platform is not this role's job.
 
-কখনো করে না: publish করে না, upload করে না, send করে না, খরচ করে না,
-delete করে না। কোনো invented client / stat / testimonial / price লেখে না।
-Upload OFF — this agent never uploads।
+Never does: does not publish, upload, send, spend, or
+delete. Does not write any invented client / stat / testimonial / price.
+Upload OFF — this agent never uploads.
 """
 
 import os
 import sys
 import uuid
 
-# Import time-এ শুধু stdlib। Worker / brain / gateway — সব lazy, run()-এর ভিতরে
-# (দুই department-এর vendored tree-ই top-level `src` দেয় — module level-এ
-# src.creator_workers import করলে package collision হয়)।
+# Only stdlib at import time. Brain / gateway — all lazy, inside run().
+# (both departments' vendored trees give a top-level `src` — importing
+# src.creator_workers at module level causes a package collision).
 
 
 class CaptionWriterAgent:
-    """Caption Writer — publish section-এর caption pack agent।"""
+    """Caption Writer — caption pack agent for the publish section."""
 
     task_kind = "caption_write"
     gate = "ok"
@@ -100,12 +100,12 @@ class CaptionWriterAgent:
             "mock_brain": True,
             "gate": self.gate,
             "note": "Gated action — PENDING approval recorded. Nothing was "
-                    "sent/published/uploaded/spent/deleted. Boss-এর gate word "
-                    "ছাড়া এগোবে না।",
+                    "sent/published/uploaded/spent/deleted. Without Boss's gate word " 
+                    "it will not go ahead.",
         }
 
     def _gate_check(self, task, gateway, approvals_path):
-        """Gated action থাকলে worker চালানো যাবে না — PENDING-এ আটকাও।"""
+        """If there is a gated action, the draft may not run — hold it as PENDING."""
         gated_action = task.get("gated_action")
         if not gated_action:
             return None
@@ -118,8 +118,8 @@ class CaptionWriterAgent:
                 "draft_only": True,
                 "mock_brain": True,
                 "gate": self.gate,
-                "upload_stage": "OFF by default — needs Boss-এর 'upload it' + "
-                                "YOUTUBE_UPLOAD_ENABLED=1 + Boss-এর নিজের "
+                "upload_stage": "OFF by default — needs Boss's 'upload it' + " 
+                                "YOUTUBE_UPLOAD_ENABLED=1 + Boss's own " 
                                 "YouTube credential",
                 "note": "Upload stage 9 is OFF by default. This agent never uploads.",
             }
@@ -128,7 +128,7 @@ class CaptionWriterAgent:
         if approval_id:
             try:
                 if gw.is_approved(approval_id):
-                    return None  # approved — তবুও শুধু draft, action execute নয়
+                    return None  # approved — still only a draft, no action executed
             except KeyError:
                 pass
         if gated_action in ("send", "publish", "spend", "delete"):
@@ -144,19 +144,19 @@ class CaptionWriterAgent:
             "draft_only": True,
             "mock_brain": True,
             "gate": self.gate,
-            "note": f"Gate word '{self.gate}' ছাড়া এগোবে না — Boss-এর "
-                    f"অনুমোদন বাকি। Gated action {gated_action!r}-এর জন্য "
-                    "কোনো approval record বানানো যায়নি।",
+            "note": f"Gate word '{self.gate}' is needed to go ahead — Boss's " 
+                    f"approval is pending. For gated action {gated_action!r} " 
+                    "no approval record could be made.",
         }
 
     # -- run ---------------------------------------------------------------
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Caption + hashtag pack DRAFT — vendored CaptionWriter-কে delegate করে।
+        """Caption + hashtag pack DRAFT — delegates to the vendored CaptionWriter.
 
         task = {"type": "caption_write", "title": "...",
                 "payload": {"topic": ..., "platform": ...},
                 "gated_action": ... (optional), "approval_id": ... (optional)}
-        কোনো file লেখে না, network ছোঁয় না, কিছু publish/upload করে না।
+        It writes no file, touches no network, and publishes/uploads nothing.
         """
         task = dict(task or {})
         payload = dict(task.get("payload") or {})
@@ -183,9 +183,9 @@ class CaptionWriterAgent:
         worker_result = worker.execute(creator_task)
 
         notes = (worker_result.notes or "") + (
-            "\n[MOCK DRAFT] — mock brain ($0), DRAFT ONLY। Output পাঠাতে/ব্যবহার "
-            "করতে Boss-এর gate word লাগবে: 'ok'। Caption line-level — "
-            "word-level karaoke নয়। এই agent কোনো platform-এ post করে না।")
+            "\n[MOCK DRAFT] — mock brain ($0), DRAFT ONLY. To send/use the output, "
+            "Boss's gate word is needed: 'ok'. Captions are line-level — "
+            "not word-level karaoke. This agent posts on no platform.")
         return {
             "status": "draft-ready",
             "type": self.task_kind,

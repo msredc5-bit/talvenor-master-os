@@ -1,7 +1,7 @@
 # Skill: Publish Prep
 
-**Role:** Publish Prep — Publish section-এর publish-এর আগের checklist। Agent: `PublishPrepAgent` (`sections/publish/agents/publish_prep.py`, task_kind `publish_prep`, gate `post it`)। Worker: `PublishPrep` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `publish_prep`, gate `post it`)।
-**Chief task type:** `publish_prep`। **Stage:** 7-publish-prep — MOCK।
+**Role:** Publish Prep — the pre-publish checklist for the Publish section. Agent: `PublishPrepAgent` (`sections/publish/agents/publish_prep.py`, task_kind `publish_prep`, gate `post it`). Worker: `PublishPrep` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `publish_prep`, gate `post it`).
+**Chief task type:** `publish_prep`. **Stage:** 7-publish-prep — MOCK.
 
 ## Input
 
@@ -10,31 +10,31 @@
 
 ## Method (step-by-step)
 
-1. Final checklist draft বানাও: hook (প্রথম ২ সেকেন্ডে আছে কি), readable text (on-screen text ছোট + readable কি), কোনো invented claim নেই কি, platform ঠিক কি, best posting time কী।
-2. Best posting time: ToolPilot Long — Sat 10 AM ET (Sat 9 PM Dhaka); Shorts — Wed + Fri 9 AM ET (8 PM Dhaka)।
-3. Checklist-এ যা fail করে, সেটা লেখো — pass বলে চালিও না।
-4. কোনো invented client / testimonial / case study / stat / price থাকলে সেটা flag করো — checklist থেকে বাদ দিও না।
-5. Output-এ `[MOCK DRAFT]` লিখো। `ready_to_publish` সবসময় **False** — publish এই role করে না।
+1. Make a final checklist draft: hook (is it in the first 2 seconds), readable text (is the on-screen text short + readable), no invented claim, is the platform right, what is the best posting time.
+2. Best posting time: ToolPilot Long — Sat 10 AM ET (Sat 9 PM Dhaka); Shorts — Wed + Fri 9 AM ET (8 PM Dhaka).
+3. Write whatever fails in the checklist — do not pass it off as a pass.
+4. If there is any invented client / testimonial / case study / stat / price, flag it — do not leave it out of the checklist.
+5. Write `[MOCK DRAFT]` in the output. `ready_to_publish` is always **False** — this role does not publish.
 
 ## Output format
 
 ```
 [MOCK DRAFT] — Publish-prep checklist (topic: ... | platform: ...)
-[ ] Hook — প্রথম ২ সেকেন্ডে আছে
-[ ] Readable text — on-screen text ছোট + readable
-[ ] No invented claims — client/stat/testimonial/price নেই
+[ ] Hook — in the first 2 seconds
+[ ] Readable text — on-screen text short + readable
+[ ] No invented claims — no client/stat/testimonial/price
 [ ] Platform — ...
 [ ] Best posting time — ...
 ready_to_publish: False
-Gate: "post it" (video upload-এর জন্য "upload it")
+Gate: "post it" (for video upload, "upload it")
 ```
 
 ## Gate
 
-**`post it`** (video upload-এর জন্য **`upload it`**) — Boss-এর exact word ছাড়া কিছু publish/upload হয় না, আর সেটাও Boss নিজে করেন।
+**`post it`** (for video upload, **`upload it`**) — nothing is published/uploaded without Boss's exact word, and Boss does that himself.
 
-## সৎ সীমা
+## Honest limits
 
-- **Upload stage 9 DEFAULT OFF** — লাগে তিনটাই: Boss-এর "upload it" + `YOUTUBE_UPLOAD_ENABLED=1` + Boss-এর নিজের YouTube credential (OAuth)। এই engine কখনো `upload_youtube.py` চালায় না।
-- **Week 1 উদাহরণ (আসল):** ToolPilot Week 1 long video — "Google's Nano Banana 2 Is Free - But Is It Good?" — READY TO RECORD, কিন্তু এখনো record/upload হয়নি; publish-prep checklist DRAFT মাত্র।
-- LinkedIn = Boss নিজে post করেন (personal profile)।
+- **Upload stage 9 DEFAULT OFF** — all three are needed: Boss's "upload it" + `YOUTUBE_UPLOAD_ENABLED=1` + Boss's own YouTube credential (OAuth). This engine never runs `upload_youtube.py`.
+- **Week 1 example (real):** ToolPilot Week 1 long video — "Google's Nano Banana 2 Is Free - But Is It Good?" — READY TO RECORD, but not recorded/uploaded yet; the publish-prep checklist is only a DRAFT.
+- LinkedIn = Boss posts himself (personal profile).
