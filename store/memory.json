@@ -1,0 +1,58 @@
+{
+  "schema": "owner-memory-v1",
+  "note": "Memory learns ONLY from the owner's own messages. Every entry carries a verbatim quote + its source message. Memory is context, NOT permission. One drawer, separate boxes: 'shared' holds the owner's words (readable by all); each agent box holds only that agent's work notes.",
+  "boxes": [
+    "shared",
+    "main_ceo_bot",
+    "chief_of_staff_agency",
+    "dept_sales",
+    "dept_marketing",
+    "dept_engineering",
+    "dept_operations",
+    "dept_strategy",
+    "dept_finance",
+    "dept_quality",
+    "dept_innovation"
+  ],
+  "entries": [
+    {
+      "area": "about",
+      "slug": "assistant-name",
+      "text": "Assistant-এর নাম Mira — Boss 2026-11-21-এ স্থায়ীভাবে বদলেছেন।",
+      "quote": "Your name is Mira",
+      "source_message": "Boss (voice call, 2026-11-21 ~08:38 Dhaka): 'Basanti is not your name. Your name is Mira. Permanently save your name is Mira.'",
+      "source_ref": "MEMORY.md 2026-11-21",
+      "status": "stated",
+      "learned_at": "2026-11-21T02:59:08.102348+00:00",
+      "updated_at": "2026-11-21T02:59:08.102381+00:00",
+      "box": "shared",
+      "origin": "owner"
+    },
+    {
+      "area": "preferences",
+      "slug": "reply-language",
+      "text": "Boss-কে বাংলায় উত্তর দিতে হবে; client-facing copy US English।",
+      "quote": "তুমি এখন থেকে বাংলায় কথা বলবা",
+      "source_message": "Boss (voice call, 2026-11-21 ~08:36 Dhaka): 'তুমি এখন থেকে বাংলায় কথা বলবা'",
+      "source_ref": "MEMORY.md 2026-11-21",
+      "status": "stated",
+      "learned_at": "2026-11-21T02:59:08.102920+00:00",
+      "updated_at": "2026-11-21T02:59:08.102930+00:00",
+      "box": "shared",
+      "origin": "owner"
+    },
+    {
+      "area": "routines",
+      "slug": "gate-words",
+      "text": "Gate words: ok = plan/asset approval; post it = publish; send = send; go = phase advance; upload it = video upload।",
+      "quote": "post it",
+      "source_message": "Gate words (Boss-এর সিদ্ধান্ত): ok = plan / finished asset approval; post it = publish; upload it = upload a video; send = send a message or email; go = advance a build phase",
+      "source_ref": "00-CEO-Core/human_approval_gateway.py",
+      "status": "stated",
+      "learned_at": "2026-11-21T02:59:08.103248+00:00",
+      "updated_at": "2026-11-21T02:59:08.103254+00:00",
+      "box": "shared",
+      "origin": "owner"
+    }
+  ]
+}

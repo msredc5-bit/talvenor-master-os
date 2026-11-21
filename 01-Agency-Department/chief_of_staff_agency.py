@@ -32,6 +32,14 @@ vendored (engine/workers/) — বাইরের কোনো checkout-এর �
     payload-এ থাকলে তা top-level-এ বসানো হয় (manager task.get
     ("task_kind") পড়ে); না থাকলে M1–M4 overview দেয়, M5–M8
     "unknown-task" ফেরত দেয় (known kind-গুলোর তালিকা সহ)।
+- Memory wiring (2026-11-21, MEMORY-STRUCTURE-DECISION-2026-11-21.md):
+    handle_task() প্রত্যেক task-এ memory পড়ে — context_for(
+    "chief_of_staff_agency") result-এ "memory" হিসেবে attach হয়
+    (shared Boss-কথা + নিজের box)। Chief memory-তে note লেখে না —
+    routing log tasks.json-এ থাকে; memory Boss-এর কথা + lesson-এর
+    জন্য। Boss-এর কথা শেখা / ভুলে যাওয়া Chief করে না — সেটা Main
+    CEO Bot-এর কাজ (record_owner_message /
+    request_forget_owner_entry)।
 
 Routing table: TASK_TYPE -> (worker class, division, gate word)
 """
@@ -53,6 +61,7 @@ sys.path.insert(0, CEO_CORE_DIR)
 sys.path.insert(0, ENGINE_WORKERS_DIR)
 
 from human_approval_gateway import ApprovalGateway  # noqa: E402
+from owner_memory import OwnerMemory  # noqa: E402
 from brain import BrainFactory  # noqa: E402
 from src.contracts.models import Task as EngineTask  # noqa: E402
 from src.workers.acquisition import (  # noqa: E402
@@ -178,7 +187,25 @@ def _log_task(record, tasks_path=None):
     return record
 
 
-def handle_task(task, tasks_path=None, approvals_path=None):
+def handle_task(task, tasks_path=None, approvals_path=None, memory_path=None):
+    """Main CEO Bot থেকে আসা একটা agency task চালানো + memory wiring।
+
+    Memory: প্রত্যেক task-এ Chief নিজের box-এর context পড়ে
+    (context_for("chief_of_staff_agency") — shared Boss-কথা + নিজের
+    note) আর result-এ "memory" হিসেবে attach করে। Memory-তে কিছু
+    লেখা হয় না — routing log tasks.json-এ থাকে।
+    আসল কাজ _handle_task_inner()-এ — এই wrapper শুধু memory পড়া জোড়ে।
+    """
+    mem = (OwnerMemory(memory_path=memory_path)
+           if memory_path else OwnerMemory())
+    memory_ctx = mem.context_for("chief_of_staff_agency")
+    result = _handle_task_inner(task, tasks_path=tasks_path,
+                                approvals_path=approvals_path)
+    result["memory"] = memory_ctx
+    return result
+
+
+def _handle_task_inner(task, tasks_path=None, approvals_path=None):
     """Main CEO Bot থেকে আসা একটা agency task চালানো।
 
     task = {
