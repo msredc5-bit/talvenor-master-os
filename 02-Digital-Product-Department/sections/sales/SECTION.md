@@ -1,29 +1,29 @@
 # Sales Section — Kit Outreach DRAFTs
 
-**Purpose (উদ্দেশ্য):** যাচাই করা PA clinic-দের জন্য Vet Kit outreach email-এর DRAFT লেখা — শুধু DRAFT, পাঠানো নয়।
+**Purpose:** Write DRAFTs of Vet Kit outreach emails for verified PA clinics — DRAFTs only, never sent.
 
-## Staff roster (কর্মী তালিকা)
+## Staff roster
 
 | Staff | Agent file | Skill file | Gate | Status |
 |---|---|---|---|---|
 | Kit Sales | `agents/kit_sales.py` (`KitSalesAgent`, task `kit_sales`) | `skills/kit-sales.md` | `send` | **NEW** role (Phase 7) |
 
-## How work flows (কাজের ধারা)
+## How work flows
 
-1. Main CEO Bot → Products Chief → `kit_sales` (Chief-এর `SECTION_ROUTING` branch, Phase 7, নতুন) → `KitSalesAgent`।
-2. Agent `pa-vet-clinics.csv` (read-only) থেকে verified clinic নেয়: payload-এ `clinic_name` থাকলে CSV-তে মিলিয়ে দেখা; না থাকলে প্রথম emailable row (public email আছে) ব্যবহার করা — এখন Indy Veterinary Care, Philadelphia।
-3. Draft লেখা (plain US English): pain (AAHA ~11% × AVMA ~$200), kit-এর ৬ অংশের নাম, CTA (booking link + phone)। Price জায়গায় placeholder — Boss confirm না করলে $49 লেখা হয় না।
-4. প্রতিটা output-এর মাথায় prominent warning: "DRAFT ONLY — Gate 0 NOT passed, do not send until Boss says go"।
-5. Gated `send` চাইলে agent চালানো হয় না — ApprovalGateway-এ PENDING request লেখা হয়।
+1. Main CEO Bot → Products Chief → `kit_sales` (the Chief's `SECTION_ROUTING` branch, Phase 7, new) → `KitSalesAgent`.
+2. The agent takes a verified clinic from `pa-vet-clinics.csv` (read-only): if the payload has a `clinic_name`, it checks the CSV for a match; if not, it uses the first emailable row (one with a public email) — now Indy Veterinary Care, Philadelphia.
+3. Writing the draft (plain US English): pain (AAHA ~11% × AVMA ~$200), the kit's 6 parts, CTA (booking link + phone). The price is a placeholder — $49 is not written unless Boss confirms.
+4. A prominent warning at the top of every output: "DRAFT ONLY — Gate 0 NOT passed, do not send until Boss says go".
+5. If a gated `send` is requested, the agent is not run — a PENDING request is written to the ApprovalGateway.
 
-## Gates (গেট)
+## Gates
 
-- পাঠাতে Boss-এর `send` লাগে — exact word ছাড়া কিছু পাঠানো হয় না।
-- Email channel এখন **PAUSED** (2026-11-14 থেকে — SPF/DMARC DNS fix Boss-এর হাতে বাকি)।
+- Boss's `send` is needed to send — nothing is sent without the exact word.
+- The email channel is now **PAUSED** (since 2026-11-14 — the SPF/DMARC DNS fix is still in Boss's hands).
 
-## Honest limits (সৎ সীমা)
+## Honest limits
 
-- **Gate 0 NOT PASSED** — kit বানানো হয়নি (0/6), sale 0। Draft launch-এর পরে ব্যবহারের জন্য।
-- **PA list 39/100** — 39-এর মধ্যে public email আছে 8টার; public email না থাকলে ("Not publicly listed") addressed email draft লেখা যায় না।
-- কোনো clinic-কে দুইবার মেইল করা যাবে না (launch-এর সময়)।
-- কোনো agent মেইল পাঠায় না, sale চিহ্নিত করে না, contact details বানায় না, file লেখে না, network ছোঁয় না।
+- **Gate 0 NOT PASSED** — the kit has not been built (0/6), sale 0. Drafts are for use after launch.
+- **PA list 39/100** — of the 39, 8 have a public email; if there is no public email ("Not publicly listed"), no addressed email draft can be written.
+- No clinic can be emailed twice (at launch time).
+- No agent sends mail, marks a sale, invents contact details, writes a file, or touches the network.

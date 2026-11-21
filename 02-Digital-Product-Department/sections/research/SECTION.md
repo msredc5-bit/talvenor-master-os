@@ -1,29 +1,29 @@
 # Research Section — PA Vet Clinic List
 
-**Purpose (উদ্দেশ্য):** PA vet list-কে ১০০টি যাচাই করা independent clinic-এর দিকে বাড়ানো — official website প্রথমে, নইলে directory listing; contact details কখনো বানানো হয় না।
+**Purpose:** Grow the PA vet list toward 100 verified independent clinics — official website first, otherwise a directory listing; contact details are never invented.
 
-## Staff roster (কর্মী তালিকা)
+## Staff roster
 
 | Staff | Agent file | Skill file | Gate | Status |
 |---|---|---|---|---|
-| Clinic Researcher | `agents/clinic_researcher.py` (`ClinicResearcherAgent`, task `clinic_research`) | `skills/clinic-researcher.md` | — (none) | Existing role — section agent হিসেবে নতুন file |
+| Clinic Researcher | `agents/clinic_researcher.py` (`ClinicResearcherAgent`, task `clinic_research`) | `skills/clinic-researcher.md` | — (none) | Existing role — new file as a section agent |
 
-## How work flows (কাজের ধারা)
+## How work flows
 
-1. Main CEO Bot → Products Chief → `clinic_research` (existing ROUTING branch)।
-2. Section agent `ClinicResearcherAgent` `pa-vet-clinics.csv` (read-only) পড়ে অবস্থা জানায়: row সংখ্যা, শহর ভাগ, কয়টার public email আছে; যাচাইয়ের নিয়ম লেখে (official website প্রথমে, chain বাদ, "Not publicly listed")।
-3. নতুন clinic যাচাইয়ের plan: README-র শহর plan (Pittsburgh আশেপাশে, Harrisburg আশেপাশে, Lehigh Valley, Bucks/Montgomery, Pittsburgh suburbs, Central PA ছোট শহর)।
-4. এই section কাউকে মেইল/ফোন করে না — এটা শুধু list, outreach নয়।
+1. Main CEO Bot → Products Chief → `clinic_research` (existing ROUTING branch).
+2. Section agent `ClinicResearcherAgent` reads `pa-vet-clinics.csv` (read-only) and reports the status: row count, city breakdown, how many have a public email; writes the verification rules (official website first, chains excluded, "Not publicly listed").
+3. Plan for verifying new clinics: the README's city plan (around Pittsburgh, around Harrisburg, Lehigh Valley, Bucks/Montgomery, Pittsburgh suburbs, small Central PA towns).
+4. This section emails/calls nobody — this is only a list, not outreach.
 
-## Gates (গেট)
+## Gates
 
-- List বানানোয় কোনো gate নেই — এটা নিরাপদ কাজ।
-- কিন্তু list থেকে কাউকে মেইল করতে Boss-এর `send` লাগে, আর email channel এখন PAUSED।
+- Building the list has no gate — it is safe work.
+- But emailing anyone from the list needs Boss's `send`, and the email channel is now PAUSED.
 
-## Honest limits (সৎ সীমা)
+## Honest limits
 
-- **PA list 39/100** (যাচাই করা, 2026-11-16) — বাকি 61 Gate 0-র পরে পূর্ণ করা হবে।
-- 39-এর মধ্যে public email আছে 8টার; বাকিদের "Not publicly listed"।
-- Chain বাদ: Banfield, VCA, Vetco, BluePearl, Thrive, PetVet365, PetVet Care Centers network।
-- **Gate 0 NOT PASSED, kit 0/6 built, sale 0** — list বাড়ানো Gate 0-র বাইরে করা যায়, তবে plan অনুযায়ী বাকি 61 Gate 0-র পরে।
-- কোনো agent file লেখে না (CSV overwrite নয়), network ছোঁয় না, contact details বানায় না।
+- **PA list 39/100** (verified, 2026-11-16) — the remaining 61 will be completed after Gate 0.
+- Of the 39, 8 have a public email; the rest are "Not publicly listed".
+- Chains excluded: Banfield, VCA, Vetco, BluePearl, Thrive, PetVet365, PetVet Care Centers network.
+- **Gate 0 NOT PASSED, kit 0/6 built, sale 0** — the list can be grown outside Gate 0, but per the plan the remaining 61 come after Gate 0.
+- No agent writes a file (no CSV overwrite), touches the network, or invents contact details.

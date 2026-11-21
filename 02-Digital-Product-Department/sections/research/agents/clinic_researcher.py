@@ -1,16 +1,16 @@
-"""Clinic Researcher — PA vet list যাচাই + বাড়ানো (section agent)।
+"""Clinic Researcher — verify + grow the PA vet list (section agent).
 
-Role (ভূমিকা): pa-vet-clinics.csv-এর যাচাই করা list-এর অবস্থা জানানো আর
-নতুন clinic যাচাইয়ের নিয়ম লেখা — লক্ষ্য ১০০ independent PA vet clinic।
-Gate (গেট): কোনো gate নেই — list বানানো নিরাপদ কাজ। কিন্তু list থেকে
-কাউকে মেইল করতে Boss-এর `send` লাগে, আর email channel এখন PAUSED
-(2026-11-14 থেকে)।
-Gate 0 status (গেট ০ অবস্থা): **NOT BLOCKED** — list বাড়ানো Gate 0-র
-বাইরে করা যায়; তবে plan অনুযায়ী বাকি 61 clinic Gate 0-র পরে পূর্ণ করা হবে।
-যা কখনো করে না: contact details বানায় না — public-এ না থাকলে
-"Not publicly listed" লেখে; chain (Banfield, VCA, Vetco, BluePearl,
-Thrive, PetVet365) list-এ আনে না; কাউকে মেইল/ফোন করে না (no outreach);
-CSV overwrite করে না — এই agent কোনো file লেখে না।
+Role: report the status of the verified list in pa-vet-clinics.csv and
+write the rules for verifying new clinics — goal: 100 independent PA vet clinics.
+Gate: no gate — building a list is safe work. But emailing anyone from
+the list needs Boss's `send`, and the email channel is now PAUSED
+(since 2026-11-14).
+Gate 0 status: **NOT BLOCKED** — the list can be grown outside Gate 0;
+but per the plan the remaining 61 clinics will be completed after Gate 0.
+Never does this: invents contact details — writes "Not publicly listed"
+if it is not public; brings a chain (Banfield, VCA, Vetco, BluePearl,
+Thrive, PetVet365) into the list; emails/calls anyone (no outreach);
+overwrites the CSV — this agent writes no file.
 """
 
 import csv
@@ -26,13 +26,13 @@ EXCLUDED_CHAINS = ["Banfield", "VCA", "Vetco", "BluePearl", "Thrive",
                    "PetVet365", "PetVet Care Centers"]
 
 NEXT_CITIES_PLAN = [
-    "Pittsburgh আশেপাশে", "Harrisburg আশেপাশে", "Lehigh Valley",
-    "Bucks / Montgomery County", "Pittsburgh suburbs", "Central PA ছোট শহর",
+    "Around Pittsburgh", "Around Harrisburg", "Lehigh Valley",
+    "Bucks / Montgomery County", "Pittsburgh suburbs", "Small Central PA towns",
 ]
 
 
 def _dept_dir():
-    """kit-outline.md খুঁজে department dir বের করা (read-only source)।"""
+    """Finds the department dir by locating kit-outline.md (read-only source)."""
     here = os.path.dirname(os.path.abspath(__file__))
     node = here
     for _ in range(6):
@@ -43,7 +43,7 @@ def _dept_dir():
 
 
 def _read_pa_list():
-    """pa-vet-clinics.csv পড়া (read-only) — row + শহর ভাগ।"""
+    """Reads pa-vet-clinics.csv (read-only) — rows + city breakdown."""
     path = os.path.join(_dept_dir(), "pa-vet-list", "pa-vet-clinics.csv")
     try:
         with open(path, "r", encoding="utf-8", newline="") as f:
@@ -53,7 +53,7 @@ def _read_pa_list():
 
 
 def _load_gateway(gateway, approvals_path):
-    """ApprovalGateway lazy import — শুধু gated কাজে দরকার হলে।"""
+    """ApprovalGateway lazy import — only when gated work needs it."""
     if gateway is not None:
         return gateway
     ceo_core = os.path.join(os.path.dirname(_dept_dir()), "00-CEO-Core")
@@ -66,8 +66,8 @@ def _load_gateway(gateway, approvals_path):
 
 
 def _draft_with_brain(brain, prompt, static_text):
-    """brain থাকলে brain.complete(prompt) ব্যবহার করে [MOCK DRAFT] লেখা;
-    না থাকলে static DRAFT text। কখনো live call / network নয় — brain mock।"""
+    """If a brain exists, uses brain.complete(prompt) to write a [MOCK DRAFT];
+    otherwise static DRAFT text. Never a live call / network — the brain is mock."""
     if brain is not None:
         try:
             mock_text = brain.complete(prompt)
@@ -79,8 +79,8 @@ def _draft_with_brain(brain, prompt, static_text):
 
 
 def _gated_check(agent, task, gateway, approvals_path):
-    """gated_action থাকলে PENDING ফেরত দেয়; approved হলে None (শুধু DRAFT-এ
-    এগোনো যাবে — agent কখনো gated action execute করে না)।"""
+    """If a gated_action is present, returns PENDING; if approved, None (only the
+    DRAFT can proceed — the agent never executes a gated action)."""
     gated_action = (task or {}).get("gated_action")
     if not gated_action:
         return None
@@ -103,7 +103,7 @@ def _gated_check(agent, task, gateway, approvals_path):
 
 
 class ClinicResearcherAgent:
-    """PA vet list-এর অবস্থা + যাচাইয়ের নিয়ম দেয় — outreach করে না।"""
+    """Gives the PA vet list's status + verification rules — does no outreach."""
 
     task_kind = "clinic_research"
     gate = None
@@ -129,22 +129,22 @@ class ClinicResearcherAgent:
             "  - %s: %d" % (city, count)
             for city, count in sorted(cities.items()))
         static_text = "\n".join([
-            "PA Vet Clinic List — যাচাই করা অবস্থা (read-only, pa-vet-clinics.csv থেকে):",
-            "  Rows: %d / %d (বাকি %d — Gate 0-র পরে পূর্ণ করা হবে)।" % (
+            "PA Vet Clinic List — verified status (read-only, from pa-vet-clinics.csv):",
+            "  Rows: %d / %d (remaining %d — to be completed after Gate 0)." % (
                 len(rows), PA_LIST_TARGET, PA_LIST_TARGET - len(rows)),
-            "  Public email আছে: %dটি; 'Not publicly listed': %dটি।" % (
+            "  Have a public email: %d; 'Not publicly listed': %d." % (
                 with_email, len(rows) - with_email),
-            "  শহর ভাগ:",
-            city_lines or "  (কোনো row নেই)",
+            "  City breakdown:",
+            city_lines or "  (no rows)",
             "",
-            "Verification rule (যাচাইয়ের নিয়ম — pa-vet-list/README.md):",
-            "  1. প্রতিটা clinic-এর নিজের official website প্রথমে (সবচেয়ে ভালো), নইলে directory listing (নাম + শহর + website/phone দেখা যায়)।",
-            "  2. Chain EXCLUDED — list-এ আনা যাবে না: %s।" % ", ".join(EXCLUDED_CHAINS),
-            "  3. Email/phone public-এ না থাকলে 'Not publicly listed' লিখতে হবে — কিছু বানানো যাবে না।",
-            "  4. Target: independent companion-animal clinic, ১–৫ vet। Corporate chain নয়, solo mobile vet নয়।",
+            "Verification rules (pa-vet-list/README.md):",
+            "  1. Each clinic's own official website first (best), otherwise a directory listing (name + city + website/phone visible).",
+            "  2. Chains EXCLUDED — cannot be added to the list: %s." % ", ".join(EXCLUDED_CHAINS),
+            "  3. If the email/phone is not public, write 'Not publicly listed' — nothing can be invented.",
+            "  4. Target: independent companion-animal clinic, 1–5 vets. Not a corporate chain, not a solo mobile vet.",
             "",
-            "পরের শহর (README plan): %s।" % "; ".join(NEXT_CITIES_PLAN),
-            "No outreach — এই agent কাউকে মেইল/ফোন করে না। List থেকে মেইল করতে Boss-এর 'send' লাগে, আর email channel এখন PAUSED (2026-11-14 থেকে)।",
+            "Next cities (README plan): %s." % "; ".join(NEXT_CITIES_PLAN),
+            "No outreach — this agent emails/calls nobody. Emailing from the list needs Boss's 'send', and the email channel is now PAUSED (since 2026-11-14).",
         ])
         output = _draft_with_brain(
             brain, "PA vet clinic list status draft", static_text)
@@ -153,5 +153,5 @@ class ClinicResearcherAgent:
                 "pa_rows": len(rows), "pa_target": PA_LIST_TARGET,
                 "with_email": with_email,
                 "output": output,
-                "notes": "যাচাই করা public তথ্য শুধু — কিছু বানানো নয়। কোনো clinic-কে মেইল করা হয়নি।",
+                "notes": "Verified public information only — nothing invented. No clinic has been emailed.",
                 "draft_only": True, "mock_brain": True, "gate": self.gate}

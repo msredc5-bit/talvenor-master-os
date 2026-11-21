@@ -1,67 +1,67 @@
 # Skill: Kit Sales (NEW)
 
-**Role (ভূমিকা):** যাচাই করা PA clinic-দের জন্য Vet Kit outreach email-এর DRAFT লেখা — শুধু DRAFT, পাঠানো নয়।
+**Role:** Write DRAFTs of Vet Kit outreach emails for verified PA clinics — DRAFTs only, never sent.
 **Agent:** `sections/sales/agents/kit_sales.py` — `KitSalesAgent` (task kind `kit_sales`, section `sales`)
-**Status: DRAFTS ONLY** — Gate 0 NOT PASSED, email channel PAUSED (2026-11-14 থেকে)। প্রতিটা output-এ prominent warning থাকে: "DRAFT ONLY — Gate 0 NOT passed, do not send until Boss says go"।
+**Status: DRAFTS ONLY** — Gate 0 NOT PASSED, email channel PAUSED (since 2026-11-14). Every output carries a prominent warning: "DRAFT ONLY — Gate 0 NOT passed, do not send until Boss says go".
 
 ## Product (locked facts)
 
-- **Product:** Vet No-Show Recovery Kit, **$49 one-time** (প্রথম ৩০ buyer-এর জন্য launch price **$39**)। Format: Google Sheets + Google Docs + copy-paste script।
-- **কার জন্য:** Independent companion-animal vet clinic, ১–৫ vet। Corporate chain নয়, solo mobile vet নয়।
-- **Pain (VERIFIED):** no-show rate **~11%** (AAHA) × গড় vet visit **~$200** (AVMA 2025) ≈ **~$50k–$150k/yr** ঝুঁকিতে থাকে একটা সাধারণ clinic-এর (labeled estimate)। US-এ **34,296** vet practice (Census 2023)।
-- **Contact (real facts):** booking link https://calendar.app.google/WLoxBfnLGTdjK3LB8 (Talvenor Demo, 15 min, New York Time); phone +1 (947) 223-0244; main email contact@talvenorai.agency।
-- **Price flag:** $49 কোনো verified sale থেকে আসেনি — inference। Prospect-কে $49 quote করা যাবে না Boss confirm না করলে।
+- **Product:** Vet No-Show Recovery Kit, **$49 one-time** (launch price **$39** for the first 30 buyers). Format: Google Sheets + Google Docs + copy-paste script.
+- **For whom:** Independent companion-animal vet clinic, 1–5 vets. Not a corporate chain, not a solo mobile vet.
+- **Pain (VERIFIED):** no-show rate **~11%** (AAHA) × average vet visit **~$200** (AVMA 2025) ≈ **~$50k–$150k/yr** at risk for a typical clinic (labeled estimate). **34,296** vet practices in the US (Census 2023).
+- **Contact (real facts):** booking link https://calendar.app.google/WLoxBfnLGTdjK3LB8 (Talvenor Demo, 15 min, New York Time); phone +1 (947) 223-0244; main email contact@talvenorai.agency.
+- **Price flag:** $49 does not come from any verified sale — an inference. $49 cannot be quoted to a prospect unless Boss confirms.
 
 ## Inputs
 
-- `02-Digital-Product-Department/pa-vet-list/pa-vet-clinics.csv` (39 verified row, read-only) — শুধু এই list-এর clinic-দের জন্য draft।
-- `02-Digital-Product-Department/kit-outline.md` — kit-এর ৬ অংশের নাম + pain arithmetic (draft-এর ভিত্তি)।
-- Task payload-এ `clinic_name` (optional) — CSV-তে মিললে তবেই addressed draft; না মিললে generic template।
-- Gate 0 status: `gate0-status.md` — এখন NOT PASSED।
+- `02-Digital-Product-Department/pa-vet-list/pa-vet-clinics.csv` (39 verified rows, read-only) — drafts only for clinics on this list.
+- `02-Digital-Product-Department/kit-outline.md` — the kit's 6 parts + pain arithmetic (the basis of the draft).
+- Task payload `clinic_name` (optional) — an addressed draft only if it matches the CSV; otherwise a generic template.
+- Gate 0 status: `gate0-status.md` — now NOT PASSED.
 
 ## Step-by-step method
 
-1. **Clinic যাচাই:** payload-এ `clinic_name` থাকলে CSV-তে খোঁজা। মিললে public email দেখা — email "Not publicly listed" হলে addressed email draft লেখা যাবে না (contact details বানানো যাবে না)।
-2. **Clinic না বলা থাকলে:** CSV-এর প্রথম emailable row (public email আছে) ব্যবহার করা — এখন সেটা Indy Veterinary Care, Philadelphia (info@indyvetcare.com)।
-3. **Draft লেখা (plain US English):** subject + body — pain (AAHA 11% × AVMA ~$200), kit-এর ৬ অংশের নাম, CTA (booking link + phone)। Price জায়গায় placeholder: "[Price — Boss confirms before sending. Do NOT quote a price to a prospect without Boss confirming.]" — $49 লেখা হয় না।
-4. **Warning লাগানো:** output-এর মাথায় prominent "DRAFT ONLY — Gate 0 NOT passed, do not send until Boss says go" + "Email channel PAUSED"।
-5. **কোনো clinic-কে দুইবার মেইল করা যাবে না** (launch-এর সময়) — note-এ লেখা থাকে।
+1. **Verify the clinic:** if the payload has a `clinic_name`, search the CSV. If it matches, look at the public email — if the email is "Not publicly listed", no addressed email draft can be written (contact details cannot be invented).
+2. **If no clinic is given:** use the CSV's first emailable row (one with a public email) — now that is Indy Veterinary Care, Philadelphia (info@indyvetcare.com).
+3. **Write the draft (plain US English):** subject + body — pain (AAHA 11% × AVMA ~$200), the kit's 6 parts, CTA (booking link + phone). Price is a placeholder: "[Price — Boss confirms before sending. Do NOT quote a price to a prospect without Boss confirming.]" — $49 is not written.
+4. **Attach the warning:** a prominent "DRAFT ONLY — Gate 0 NOT passed, do not send until Boss says go" + "Email channel PAUSED" at the top of the output.
+5. **No clinic can be emailed twice** (at launch time) — written in the note.
 
 ## Output format
 
-- Warning + addressed draft (To: verified clinic, city, public email, source_url) অথবা generic template (placeholders সহ)।
-- Status: `draft-ready` (draft-এর জন্য); `mark_sold` চাইলে `blocked-gate0`।
-- Draft-এর মাথায় লেখা থাকবে: DRAFT ONLY — পাঠানো হয়নি।
+- Warning + addressed draft (To: verified clinic, city, public email, source_url) or generic template (with placeholders).
+- Status: `draft-ready` (for the draft); `blocked-gate0` if `mark_sold` is requested.
+- The top of the draft will say: DRAFT ONLY — not sent.
 
-## Tools used (টুল)
+## Tools used
 
-- Read-only file read: `pa-vet-list/pa-vet-clinics.csv` (verified clinic + public email + source_url)।
-- Mock brain draft (BrainFactory, config `brain: mock`, $0) — draft লেখায়, live call নয়।
-- Gated কাজে ApprovalGateway (PENDING record) — `send` চাইলে worker চালানো হয় না, PENDING-এ আটকায়।
-- কোনো live tool, network, বা file write নয়। মেইল পাঠানো এই skill-এর কাজ নয়।
+- Read-only file read: `pa-vet-list/pa-vet-clinics.csv` (verified clinic + public email + source_url).
+- Mock brain draft (BrainFactory, config `brain: mock`, $0) — writes the draft, not a live call.
+- ApprovalGateway for gated work (PENDING record) — if `send` is requested the worker is not run, it is held at PENDING.
+- No live tool, network, or file write. Sending mail is not this skill's job.
 
 ## Gate
 
-- পাঠাতে Boss-এর `send` লাগে — exact word ছাড়া কিছু পাঠানো হয় না।
-- Email channel এখন PAUSED — SPF/DMARC DNS fix Boss-এর হাতে বাকি (2026-11-14 থেকে)।
+- Boss's `send` is needed to send — nothing is sent without the exact word.
+- The email channel is now PAUSED — the SPF/DMARC DNS fix is still in Boss's hands (since 2026-11-14).
 
 ## Honest limits
 
-- **Gate 0 NOT PASSED** — kit বানানো হয়নি (0/6), sale 0। Draft launch-এর পরে ব্যবহারের জন্য।
-- **PAUSED email** — draft লেখা যায়, পাঠানো যায় না।
-- PA list 39/100 — 39-এর মধ্যে public email আছে 8টার; বাকিদের addressed email draft লেখা যায় না।
-- কোনো clinic-র সাথে Talvenor-এর কোনো সম্পর্ক/চুক্তি নেই — এটা শুধু public তথ্যের list।
-- $49 price unproven — কোনো verified sale নেই।
+- **Gate 0 NOT PASSED** — the kit has not been built (0/6), sale 0. Drafts are for use after launch.
+- **PAUSED email** — drafts can be written, nothing can be sent.
+- PA list 39/100 — of the 39, 8 have a public email; the rest cannot get an addressed email draft.
+- Talvenor has no relationship/agreement with any clinic — this is only a list of public information.
+- $49 price unproven — no verified sale.
 
-## যা কখনো করে না
+## Never does this
 
-- মেইল পাঠায় না; sale হিসেবে কিছু চিহ্নিত করে না।
-- Prospect-কে $49 quote করে না Boss confirm না করলে।
-- Contact details বানায় না; CSV-এর বাইরে কাউকে draft লেখে না; কোনো file লেখে না।
-- কোনো client/testimonial/statistic বানায় না।
+- Sends mail; marks anything as a sale.
+- Quotes $49 to a prospect unless Boss confirms.
+- Invents contact details; writes a draft for anyone outside the CSV; writes any file.
+- Invents any client/testimonial/statistic.
 
-## Worked example (আসল repo fact দিয়ে)
+## Worked example (with real repo facts)
 
-- **Task:** `{"type": "kit_sales", "title": "Outreach draft", "payload": {"clinic_name": "Indy Veterinary Care"}}` → `KitSalesAgent.run()`।
-- **Agent করে:** CSV-তে খোঁজে — Indy Veterinary Care, Philadelphia, public email info@indyvetcare.com, phone (215) 923-2300, source https://indyvetcare.com/ — verified (README spot-check)।
-- **ফলাফল:** status `draft-ready`; output-এর মাথায় "DRAFT ONLY — Gate 0 NOT passed, do not send until Boss says go" warning; তারপর addressed email DRAFT (subject "Missed appointments — a simple fix for Indy Veterinary Care?", pain AAHA 11% × AVMA ~$200, ৬ অংশের নাম, CTA booking link https://calendar.app.google/WLoxBfnLGTdjK3LB8 + phone +1 (947) 223-0244, price জায়গায় placeholder — $49 লেখা নেই)। পাঠানো হয়নি।
+- **Task:** `{"type": "kit_sales", "title": "Outreach draft", "payload": {"clinic_name": "Indy Veterinary Care"}}` → `KitSalesAgent.run()`.
+- **Agent does:** searches the CSV — Indy Veterinary Care, Philadelphia, public email info@indyvetcare.com, phone (215) 923-2300, source https://indyvetcare.com/ — verified (README spot-check).
+- **Result:** status `draft-ready`; at the top of the output, the "DRAFT ONLY — Gate 0 NOT passed, do not send until Boss says go" warning; then an addressed email DRAFT (subject "Missed appointments — a simple fix for Indy Veterinary Care?", pain AAHA 11% × AVMA ~$200, the 6 parts, CTA booking link https://calendar.app.google/WLoxBfnLGTdjK3LB8 + phone +1 (947) 223-0244, price as a placeholder — $49 is not written). Not sent.

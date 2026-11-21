@@ -1,17 +1,17 @@
-"""Kit Sales — Vet Kit outreach DRAFT (section agent, NEW)।
+"""Kit Sales — Vet Kit outreach DRAFT (section agent, NEW).
 
-Role (ভূমিকা): যাচাই করা PA clinic-দের জন্য outreach email-এর DRAFT লেখা —
-শুধু pa-vet-clinics.csv-এর verified clinic-দের জন্য, শুধু DRAFT।
-Gate (গেট): পাঠাতে Boss-এর `send` লাগে। DRAFT নিজে পাঠানো নয়।
-Gate 0 status (গেট ০ অবস্থা): **NOT PASSED** — kit বানানো হয়নি, sale 0।
-প্রতিটা output-এ prominent warning থাকে: "DRAFT ONLY — Gate 0 NOT passed,
-do not send until Boss says go"। Email channel **PAUSED** (2026-11-14 থেকে)।
-যা কখনো করে না: মেইল পাঠায় না; sale হিসেবে কিছু চিহ্নিত করে না
-(mark_sold মানেই blocked-gate0); prospect-কে $49 quote করে না Boss confirm
-না করলে (draft-এ price জায়গায় placeholder থাকে); contact details
-বানায় না — public email না থাকলে "Not publicly listed" clinic-কে email
-draft লেখে না; CSV-এর বাইরে কাউকে draft লেখে না; কোনো file লেখে না;
-network ছোঁয় না।
+Role: write DRAFTs of outreach emails for verified PA clinics —
+only for the verified clinics in pa-vet-clinics.csv, DRAFTs only.
+Gate: Boss's `send` is needed to send. The DRAFT itself is not sent.
+Gate 0 status: **NOT PASSED** — the kit has not been built, sale 0.
+Every output carries a prominent warning: "DRAFT ONLY — Gate 0 NOT passed,
+do not send until Boss says go". Email channel **PAUSED** (since 2026-11-14).
+Never does this: sends mail; marks anything as a sale
+(mark_sold means blocked-gate0); quotes $49 to a prospect unless Boss confirms
+(the draft has a placeholder where the price goes); invents contact details —
+does not write an email draft for a "Not publicly listed" clinic with no public
+email; writes a draft for anyone outside the CSV; writes any file;
+touches the network.
 """
 
 import csv
@@ -27,7 +27,7 @@ WARNING = ("DRAFT ONLY — Gate 0 NOT passed, do not send until Boss says go. "
 
 
 def _dept_dir():
-    """kit-outline.md খুঁজে department dir বের করা (read-only source)।"""
+    """Finds the department dir by locating kit-outline.md (read-only source)."""
     here = os.path.dirname(os.path.abspath(__file__))
     node = here
     for _ in range(6):
@@ -38,7 +38,7 @@ def _dept_dir():
 
 
 def _read_pa_list():
-    """pa-vet-clinics.csv পড়া (read-only)।"""
+    """Reads pa-vet-clinics.csv (read-only)."""
     path = os.path.join(_dept_dir(), "pa-vet-list", "pa-vet-clinics.csv")
     try:
         with open(path, "r", encoding="utf-8", newline="") as f:
@@ -58,7 +58,7 @@ def _find_clinic(rows, name):
 
 
 def _first_emailable(rows):
-    """প্রথম verified clinic যার public email আছে (CSV order)।"""
+    """The first verified clinic that has a public email (CSV order)."""
     for row in rows:
         email = (row.get("public_email") or "").strip()
         if email and email != "Not publicly listed" and "@" in email:
@@ -67,7 +67,7 @@ def _first_emailable(rows):
 
 
 def _load_gateway(gateway, approvals_path):
-    """ApprovalGateway lazy import — শুধু gated কাজে দরকার হলে।"""
+    """ApprovalGateway lazy import — only when gated work needs it."""
     if gateway is not None:
         return gateway
     ceo_core = os.path.join(os.path.dirname(_dept_dir()), "00-CEO-Core")
@@ -80,8 +80,8 @@ def _load_gateway(gateway, approvals_path):
 
 
 def _draft_with_brain(brain, prompt, static_text):
-    """brain থাকলে brain.complete(prompt) ব্যবহার করে [MOCK DRAFT] লেখা;
-    না থাকলে static DRAFT text। কখনো live call / network নয় — brain mock।"""
+    """If a brain exists, uses brain.complete(prompt) to write a [MOCK DRAFT];
+    otherwise static DRAFT text. Never a live call / network — the brain is mock."""
     if brain is not None:
         try:
             mock_text = brain.complete(prompt)
@@ -93,8 +93,8 @@ def _draft_with_brain(brain, prompt, static_text):
 
 
 def _gated_check(agent, task, gateway, approvals_path):
-    """gated_action থাকলে PENDING ফেরত দেয়; approved হলে None (শুধু DRAFT-এ
-    এগোনো যাবে — agent কখনো gated action execute করে না)।"""
+    """If a gated_action is present, returns PENDING; if approved, None (only the
+    DRAFT can proceed — the agent never executes a gated action)."""
     gated_action = (task or {}).get("gated_action")
     if not gated_action:
         return None
@@ -117,8 +117,8 @@ def _gated_check(agent, task, gateway, approvals_path):
 
 
 def _email_draft(clinic_name, city):
-    """Outreach email DRAFT (plain US English)। Price জায়গায় placeholder —
-    Boss confirm না করলে $49 লেখা হয় না।"""
+    """Outreach email DRAFT (plain US English). The price is a placeholder —
+    $49 is not written unless Boss confirms."""
     return "\n".join([
         "Subject: Missed appointments — a simple fix for %s?" % clinic_name,
         "",
@@ -142,7 +142,7 @@ def _email_draft(clinic_name, city):
 
 
 class KitSalesAgent:
-    """Verified PA clinic-দের জন্য outreach DRAFT লেখে — পাঠায় না।"""
+    """Writes outreach DRAFTs for verified PA clinics — does not send them."""
 
     task_kind = "kit_sales"
     gate = "send"
@@ -158,19 +158,19 @@ class KitSalesAgent:
         if payload.get("mark_sold") or payload.get("mark_launched"):
             return {"status": "blocked-gate0", "task_kind": self.task_kind,
                     "section": self.section,
-                    "output": WARNING + "\nSale/launch দাবি Gate 0-তে আটকে আছে — কিছুই sold হিসেবে লেখা হয়নি, sale এখনো 0।",
-                    "notes": "Gate 0 NOT PASSED — sale চিহ্নিত করা যাবে না।",
+                    "output": WARNING + "\nA sale/launch claim is blocked at Gate 0 — nothing was recorded as sold, sales are still 0.",
+                    "notes": "Gate 0 NOT PASSED — nothing can be marked as sold.",
                     "draft_only": True, "mock_brain": True, "gate": self.gate}
         rows = _read_pa_list()
         clinic_name = payload.get("clinic_name")
-        note = "কোনো clinic-কে দুইবার মেইল করা যাবে না (launch-এর সময়)। এই draft পাঠানো হয়নি।"
+        note = "No clinic can be emailed twice (at launch time). This draft was not sent."
         if clinic_name:
             clinic = _find_clinic(rows, clinic_name)
             if clinic is None:
                 static_text = "\n".join([
                     WARNING,
-                    "Clinic '%s' — pa-vet-clinics.csv-এ পাওয়া যায়নি। Verified list-এর বাইরে কাউকে addressed draft লেখা হয় না।" % clinic_name,
-                    "নিচে generic template (placeholders সহ) — শুধু verified clinic পাওয়া গেলে ব্যবহার করা যাবে, Boss-এর 'send'-এর পরে।",
+                    "Clinic '%s' — not found in pa-vet-clinics.csv. No addressed draft is written for anyone outside the verified list." % clinic_name,
+                    "Generic template below (with placeholders) — usable only once a verified clinic is found, after Boss's 'send'.",
                     "",
                     _email_draft("[CLINIC NAME]", "[CITY]"),
                 ])
@@ -184,9 +184,9 @@ class KitSalesAgent:
             if not email or email == "Not publicly listed" or "@" not in email:
                 static_text = "\n".join([
                     WARNING,
-                    "%s (%s) — public email নেই ('Not publicly listed')। Email draft লেখা যাবে না — contact details বানানো যাবে না।" % (
+                    "%s (%s) — no public email ('Not publicly listed'). No email draft can be written — contact details cannot be invented." % (
                         clinic.get("clinic_name"), clinic.get("city")),
-                    "নিচে generic template (placeholders সহ) — শুধু public email পাওয়া গেলে ব্যবহার করা যাবে।",
+                    "Generic template below (with placeholders) — usable only once a public email is found.",
                     "",
                     _email_draft("[CLINIC NAME]", "[CITY]"),
                 ])
@@ -199,7 +199,7 @@ class KitSalesAgent:
                         "draft_only": True, "mock_brain": True, "gate": self.gate}
             static_text = "\n".join([
                 WARNING,
-                "To (verified, pa-vet-clinics.csv): %s, %s — %s (source: %s)।" % (
+                "To (verified, pa-vet-clinics.csv): %s, %s — %s (source: %s)." % (
                     clinic.get("clinic_name"), clinic.get("city"),
                     clinic.get("public_email"), clinic.get("source_url")),
                 "",
@@ -216,7 +216,7 @@ class KitSalesAgent:
         if clinic is None:
             static_text = "\n".join([
                 WARNING,
-                "pa-vet-clinics.csv-এ public email-সহ কোনো clinic পাওয়া যায়নি — addressed draft লেখা যাবে না।",
+                "No clinic with a public email was found in pa-vet-clinics.csv — no addressed draft can be written.",
                 "",
                 _email_draft("[CLINIC NAME]", "[CITY]"),
             ])
@@ -228,7 +228,7 @@ class KitSalesAgent:
                     "draft_only": True, "mock_brain": True, "gate": self.gate}
         static_text = "\n".join([
             WARNING,
-            "To (verified, pa-vet-clinics.csv — প্রথম emailable row): %s, %s — %s (source: %s)।" % (
+            "To (verified, pa-vet-clinics.csv — first emailable row): %s, %s — %s (source: %s)." % (
                 clinic.get("clinic_name"), clinic.get("city"),
                 clinic.get("public_email"), clinic.get("source_url")),
             "",

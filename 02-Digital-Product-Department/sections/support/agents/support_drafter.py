@@ -1,17 +1,17 @@
-"""Support Drafter — kit buyer-দের reply DRAFT (section agent)।
+"""Support Drafter — reply DRAFT for kit buyers (section agent).
 
-Role (ভূমিকা): kit buyer-দের প্রশ্নের reply-এর DRAFT লেখা — delivery,
-file খোলা, tracker formula, script ব্যবহার, refund, policy template —
-plain US English, DRAFT only।
-Gate (গেট): পাঠাতে Boss-এর `send` লাগে। DRAFT নিজেই নিরাপদ।
-Gate 0 status (গেট ০ অবস্থা): **BLOCKED (কাজ নেই এখন)** — sale 0, তাই
-কোনো buyer নেই, কোনো support প্রশ্নও নেই। এই agent-এর output সবসময়
-template — প্রথম sale-এর পরেই আসল buyer-reply কাজ শুরু হবে। প্রতিটা
-output-এ সৎ note থাকে: sale 0, no live buyers yet।
-যা কখনো করে না: legal advice দেয় না — policy template-এ সবসময় "have
-your own attorney review before using" লেখে; refund policy বানায় না
-(ঠিক হয়নি — BOSS INPUT REQUIRED); invented buyer-এর প্রশ্নের উত্তর
-আসল message হিসেবে চালায় না; কোনো file লেখে না; network ছোঁয় না।
+Role: write DRAFT replies to kit buyers' questions — delivery,
+opening files, tracker formulas, using scripts, refunds, policy template —
+plain US English, DRAFT only.
+Gate: Boss's `send` is needed to send it. The DRAFT itself is safe.
+Gate 0 status: **BLOCKED (no work now)** — sale 0, so there are
+no buyers, and no support questions either. This agent's output is always
+a template — real buyer-reply work starts only after the first sale. Every
+output carries an honest note: sale 0, no live buyers yet.
+Never does this: gives legal advice — the policy template always says "have
+your own attorney review before using"; invents a refund policy
+(not decided — BOSS INPUT REQUIRED); passes an invented buyer's question off
+as a real message; writes any file; touches the network.
 """
 
 import os
@@ -68,7 +68,7 @@ TEMPLATES = {
 
 
 def _dept_dir():
-    """kit-outline.md খুঁজে department dir বের করা (read-only source)।"""
+    """Finds the department dir by locating kit-outline.md (read-only source)."""
     here = os.path.dirname(os.path.abspath(__file__))
     node = here
     for _ in range(6):
@@ -79,7 +79,7 @@ def _dept_dir():
 
 
 def _load_gateway(gateway, approvals_path):
-    """ApprovalGateway lazy import — শুধু gated কাজে দরকার হলে।"""
+    """ApprovalGateway lazy import — only when gated work needs it."""
     if gateway is not None:
         return gateway
     ceo_core = os.path.join(os.path.dirname(_dept_dir()), "00-CEO-Core")
@@ -92,8 +92,8 @@ def _load_gateway(gateway, approvals_path):
 
 
 def _draft_with_brain(brain, prompt, static_text):
-    """brain থাকলে brain.complete(prompt) ব্যবহার করে [MOCK DRAFT] লেখা;
-    না থাকলে static DRAFT text। কখনো live call / network নয় — brain mock।"""
+    """If a brain exists, uses brain.complete(prompt) to write a [MOCK DRAFT];
+    otherwise static DRAFT text. Never a live call / network — the brain is mock."""
     if brain is not None:
         try:
             mock_text = brain.complete(prompt)
@@ -105,8 +105,8 @@ def _draft_with_brain(brain, prompt, static_text):
 
 
 def _gated_check(agent, task, gateway, approvals_path):
-    """gated_action থাকলে PENDING ফেরত দেয়; approved হলে None (শুধু DRAFT-এ
-    এগোনো যাবে — agent কখনো gated action execute করে না)।"""
+    """If a gated_action is present, returns PENDING; if approved, None (only the
+    DRAFT can proceed — the agent never executes a gated action)."""
     gated_action = (task or {}).get("gated_action")
     if not gated_action:
         return None
@@ -129,7 +129,7 @@ def _gated_check(agent, task, gateway, approvals_path):
 
 
 class SupportDrafterAgent:
-    """Buyer-reply DRAFT (template) লেখে — পাঠায় না।"""
+    """Writes a buyer-reply DRAFT (template) — does not send it."""
 
     task_kind = "support_draft"
     gate = "send"
@@ -150,16 +150,16 @@ class SupportDrafterAgent:
         if buyer_message:
             header += "Replying to buyer message (Boss-forwarded): \"%s\"\n" % buyer_message
         else:
-            header += "No real buyer message yet — template for topic '%s' (kit-outline.md থেকে)।\n" % topic
+            header += "No real buyer message yet — template for topic '%s' (from kit-outline.md).\n" % topic
         if topic == "refund":
-            header += "BOSS INPUT REQUIRED: refund policy এখনো ঠিক হয়নি — draft-এ কোনো refund promise নেই।\n"
+            header += "BOSS INPUT REQUIRED: the refund policy is not decided yet — the draft makes no refund promise.\n"
         if topic == "policy":
-            header += "Policy template legal advice নয় — draft-এ 'have your own attorney review before using' আছে।\n"
+            header += "The policy template is not legal advice — the draft says 'have your own attorney review before using'.\n"
         static_text = header + "\n" + TEMPLATES[topic]
         output = _draft_with_brain(
             brain, "Vet Kit support reply draft (%s)" % topic, static_text)
         return {"status": "draft-ready", "task_kind": self.task_kind,
                 "section": self.section, "topic": topic,
                 "output": output,
-                "notes": HONEST_NOTE + " Topic: %s। পাঠাতে Boss-এর 'send' লাগবে।" % topic,
+                "notes": HONEST_NOTE + " Topic: %s. Sending needs Boss's 'send'." % topic,
                 "draft_only": True, "mock_brain": True, "gate": self.gate}
