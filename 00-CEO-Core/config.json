@@ -6,7 +6,7 @@
     "headline": "Never miss a call. Never lose a job.",
     "line": "You run the jobs. We run the phone."
   },
-  "built": "2026-11-20",
+  "built": "2026-11-21",
   "businesses": [
     {
       "category": "Agency - service selling",
@@ -62,7 +62,8 @@
       "send",
       "publish",
       "spend",
-      "delete"
+      "delete",
+      "upload"
     ],
     "rule": "No gated action moves without Boss's exact gate word. No auto-approve path exists.",
     "words": {
@@ -99,11 +100,15 @@
       "agentic_phase_3": "BUILT 2026-11-19 - 43/43 ROLE-ONLY specialists built as worker code (Sales 5, Marketing 4, AI Engineering 7, Client Ops 4, Research 7, Finance 4, Quality 6, Innovation 6); registry 65/69 EXISTING, 4 GAP untouched; check_specialists.py 41/41",
       "unified_os": "BUILT 2026-11-19 - CENTRAL-HQ/ 7 doc files (architecture layer only, no new repo, no new monorepo): Agency = 01-Agency-Department, Commerce = Vet Kit (Etsy CLOSED, Amazon GATED, Shopify PARKED Boss-direct), Media = 03-Content-Creation-Department; ONE brain (mock) + 3 Chiefs",
       "phase_9_connections": "BUILT 2026-11-20 - taskboard (dashboards/taskboard.html + scripts/taskboard_server.py, port 8766, POST /api/tasks -> queued in store/tasks.json) + MCP stdio server (00-CEO-Core/mcp/, 7 mock tools only, check 9/9) + live-ready tool code (00-CEO-Core/live_tools.py: gmail_send + n8n_trigger, env-only creds, gated, DRAFT fallback, never sends; tools.json 9 tools, check 7/7); brain still mock; store now a live queue",
-      "phase_11_providers": "BUILT 2026-11-20 - 7 LLM providers (meta, openai, anthropic, gemini, kimi, grok, openrouter) + fallback chain in config; brain still mock; no live calls, no keys on record; model name now comes from config"
+      "phase_10_live_brain": "NOT PROVEN LIVE — probe 2026-11-20 01:44 failed (tunnel 403, api.meta.ai unreachable from this VM), $0 spent, key validity UNPROVEN; brain stays mock",
+      "phase_11_providers": "BUILT 2026-11-20 - 7 LLM providers (meta, openai, anthropic, gemini, kimi, grok, openrouter) + fallback chain in config; brain still mock; no live calls, no keys on record; model name now comes from config",
+      "improvement_p1_gate": "BUILT 2026-11-21 - trust_gate.py: rule-based trust check (read/draft free, quote verification, coverage, standing deny spend cap $0 + dental/medical DQ) + ConfirmationStore run-once (failed = UNCERTAIN, never re-run), wired into ApprovalGateway + call_tool (blocked-trust, no approval recorded); brain still mock; check_gate.py 24/24",
+      "improvement_p2_memory_ledger": "BUILT 2026-11-21 - owner_memory.py (quote-verified, owner-messages-only, 256 KiB cap, 3 seed entries from Boss's recorded words) + usage_ledger.py ($0 cap as measurement, task check-in threshold $0, mock always $0.00) + dispatcher ledger threading; check_memory_ledger.py 19/19",
+      "improvement_p3_quiet_schedules": "BUILT 2026-11-21 - quiet_schedules.py (watchMarker sha256, skip when unchanged, one run at a time, corrections keep the rest, failed work keeps marker); 1 schedule seeded (taskboard-queue-watch, paused, no runner attached); check_quiet_schedules.py 15/15"
     }
   },
   "owner": "Md Mainuddin (Boss)",
-  "phase": 9,
+  "phase": 11,
   "providers": {
     "meta": {
       "enabled": true,

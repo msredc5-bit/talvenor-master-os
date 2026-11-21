@@ -3,50 +3,50 @@
 
 Structure — DECIDED on merit (2026-11-21,
 00-CEO-Core/MEMORY-STRUCTURE-DECISION-2026-11-21.md):
-  - একটাই drawer = একটাই store file (store/memory.json)।
-  - Drawer-এর ভেতরে আলাদা box: "shared" (Boss-এর কথা — সবাই পড়ে)
-    + প্রত্যেক agent-এর নিজের box (main_ceo_bot, chief_of_staff_agency,
-    8 dept box, worker:<slug>)।
-  - Boss-এর কথা শুধু shared-এ; কাজের note শুধু নিজের box-এ;
-    এক box-এর note অন্য box পড়তে পারে না।
+  - One drawer = one store file (store/memory.json).
+  - Separate boxes inside the drawer: "shared" (Boss's words — everyone reads)
+    + each agent's own box (main_ceo_bot, chief_of_staff_agency,
+    8 dept boxes, worker:<slug>).
+  - Boss's words only in shared; work notes only in one's own box;
+    one box's note cannot be read by another box.
   - Live wiring: Main CEO Bot route_task() + Agency Chief handle_task()
-    প্রত্যেক task-এ memory পড়ে (context_for) আর নিজের box-এ note লেখে;
-    Boss-এর কথা শেখা quote-verify দিয়ে; ভুলে যাওয়া শুধু gate-এর
-    অনুমোদনে (ConfirmationStore "delete", gate word "go")।
+    read memory on every task (context_for) and write a note to their own box;
+    learning Boss's words is quote-verified; forgetting happens only with the
+    gate's approval (ConfirmationStore "delete", gate word "go").
 
 Checks:
-  1. store/memory.json-ই একমাত্র memory JSON; repo-তে per-agent
-     memory file নেই
-  2. BOXES-এ ১১টা fixed box আছে (shared + CEO + Chief + ৮ dept)
-  3. আসল store: ৩ seed owner entry intact, সব owner entry
-     quote-verified (live note বাড়তে পারে — "ঠিক ৩ entry" নয়)
-  4. Temp store-এ seed -> ৩ entry, সব shared
-  5. learn() অন্য box নেয় না (ValueError)
-  6. note_work(): shared-এ যায় না, অচেনা box-এ যায় না,
-     worker box-এ যায়
-  7. Isolation: এক box-এর note অন্য box-এর read_box-এ আসে না
-  8. প্রত্যেক fixed box-এর read_box-এ ৩ shared entry আছে
-  9. Agent note verify হয় না; verify_all শুধু owner entry
- 10. ভুল box থেকে edit/forget বারণ; নিজের box থেকে চলে
- 11. একই slug অন্য box-এ চলে; একই box-এ দুবার নয়
- 12. Work note-এও 4000 chars cap
- 13. export_markdown-এ Shared compartment + Box section + agent-note লেবেল
- 14. 256 KiB cap এখনো কাজ করে
- 15. owner_memory.py-তে network import নেই
- 16. owner_memory.py __main__ self-test pass
- 17. maintenance_repair: stale tentative archive, stated ছোঁয়া হয় না, dedupe
- 18. validate_proposals: valid quote ready, bad quote rejected, কিছু লেখে না
- 19. context_for: shared seed + নিজের note, source_message নেই
- 20. CEO wiring: route_task-এ memory attach, memory-তে লেখে না (TEMP store)
- 21. Chief wiring: handle_task-এ memory attach, memory-তে লেখে না (TEMP store)
- 22. record_owner_message: valid quote শেখে, ভুল quote বারণ
- 23. Gated forget: approve ছাড়া execute বারণ, ভুল word বারণ, "go"-তে মোছা
- 24. Reload guard: দুটো instance একই file-এ লিখলেও দুটো note-ই থাকে
- 25. main_ceo_bot.py / chief_of_staff_agency.py-তে network import নেই
- 26. আসল store এই check run-এ বদলায়নি
+  1. store/memory.json is the only memory JSON; no per-agent
+     memory file in the repo
+  2. BOXES has 11 fixed boxes (shared + CEO + Chief + 8 dept)
+  3. Real store: 3 seed owner entries intact, all owner entries
+     quote-verified (live notes may grow — not "exactly 3 entries")
+  4. Temp store seed -> 3 entries, all shared
+  5. learn() takes no other box (ValueError)
+  6. note_work(): not to shared, not to an unknown box,
+     goes to a worker box
+  7. Isolation: one box's note does not show in another box's read_box
+  8. Every fixed box's read_box has the 3 shared entries
+  9. An agent note is not verified; verify_all covers owner entries only
+ 10. Edit/forget from the wrong box is refused; from one's own box it works
+ 11. The same slug works in another box; not twice in the same box
+ 12. Work notes also have the 4000 chars cap
+ 13. export_markdown shows Shared compartment + Box section + agent-note label
+ 14. The 256 KiB cap still works
+ 15. No network import in owner_memory.py
+ 16. owner_memory.py __main__ self-test passes
+ 17. maintenance_repair: stale tentative archived, stated never touched, dedupe
+ 18. validate_proposals: valid quote ready, bad quote rejected, writes nothing
+ 19. context_for: shared seed + own note, no source_message
+ 20. CEO wiring: memory attached in route_task, nothing written to memory (TEMP store)
+ 21. Chief wiring: memory attached in handle_task, nothing written to memory (TEMP store)
+ 22. record_owner_message: learns with a valid quote, refuses a bad quote
+ 23. Gated forget: no execute without approval, wrong word refused, "go" deletes
+ 24. Reload guard: two instances writing the same file still keep both notes
+ 25. No network import in main_ceo_bot.py / chief_of_staff_agency.py
+ 26. The real store did not change in this check run
 
-সব check TEMP file-এ চলে — আসল store শুধু পড়া হয়, লেখা হয় না।
-Stdlib only, no network, no spend, no send. Exit 0 = PASS।
+All checks run on TEMP files — the real store is only read, never written.
+Stdlib only, no network, no spend, no send. Exit 0 = PASS.
 """
 
 import json
@@ -87,7 +87,7 @@ def main():
     store_before = _snapshot_store()
     tmp_dir = tempfile.mkdtemp()
 
-    # 1. একটাই memory JSON; repo-তে per-agent memory file নেই।
+    # 1. One memory JSON; no per-agent memory file in the repo.
     try:
         store_files = os.listdir(os.path.join(BASE, "store"))
         memory_jsons = [n for n in store_files if "memory" in n.lower()
@@ -110,7 +110,7 @@ def main():
     except Exception as e:  # noqa: BLE001
         check("one store file; no per-agent memory files in the repo", False, str(e))
 
-    # 2. BOXES — ১১ fixed box।
+    # 2. BOXES — 11 fixed boxes.
     try:
         from owner_memory import BOXES, SHARED_BOX, SEED_ENTRIES, OwnerMemory  # noqa: PLC0415
         expected = {"shared", "main_ceo_bot", "chief_of_staff_agency",
@@ -125,11 +125,11 @@ def main():
               False, str(e))
         return 1
 
-    # 3. আসল store: ৩ seed owner entry অপরিবর্তিত + সব owner entry
-    # verify। Live system-এ কাজের note বাড়তে পারে — তাই "ঠিক ৩
-    # entry" নয়, seed ৩টা intact + সব owner entry quote-verified-ই শর্ত।
+    # 3. Real store: 3 seed owner entries unchanged + all owner entries
+    # verified. Work notes may grow in the live system — so not "exactly 3
+    # entries"; the condition is the 3 seeds intact + all owner entries quote-verified.
     try:
-        real = OwnerMemory()  # আসল store/memory.json — শুধু পড়া
+        real = OwnerMemory()  # real store/memory.json — read only
         seeds = {(s["area"], s["slug"]): s for s in SEED_ENTRIES}
         ok = True
         for (area, slug), seed in seeds.items():
@@ -151,29 +151,29 @@ def main():
         check("real store: 3 seed owner entries intact, all owner entries "
               "quote-verified (work notes may exist)", False, str(e))
 
-    # 4-15. Temp store-এ drawer আচরণ।
+    # 4-15. Drawer behaviour in a temp store.
     try:
         tmp_mem = os.path.join(tmp_dir, "memory-drawer-test.json")
         tmp_md = os.path.join(tmp_dir, "MEMORY-drawer-test.md")
         mem = OwnerMemory(memory_path=tmp_mem)
 
-        # 4. Seed -> ৩ entry, সব shared।
+        # 4. Seed -> 3 entries, all shared.
         seeded = mem.seed_defaults()
         check("temp seed: 3 entries, all in the shared box",
               len(seeded) == 3
               and all(e.get("box") == "shared" for e in seeded)
               and all(e.get("origin") == "owner" for e in seeded))
 
-        # 5. learn() অন্য box নেয় না।
+        # 5. learn() takes no other box.
         try:
-            mem.learn("preferences", "bad-box", "x", quote="test করো",
-                      source_message="Boss: test করো", box="dept_sales")
+            mem.learn("preferences", "bad-box", "x", quote="test this",
+                      source_message="Boss: test this", box="dept_sales")
             ok_learn_box = False
         except ValueError:
             ok_learn_box = True
         check("learn() rejects a non-shared box", ok_learn_box)
 
-        # 6. note_work(): shared নয়, অচেনা box নয়, worker box চলে।
+        # 6. note_work(): not shared, not an unknown box, a worker box works.
         try:
             mem.note_work("shared", "n", "x")
             ok_shared = False
@@ -192,7 +192,7 @@ def main():
         check("note_work(): shared/unknown box rejected, worker box works",
               ok_shared and ok_unknown and ok_worker)
 
-        # 7. Isolation।
+        # 7. Isolation.
         mem.note_work("dept_sales", "day-note", "Sales: 5 draft ready.",
                       area="lessons")
         sales_sees = any(e["slug"] == "day-note"
@@ -206,8 +206,8 @@ def main():
         check("work note visible in its own box, invisible to other boxes",
               sales_sees and not marketing_sees and own_only and not other_own)
 
-        # 8. প্রত্যেক fixed box-এ ৩ shared entry (নিজের note থাকলে
-        # মোট বেশি হতে পারে — shared ৩টা থাকতেই হবে)।
+        # 8. 3 shared entries in every fixed box (the total may be higher
+        # if it has its own notes — the 3 shared ones must be there).
         shared_slugs = {"assistant-name", "reply-language", "gate-words"}
         ok_all_boxes = all(
             shared_slugs <= {e["slug"] for e in mem.read_box(box)}
@@ -215,7 +215,7 @@ def main():
         check("every fixed box reads the 3 shared entries",
               ok_all_boxes, f"boxes={len(BOXES)}")
 
-        # 9. Agent note verify হয় না; verify_all শুধু owner।
+        # 9. An agent note is not verified; verify_all covers owners only.
         try:
             mem.verify("lessons", "day-note", box="dept_sales")
             ok_verify_agent = False
@@ -226,7 +226,7 @@ def main():
               "owner entries only",
               ok_verify_agent and len(va) == 3 and all(va.values()))
 
-        # 10. ভুল box থেকে edit/forget বারণ; নিজের box থেকে চলে।
+        # 10. Edit/forget from the wrong box is refused; from one's own box it works.
         try:
             mem.edit("lessons", "day-note", new_text="x", box="dept_marketing")
             ok_wrong_edit = False
@@ -251,7 +251,7 @@ def main():
               ok_wrong_edit and ok_shared_edit and ok_own_edit
               and ok_wrong_forget)
 
-        # 11. একই slug অন্য box-এ চলে; একই box-এ দুবার নয়।
+        # 11. The same slug works in another box; not twice in the same box.
         mem.note_work("dept_marketing", "day-note",
                       "Marketing: 2 caption ready.")
         try:
@@ -262,7 +262,7 @@ def main():
         check("same slug allowed in another box, rejected in the same box",
               ok_dup)
 
-        # 12. Work note-এও 4000 chars cap।
+        # 12. Work notes also have the 4000 chars cap.
         try:
             mem.note_work("dept_sales", "too-long", "x" * 4001)
             ok_cap = False
@@ -270,7 +270,7 @@ def main():
             ok_cap = True
         check("work note over 4000 chars -> ValueError", ok_cap)
 
-        # 13. Export-এ Shared compartment + Box section + agent-note লেবেল।
+        # 13. Export shows Shared compartment + Box section + agent-note label.
         out = mem.export_markdown(tmp_md)
         with open(out, encoding="utf-8") as f:
             md = f.read()
@@ -280,7 +280,7 @@ def main():
               and "Box: dept_marketing" in md and "agent note" in md
               and "Mira" in md and "NOT permission" in md)
 
-        # 14. 256 KiB cap।
+        # 14. The 256 KiB cap.
         try:
             import owner_memory as om  # noqa: PLC0415
             big = OwnerMemory(memory_path=os.path.join(tmp_dir, "big.json"))
@@ -301,13 +301,13 @@ def main():
             print(f"    (cap check error: {e})")
         check("256 KiB doc cap still enforced", ok_big)
 
-        # 17. Maintenance repair: stale tentative archive হয়; নতুন
-        # tentative থাকে; stated কখনো auto-archive হয় না; dedupe।
+        # 17. Maintenance repair: a stale tentative is archived; a new
+        # tentative stays; stated is never auto-archived; dedupe.
         rep_mem = OwnerMemory(memory_path=os.path.join(tmp_dir, "repair.json"))
         rep_mem.seed_defaults()
         rep_mem.learn("lessons", "old-rule", "Old rule.",
-                      quote="পুরোনো কথা",
-                      source_message="Boss: পুরোনো কথা", status="tentative")
+                      quote="old words",
+                      source_message="Boss: old words", status="tentative")
         for e in rep_mem.entries:
             if e["slug"] == "old-rule":
                 e["learned_at"] = "2026-09-01T00:00:00+00:00"
@@ -329,13 +329,13 @@ def main():
               "never touches stated", ok_repair, str(rep) + " " + str(rep2))
 
         # 18. validate_proposals: valid quote ready, bad quote rejected,
-        # কিছু লেখে না।
+        # writes nothing.
         before_n = len(mem.list_entries())
         v = mem.validate_proposals([
             {"area": "preferences", "slug": "new-rule", "text": "New.",
-             "quote": "নতুন কথা", "source_message": "Boss: নতুন কথা"},
+             "quote": "new words", "source_message": "Boss: new words"},
             {"area": "preferences", "slug": "bad-rule", "text": "Bad.",
-             "quote": "বানানো", "source_message": "Boss: অন্য কথা"},
+             "quote": "invented", "source_message": "Boss: other words"},
         ])
         check("validate_proposals: valid quote ready, bad quote rejected, "
               "nothing written",
@@ -343,7 +343,7 @@ def main():
               and len(mem.list_entries()) == before_n,
               f"ready={len(v['ready'])}, rejected={len(v['rejected'])}")
 
-        # 19. context_for: shared-এ ৩ seed আছে, source_message নেই।
+        # 19. context_for: 3 seeds in shared, no source_message.
         ctx = mem.context_for("main_ceo_bot")
         check("context_for: shared seeds present, no source_message dump",
               ctx["box"] == "main_ceo_bot"
@@ -352,8 +352,8 @@ def main():
               and all("source_message" not in e for e in ctx["shared"]),
               f"counts={ctx['counts']}")
 
-        # 20. CEO wiring (TEMP store): route_task-এ memory attach হয়;
-        # route memory-তে লেখে না (routing log tasks.json-এ)।
+        # 20. CEO wiring (TEMP store): memory is attached in route_task;
+        # routing writes nothing to memory (routing log goes to tasks.json).
         import main_ceo_bot as mcb  # noqa: PLC0415
         tmp_tasks = os.path.join(tmp_dir, "tasks-wiring.json")
         tmp_appr = os.path.join(tmp_dir, "approvals-wiring.json")
@@ -372,8 +372,8 @@ def main():
               "written to memory (temp store)", ok_wire,
               f"status={r['status']}")
 
-        # 21. Chief wiring (TEMP store): direct handle_task-এ memory
-        # attach হয়; memory-তে লেখে না।
+        # 21. Chief wiring (TEMP store): memory is attached in direct
+        # handle_task; nothing is written to memory.
         chief_path = os.path.join(BASE, "01-Agency-Department")
         if chief_path not in sys.path:
             sys.path.insert(0, chief_path)
@@ -387,16 +387,16 @@ def main():
               and cr["memory"]["counts"]["shared"] == 3,
               f"status={cr['status']}")
 
-        # 22. record_owner_message: valid quote শেখে, ভুল quote বারণ।
+        # 22. record_owner_message: learns with a valid quote, refuses a bad quote.
         e22 = mcb.record_owner_message(
-            "Boss (test): নতুন নিয়ম — শুক্রবার ছুটি",
-            "routines", "friday-off", "শুক্রবার ছুটি।",
-            quote="শুক্রবার ছুটি", source_ref="test",
+            "Boss (test): new rule — Friday is off",
+            "routines", "friday-off", "Friday is off.",
+            quote="Friday is off", source_ref="test",
             memory_path=wiring_path)
         try:
             mcb.record_owner_message(
-                "Boss (test): আজ ছুটি", "routines", "bad-rule", "x",
-                quote="Boss কখনো বলেনি", memory_path=wiring_path)
+                "Boss (test): today is off", "routines", "bad-rule", "x",
+                quote="Boss never said that", memory_path=wiring_path)
             ok_learn = False
         except ValueError:
             ok_learn = True
@@ -405,8 +405,8 @@ def main():
               e22["slug"] == "friday-off" and e22["box"] == "shared"
               and ok_learn)
 
-        # 23. Gated forget: approve ছাড়া execute বারণ, ভুল gate word
-        # বারণ, "go"-তে approve -> executed -> entry নেই।
+        # 23. Gated forget: no execute without approval, wrong gate word
+        # refused, approve with "go" -> executed -> entry gone.
         tmp_conf = os.path.join(tmp_dir, "confirmations-wiring.json")
         conf = mcb.request_forget_owner_entry(
             "routines", "friday-off", memory_path=wiring_path,
@@ -442,7 +442,7 @@ def main():
               conf["status"] == "asked" and ok_no_exec and ok_wrong_word
               and done["status"] == "executed" and ok_gone)
 
-        # 24. Reload guard: দুটো instance একই file-এ লিখলেও দুটো note-ই থাকে।
+        # 24. Reload guard: two instances writing the same file still keep both notes.
         race_path = os.path.join(tmp_dir, "race.json")
         ra = OwnerMemory(memory_path=race_path)
         ra.seed_defaults()
@@ -486,7 +486,7 @@ def main():
             if not any(r[0] == name for r in results):
                 check(name, False, str(e))
 
-    # 15. owner_memory.py-তে network import নেই।
+    # 15. No network import in owner_memory.py.
     try:
         net_re = re.compile(r"\b(import|from)\s+(socket|urllib|requests|"
                             r"http\.client|httpx|aiohttp)\b")
@@ -501,7 +501,7 @@ def main():
     except Exception as e:  # noqa: BLE001
         check("no network imports in owner_memory.py", False, str(e))
 
-    # 16. owner_memory.py __main__ self-test।
+    # 16. owner_memory.py __main__ self-test.
     try:
         proc = subprocess.run(
             [sys.executable, os.path.join(CEO_CORE_DIR, "owner_memory.py")],
@@ -512,7 +512,7 @@ def main():
     except Exception as e:  # noqa: BLE001
         check("owner_memory.py __main__ self-test passes", False, str(e))
 
-    # 25. main_ceo_bot.py + chief_of_staff_agency.py-তে network import নেই।
+    # 25. No network import in main_ceo_bot.py + chief_of_staff_agency.py.
     try:
         bad2 = []
         for _rel in ("00-CEO-Core/main_ceo_bot.py",
@@ -529,7 +529,7 @@ def main():
         check("no network imports in main_ceo_bot.py / "
               "chief_of_staff_agency.py", False, str(e))
 
-    # 26. আসল store বদলায়নি।
+    # 26. The real store did not change.
     try:
         after = _snapshot_store()
         check("real store unchanged by this check run",

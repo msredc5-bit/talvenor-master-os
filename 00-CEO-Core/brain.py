@@ -9,6 +9,9 @@ honours each one instead of forcing a single interface on them:
                complete(prompt, *, max_tokens=500) -> str
   - content -> vendored src.workers.base.MockLLM
                complete(prompt) -> str
+  - digital-product -> the agency mock tree, with its own Phase 2 seed
+    ("master-os-phase2") — it used to raise ValueError, and the Products Chief
+    quietly used the agency seed.
 Both satisfy the only contract the workers actually call —
 complete(prompt) -> str and health() -> dict — so each Chief keeps
 its existing call sites untouched: it just asks the factory for its
@@ -24,7 +27,7 @@ LIVE BRAIN — Phase 10 (wired via live_brain.py):
     key never appears in any file, env var, argument, or log.
   - If a live call fails (no credential, timeout, 403/401, API
     error), the adapter falls back LOUDLY to the department's own
-    mock brain (stderr-এ কারণ লিখে) — never silently pretends
+    mock brain (writing the reason to stderr) — never silently pretends
     live, never retries in a loop (one attempt per call).
   - Constructing the adapter performs NO network I/O (verified:
     import + construct, 0 calls). Only complete() touches the
@@ -73,6 +76,13 @@ DEFAULT_BRAIN = "mock"
 # the flag back to mock reproduces exactly the old drafts.
 _AGENCY_MOCK_SEED = "master-os-phase1"
 _CONTENT_MOCK_SEED = "master-os-phase3"
+# Digital Product's own seed (Phase 2) — get_brain(
+# "digital-product") used to raise ValueError, and the Products Chief quietly
+# used the agency seed (master-os-phase1). Now digital-product has its own
+# branch: the agency mock still runs (the Products Chief's workers are vendored
+# in the agency tree), but the seed is different — so the drafts no longer
+# look like the agency's.
+_DIGITAL_PRODUCT_MOCK_SEED = "master-os-phase2"
 
 
 def _load_module(workers_dir, dotted_name):
@@ -123,14 +133,17 @@ class BrainFactory:
 
     @staticmethod
     def get_brain(department, seed=None, config_path=CONFIG_PATH):
-        """The brain object for `department` ("agency" | "content").
+        """The brain object for `department` ("agency" | "digital-product"
+        | "content").
 
         Mock (default): that department's own vendored mock, seeded as
         before — each Chief can use the result exactly as it used its
-        mock before. Live: LiveBrainAdapter wrapping the provider
-        chain from config.json "fallback_chain" (same adapter serves
-        both departments — its complete(prompt, *, max_tokens) accepts
-        the positional call both worker bases make; on live failure of
+        mock before. Digital-product uses the agency mock tree (its
+        workers are vendored there) with its own Phase 2 seed.
+        Live: LiveBrainAdapter wrapping the provider chain from
+        config.json "fallback_chain" (same adapter serves all
+        departments — its complete(prompt, *, max_tokens) accepts the
+        positional call both worker bases make; on live failure of
         every provider it falls back LOUDLY to that department's own
         mock).
         """
@@ -139,11 +152,16 @@ class BrainFactory:
         if department == "agency":
             mod = _load_module(AGENCY_WORKERS_DIR, "src.mock.provider")
             return mod.MockLLMProvider(seed=seed or _AGENCY_MOCK_SEED)
+        if department == "digital-product":
+            mod = _load_module(AGENCY_WORKERS_DIR, "src.mock.provider")
+            return mod.MockLLMProvider(
+                seed=seed or _DIGITAL_PRODUCT_MOCK_SEED)
         if department == "content":
             mod = _load_module(CONTENT_WORKERS_DIR, "src.workers.base")
             return mod.MockLLM(seed=seed or _CONTENT_MOCK_SEED)
         raise ValueError(
-            f"Unknown department: {department!r}. Known: ['agency', 'content']")
+            f"Unknown department: {department!r}. Known: ['agency', "
+            "'digital-product', 'content']")
 
     @staticmethod
     def _live_brain(department, config_path=CONFIG_PATH):
@@ -161,13 +179,16 @@ class BrainFactory:
         if department == "agency":
             mod = _load_module(AGENCY_WORKERS_DIR, "src.mock.provider")
             mock = mod.MockLLMProvider(seed=_AGENCY_MOCK_SEED)
+        elif department == "digital-product":
+            mod = _load_module(AGENCY_WORKERS_DIR, "src.mock.provider")
+            mock = mod.MockLLMProvider(seed=_DIGITAL_PRODUCT_MOCK_SEED)
         elif department == "content":
             mod = _load_module(CONTENT_WORKERS_DIR, "src.workers.base")
             mock = mod.MockLLM(seed=_CONTENT_MOCK_SEED)
         else:
             raise ValueError(
                 f"Unknown department: {department!r}. "
-                "Known: ['agency', 'content']")
+                "Known: ['agency', 'digital-product', 'content']")
         try:
             if CEO_CORE_DIR not in sys.path:
                 sys.path.insert(0, CEO_CORE_DIR)
@@ -201,11 +222,15 @@ if __name__ == "__main__":
     mode = BrainFactory.get_brain_mode()
     print(f"brain mode (config): {mode}")
     agency_brain = BrainFactory.get_brain("agency")
+    digital_brain = BrainFactory.get_brain("digital-product")
     content_brain = BrainFactory.get_brain("content")
     print("agency brain:", type(agency_brain).__name__,
           "| health:", agency_brain.health())
+    print("digital-product brain:", type(digital_brain).__name__,
+          "| health:", digital_brain.health())
     print("content brain:", type(content_brain).__name__,
           "| health:", content_brain.health())
     assert agency_brain.health()["calls"] == 0
+    assert digital_brain.health()["calls"] == 0
     assert content_brain.health()["calls"] == 0
-    print("brain.py: OK (both mocks, 0 calls, $0)")
+    print("brain.py: OK (all three mocks, 0 calls, $0)")

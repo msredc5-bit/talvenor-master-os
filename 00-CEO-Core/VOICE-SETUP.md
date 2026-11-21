@@ -1,47 +1,47 @@
-# Jarvis Voice Setup — Windows (Boss-এর PC)
+# Jarvis Voice Setup — Windows (Boss's PC)
 
-Jarvis-এর কান + মুখ — **পুরো offline, $0**। একবার install + download
-করলেই হবে; তারপর internet ছাড়াই চলবে।
+Jarvis's ears + mouth — **fully offline, $0**. Install + download once;
+then it runs without internet.
 
-## কী কী লাগবে
+## What is needed
 
-| জিনিস | কাজ | খরচ |
+| Item | Job | Cost |
 |---|---|---|
-| Python 3.10+ (Windows) | voice code চালানো | $0 |
-| `piper-tts` | বলা (TTS) — neural voice, CPU-তে চলে | $0 |
-| `vosk` | শোনা (STT, English) | $0 |
-| `sherpa-onnx` | শোনা (STT, Bengali) | $0 |
-| `sounddevice` | mic ধরা (Windows wheel-এ PortAudio বান্ডেল থাকে) | $0 |
-| Voice/model file (একবার download) | bn voice 73 MB + en voice ~15 MB + Vosk en 40 MB + sherpa bn 96 MB | $0 |
+| Python 3.10+ (Windows) | Run the voice code | $0 |
+| `piper-tts` | Speaking (TTS) — neural voice, runs on CPU | $0 |
+| `vosk` | Listening (STT, English) | $0 |
+| `sherpa-onnx` | Listening (STT, Bengali) | $0 |
+| `sounddevice` | Capturing the mic (the Windows wheel bundles PortAudio) | $0 |
+| Voice/model files (one download) | bn voice 73 MB + en voice ~15 MB + Vosk en 40 MB + sherpa bn 96 MB | $0 |
 
-## ধাপ ১ — Python আছে কিনা দেখুন
+## Step 1 — Check whether Python is installed
 
-PowerShell / Command Prompt-এ:
+In PowerShell / Command Prompt:
 
 ```bat
 python --version
 ```
 
-`Python 3.10` বা তার বেশি দেখাতে হবে। না থাকলে python.org থেকে
-ডাউনলোড করুন (install-এর সময় **"Add Python to PATH"** টিক দিন)।
+It must show `Python 3.10` or higher. If not, download it from python.org
+(tick **"Add Python to PATH"** during install).
 
-## ধাপ ২ — Package install
+## Step 2 — Install packages
 
-Repo-র root থেকে (যেখানে `talvenor-master-os` folder):
+From the repo root (where the `talvenor-master-os` folder is):
 
 ```bat
 pip install piper-tts vosk sounddevice sherpa-onnx
 ```
 
-## ধাপ ৩ — Voice + model download (একবারই)
+## Step 3 — Download voices + models (once)
 
 ```bat
-:: Piper voice (Bengali + English) — এক command-এ দুইটা
+:: Piper voices (Bengali + English) — both in one command
 python -m piper.download_voices bn_BD-google-medium en_US-lessac-medium --download-dir 00-CEO-Core\voice\models\piper
 
-:: Vosk English model (40 MB) — zip download করে unzip করুন
+:: Vosk English model (40 MB) — download the zip and unzip it
 :: https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip
-:: unzip-এর পর এই folder-টা থাকতে হবে:
+:: After unzipping, this folder must exist:
 ::   00-CEO-Core\voice\models\vosk\vosk-model-small-en-us-0.15\am\final.mdl
 
 :: Sherpa Bengali model (~96 MB)
@@ -49,101 +49,101 @@ pip install huggingface_hub
 python -c "from huggingface_hub import snapshot_download; snapshot_download('alphacep/vosk-model-small-streaming-bn', local_dir='00-CEO-Core/voice/models/sherpa-bn')"
 ```
 
-Voice id — VERIFIED (upstream থেকে, অনুমান নয়):
-- **Bengali বলা:** `bn_BD-google-medium` — Piper catalog-এর একমাত্র
-  Bengali voice (bn_BD, 16 speaker, medium, 22,050 Hz, openSLR 37,
-  licence CC-BY-SA-4.0)।
-- **English বলা:** `en_US-lessac-medium` — 1 speaker, medium।
-  Lessac licence CSTR Blizzard 2013 page-এ — personal use OK,
-  commercial use-এর আগে licence দেখুন।
-- **English শোনা:** `vosk-model-small-en-us-0.15` (Vosk official list-এ
-  আছে, Apache-2.0)।
-- **Bengali শোনা:** `vosk-model-small-streaming-bn` (HF repo
+Voice ids — VERIFIED (from upstream, not a guess):
+- **Speaking Bengali:** `bn_BD-google-medium` — the Piper catalog's only
+  Bengali voice (bn_BD, 16 speakers, medium, 22,050 Hz, openSLR 37,
+  licence CC-BY-SA-4.0).
+- **Speaking English:** `en_US-lessac-medium` — 1 speaker, medium.
+  Lessac licence on the CSTR Blizzard 2013 page — personal use OK;
+  check the licence before commercial use.
+- **Hearing English:** `vosk-model-small-en-us-0.15` (on the Vosk official list,
+  Apache-2.0).
+- **Hearing Bengali:** `vosk-model-small-streaming-bn` (HF repo
   `alphacep/vosk-model-small-streaming-bn`, Apache-2.0, WER self-reported:
-  Common Voice 17.9, Fleurs 20.6, Banspeech 32.9)।
-  সত্য কথা: classic Vosk-এর official list-এ কোনো Bengali model নেই;
-  যেটা আছে সেটা Zipformer2 streaming model — তাই Bengali শোনে
-  sherpa-onnx, Vosk নয়। `vosk.Model()` দিয়ে এটা লোড হয় না।
+  Common Voice 17.9, Fleurs 20.6, Banspeech 32.9).
+  The truth: the classic Vosk official list has no Bengali model;
+  the one that exists is a Zipformer2 streaming model — so Bengali is heard by
+  sherpa-onnx, not Vosk. It does not load with `vosk.Model()`.
 
-## ধাপ ৪ — Test চালান (mic/speaker ছাড়াই)
+## Step 4 — Run the test (no mic/speaker needed)
 
 ```bat
 python scripts\voice_test.py
 ```
 
-সব PASS হলে: দুই voice-এ synth হয়েছে, English WAV Vosk চিনেছে,
-Bengali WAV sherpa চিনেছে। WAV file থাকে
+If all PASS: both voices synthesized, the English WAV was recognised by Vosk,
+the Bengali WAV by sherpa. The WAV files live in
 `00-CEO-Core\voice\output\voice-test-bn.wav` /
-`voice-test-en.wav`-এ — নিজে শুনে দেখুন Bengali voice কেমন শোনায়।
+`voice-test-en.wav` — listen for yourself to hear how the Bengali voice sounds.
 
-আর check:
+And check:
 
 ```bat
 python scripts\check_voice.py
 ```
 
-## ধাপ ৫ — Voice loop চালান (আসল Jarvis)
+## Step 5 — Run the voice loop (the real Jarvis)
 
 ```bat
 python scripts\jarvis_voice_loop.py
 ```
 
-- বাংলায় বলুন (default `bn`) — Jarvis শুনে brain-এর উত্তর বলবে।
-- English-এ বলতে চাইলে: `python scripts\jarvis_voice_loop.py --lang en`
-- থামাতে: `Ctrl+C`
-- একবারে ৮ সেকেন্ড শোনে (বদলাতে: `--seconds 12`)।
+- Speak in Bengali (default `bn`) — Jarvis listens and speaks the brain's answer.
+- To speak English: `python scripts\jarvis_voice_loop.py --lang en`
+- To stop: `Ctrl+C`
+- It listens for 8 seconds at a time (to change: `--seconds 12`).
 
-## RAM নোট (জরুরি)
+## RAM note (important)
 
-আপনার PC: 8 GB RAM, খালি মাত্র ~1.4 GB। Voice চালানোর সময় **Chrome
-বন্ধ রাখুন** — Piper + Vosk/sherpa একসাথে ~1 GB RAM নেয়। Chrome খোলা
-থাকলে আটকে যেতে পারে।
+Your PC: 8 GB RAM, only ~1.4 GB free. While running voice, keep **Chrome
+closed** — Piper + Vosk/sherpa together take ~1 GB RAM. With Chrome open,
+it may freeze.
 
-## সমস্যা হলে
+## If something goes wrong
 
-| সমস্যা | করণীয় |
+| Problem | What to do |
 |---|---|
-| `piper-tts ইনস্টল নেই` | ধাপ ২ আবার চালান |
-| `Piper voice file নেই` | ধাপ ৩-এর piper command চালান |
-| `Vosk English model নেই` | zip download + unzip, folder path মেলান |
-| `sherpa Bengali model অসম্পূর্ণ` | ধাপ ৩-এর snapshot_download চালান |
-| `sounddevice / PortAudio পাওয়া যায়নি` | `pip install sounddevice` (Windows wheel-এ PortAudio থাকে) |
-| `Mic খুলতে পারলাম না` | Mic লাগানো + Windows Settings-এ mic অনুমতি আছে কিনা দেখুন |
-| কথা শুনে ভুল লেখে | স্বাভাবিক — ছোট model (Bengali WER 17-33%)। ধীরে, পরিষ্কার করে বলুন; শোরগোল কমান |
+| `piper-tts is not installed` | Run step 2 again |
+| `Piper voice file missing` | Run the step 3 piper command |
+| `Vosk English model missing` | Download + unzip the zip, match the folder path |
+| `sherpa Bengali model incomplete` | Run the step 3 snapshot_download |
+| `sounddevice / PortAudio not found` | `pip install sounddevice` (the Windows wheel has PortAudio) |
+| `Could not open the mic` | Check the mic is plugged in + mic permission in Windows Settings |
+| It hears speech but writes it wrong | Normal — a small model (Bengali WER 17-33%). Speak slowly and clearly; reduce background noise |
 
-## সৎ সীমা (আগে জানুন)
+## Honest limits (know these first)
 
-- **Bengali voice-এর মান কেউ শোনেনি** — কেমন শোনায়, আপনিই প্রথম
-  শুনে বলবেন। ভালো না লাগলে speaker বদলানো যায় (bn voice-এ 16 speaker;
-  `speak.py`-তে `speaker_id=0..15`)।
-- **Bengali শোনায় ভুল হবে** — ছোট model, WER 17-33%। ছোট, পরিষ্কার
-  বাক্য বলুন।
-- **Brain mock** — voice Jarvis-কে বুদ্ধিমান বানায় না। উত্তর হবে
-  mock draft ("MOCK-PLAN: ...")। আসল বুদ্ধির জন্য brain `live` করতে
-  হয় — সেটা আলাদা সিদ্ধান্ত (Boss-এর কথায়, live verification-এর পর)।
-- **Voice-এ gated কাজ হয় না** — "send" / "post it" বললে শুধু
-  ApprovalGateway-এ PENDING লেখা হয়; execute হয় না। Boss-এর gate
-  word (টাইপ করা) ছাড়া কিছুই এগোয় না।
-- **"upload it" / খরচ / delete voice-এ request করা যায় না** — ওগুলো
-  Boss টাইপ করে দেবে।
+- **Nobody has heard the Bengali voice's quality** — how it sounds, you will be
+  the first to hear and say. If you do not like it, the speaker can be changed
+  (the bn voice has 16 speakers; `speak.py` `speaker_id=0..15`).
+- **Hearing Bengali will make mistakes** — a small model, WER 17-33%. Speak in
+  short, clear sentences.
+- **Brain mock** — voice does not make Jarvis intelligent. The answer will be
+  a mock draft ("MOCK-PLAN: ..."). For real intelligence, the brain must go `live`
+  — that is a separate decision (on Boss's word, after live verification).
+- **No gated work by voice** — saying "send" / "post it" only writes PENDING
+  to the ApprovalGateway; nothing executes. Nothing moves without Boss's gate
+  word (typed).
+- **"upload it" / spend / delete cannot be requested by voice** — Boss
+  types those.
 
-## File কোথায়
+## Where the files are
 
 ```
 00-CEO-Core/
 ├── jarvis_voice.py      # REAL — listen()/speak()/handle_voice_command()
-├── VOICE-SETUP.md       # এই file
+├── VOICE-SETUP.md       # this file
 └── voice/
     ├── speak.py         # Piper TTS
     ├── listen.py        # Vosk (en) + sherpa-onnx (bn)
-    ├── loop.py          # শোনা -> brain -> বলা + gate
-    ├── models/          # voice/model file (git-এ যায় না — .gitignore)
+    ├── loop.py          # listen -> brain -> speak + gate
+    ├── models/          # voice/model files (not in git — .gitignore)
     │   ├── piper/       # *.onnx voice
     │   ├── vosk/        # vosk-model-small-en-us-0.15/
     │   └── sherpa-bn/   # am-onnx/ + lang/
-    └── output/          # বানানো WAV (git-এ যায় না)
+    └── output/          # generated WAVs (not in git)
 scripts/
-├── voice_test.py        # headless test (mic ছাড়া)
+├── voice_test.py        # headless test (no mic)
 ├── check_voice.py       # voice check suite
-└── jarvis_voice_loop.py # PC-তে চালানোর entry
+└── jarvis_voice_loop.py # entry point to run on the PC
 ```
