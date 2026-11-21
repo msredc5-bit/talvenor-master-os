@@ -1,4 +1,4 @@
-# Talvenor Master OS — আসল সিস্টেম (Phase 9 — COMPLETE: Taskboard + MCP + Live-Ready Tools)
+# Talvenor Master OS — আসল সিস্টেম (Phase 11 + Improvement 1–3 COMPLETE: Live Brain adapter + 7 LLM provider + Trust Gate + Memory/Ledger + Quiet Schedules — brain এখনো mock)
 
 **এটা কী:** Boss-এর ৩ ব্যবসার আসল operating system-এর folder। এটা
 কোনো ছবি বা mock নয় — Phase 0-র skeleton + CEO Core + approval
@@ -53,22 +53,35 @@ talvenor-master-os/
 │   ├── main_ceo_bot.py         # REAL (router)
 │   ├── human_approval_gateway.py  # REAL (approve/reject)
 │   ├── brain.py                # REAL (Phase 6 + Phase 10 + Phase 11 — BrainFactory: mock default / live via LiveBrainAdapter, loud mock fallback; provider chain: openrouter → meta → mock; live probe 2026-11-20 tunnel-403 BLOCKED, key unproven)
-│   ├── tool_calling.py         # REAL (Phase 5 — ToolRegistry + dispatcher, 7 mock handler)
-│   ├── tools.json              # REAL (7 tool-এর registry — booking_reply সহ)
+│   ├── live_brain.py           # REAL (Phase 10 — LiveBrainAdapter: provider chain + loud mock fallback; live probe 2026-11-20 tunnel-403 FAILED, $0, key UNPROVEN; brain mock-ই আছে)
+│   ├── live_tools.py           # REAL (Phase 9 — gmail_send + n8n_trigger, CODE ONLY, gated, কখনো execute নয়)
+│   ├── trust_gate.py           # REAL (Improvement 1 — rule-based trust_check + ConfirmationStore)
+│   ├── owner_memory.py         # REAL (Improvement 2 + Memory LIVE — quote-verified owner memory, central store + box)
+│   ├── usage_ledger.py         # REAL (Improvement 2 — $0 ledger, mock সবসময় $0.00)
+│   ├── quiet_schedules.py      # REAL (Improvement 3 — watchMarker, quiet schedule)
+│   ├── skill_finder.py         # REAL (2026-11-21 — local skill খোঁজা + DRAFT proposal; find_skill task type)
+│   ├── check_drawer_memory.py  # REAL (Memory check 26/26)
+│   ├── mcp/                    # REAL (Phase 9 — mcp_server.py + mcp_client.py + check_mcp.py 9/9 + README.md; check_mcp.py-ই একমাত্র check script যা scripts/-এ নয়)
+│   ├── tool_calling.py         # REAL (Phase 5 — ToolRegistry + dispatcher, 9 handler: 7 mock + 2 live-ready gated)
+│   ├── tools.json              # REAL (9 tool-এর registry — 7 mock + gmail_send/n8n_trigger live-ready, gated)
+│   ├── agent-tool-assignments-DRAFT.md  # DRAFT policy (Boss-এর review বাকি)
+│   ├── agent-skill-audit-2026-11-21.md # skill audit (81 file scope; repo-তে মোট 113 */skills/*.md)
+│   ├── MEMORY-STRUCTURE-DECISION-2026-11-21.md  # memory structure merit-এ decide (central store + box)
+│   ├── PROVIDERS-SETUP-BANGLA.md  # Phase 11 — 7 provider-এর key + env var guide (key কখনো file-এ নয়)
 │   ├── jarvis_voice.py         # REAL (2026-11-17 — Piper+Vosk/sherpa, offline, $0; একই 3 function)
 │   ├── voice/                  # REAL (2026-11-17) — speak.py (Piper TTS), listen.py (Vosk en + sherpa-onnx bn), loop.py (শোনা → brain → বলা + gate); models/ + output/ git-এ যায় না
 │   ├── VOICE-SETUP.md          # Windows setup guide (Bengali)
-│   ├── config.json             # REAL (locked facts; brain: mock, phase 9, v0.9.0 + voice block + providers section: 7 LLM provider + fallback_chain)
+│   ├── config.json             # REAL (locked facts; brain: mock, phase 11, v0.9.0, built 2026-11-21 + voice block + providers section: 7 LLM provider + fallback_chain)
 │   └── CEO-README.md
-├── 01-Agency-Department/   # REAL (Phase 1 + Agentic 1–3) — Chief 15 worker + 8 department manager + 43 specialist ডাকে, draft-only; worker-রা এখন ভিতরে vendored (Phase 6)
+├── 01-Agency-Department/   # REAL (Phase 1 + Agentic 1–3) — Chief 15 worker + 8 department manager + 47 specialist ডাকে, draft-only; worker-রা এখন ভিতরে vendored (Phase 6)
 │   ├── chief_of_staff_agency.py  # REAL — ROUTING (15) + SECTION_ROUTING (6) + DEPARTMENT_ROUTING (8)
 │   ├── pipeline.md             # 10 ধাপ + সৎ অবস্থা (mail 162, email PAUSED)
 │   ├── governance/             # NEW (Agentic Phase 1) — office-charter.md + agent-permissions.md + approval-policy.md + security-policy.md
-│   ├── departments/            # NEW (Agentic Phase 1–3) — 8 department (01-sales-growth … 08-product-innovation); প্রতিটায় SECTION.md + manager/ + skills/ + specialists/ (৪৩ worker .py)
-│   ├── agents/agent-registry/  # NEW (Agentic Phase 1–3) — registry.md + registry.json (৬৯ entry: EXISTING ৬৫, GAP ৪)
+│   ├── departments/            # NEW (Agentic Phase 1–3) — 8 department (01-sales-growth … 08-product-innovation); প্রতিটায় SECTION.md + manager/ + skills/ + specialists/ (৪৭ worker .py — 43 Phase 3 + 4 GAP, 2026-11-21)
+│   ├── agents/agent-registry/  # NEW (Agentic Phase 1–3) — registry.md + registry.json (৬৯ entry: EXISTING ৬৯, GAP ০)
 │   ├── workflows/              # NEW (Agentic Phase 1) — 5 pipeline doc + README.md
 │   ├── sub_agents/README.md    # sub-agent নোট
-│   ├── engine/                 # REAL (Phase 5) — 15 staff, 8 tool (5 mock / 3 gated), 15 skill; workers/ (vendored boss-ceo engine, SOURCE.md + src/)
+│   ├── engine/                 # REAL (Phase 5) — 15 staff, 8 tool (5 mock / 3 gated), 15 skill; workers/ (vendored boss-ceo engine, SOURCE.md + src/; src/live/ — Phase 11: 6 provider openai/anthropic/gemini/kimi/grok/openrouter + meta_provider.py)
 │   └── sections/               # REAL (Phase 7) — 5 section (receive/sell/delivery/marketing/ops), 6 নতুন agent + 6 skill, 15 mapped staff
 ├── 02-Digital-Product-Department/  # REAL* (Phase 2) — Chief আসল কাজ করে, kit blueprint + PA list 39/100; launch/sale Gate 0-তে আটকে
 │   ├── chief_of_staff_products.py + README.md + kit-outline.md + gate0-status.md
@@ -80,10 +93,10 @@ talvenor-master-os/
 │   ├── engine/                 # REAL (Phase 5) — 8 staff, 8 tool (5 mock / 3 gated), 8 skill; workers/ (vendored Creator OS, SOURCE.md + src/)
 │   └── sections/               # REAL (Phase 7) — 5 section (plan/produce/publish/analyze/growth), 10 agent + 10 skill; upload OFF
 ├── CENTRAL-HQ/             # NEW (2026-11-19) — Unified OS layer, docs only (কোনো code নয়): unified-os.md + shared-services.md + data-isolation.md + cross-business.md + BUSINESS-01-AGENCY.md + BUSINESS-02-COMMERCE.md + BUSINESS-03-MEDIA.md
-├── store/                  # tasks.json, approvals.json, vault/README.md (খালি — task 0, approval 0)
-├── dashboards/             # status.html + status.json (sync_status.py দিয়ে বানানো — সংখ্যা আসল ফাইল থেকে) + engines.html (sync_engines.py দিয়ে বানানো) + dashboard-3d.html (3D dashboard, status.json পড়ে) + n8n-wiring.md (২ workflow-র map, READY NOT LIVE)
-├── skills/                 # ৪টা skill manual (CEO + ৩ Chief)
-├── scripts/                # check_phase0..4.py + check_engines.py + check_phase6.py + check_phase7.py + check_departments.py + check_specialists.py + run_office.py (runner) + sync_status.py + sync_engines.py + voice_test.py + check_voice.py + jarvis_voice_loop.py
+├── store/                  # LIVE queue + live state: tasks.json (1 done record — booking-link verification 2026-11-20), approvals.json, MEMORY.md, memory.json, schedules.json, confirmations.json, usage_ledger.json, vault/README.md (policy: store/README.md)
+├── dashboards/             # status.html + status.json (sync_status.py দিয়ে বানানো — সংখ্যা আসল ফাইল থেকে) + engines.html (sync_engines.py দিয়ে বানানো — 9 tool, tools.json থেকে) + dashboard-3d.html (3D dashboard, status.json পড়ে) + n8n-wiring.md (২ workflow-র map, READY NOT LIVE) + taskboard.html + TASKBOARD-README.md (Phase 9 — local queue board, port 8766)
+├── skills/                 # ৭টা skill manual (main-ceo-bot + chief-agency/chief-content/chief-products + drawer-memory-box + skill-finder + tool-allowlist)
+├── scripts/                # check_phase0..4.py + check_engines.py + check_phase6.py + check_phase7.py + check_departments.py + check_specialists.py + run_office.py (runner) + sync_status.py + sync_engines.py + voice_test.py + check_voice.py + jarvis_voice_loop.py + check_gate.py + check_memory_ledger.py + check_quiet_schedules.py + check_providers.py + check_live_brain.py + check_live_tools.py + taskboard_server.py (port 8766)
 ├── .gitignore              # voice models/ + output/ push হয় না
 ├── LOCAL-RUN-BANGLA.md     # PC-তে চালানোর নির্দেশনা (Bengali) + run_local.bat (Windows)
 ├── README.md               # এই ফাইল
@@ -108,14 +121,14 @@ python3 ~/workspace/talvenor-master-os/scripts/check_phase0.py
 | Shared tool-calling core (`tool_calling.py`) | **REAL (Phase 5)** — registry + dispatcher; mock tool DRAFT ফেরত দেয়, gated tool PENDING-এ আটকায়, সব call log করে |
 | Agency Engine (15 staff, 8 tool, 15 skill) | **REAL (Phase 5)** — draft-only, email PAUSED; send/publish/spend gated |
 | Products Engine (5 staff, 8 tool, 5 skill) | **REAL* (Phase 5)** — launch/sale Gate 0-তে আটকে |
-| Content Engine (8 staff, 8 tool, 8 skill) | **REAL (Phase 5)** — upload OFF, VOICE.md DRAFT, GPU নাম বাকি |
+| Content Engine (8 staff, 8 tool, 8 skill) | **REAL (Phase 5)** — upload OFF, VOICE.md DRAFT, GPU AMD Radeon integrated 496 MB VRAM (2026-11-17 যাচাই — FramePack/WanGP চলবে না) |
 | Phase 7 sections (16 section, 23 agent, 23 skill) | **REAL** — draft-only, gated PENDING; Agency 5 section / 6 নতুন agent, Products 6 / 7 (Gate 0 fail-closed), Content 5 / 10 (upload OFF) |
 | Main CEO Bot router | **REAL** — task ঠিক Chief-এর দিকে পাঠায় |
 | config.json | **REAL** — locked facts |
 | Dashboard status.html | **REAL** — sync_status.py দিয়ে বানানো, সংখ্যা আসল ফাইল থেকে |
 | n8n workflows (auto-send + callback) | **READY · NOT LIVE** — import file তৈরি, Boss-এর import + connect + test বাকি |
 | Jarvis voice | **REAL (2026-11-17)** — Piper TTS + Vosk (en) + sherpa-onnx (bn), offline, $0; mic যুক্ত; brain mock (voice Jarvis-কে বুদ্ধিমান বানায় না); gated কাজ voice-এ শুধু PENDING, execute নয় |
-| Agency Chief of Staff | **REAL (Phase 1 + Agentic Phase 2 + 3)** — 15 worker + 8 department manager + 43 specialist routing (DEPARTMENT_ROUTING + manager→specialist importlib), draft-only, gated কাজ PENDING-এ আটকায় |
+| Agency Chief of Staff | **REAL (Phase 1 + Agentic Phase 2 + 3)** — 15 worker + 8 department manager + 47 specialist routing (DEPARTMENT_ROUTING + manager→specialist importlib), draft-only, gated কাজ PENDING-এ আটকায় |
 | Products Chief of Staff | **REAL* (Phase 2)** — ৪ task type routing, Gate 0 fail-closed, launch/sale আটকায় |
 | Content Chief of Staff | **REAL (Phase 3)** — 6 Creator OS worker routing, draft-only, upload OFF-এ আটকায়, video file বানায় না |
 | boss-ceo engine (15 worker) | **VENDORED (Phase 6)** — copy এখন `01-Agency-Department/engine/workers/`-এ ভিতরে; upstream `~/workspace/boss-ceo/` canonical থাকে, runtime dependency নয় |
@@ -138,9 +151,13 @@ python3 ~/workspace/talvenor-master-os/scripts/check_phase0.py
 `ok` / `post it` / `upload it` / `send` / `go` — Boss-এর exact
 word ছাড়া send/publish/spend/delete হবে না। Spend cap **$0**।
 
-## সত্য অবস্থা (2026-11-20)
+## সত্য অবস্থা (2026-11-21)
 
 - Paying client: **0**
+- Registry: **69 entry — EXISTING 69, GAP 0** (4 GAP worker 2026-11-21-এ বানানো হয়েছে; specialists 43 → 47)
+- মোট check: **326/326** (199 base + 69 নতুন [mcp 9 + live_tools 7 + live_brain 10 + providers 43] + 58 improvement [gate 24 + memory_ledger 19 + quiet 15]; drawer_memory check 26/26 আলাদা suite হিসেবে PASS; check_voice 13/14 — sounddevice VM-only)
+- Phase 11 + Improvement 1–3: **BUILT 2026-11-20/21** — brain এখনো **mock** (live probe 2026-11-20 tunnel-403 FAILED, key UNPROVEN)
+- store/tasks.json: **1 done record** (booking-link verification, 2026-11-20) — store এখন live queue
 - Jarvis voice: **REAL (2026-11-17)** — Piper+Vosk/sherpa, offline, $0; প্রথম live mic test Boss-এর PC-তে বাকি
 - Email: **PAUSED** (2026-11-14 থেকে) — SPF/DMARC DNS fix Boss-এর হাতে বাকি
 - প্রথম মেইল: 162
@@ -156,10 +173,14 @@ word ছাড়া send/publish/spend/delete হবে না। Spend cap **$
 - **Phase 4 — n8n wiring:** ✅ BUILT 2026-11-16 (wiring doc + sync_status.py, ২ workflow READY NOT LIVE, dashboard sync-এ চলে, check 9/9 PASS)।
 - **Phase 5 — Three Engines:** ✅ BUILT 2026-11-16 (shared tool-calling core + ৩ engine — Agency 15 staff / 8 tool / 15 skill, Products 5 / 8 / 5, Content 8 / 8 / 8; engines dashboard sync-এ চলে, check 45/45 PASS)।
 - **Phase 6 — Full Complete Agent Offices:** ✅ BUILT 2026-11-16 (worker-রা ভিতরে vendored — Agency 18 file + Content 4 file + SOURCE.md; BrainFactory mock default / live unwired; `run_office.py` runner — এক command-এ office চলে, `--drain-queue --max 2`; 136 DROPPED, scope 3 ব্যবসা only; config phase 6 / v0.6.0; check 14/14 PASS)।
-- **Phase 7 — Full Offices (Sections):** ✅ BUILT 2026-11-17 (১৬ section — Agency 5, Products 6, Content 5; ২৩ section agent + ২৩ section skill; Agency-র ১৫ worker mapped + ৬ নতুন agent, Products-এর ৭ agent (Gate 0 fail-closed — kit/sale কখনো লেখা হয় না), Content-এর ১০ agent (৬ wrapper + ২ chief-level + ২ নতুন; upload OFF); ৩ Chief-এ SECTION_ROUTING; config phase 7 / v0.7.0; check 18/18 PASS) — Phase 7 এখানেই শেষ নয়: তারপর Agentic Phase 1–3 + Unified OS (নিচে দেখুন)। মোট check এখন 200/200 (138 phases+engines + 21 departments + 41 specialists) + voice 13/14।
+- **Phase 7 — Full Offices (Sections):** ✅ BUILT 2026-11-17 (১৬ section — Agency 5, Products 6, Content 5; ২৩ section agent + ২৩ section skill; Agency-র ১৫ worker mapped + ৬ নতুন agent, Products-এর ৭ agent (Gate 0 fail-closed — kit/sale কখনো লেখা হয় না), Content-এর ১০ agent (৬ wrapper + ২ chief-level + ২ নতুন; upload OFF); ৩ Chief-এ SECTION_ROUTING; config phase 7 / v0.7.0; check 18/18 PASS) — Phase 7 এখানেই শেষ নয়: তারপর Agentic Phase 1–3 + Unified OS (নিচে দেখুন)। মোট check Phase 7-এর সময়ে 200/200 ছিল (138 phases+engines + 21 departments + 41 specialists) + voice 13/14 — এখনকার মোট 326/326, উপরে "সত্য অবস্থা" দেখুন।
 - **Agentic Agency Office Phase 1 — Foundation:** ✅ BUILT 2026-11-19 (Boss-এর order — আরেক AI-এর blueprint audit করে Agency office-এর সাথে combine; নতুন repo নয়, 01-Agency-Department-এর ভেতরেই): governance/ (charter, permissions, approval policy, security policy — ৪ file), departments/ (৮ department — Sales & Growth, Marketing, AI Engineering, Client Operations, Research & Strategy, Finance & Admin, Quality & Security, Product & Innovation; প্রতিটায় SECTION.md + manager .py + skill .md — ২৪ file), agents/agent-registry/ (registry.md + registry.json — ৬৯ entry: EXISTING ২২ role-entry = ২১ distinct worker, ROLE-ONLY ৪৩, GAP ৪; ৮ manager আলাদা তালিকায় EXISTING), workflows/ (৫ pipeline doc — lead-generation, sales-outreach, client-onboarding, receptionist-deployment, client-support)। ২১ existing staff map: Sales ৮, Marketing ৪, AI Eng ১, Client Ops ৫, Research ০ (GAP dept), Finance ২, Quality ১, Innovation ০ (GAP dept)। Audit সংশোধন: Retell production নয় — Vapi live (Sophia +19472230244); DB JSON store, PostgreSQL নয়; CRM n8n planned not live; Sophia live receptionist, demo নয়। ৮ manager live test PASS (TEMP store — draft-ready + unknown-task + pending-approval); সব check 138/138 + voice 13/14 PASS; sync byte-identical; store pristine। Agency Chief wiring **Phase 2 DONE 2026-11-19** — Chief এখন ৮ manager-কে DEPARTMENT_ROUTING দিয়ে ডাকে (নিচে "Agentic Agency Office Phase 2" দেখুন)। PUSHED 2026-11-19 ~23:40, head 162921aa (Boss-এর "finish everything + push"-এ, 55 file, 6 batch — Phase 1 + Phase 2 + Unified OS একসাথে)।
 - **Agentic Agency Office Phase 2 — Executive wiring:** ✅ BUILT 2026-11-19 (Boss-এর order "যা বাকি আছে, সব কাজ শেষ করো" — Phase 1-এর ৮ manager-কে Agency Chief-এর সাথে যুক্ত করা): chief_of_staff_agency.py-তে নতুন DEPARTMENT_ROUTING — ৮ task type (dept_sales, dept_marketing, dept_engineering, dept_operations, dept_strategy, dept_finance, dept_quality, dept_innovation) → ৮ manager (ChiefGrowthAgent / MarketingDirectorAgent / CTOAIEngineeringAgent / COOClientOperationsAgent / ChiefStrategyAgent / CFOFinanceAgent / ChiefQualitySecurityAgent / ChiefInnovationAgent), gate সব `ok`, payload-এর task_kind → top-level translate (manager-রা task.get("task_kind") পড়ে), SECTION_ROUTING pattern-ই (importlib load + mock brain + tasks.json log), gated action → ApprovalGateway PENDING, unknown kind → "unknown-task"। ROUTING (১৫) ও SECTION_ROUTING (৬) অপরিবর্তিত। নতুন check script scripts/check_departments.py — ২১/২১ PASS (৮ manager load + ৮ route draft-ready [MOCK DRAFT] + ২ gated PENDING + ১ unknown-task + stale-claim grep clean + পুরনো check 138/138 + voice 13/14)। ২৫ file-এ stale wiring note ঠিক করা হয়েছে (৭৬ replacement + ৩ extra variant fix — "Chief এখনো call করে না" → "Chief এখন DEPARTMENT_ROUTING দিয়ে call করে")। PUSHED 2026-11-19 ~23:40, head 162921aa (Boss-এর "finish everything + push"-এ, 55 file, 6 batch)।
 - **Agentic Agency Office Phase 3 — Specialists:** ✅ BUILT 2026-11-19 (Boss-এর order "go" — Phase 1-এর ৪৩ ROLE-ONLY role-কে আসল worker code হিসেবে বানানো): প্রতিটা role-এর skill .md প্রথমে লেখা, তারপর সেই skill থেকে worker .py (Phase 7 section-agent pattern — stdlib-only, Bengali docstring, run(task, brain, gateway, approvals_path), mock brain, DRAFT-labelled output, gated action → ApprovalGateway PENDING, কখনো execute নয়)। Per-dept: 01 Sales & Growth ৫ (Google Maps Prospect Finder, Business Verification, Lead Scoring, CRM Manager, Sales Intelligence), 02 Marketing ৪ (Market Positioning, Social Media, SEO, Analytics — worker file snake_case-এ rename করা হয়েছে), 03 AI Engineering ৭ (AI Solution Architect, Conversation Designer, Prompt Engineering, Vapi Integration — brief-এর Retell নাম corrected, Calendar Integration, n8n Automation, Deployment), 04 Client Operations ৪ (Call Monitoring, Client Reporting, Retention, Renewal & Upsell), 05 Research & Strategy ৭ (Competitor, Industry, Pricing, Niche Selection, Offer Development, Market Opportunity, Business Intelligence), 06 Finance & Admin ৪ (Revenue Tracking, Subscription Tracking, Document Management, Compliance Calendar), 07 Quality & Security ৬ (Call Scenario Testing, Workflow Testing, Data Validation, Security Monitoring, Access Control, Compliance Review), 08 Product & Innovation ৬ (New AI Product Research, New Feature Research, Automation R&D, Technology Evaluation, Product Improvement, Prototype Builder)। ৮ manager-ই নিজের specialist-দের importlib দিয়ে load করে চালায় (Chief→manager pattern-ই) — engine/section-এর পুরনো worker-দের plan-draft behavior অপরিবর্তিত, Chief-এর DEPARTMENT_ROUTING অপরিবর্তিত। Registry: ৬৯ entry — EXISTING ৬৫ (২২ role-entry + ৪৩ specialist = ৬৫ role-entry, ৬৪ distinct worker), ROLE-ONLY ০, GAP ৪ (Ad Campaign — $0 cap; CRM Integration — CRM live নয়; Expense Tracking — $0 spend; Backup & Recovery — backup system নেই) — GAP ৪-এর কোনো worker/skill বানানো হয়নি। নতুন check script scripts/check_specialists.py — ৪১/৪১ PASS (৪৩ load + ৪৩ draft-run + ৪৩ gated PENDING + ৮ manager route + ৮ manager gated + GAP + registry + stale-claim grep + forbidden terms + real store + পুরনো check 138/138 + check_departments 21/21)। Dept 02-র ৪ worker file snake_case-এ rename + ৬৮ stale-claim fix (manager .py/skill/SECTION.md — "কোনো worker execute করে না" → scoped সত্য: manager নতুন specialist চালায়, পুরনো engine/section worker চালায় না)। PUSHED 2026-11-20 ~00:21–01:19, head aab7dc03 (Boss-এর "push koro"-তে, 117 file, 12 batch)।
+- **Phase 9 — Connections:** ✅ BUILT 2026-11-20 (taskboard + MCP + live-ready tools): taskboard (`dashboards/taskboard.html` + `scripts/taskboard_server.py`, port 8766, `store/tasks.json` live queue — ১টা research task POST করে verify করা হয়েছে, booking link LIVE, status done); MCP wiring (`00-CEO-Core/mcp/` — stdio server + client, শুধু ৭ mock tool, check 9/9); live-ready tools (`00-CEO-Core/live_tools.py` — gmail_send + n8n_trigger, CODE ONLY, gated, কখনো execute নয়; `tools.json` এখন ৯ tool; check 7/7)। Store এখন live queue — "store খালি" আর invariant নয় (১২ check script-এ snapshot-compare)। মোট 215/215 PASS।
+- **Phase 10 — Live Brain:** ✅ BUILT 2026-11-20 (adapter only — body ছোঁয়া হয়নি): `00-CEO-Core/live_brain.py` (LiveBrainAdapter — vendored MetaSparkProvider wrap, live fail হলে LOUD mock fallback, retry নেই) + `scripts/check_live_brain.py` (10 check, `--live` probe default OFF)। LIVE PROBE 2026-11-20 ~21:45 — FAILED (tunnel 403, api.meta.ai unreachable, $0, key validity UNPROVEN; adapter ঠিকমতো fallback দিয়েছে)। সিদ্ধান্ত: brain **mock**-ই আছে, config phase 9 / v0.9.0 অপরিবর্তিত, retry নয় — live proof Boss-এর PC network-এ। মোট 225/225 PASS।
+- **Phase 11 — LLM Providers:** ✅ BUILT 2026-11-20 (৭ provider, একই interface): `01-Agency-Department/engine/workers/src/live/`-এ ৬ নতুন file — openai (ChatGPT gpt-4o), anthropic (Claude claude-sonnet-4-5), gemini (gemini-2.5-flash), kimi (Moonshot kimi-k2.5), grok (xAI grok-4), openrouter (`openrouter/free` auto-route) — MetaSparkProvider-এর পাশে; `live_brain.py`-তে provider chain (fallback_chain: openrouter → meta → mock); config-এ `providers` section + `PROVIDERS-SETUP-BANGLA.md` guide (key শুধু Windows env var-এ, কখনো file-এ নয়)। কোনো key দেওয়া হয়নি — brain live করতে Boss-এর key + "live" flip + probe লাগবে। Check: `scripts/check_providers.py` **43/43 PASS**; মোট **268/268 PASS**।
+- **GAP worker build (2026-11-21):** Phase 3-এর ৪ GAP role-এর worker `.py` + skill বানানো হয়েছে (Ad Campaign, CRM Integration, Expense Tracking, Backup & Recovery) — registry এখন **69 EXISTING / 0 GAP**; specialists 43 → 47। Phase 3 bullet-এর "GAP ৪-এর কোনো worker/skill বানানো হয়নি" লাইনটা Phase 3-এর সময়ের (2026-11-19) সত্য — এখন আর নয়।
 - **Old system delete + নতুন bridge (2026-11-20):** পুরনো `ceo-office-dashboard` artifact + `ceo-office-bridge` cron Boss-এর order-এ FULLY DELETE (backup `~/workspace/backups/ceo-office-dashboard-state-2026-11-20.json`); dashboard এখন একটাই — Talvenor Master OS 3D Dashboard (artifact `talvenor-master-os-3d-dashboard`)। নতুন bridge cron `master-os-3d-bridge` (প্রতি ১০ মিনিট) repo-র `store/tasks.json` queue পড়ে, আসল কাজ করে (সর্বোচ্চ ২/run, draft/result only — send/publish/spend/delete নয়), `dashboards/status.json` regenerate করে। Gate 0-র অবস্থা এখন chat-এ Elora-কে বললেই record হয় (dashboard-এ record করার পথ আর নেই)।
 
 ## Office চালানো (Phase 6 runner)
@@ -189,3 +210,51 @@ python3 ~/workspace/talvenor-master-os/scripts/check_phase4.py
 sync চালালে `dashboards/status.html` আবার আসল ফাইল থেকে বানানো হয় —
 হাতে সংখ্যা বদলালে sync-এ ফিরে যাবে। কোনো মান না পেলে "unknown"
 লেখে, বানায় না।
+
+## Taskboard + Skill-finder + Live-brain probe চালানো
+
+### Taskboard (Phase 9 — local queue board)
+
+```bash
+python scripts\taskboard_server.py   # Windows; Linux-এ python3
+# খুলুন: http://localhost:8766/
+```
+
+- Board শুধু `store/tasks.json`-এ task লেখে (queued) — কাজ করে bridge cron
+  (প্রতি ১০ মিনিট, সর্বোচ্চ ২/run, draft/result only)। বিস্তারিত:
+  `dashboards/TASKBOARD-README.md`। `run_local.bat` taskboard চালায় না —
+  আলাদা command-এ চালাতে হয়।
+
+### Skill-finder (2026-11-21 — নতুন skill খোঁজা)
+
+```bash
+python scripts\run_office.py --business agency --task find_skill --input "{\"query\": \"backup\"}"
+```
+
+- Main CEO Bot-এর task type `find_skill`: প্রথমে local registry খোঁজে,
+  না পেলে DRAFT proposal বানায় (`store/skill-proposals.json` — এখনো file
+  নেই, proposal এলে বানানো হবে); upstream clone/adapt শুধু Boss-এর
+  "ok"-তে, কখনো copy-paste নয়। Skill: `skills/skill-finder.md`; code:
+  `00-CEO-Core/skill_finder.py`।
+
+### Live-brain probe (Phase 10 — শুধু Boss-এর কথায়)
+
+```bash
+python3 scripts/check_live_brain.py --live
+```
+
+- Default mock-mode — কোনো live call নয়। `--live` একটাই probe চালায়;
+  2026-11-20-এর probe FAILED (tunnel 403, api.meta.ai unreachable, $0,
+  key UNPROVEN)। এই VM থেকে আর retry নয় — live proof Boss-এর PC network-এ।
+
+## Improvement Phases 1–3 — Nod Gate + Memory/Ledger + Quiet Schedules (2026-11-21)
+
+Boss-এর order (2026-11-21 voice call): already-built ~50%-এর বাকিটা live brain ছাড়া, $0-এ, local-এ complete করো। Mira-shift / API-voice idea বাদ। Pattern: n8n Nod-এর RE (trust.ts / approvals.ts / memory.ts / ledger.ts / schedules.ts)।
+
+- **Phase 1 — Trust gate as code** (`00-CEO-Core/trust_gate.py`): rule-based `trust_check()` — read/draft free; gated কাজে Boss-এর quote verify (verbatim) + coverage (gate word + material target); standing deny: spend cap $0-এর বেশি, dental/medical hard DQ; email PAUSED deny নয় — PENDING approval-ই restart-এর পথ। `ConfirmationStore` — run-once confirmation, ApprovalGateway-এর সাথে wired; fail -> UNCERTAIN, কখনো re-run নয়। Dispatcher (`tool_calling.py`)-এ trust pre-check: deny হলে `blocked-trust`, approval-ও রেকর্ড হয় না। Check: `scripts/check_gate.py` **24/24 PASS**।
+- **Phase 2 — Owner memory + usage ledger** (`00-CEO-Core/owner_memory.py`, `usage_ledger.py`): memory শুধু Boss-এর নিজের message থেকে শেখে, প্রতিটা entry-তে verbatim quote + source (256 KiB cap); seed ৩টা — Mira নাম, বাংলায় উত্তর, gate words (`store/memory.json` + `store/MEMORY.md`)। Ledger: $0 cap এখন measurement — mock সবসময় $0.00, যেকোনো live খরচেই task check-in + monthly cap trip। Dispatcher-এ ledger threading (opt-in `ledger_path`)। Check: `scripts/check_memory_ledger.py` **19/19 PASS**।
+- **Phase 3 — Quiet schedules** (`00-CEO-Core/quiet_schedules.py`): watchMarker (state hash) — state না বদলালে run skip, quiet; একসাথে একটাই run; correction শুধু বলা field বদলায়; failed work-এ marker আগেরটাই থাকে। Seed schedule `taskboard-queue-watch` (paused — কোনো runner attach করা হয়নি)। Check: `scripts/check_quiet_schedules.py` **15/15 PASS**।
+- **Memory system LIVE** (`00-CEO-Core/owner_memory.py` + `MEMORY-STRUCTURE-DECISION-2026-11-21.md`): structure merit-এ decide করা — একটাই central store + ভেতরে box (shared Boss-কথা + per-agent box); CEO route + Chief handle প্রত্যেক task-এ memory পড়ে; Boss-এর কথা quote-verify দিয়ে শেখা হয়, ভুলে যাওয়া শুধু gate-এর অনুমোদনে ("go"); maintenance (stale archive + dedupe) + proposal validation (auto-write নয়)। Check: `00-CEO-Core/check_drawer_memory.py` **26/26 PASS**। Brain এখনো mock।
+- **মোট হিসাব:** Improvement 1–3 = 24 + 19 + 15 = **58 check**; Memory LIVE check 26/26 আলাদা suite। পুরো suite **326/326 PASS** (199 base + 69 নতুন + 58 improvement — গণনা উপরে "সত্য অবস্থা"-তে)।
+
+Brain এখনো **mock**। Phase 4 team factory live brain ছাড়া blocked। Phase 1–3-এর বেশিরভাগ file এখনো LOCAL only (memory batch-এ trust_gate.py + owner_memory.py যাচ্ছে) — push শুধু Boss-এর "push koro"-তে।
