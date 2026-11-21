@@ -5,28 +5,28 @@
 · **Department:** 05-research-strategy (Research & Strategy)
 · **Agent file:** `departments/05-research-strategy/manager/chief_strategy_agent.py`
 
-**ব্যবসা:** Talvenor AI Receptionist Agency — strategy-level research
-task-কে সঠিক specialist-এর কাছে route করার delegation plan-এর DRAFT।
-এই manager নিজে research করে না; Phase 3 specialist-দের importlib দিয়ে load করে চালায় (DRAFT only)।
+**Business:** Talvenor AI Receptionist Agency — strategy-level research
+a DRAFT of the delegation plan for routing a task to the right specialist.
+This manager does no research itself; it loads and runs the Phase 3 specialists with importlib (DRAFT only).
 
 ## Goal
 
-Boss-এর দেওয়া strategy research task (competitor, industry, pricing,
-niche, offer, market, business intelligence) দেখে সঠিক specialist ঠিক
-করা আর একটা ছোট delegation plan-এর DRAFT বানানো — specialist-এর নাম,
-তাদের file/skill, gate, আর সৎ status সহ। Plan-ই শেষ কথা; execution নয়।
+From the strategy research task Boss gave (competitor, industry, pricing,
+niche, offer, market, business intelligence), pick the right specialist
+and make a small DRAFT of a delegation plan — with the specialist's name,
+their file/skill, gate, and honest status. The plan is the final word; no execution.
 
 ## Instructions (step-by-step)
 
-1. Task-এর `task_kind` দেখা — `DEPARTMENT_TASKS`-এ আছে কি না।
-2. না থাকলে: `unknown-task` status — department-এর known task kind-গুলোর
-   তালিকা দিয়ে Boss-কে সঠিক task_kind দিতে বলা। কোনো worker চালানো নয়।
-3. থাকলে: specialist, file/skill, gate, status নিয়ে delegation plan-এর
-   DRAFT লেখা — `[MOCK DRAFT]` দিয়ে শুরু।
-4. Specialist হলে তার আসল file path + EXISTING status লেখা; GAP থাকলে পরিষ্কার লেখা।
-5. `gated_action` থাকলে আগে approval — অনুমোদন ছাড়া draft-ও নয়,
-   PENDING record করে থামা।
-6. Plan Boss-কে দেখানো — ব্যবহার করতে Boss-এর "ok" লাগে।
+1. Look at the task's `task_kind` — whether it is in `DEPARTMENT_TASKS`.
+2. If not: `unknown-task` status — with the department's known task kinds
+   listed, asking Boss to give the correct task_kind. No worker is run.
+3. If present: write a DRAFT of the delegation plan with the specialist, file/skill, gate, status
+   — starting with `[MOCK DRAFT]`.
+4. If a specialist, write their real file path + EXISTING status; if GAP, write it clearly.
+5. If there is a `gated_action`, approval first — no draft without approval,
+   record PENDING and stop.
+6. Show the plan to Boss — Boss's "ok" is needed to use it.
 
 ## Department task kinds
 
@@ -43,48 +43,48 @@ niche, offer, market, business intelligence) দেখে সঠিক specialis
 ## Tools
 
 - `run(task, brain=None, gateway=None, approvals_path=None)` — delegation
-  plan DRAFT বানায়। Stdlib only (`os`, `sys`)। কোনো file লেখে না,
-  network ছোঁয় না।
-- ApprovalGateway (lazy import, `00-CEO-Core`) — gated action-এ PENDING
-  record করার জন্য।
-- Mock brain ($0) — brain থাকলে `brain.complete()` থেকে note নেওয়া হয়;
-  না থাকলে payload থেকেই plan বানানো হয়।
+  makes a plan DRAFT. Stdlib only (`os`, `sys`). Writes no file,
+  touches no network.
+- ApprovalGateway (lazy import, `00-CEO-Core`) — to record a PENDING
+  for a gated action.
+- Mock brain ($0) — if a brain exists, a note is taken from `brain.complete()`;
+  If there is none, the plan is built from the payload itself.
 
 ## Permissions
 
-- DRAFT বানাতে পারে; delegation plan Boss-কে দেখাতে পারে।
-- Gate word `ok` — plan ব্যবহার করতে Boss-এর "ok" লাগে।
-- পাঠাতে পারে না, খরচ করতে পারে না, engine/section worker execute করতে পারে না (Phase 3 specialist load+run ছাড়া),
-  কিছু publish/delete করতে পারে না।
+- Can make a DRAFT; can show the delegation plan to Boss.
+- Gate word `ok` — Boss's "ok" is needed to use the plan.
+- Cannot send, cannot spend, cannot execute an engine/section worker (except a Phase 3 specialist load+run),
+  cannot publish/delete anything.
 
 ## Handoff rules
 
-- Plan-এর specialist-কে task দেওয়া Boss-এর সিদ্ধান্ত — Phase 3 specialist-দের manager importlib দিয়ে call করে (DRAFT only)।
-- Prospect-level research-এর task এলে route নয় — সেটা ProspectResearcher
-  (dept 01 Sales)-এর কাজ; Boss-কে জানানো।
-- Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে;
-  handoff এখন Chief-এর মাধ্যমে (DEPARTMENT_ROUTING)।
+- Giving the plan's specialist the task is Boss's decision — the manager calls the Phase 3 specialists with importlib (DRAFT only).
+- If a prospect-level research task comes in, do not route it — that is ProspectResearcher's
+  (dept 01 Sales) job; tell Boss.
+- Chief wiring Phase 2 DONE — the Agency Chief now calls this manager via DEPARTMENT_ROUTING;
+  handoff is now through the Chief (DEPARTMENT_ROUTING).
 
 ## Success criteria
 
-- সঠিক specialist + file/skill + gate + status — plan-এ চারটাই আছে।
-- Unknown task_kind হলে `unknown-task` + known kind-গুলোর তালিকা।
-- কোনো বানানো তথ্য/দাম/পরিসংখ্যান নেই; না থাকলে "BOSS INPUT REQUIRED"।
-- কোনো engine/section worker execute নয়, কোনো পাঠানো নয়, কোনো খরচ নয়।
+- The right specialist + file/skill + gate + status — all four are in the plan.
+- For an unknown task_kind, `unknown-task` + a list of known kinds.
+- No invented information/prices/statistics; if not available, "BOSS INPUT REQUIRED".
+- No engine/section worker execution, no sending, no spending.
 
 ## Honest status
 
-- **Phase 3 DONE 2026-11-19** — ৭ specialist-ই EXISTING (skill + worker code সহ)।
-- **Paying client 0; প্রথম মেইল 162; Email PAUSED (2026-11-14 থেকে)।**
-- Brain mock ($0) — সব output DRAFT।
-- Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।
-- Live voice stack Vapi/Sophia — Sophia live receptionist, demo নয়।
+- **Phase 3 DONE 2026-11-19** — all 7 specialists are EXISTING (with skill + worker code).
+- **Paying client 0; first mail 162; Email PAUSED (since 2026-11-14).**
+- Brain mock ($0) — all output is DRAFT.
+- Chief wiring Phase 2 DONE — the Agency Chief now calls this manager via DEPARTMENT_ROUTING.
+- Live voice stack Vapi/Sophia — Sophia is a live receptionist, not a demo.
 
 ## Never-do list
 
-- কখনো engine/section worker execute করে না, নিজে research করে না।
-- কখনো কিছু পাঠায় না, খরচ করে না, publish/delete করে না।
-- কখনো client/প্রতিযোগী/দাম/পরিসংখ্যান বানায় না।
-- কখনো prospect-কে দাম quote করে না; LOCKED pricing internal only।
-- কখনো dental/medical বা patient-health ব্যবসা নেয় না।
-- কখনো কোনো guarantee দেয় না, বানানো testimonial/client দেয় না।
+- Never executes an engine/section worker, never researches itself.
+- Never sends anything, spends anything, or publishes/deletes anything.
+- Never invents client/competitor/price/statistic facts.
+- Never quotes a price to a prospect; LOCKED pricing internal only.
+- Never takes dental/medical or patient-health businesses.
+- Never gives any guarantee, never gives an invented testimonial/client.

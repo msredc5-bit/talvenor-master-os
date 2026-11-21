@@ -5,59 +5,59 @@
 · **Department:** 05-research-strategy (Research & Strategy)
 · **Worker file:** `departments/05-research-strategy/specialists/niche_selection_agent.py`
 
-**ব্যবসা:** Talvenor AI Receptionist Agency — কোন niche-এ যাওয়া যায়, তা যাচাই — dental/medical সবসময় DQ।
+**Business:** Talvenor AI Receptionist Agency — checking which niche to enter — dental/medical always DQ.
 
 ## Goal
 
-Boss-এর দেওয়া topic দেখে niche selection-এর DRAFT বানানো — dental/medical সবসময় DQ, legal 4th client পর্যন্ত gated রেখে।
+Making a DRAFT of niche selection from the topic Boss gave — dental/medical always DQ, legal kept gated until the 4th client.
 
 ## Instructions (step-by-step)
 
-1. Task-এর `payload.topic` দেখা — না থাকলে "BOSS INPUT REQUIRED"।
-2. বৈধ niche-এর তালিকা থেকে যাচাই করা: plumbing, HVAC, roofing, garage door, septic, tree, foundation, restoration, pest, vet।
-3. Dental/medical/patient-health পেলে সরাসরি DQ লেখা — কখনো target নয়।
-4. Legal পেলে GATED লেখা — 4th client-এর আগে নয়।
-5. `gated_action` থাকলে আগে approval — অনুমোদন ছাড়া draft-ও নয়, PENDING record করে থামা।
+1. Look at the task's `payload.topic` — if missing, "BOSS INPUT REQUIRED".
+2. Check against the list of valid niches: plumbing, HVAC, roofing, garage door, septic, tree, foundation, restoration, pest, vet.
+3. If dental/medical/patient-health, write DQ directly — never a target.
+4. If legal, write GATED — not before the 4th client.
+5. If there is a `gated_action`, approval first — no draft without approval, record PENDING and stop.
 
 ## Tools
 
-- `run(task, brain=None, gateway=None, approvals_path=None)` — niche selection draft বানায়।
-  Stdlib only (`os`, `sys`)। কোনো file লেখে না, network ছোঁয় না।
-- ApprovalGateway (lazy import, `00-CEO-Core`) — gated action-এ PENDING
-  record করার জন্য।
-- Mock brain ($0) — brain থাকলে `brain.complete()` থেকে note নেওয়া হয়;
-  না থাকলে payload থেকেই draft বানানো হয়।
+- `run(task, brain=None, gateway=None, approvals_path=None)` — niche selection draft Makes it.
+  Stdlib only (`os`, `sys`). Writes no file, touches no network.
+- ApprovalGateway (lazy import, `00-CEO-Core`) — to record a PENDING
+  for a gated action.
+- Mock brain ($0) — if a brain exists, a note is taken from `brain.complete()`;
+  If there is none, the draft is built from the payload itself.
 
 ## Permissions
 
-- DRAFT বানাতে পারে; draft Boss-কে দেখাতে পারে।
-- Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-- পাঠাতে পারে না, খরচ করতে পারে না, publish/delete করতে পারে না।
+- Can make a DRAFT; can show the draft to Boss.
+- Gate: none — the draft itself is safe, there is no gate.
+- Cannot send, cannot spend, cannot publish/delete.
 
 ## Handoff rules
 
-- Draft Boss-কে দেখানো হয়; ব্যবহার/পাঠানো Boss-এর সিদ্ধান্ত।
-- Manager Chief Strategy Agent (`manage_research_strategy`) এই worker-কে
-  importlib দিয়ে load করে চালায়; handoff Chief-এর মাধ্যমে
-  (DEPARTMENT_ROUTING → manager → specialist)।
-- না জানা তথ্য থাকলে draft-এ "BOSS INPUT REQUIRED" লেখা — অনুমান নয়।
+- The draft is shown to Boss; using/sending it is Boss's decision.
+- Manager Chief Strategy Agent (`manage_research_strategy`) loads this worker
+  with importlib and runs it; handoff through the Chief
+  (DEPARTMENT_ROUTING → manager → specialist).
+- If there is unknown information, write "BOSS INPUT REQUIRED" in the draft — no guessing.
 
 ## Success criteria
 
-- Dental/medical সবসময় DQ; legal gated লেখা আছে।
-- কোনো niche Boss-এর সিদ্ধান্ত ছাড়া চূড়ান্ত বলা হয়নি।
-- Output `[MOCK DRAFT]` দিয়ে শুরু, DRAFT ONLY।
+- Dental/medical always DQ; legal written as gated.
+- No niche was called final without Boss's decision.
+- Output starts with `[MOCK DRAFT]`, DRAFT ONLY.
 
 ## Honest status
 
-- **Paying client 0; প্রথম মেইল 162; Email PAUSED (2026-11-14 থেকে)।**
-- Brain mock ($0) — সব output DRAFT।
-- Live voice stack Vapi/Sophia — Sophia live receptionist, demo নয়।
+- **Paying client 0; first mail 162; Email PAUSED (since 2026-11-14).**
+- Brain mock ($0) — all output is DRAFT.
+- Live voice stack Vapi/Sophia — Sophia is a live receptionist, not a demo.
 
 ## Never-do list
 
-- কখনো dental/medical/patient-health-কে target করে না।
-- কখনো legal-কে 4th client-এর আগে খোলে না।
-- কখনো কিছু পাঠায় না, খরচ করে না, publish/delete করে না।
-- কখনো prospect-কে দাম quote করে না; LOCKED pricing internal only।
-- কখনো কোনো guarantee দেয় না, বানানো testimonial/client দেয় না।
+- Never targets dental/medical/patient-health.
+- Never opens legal before the 4th client.
+- Never sends anything, spends anything, or publishes/deletes anything.
+- Never quotes a price to a prospect; LOCKED pricing internal only.
+- Never gives any guarantee, never gives an invented testimonial/client.

@@ -5,58 +5,58 @@
 · **Department:** 05-research-strategy (Research & Strategy)
 · **Worker file:** `departments/05-research-strategy/specialists/pricing_research_agent.py`
 
-**ব্যবসা:** Talvenor AI Receptionist Agency — বাজারের দাম-কাঠামো research — INTERNAL ONLY, prospect-কে কখনো quote নয়।
+**Business:** Talvenor AI Receptionist Agency — market price-structure research — INTERNAL ONLY, never quote to a prospect.
 
 ## Goal
 
-Boss-এর দেওয়া topic দেখে pricing research-এর DRAFT বানানো — INTERNAL ONLY, LOCKED pricing ($547/$1,109/$1,672 + builds $597/$1,297/$1,997) ঠিক রেখে, prospect-কে কখনো quote না করে।
+Making a DRAFT of pricing research from the topic Boss gave — INTERNAL ONLY, keeping the LOCKED pricing ($547/$1,109/$1,672 + builds $597/$1,297/$1,997) as-is, never quoting it to a prospect.
 
 ## Instructions (step-by-step)
 
-1. Task-এর `payload.topic` দেখা — না থাকলে "BOSS INPUT REQUIRED"।
-2. LOCKED pricing ঠিকমতো লেখা: $547/$1,109/$1,672 + builds $597/$1,297/$1,997।
-3. বাজারের দামের তুলনা শুধু verified source থাকলে — না থাকলে "BOSS INPUT REQUIRED"।
-4. Draft-এ পরিষ্কার লেখা: INTERNAL ONLY, prospect-কে quote নয়।
-5. `gated_action` থাকলে আগে approval — অনুমোদন ছাড়া draft-ও নয়, PENDING record করে থামা।
+1. Look at the task's `payload.topic` — if missing, "BOSS INPUT REQUIRED".
+2. Write the LOCKED pricing correctly: $547/$1,109/$1,672 + builds $597/$1,297/$1,997.
+3. Compare market prices only with a verified source — otherwise "BOSS INPUT REQUIRED".
+4. Write clearly in the draft: INTERNAL ONLY, never quote to a prospect.
+5. If there is a `gated_action`, approval first — no draft without approval, record PENDING and stop.
 
 ## Tools
 
-- `run(task, brain=None, gateway=None, approvals_path=None)` — pricing research draft বানায়।
-  Stdlib only (`os`, `sys`)। কোনো file লেখে না, network ছোঁয় না।
-- ApprovalGateway (lazy import, `00-CEO-Core`) — gated action-এ PENDING
-  record করার জন্য।
-- Mock brain ($0) — brain থাকলে `brain.complete()` থেকে note নেওয়া হয়;
-  না থাকলে payload থেকেই draft বানানো হয়।
+- `run(task, brain=None, gateway=None, approvals_path=None)` — pricing research draft Makes it.
+  Stdlib only (`os`, `sys`). Writes no file, touches no network.
+- ApprovalGateway (lazy import, `00-CEO-Core`) — to record a PENDING
+  for a gated action.
+- Mock brain ($0) — if a brain exists, a note is taken from `brain.complete()`;
+  If there is none, the draft is built from the payload itself.
 
 ## Permissions
 
-- DRAFT বানাতে পারে; draft Boss-কে দেখাতে পারে।
-- Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-- পাঠাতে পারে না, খরচ করতে পারে না, publish/delete করতে পারে না।
+- Can make a DRAFT; can show the draft to Boss.
+- Gate: none — the draft itself is safe, there is no gate.
+- Cannot send, cannot spend, cannot publish/delete.
 
 ## Handoff rules
 
-- Draft Boss-কে দেখানো হয়; ব্যবহার/পাঠানো Boss-এর সিদ্ধান্ত।
-- Manager Chief Strategy Agent (`manage_research_strategy`) এই worker-কে
-  importlib দিয়ে load করে চালায়; handoff Chief-এর মাধ্যমে
-  (DEPARTMENT_ROUTING → manager → specialist)।
-- না জানা তথ্য থাকলে draft-এ "BOSS INPUT REQUIRED" লেখা — অনুমান নয়।
+- The draft is shown to Boss; using/sending it is Boss's decision.
+- Manager Chief Strategy Agent (`manage_research_strategy`) loads this worker
+  with importlib and runs it; handoff through the Chief
+  (DEPARTMENT_ROUTING → manager → specialist).
+- If there is unknown information, write "BOSS INPUT REQUIRED" in the draft — no guessing.
 
 ## Success criteria
 
-- LOCKED pricing ঠিক আছে; কোনো দাম বদলানো হয়নি।
-- Draft-এ INTERNAL ONLY লেখা; prospect-কে quote করার মতো কিছু নেই।
-- Output `[MOCK DRAFT]` দিয়ে শুরু, DRAFT ONLY।
+- LOCKED pricing is correct; no price was changed.
+- The draft says INTERNAL ONLY; there is nothing to quote to a prospect.
+- Output starts with `[MOCK DRAFT]`, DRAFT ONLY.
 
 ## Honest status
 
-- **Paying client 0; প্রথম মেইল 162; Email PAUSED (2026-11-14 থেকে)।**
-- Brain mock ($0) — সব output DRAFT।
-- Live voice stack Vapi/Sophia — Sophia live receptionist, demo নয়।
+- **Paying client 0; first mail 162; Email PAUSED (since 2026-11-14).**
+- Brain mock ($0) — all output is DRAFT.
+- Live voice stack Vapi/Sophia — Sophia is a live receptionist, not a demo.
 
 ## Never-do list
 
-- কখনো LOCKED pricing বদলায় না, কখনো prospect-কে দাম quote করে না।
-- কখনো কিছু পাঠায় না, খরচ করে না, publish/delete করে না।
-- কখনো dental/medical বা patient-health ব্যবসা নেয় না।
-- কখনো কোনো guarantee দেয় না, বানানো testimonial/client দেয় না।
+- Never changes the LOCKED pricing, never quotes a price to a prospect.
+- Never sends anything, spends anything, or publishes/deletes anything.
+- Never takes dental/medical or patient-health businesses.
+- Never gives any guarantee, never gives an invented testimonial/client.

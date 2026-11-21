@@ -1,20 +1,20 @@
 """Chief Strategy Agent — research & strategy department manager (Phase 1).
 
-ভূমিকা (role): 05-research-strategy department-এর manager — strategy-level
-research task এলে কোন specialist-এর কাজ, তা ঠিক করে specialist-কে
-load করে তার DRAFT ফেরত দেওয়া। নিজে কোনো research করে না।
-Gate: ok — manager-এর output ব্যবহার করতে Boss-এর "ok" লাগে।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
-Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।
-Phase 3 DONE (2026-11-19) — ৭ specialist-ই EXISTING, manager এখন
-importlib দিয়ে specialist load করে চালায়।
+Role: manager of the 05-research-strategy department — strategy-level
+when a research task comes in, decide which specialist's job it is and
+load the specialist and return their DRAFT. It does no research itself.
+Gate: ok — Boss's "ok" is needed to use the manager's output.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
+Chief wiring Phase 2 DONE — the Agency Chief now calls this manager via DEPARTMENT_ROUTING.
+Phase 3 DONE (2026-11-19) — all 7 specialists are EXISTING, the manager now
+loads and runs the specialist with importlib.
 
-এই department-এ ৭ specialist EXISTING — competitor, industry, pricing,
-niche, offer, market opportunity, business intelligence।
-Prospect-level research করে ProspectResearcher (dept 01 Sales)।
-এই manager কখনো করে না: কিছু পাঠায় না, খরচ করে না, client-এর
-তথ্য/দাম/পরিসংখ্যান বানায় না, কোনো guarantee দেয় না, dental/medical
-বা patient-health ব্যবসা নেয় না।
+This department has 7 EXISTING specialists — competitor, industry, pricing,
+niche, offer, market opportunity, business intelligence.
+ProspectResearcher (dept 01 Sales) does prospect-level research.
+This manager never: sends anything, spends anything, invents client
+information/prices/statistics, gives no guarantee, dental/medical
+or patient-health businesses.
 """
 
 import importlib.util
@@ -27,9 +27,9 @@ TALVENOR_PHONE = "+1 (947) 223-0244"
 _GATE_ACTION_MAP = {"post it": "publish", "upload it": "publish"}
 _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
-# Department task kinds — ৭টাই EXISTING (Phase 3, 2026-11-19):
-# প্রতিটার worker + skill ফাইল disk-এ আছে; manager importlib দিয়ে
-# specialist load করে চালায়। Gate: none — specialist draft নিজেই নিরাপদ।
+# Department task kinds — all 7 EXISTING (Phase 3, 2026-11-19):
+# Each one's worker + skill file is on disk; the manager loads
+# and runs the specialist with importlib. Gate: none — a specialist draft is safe on its own.
 DEPARTMENT_TASKS = {
     "competitor_research": {
         "specialist": "Competitor Research Agent",
@@ -84,7 +84,7 @@ DEPARTMENT_TASKS = {
 
 
 class ChiefStrategyAgent:
-    """Strategy research task specialist-এর কাছে delegate করে তার DRAFT ফেরত দেয়।"""
+    """Delegates a strategy research task to a specialist and returns their DRAFT."""
 
     task_kind = "manage_research_strategy"
     gate = "ok"
@@ -92,7 +92,7 @@ class ChiefStrategyAgent:
     role = "Chief Strategy Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -104,7 +104,7 @@ class ChiefStrategyAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -140,7 +140,7 @@ class ChiefStrategyAgent:
         )
 
     def _load_specialist(self, entry):
-        """Specialist worker importlib দিয়ে load করা — Chief-এর loader-এর মতো।"""
+        """Specialist worker loaded with importlib — like the Chief's loader."""
         here = os.path.dirname(os.path.abspath(__file__))
         dept_dir = os.path.normpath(os.path.join(here, ".."))
         rel = entry["file"].split("departments/05-research-strategy/", 1)[-1]
@@ -152,14 +152,14 @@ class ChiefStrategyAgent:
         return getattr(mod, entry["class"])()
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Specialist-কে delegate করে তার DRAFT ফেরত দেওয়া। কোনো file লেখে না, network ছোঁয় না।"""
+        """Delegates to a specialist and returns their DRAFT. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Research & strategy delegation"
         gated_action = task.get("gated_action")
         approval_id = task.get("approval_id")
 
-        # Gated action থাকলে আগে approval — অনুমোদন ছাড়া draft-ও নয়,
-        # PENDING record করে থামা।
+        # If there is a gated action, approval first — no draft without approval,
+        # record PENDING and stop.
         if gated_action:
             gw = gateway if gateway is not None else self._gateway(approvals_path)
             approved = False
@@ -181,8 +181,8 @@ class ChiefStrategyAgent:
         task_kind = task.get("task_kind") or self.task_kind
         entry = DEPARTMENT_TASKS.get(task_kind)
 
-        # Overview — task_kind না থাকলে (manager-এর নিজের kind) ৭ specialist-এর
-        # তালিকা সহ overview draft (dept 01-এর pattern)।
+        # Overview — if there is no task_kind (the manager's own kind), an overview draft with the 7 specialists'
+        # list (dept 01's pattern).
         if task_kind == self.task_kind:
             if brain is not None:
                 try:
@@ -203,9 +203,9 @@ class ChiefStrategyAgent:
                     f"gate: {e['gate'] or 'none'} | {e['status']}"
                 )
             lines.append(
-                "Note: সব specialist DRAFT ONLY — mock brain ($0)। "
-                "Pricing research INTERNAL ONLY; dental/medical সবসময় DQ; "
-                "legal 4th client পর্যন্ত gated। Email PAUSED since 2026-11-14."
+                "Note: all specialists are DRAFT ONLY — mock brain ($0). "
+                "Pricing research INTERNAL ONLY; dental/medical always DQ; "
+                "legal gated until the 4th client. Email PAUSED since 2026-11-14."
             )
             lines.append(f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}")
             lines.append(f"Brain note: {brain_text}")
@@ -213,9 +213,9 @@ class ChiefStrategyAgent:
                 "status": "draft-ready",
                 "output": "\n".join(lines),
                 "notes": (
-                    "DRAFT ONLY — mock brain ($0). Overview, কোনো specialist "
-                    "execute নয়। Chief wiring Phase 2 DONE — Agency Chief এখন "
-                    "এই manager-কে DEPARTMENT_ROUTING দিয়ে ডাকে।"
+                    "DRAFT ONLY — mock brain ($0). Overview, no specialist "
+                    "execution. Chief wiring Phase 2 DONE — the Agency Chief now "
+                    "calls this manager with DEPARTMENT_ROUTING."
                 ),
                 "draft_only": True,
                 "mock_brain": True,
@@ -229,13 +229,13 @@ class ChiefStrategyAgent:
                 f"Department: {self.department} | Manager: {self.role}\n"
                 f"Unknown task_kind: {task_kind or 'BOSS INPUT REQUIRED'}\n"
                 f"Known task kinds in this department: {kinds}\n"
-                "No worker was executed. সঠিক task_kind Boss-কে দিতে হবে।\n"
+                "No worker was executed. The correct task_kind must be given to Boss.\n"
                 f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}"
             )
             notes = (
                 "DRAFT ONLY — mock brain ($0). Unknown task_kind — delegation "
-                "হয়নি, কোনো worker চালানো হয়নি। Chief wiring Phase 2 DONE — "
-                "এই manager-কে এখন DEPARTMENT_ROUTING দিয়ে Agency Chief ডাকে।"
+                "did not happen, no worker was run. Chief wiring Phase 2 DONE — "
+                "the Agency Chief now calls this manager via DEPARTMENT_ROUTING."
             )
             return {
                 "status": "unknown-task",
@@ -246,13 +246,13 @@ class ChiefStrategyAgent:
                 "gate": self.gate,
             }
 
-        # EXISTING specialist — importlib দিয়ে load করে চালানো, তার result ফেরত।
+        # EXISTING specialist — load and run with importlib, return its result.
         if entry["status"] == "EXISTING" and entry["file"].endswith(".py"):
             specialist = self._load_specialist(entry)
             return specialist.run(task, brain=brain, gateway=gateway,
                                   approvals_path=approvals_path)
 
-        # Fallback — file না থাকলে পুরনো delegation plan draft (unchanged behavior)।
+        # Fallback — if the file is missing, the old delegation plan draft (unchanged behavior).
         if brain is not None:
             try:
                 brain_text = brain.complete(self._prompt(task, entry))
@@ -263,9 +263,9 @@ class ChiefStrategyAgent:
 
         gate = entry["gate"]
         gate_line = (
-            f"Gate: {gate} — Boss-এর \"{gate}\" লাগবে এই কাজের output ব্যবহার করতে।"
+            f"Gate: {gate} — Boss's \"{gate}\" is needed to use this work's output."
             if gate else
-            "Gate: None — draft নিজেই নিরাপদ, কোনো gate নেই।"
+            "Gate: None — the draft itself is safe, there is no gate."
         )
         output = (
             "[MOCK DRAFT] Delegation plan — DRAFT ONLY\n"
@@ -274,16 +274,16 @@ class ChiefStrategyAgent:
             f"Specialist: {entry['specialist']}\n"
             f"File/skill: {entry['file']}\n"
             f"{gate_line}\n"
-            f"Status: {entry['status']} — specialist file পাওয়া যায়নি, plan only।\n"
-            "Chief wiring Phase 2 DONE — Agency Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে ডাকে।\n"
+            f"Status: {entry['status']} — specialist file not found, plan only.\n"
+            "Chief wiring Phase 2 DONE — the Agency Chief now calls this manager via DEPARTMENT_ROUTING.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Delegation plan, execution নয় — "
-            "specialist file পাওয়া যায়নি। "
-            "Prospect-level research করে ProspectResearcher (dept 01 Sales)। "
-            "Gate: ok।"
+            "DRAFT ONLY — mock brain ($0). Delegation plan, not execution — "
+            "specialist file not found. "
+            "Prospect-level research is done by ProspectResearcher (dept 01 Sales). "
+            "Gate: ok."
         )
         return {
             "status": "draft-ready",

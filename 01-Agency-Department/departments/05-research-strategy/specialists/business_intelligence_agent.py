@@ -1,15 +1,15 @@
 """Business Intelligence Agent — business intelligence draft (Phase 3).
 
-ভূমিকা (role): শুধু আসল সংখ্যা দিয়ে BI সারাংশের DRAFT লেখা — কখনো পাঠায় না।
-Gate: none — draft নিজেই নিরাপদ, কোনো gate নেই।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: write a DRAFT of a BI summary using only real numbers — never send it.
+Gate: none — the draft itself is safe, there is no gate.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-শুধু আসল সংখ্যা: paying client 0, প্রথম মেইল 162, Email PAUSED (2026-11-14 থেকে), revenue $0। কোনো metric বানানো যাবে না।
+Only real numbers: paying client 0, first mail 162, Email PAUSED (since 2026-11-14), revenue $0. No metric may be invented.
 
-এই agent কখনো করে না: কিছু পাঠায় না, publish করে না, খরচ করে না,
-delete করে না, client/প্রতিযোগী/দাম/পরিসংখ্যান বানায় না, কোনো
-guarantee দেয় না, dental/medical বা patient-health ব্যবসা নেয় না।
-Email PAUSED (2026-11-14 থেকে) — draft-ই শেষ কথা।
+This agent never: sends anything, publishes anything, spends anything,
+does not delete, does not invent client/competitor/price/statistic facts,
+gives no guarantee, takes no dental/medical or patient-health business.
+Email PAUSED (since 2026-11-14) — the draft is the final word.
 """
 
 import os
@@ -23,7 +23,7 @@ _GATED_ACTIONS = ("send", "publish", "spend", "delete")
 
 
 class BusinessIntelligenceAgent:
-    """business intelligence draft — DRAFT ONLY, কখনো পাঠায় না।"""
+    """business intelligence draft — DRAFT ONLY, never sends it."""
 
     task_kind = "business_intelligence"
     gate = None
@@ -31,7 +31,7 @@ class BusinessIntelligenceAgent:
     role = "Business Intelligence Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -43,7 +43,7 @@ class BusinessIntelligenceAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -68,7 +68,7 @@ class BusinessIntelligenceAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """business intelligence draft। কোনো file লেখে না, network ছোঁয় না।"""
+        """business intelligence draft. Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Business intelligence draft"
         gated_action = task.get("gated_action")
@@ -106,13 +106,13 @@ class BusinessIntelligenceAgent:
         output = (
             "[MOCK DRAFT] Business intelligence — DRAFT ONLY\n"
             f"Topic: {topic}\n"
-            "Real numbers only (2026-11-19): paying clients 0; first mails 162; email PAUSED since 2026-11-14; revenue $0; spend cap $0.\nLive stack: Vapi/Sophia, +1 (947) 223-0244; booking link 15-min, New York Time.\nAny other metric: BOSS INPUT REQUIRED — আসল সংখ্যা ছাড়া কিছু লেখা হয়নি।\n"
+            "Real numbers only (2026-11-19): paying clients 0; first mails 162; email PAUSED since 2026-11-14; revenue $0; spend cap $0.\nLive stack: Vapi/Sophia, +1 (947) 223-0244; booking link 15-min, New York Time.\nAny other metric: BOSS INPUT REQUIRED — nothing was written without a real number.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). BI draft ONLY, আসল সংখ্যা দিয়ে। কোনো metric বানানো হয়নি। "
-            "কখনো পাঠানো নয়, কোনো খরচ নয়। Gate: none।"
+            "DRAFT ONLY — mock brain ($0). BI draft ONLY, with real numbers. No metric was invented. "
+            "Never sending, never spending. Gate: none."
         )
         return {
             "status": "draft-ready",
