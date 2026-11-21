@@ -1,16 +1,16 @@
 """Jarvis voice loop — Piper TTS + Vosk/sherpa-onnx STT (REAL, offline, $0).
 
-কান (শোনা) + মুখ (বলা) — দুইটাই এই PC-তে, internet ছাড়া, খরচ $0।
+Ears (listening) + mouth (speaking) — both on this PC, no internet, $0 cost.
 
-  - বলা (TTS): Piper — voice id VERIFIED upstream voices.json থেকে।
-  - শোনা (STT): English = Vosk (classic Kaldi model, official list-এ
-    আছে); Bengali = sherpa-onnx (Zipformer2 streaming model — কারণ
-    classic Vosk-এর official list-এ কোনো Bengali model নেই; যেটা আছে
-    সেটা sherpa-onnx/icefall-এর model, vosk.Model() দিয়ে লোড হয় না)।
+  - Speaking (TTS): Piper — voice id VERIFIED from upstream voices.json.
+  - Listening (STT): English = Vosk (classic Kaldi model, on the official list);
+    Bengali = sherpa-onnx (Zipformer2 streaming model — because the classic
+    Vosk official list has no Bengali model; the one that exists is a
+    sherpa-onnx/icefall model and does not load with vosk.Model()).
 
-এই package import করলেই piper/vosk/sherpa লাগে না — ওগুলো function-এর
-ভেতরে lazy import হয়। না থাকলে exact install/download command-সহ
-স্পষ্ট error আসে, চুপচাপ ভান হয় না।
+Importing this package does not require piper/vosk/sherpa — those are
+lazily imported inside the functions. If one is missing, a clear error
+comes with the exact install/download command; nothing silently pretends.
 """
 
 from .speak import VOICE_IDS, speak, speak_to_wav

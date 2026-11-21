@@ -1,43 +1,49 @@
 """Shared Tool-Calling Core — Talvenor Master OS (Phase 5).
 
-এই ফাইলটা কী:
-  Master OS-এর তিনটা department (Agency, Digital Product, Content) —
-  সবাই একই tool-calling নিয়মে চলবে। Tool মানে একটা নাম + কী কী
-  argument লাগবে + সেটা gated কি না + mock / real / stub কি না।
-  Engine wrapper-রা এই ফাইল import করে ToolRegistry বানায়, আর
-  call_tool() দিয়ে tool চালায়।
+What this file is:
+  The Master OS's three departments (Agency, Digital Product, Content) —
+  all run on the same tool-calling rules. A tool means a name + what
+  arguments it needs + whether it is gated + whether it is mock / real / stub.
+  Engine wrappers import this file to build a ToolRegistry, and run tools
+  with call_tool().
 
-Gate নিয়ম (Boss-এর সিদ্ধান্ত, কোডে লেখা):
-  - Gated tool (send / publish / spend / delete) কখনো execute হয় না।
-    call_tool() শুধু ApprovalGateway-এ একটা PENDING approval request
-    লেখে আর থেমে যায়। Approval ID থাকলেও না — gated কাজ Boss নিজে
-    করেন, এই dispatcher শুধু request রেকর্ড করে।
-  - Gate words: ok / "post it" / "upload it" / send / go — Boss-এর
-    সঠিক শব্দ ছাড়া কিছু এগোয় না। Auto-approve-এর কোনো পথ নেই।
-  - খরচের সীমা $0। Paying client 0। Email PAUSED। Gate 0 NOT PASSED।
-    Upload OFF। কোনো বানানো client / সংখ্যা / testimonial / দাম নেই।
-    Dental / medical নয়। Brand শুধু Talvenor।
+Gate rules (Boss's decision, written in code):
+  - A gated tool (send / publish / spend / delete) never executes.
+    call_tool() first runs trust_gate.trust_check() (Improvement
+    Phase 1 — Nod pattern): if a standing rule (spend cap $0, dental/medical
+    DQ) refuses, status is "blocked-trust" — no approval is recorded either.
+    Otherwise it writes one PENDING approval request to the ApprovalGateway and
+    stops. Even with an approval ID — Boss does gated work himself; this
+    dispatcher only records the request. Even when trust says "allow", the gateway
+    is the final authority — nothing moves without Boss's exact gate word.
+  - Gate words: ok / "post it" / "upload it" / send / go — nothing moves without
+    Boss's exact word. There is no auto-approve path.
+  - Gate words: ok / "post it" / "upload it" / send / go — nothing moves without
+    Boss's exact word. There is no auto-approve path.
+  - Spend limit $0. Paying clients 0. Email PAUSED. Gate 0 NOT PASSED.
+    Upload OFF. No invented clients / numbers / testimonials / prices.
+    Not dental / medical. Brand is Talvenor only.
 
-৭টা mock handler (সব DRAFT ONLY — কিছু পাঠানো / পাবলিশ / খরচ হয় না):
+7 mock handlers (all DRAFT ONLY — nothing is sent / published / spent):
   1. draft_email      — cold-email draft (Talvenor brand line + booking link)
-  2. research_notes   — research-notes template, সব field "TO VERIFY"
-  3. draft_caption    — social caption draft, প্রথম লাইন hook
-  4. draft_script     — ছোট ভিডিও script outline (hook, problem, solution, CTA)
-  5. kit_outline_read — আসল kit-outline.md ফাইল পড়ে (বানানো content নয়)
-  6. status_read      — আসল config.json পড়ে (honest status, phase, spend cap)
-  7. booking_reply    — lead-এর নাম দিলে booking link সহ এক লাইনের reply draft
-                        (Boss-এর 2026-11-17 প্রশ্নের উদাহরণ tool — DRAFT ONLY)
+  2. research_notes   — research-notes template, every field "TO VERIFY"
+  3. draft_caption    — social caption draft, first line is the hook
+  4. draft_script     — short video script outline (hook, problem, solution, CTA)
+  5. kit_outline_read — reads the real kit-outline.md file (not invented content)
+  6. status_read      — reads the real config.json (honest status, phase, spend cap)
+  7. booking_reply    — given a lead's name, a one-line reply draft with the booking link
+                        (Boss's 2026-11-17 question's example tool — DRAFT ONLY)
 
-২টা live-ready handler (Phase 9 — live_tools.py, CODE ONLY, gated):
-  8. gmail_send       — hatch_gws_cli দিয়ে আসল মেইল (credential না থাকলে
-                        LOUD DRAFT fallback; dispatcher কখনো handler চালায় না)
-  9. n8n_trigger      — urllib POST দিয়ে n8n webhook (credential না থাকলে
-                        LOUD DRAFT fallback; URL কখনো পুরো print হয় না)
-  live-ready tool-এর status "live-ready" — dispatcher-এ gated intercept-এর
-  পরে কোনো direct execution path নেই (fail-closed)। এই module-এ
-  subprocess / urlopen call নেই — live execution Phase 9-এ নেই।
+2 live-ready handlers (Phase 9 — live_tools.py, CODE ONLY, gated):
+  8. gmail_send       — real mail via hatch_gws_cli (LOUD DRAFT fallback without a
+                        credential; the dispatcher never runs the handler)
+  9. n8n_trigger      — n8n webhook via urllib POST (LOUD DRAFT fallback without a
+                        credential; the URL is never printed in full)
+  A live-ready tool's status is "live-ready" — after the gated intercept in the
+  dispatcher there is no direct execution path (fail-closed). This module has no
+  subprocess / urlopen calls — live execution is not in Phase 9.
 
-ব্যবহার:
+Usage:
   import tool_calling
   registry = tool_calling.ToolRegistry.load_from_json("tools.json")
   result = tool_calling.call_tool("draft_email",
@@ -45,7 +51,7 @@ Gate নিয়ম (Boss-এর সিদ্ধান্ত, কোডে ল�
       registry=registry)
   # result["status"] = "draft-ready" | "pending-approval" | "blocked-stub" | "error"
 
-Stdlib only — কোনো network নেই, কোনো pip নেই।
+Stdlib only — no network, no pip.
 """
 
 import json
@@ -57,6 +63,9 @@ from datetime import datetime, timezone
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from human_approval_gateway import GATED_ACTIONS, ApprovalGateway  # noqa: E402
+from live_tools import LIVE_HANDLERS  # noqa: E402
+from trust_gate import trust_check  # noqa: E402
+from usage_ledger import UsageLedger  # noqa: E402
 
 _MASTER_OS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _STORE_DIR = os.path.join(_MASTER_OS_DIR, "store")
@@ -82,14 +91,14 @@ def _now_iso():
 
 
 # ---------------------------------------------------------------------------
-# Mock handlers — প্রতিটা fn(args, context) -> {"output": str, "notes": [str]}
-# কোনো handler network-এ যায় না, কিছু পাঠায় / পাবলিশ / খরচ করে না।
-# ফাইল পড়া handler (kit_outline_read, status_read) ফাইল না পেলে
-# {"error": ...} ফেরত দেয় — বানানো content কখনো নয়।
+# Mock handlers — each fn(args, context) -> {"output": str, "notes": [str]}
+# No handler goes to the network, nothing sends / publishes / spends.
+# A file-reading handler (kit_outline_read, status_read) returns
+# {"error": ...} if the file is missing — never invented content.
 # ---------------------------------------------------------------------------
 
 def draft_email(args, context=None):
-    """DRAFT cold-email body — Talvenor brand line + booking link, দাম নেই।"""
+    """DRAFT cold-email body — Talvenor brand line + booking link, no price."""
     business = args.get("business_name", "")
     topic = args.get("topic", "")
     output = (
@@ -113,7 +122,7 @@ def draft_email(args, context=None):
 
 
 def research_notes(args, context=None):
-    """DRAFT research-notes template — সব field যাচাই বাকি।"""
+    """DRAFT research-notes template — every field still to verify."""
     business = args.get("business_name", "")
     output = (
         f"Research notes (DRAFT) — {business}\n"
@@ -134,7 +143,7 @@ def research_notes(args, context=None):
 
 
 def draft_caption(args, context=None):
-    """DRAFT social caption — প্রথম লাইন hook।"""
+    """DRAFT social caption — first line is the hook."""
     topic = args.get("topic", "")
     platform = args.get("platform", "")
     output = (
@@ -153,7 +162,7 @@ def draft_caption(args, context=None):
 
 
 def draft_script(args, context=None):
-    """DRAFT short video script outline — hook, problem, solution, CTA।"""
+    """DRAFT short video script outline — hook, problem, solution, CTA."""
     topic = args.get("topic", "")
     duration = args.get("duration_seconds", args.get("duration_sec", ""))
     topic_lower = topic.lower()
@@ -179,20 +188,20 @@ def draft_script(args, context=None):
 
 
 def booking_reply(args, context=None):
-    """Lead-এর নাম দিলে booking link সহ এক লাইনের reply DRAFT।
+    """Given a lead's name, a one-line reply DRAFT with the booking link.
 
-    Boss-এর উদাহরণ tool (2026-11-17, 02:43 Dhaka — "GitHub দিয়ে tool
-    কিভাবে create করে?"): input শুধু lead-এর নাম, output এক লাইন reply
-    + booking link। DRAFT ONLY — কখনো পাঠায় না; পাঠাতে হলে gated
-    send_email tool + Boss-এর exact gate word লাগে। কোনো দাম নেই,
-    কোনো বানানো client / সংখ্যা / testimonial নেই।
+    Boss's example tool (2026-11-17, 02:43 Dhaka — "How do you create a tool
+    with GitHub?"): input is only the lead's name, output is one line of reply
+    + booking link. DRAFT ONLY — never sent; to send it needs the gated
+    send_email tool + Boss's exact gate word. No price,
+    no invented clients / numbers / testimonials.
     """
     lead_name = (args.get("lead_name") or "").strip()
     channel = (args.get("channel") or "email").strip().lower()
     if not lead_name:
         return {
             "output": "",
-            "notes": ["DRAFT ONLY — lead-এর নাম দেওয়া হয়নি।"],
+            "notes": ["DRAFT ONLY — no lead name was given."],
             "error": "booking_reply needs a lead_name.",
         }
     if channel == "instagram":
@@ -213,7 +222,7 @@ def booking_reply(args, context=None):
 
 
 def kit_outline_read(args, context=None):
-    """আসল kit-outline.md ফাইলের প্রথম ~1500 অক্ষর পড়ে। ফাইল না থাকলে error।"""
+    """Reads the first ~1500 characters of the real kit-outline.md file. Error if the file is missing."""
     try:
         with open(KIT_OUTLINE_PATH, "r", encoding="utf-8") as f:
             text = f.read(1500)
@@ -230,7 +239,7 @@ def kit_outline_read(args, context=None):
 
 
 def status_read(args, context=None):
-    """আসল config.json পড়ে honest status + phase + spend cap ফেরত দেয়।"""
+    """Reads the real config.json and returns the honest status + phase + spend cap."""
     try:
         with open(CONFIG_PATH, "r", encoding="utf-8") as f:
             config = json.load(f)
@@ -274,13 +283,13 @@ REQUIRED_TOOL_KEYS = ("name", "description", "params", "gated", "status")
 
 
 class ToolRegistry:
-    """Tool definition-গুলোর রেজিস্ট্রি। Engine wrapper-রা এখান থেকে পড়ে।"""
+    """Registry of tool definitions. Engine wrappers read from here."""
 
     def __init__(self):
         self.tools = {}
 
     def register(self, tool_dict):
-        """একটা tool definition যাচাই করে রেজিস্টার করে। ভুল হলে ValueError।"""
+        """Validates and registers one tool definition. ValueError if wrong."""
         if not isinstance(tool_dict, dict):
             raise ValueError("Tool definition must be a dict.")
         for key in REQUIRED_TOOL_KEYS:
@@ -322,22 +331,33 @@ class ToolRegistry:
                     f"Mock tool {name!r} must have a 'handler' name that exists "
                     f"in HANDLERS. Known: {sorted(HANDLERS)}"
                 )
+        if tool_dict["status"] == "live-ready":
+            # A live-ready handler must be in live_tools.LIVE_HANDLERS —
+            # no live handler gets into the registry under a wrong name.
+            # This is only validation: after the gated intercept in the
+            # dispatcher, a live-ready tool still has no execution path.
+            if not isinstance(handler, str) or handler not in LIVE_HANDLERS:
+                raise ValueError(
+                    f"Live-ready tool {name!r} must have a 'handler' name "
+                    f"that exists in LIVE_HANDLERS. Known: "
+                    f"{sorted(LIVE_HANDLERS)}"
+                )
         self.tools[name] = dict(tool_dict)
         return self.tools[name]
 
     def get(self, name):
-        """নামে tool খোঁজা — না থাকলে KeyError।"""
+        """Find a tool by name — KeyError if absent."""
         if name not in self.tools:
             raise KeyError(f"Unknown tool {name!r}. Known: {sorted(self.tools)}")
         return self.tools[name]
 
     def list_tools(self):
-        """রেজিস্টার করা সব tool definition-এর তালিকা।"""
+        """List of all registered tool definitions."""
         return [dict(tool) for tool in self.tools.values()]
 
     @classmethod
     def load_from_json(cls, path):
-        """tools.json ({"tools": [...]}) পড়ে প্রতিটা tool রেজিস্টার করে।"""
+        """Reads tools.json ({"tools": [...]}) and registers each tool."""
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
         tools = data.get("tools", []) if isinstance(data, dict) else []
@@ -348,8 +368,8 @@ class ToolRegistry:
 
 
 # ---------------------------------------------------------------------------
-# Calls log — প্রতিটা call (error / refusal সহ) append হয়, কখনো overwrite নয়।
-# Log লেখা fail করলে call-এর ফলাফল তবু ফেরত যায়, "log_error" সহ।
+# Calls log — every call (including errors / refusals) is appended, never overwritten.
+# If writing the log fails, the call's result is still returned, with "log_error".
 # ---------------------------------------------------------------------------
 
 def _log_call(record, calls_log_path=None):
@@ -370,7 +390,7 @@ def _log_call(record, calls_log_path=None):
 
 
 def _validate_args(tool, args):
-    """Params schema অনুযায়ী args যাচাই। ভুল হলে error string, ঠিক হলে None।"""
+    """Validate args against the params schema. An error string if wrong, None if right."""
     if not isinstance(args, dict):
         return "Invalid args: args must be a dict."
     params = tool.get("params") or {}
@@ -396,23 +416,28 @@ def _validate_args(tool, args):
 
 
 def call_tool(name, args, context=None, registry=None, approvals_path=None,
-              calls_log_path=None):
-    """একটা tool চালানো — gate আগে, handler পরে, সবকিছু log-এ।
+              calls_log_path=None, ledger_path=None):
+    """Run one tool — gate first, handler after, everything in the log.
 
     Order:
-      1. অচেনা tool -> error
+      1. Unknown tool -> error
       2. args validation fail -> error
-      3. gated tool -> ApprovalGateway-এ PENDING request, handler চলে না
+      3. gated tool -> trust_check (Phase 1): on deny, "blocked-trust"
+         (no approval is recorded); otherwise a PENDING request in the
+         ApprovalGateway, the handler does not run
       4. stub -> blocked-stub
-      4b. live-ready (gated intercept এড়িয়ে এলে) -> error, fail-closed
-      5. mock -> HANDLERS[handler] চালিয়ে draft-ready
-      6. real + handler নেই -> error (bug, silent pass নয়)
-      7. প্রতিটা call calls log-এ append হয় (log fail করলে log_error সহ)।
+      4b. live-ready (if it got past the gated intercept) -> error, fail-closed
+      5. mock -> run HANDLERS[handler], draft-ready
+      6. real + no handler -> error (a bug, not a silent pass)
+      7. Every call is appended to the calls log (log_error if the log fails);
+         with ledger_path, a receipt is also written to the usage ledger (cost $0.00).
     """
     args = args if isinstance(args, dict) else {}
     requested_by = "Main CEO Bot"
+    task_id = None
     if context and isinstance(context, dict):
         requested_by = context.get("requested_by", "Main CEO Bot") or "Main CEO Bot"
+        task_id = context.get("task_id")
     reg = registry if registry is not None else ToolRegistry()
 
     result = None
@@ -420,16 +445,16 @@ def call_tool(name, args, context=None, registry=None, approvals_path=None,
         tool = reg.get(name)
     except KeyError:
         result = {"status": "error", "tool": name, "error": f"Unknown tool {name!r}."}
-        _finish(result, name, args, requested_by, calls_log_path)
+        _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
         return result
 
     validation_error = _validate_args(tool, args)
     if validation_error:
         result = {"status": "error", "tool": name, "error": validation_error}
-        _finish(result, name, args, requested_by, calls_log_path)
+        _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
         return result
 
-    # 3. Gated tool — handler একদম চলে না, approval_id থাকলেও না।
+    # 3. Gated tool — the handler never runs at all, even with an approval_id.
     if tool.get("gated"):
         gated_action = tool.get("gated_action")
         if gated_action not in GATED_ACTIONS:
@@ -438,7 +463,32 @@ def call_tool(name, args, context=None, registry=None, approvals_path=None,
                 "tool": name,
                 "error": f"Gated tool {name!r} has invalid gated_action {gated_action!r}.",
             }
-            _finish(result, name, args, requested_by, calls_log_path)
+            _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
+            return result
+        # 3a. Trust pre-check (Improvement Phase 1, Nod pattern):
+        # No gated-work decision happens without Boss's word. If a standing rule
+        # (spend cap $0, dental/medical DQ) refuses, no approval is
+        # recorded either — "blocked-trust". Email PAUSED is not a deny:
+        # a PENDING approval is the restart path, so the decision stays "ask".
+        owner_words = None
+        owner_source = None
+        if context and isinstance(context, dict):
+            owner_words = context.get("owner_words")
+            owner_source = context.get("owner_source")
+        decision = trust_check(gated_action, args,
+                               owner_words=owner_words,
+                               owner_source=owner_source,
+                               tool_name=name)
+        if decision["decision"] == "deny":
+            result = {
+                "status": "blocked-trust",
+                "tool": name,
+                "gated_action": gated_action,
+                "trust": decision,
+                "note": ("Trust check refused — no approval recorded, "
+                         "nothing was executed."),
+            }
+            _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
             return result
         gateway = ApprovalGateway(approvals_path=approvals_path)
         approval = gateway.request(
@@ -449,24 +499,25 @@ def call_tool(name, args, context=None, registry=None, approvals_path=None,
             "tool": name,
             "gated_action": gated_action,
             "approval": approval,
+            "trust": decision,
             "note": "Gated tool refused — PENDING approval recorded. Nothing was executed.",
         }
-        _finish(result, name, args, requested_by, calls_log_path)
+        _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
         return result
 
-    # 4. Stub — নেই, চালানো যায় না।
+    # 4. Stub — absent, cannot be run.
     if tool.get("status") == "stub":
         result = {
             "status": "blocked-stub",
             "tool": name,
             "note": "Tool is a stub — not available.",
         }
-        _finish(result, name, args, requested_by, calls_log_path)
+        _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
         return result
 
-    # 4b. Live-ready — gated intercept-এর পরে এখানে এলে fail-closed:
-    # কোনো direct execution path নেই। (Gated live-ready tool এখানে
-    # আসেই না — ধাপ ৩-এ PENDING হয়। এই branch শুধু defense।)
+    # 4b. Live-ready — fail-closed if it gets here after the gated intercept:
+    # no direct execution path exists. (A gated live-ready tool never
+    # gets here — it becomes PENDING in step 3. This branch is only defense.)
     if tool.get("status") == "live-ready":
         result = {
             "status": "error",
@@ -474,10 +525,10 @@ def call_tool(name, args, context=None, registry=None, approvals_path=None,
             "error": f"Live-ready tool {name!r} has no direct execution "
                      "path — gated only, nothing executed.",
         }
-        _finish(result, name, args, requested_by, calls_log_path)
+        _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
         return result
 
-    # 5. Mock — handler চালিয়ে DRAFT ফেরত।
+    # 5. Mock — run the handler, return a DRAFT.
     if tool.get("status") == "mock":
         handler_name = tool.get("handler")
         handler = HANDLERS.get(handler_name)
@@ -487,7 +538,7 @@ def call_tool(name, args, context=None, registry=None, approvals_path=None,
                 "tool": name,
                 "error": f"Mock tool {name!r} has unknown handler {handler_name!r}.",
             }
-            _finish(result, name, args, requested_by, calls_log_path)
+            _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
             return result
         handler_result = handler(args, context)
         if isinstance(handler_result, dict) and handler_result.get("error"):
@@ -497,7 +548,7 @@ def call_tool(name, args, context=None, registry=None, approvals_path=None,
                 "error": handler_result["error"],
                 "notes": handler_result.get("notes", []),
             }
-            _finish(result, name, args, requested_by, calls_log_path)
+            _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
             return result
         result = {
             "status": "draft-ready",
@@ -507,21 +558,24 @@ def call_tool(name, args, context=None, registry=None, approvals_path=None,
             "output": handler_result.get("output", ""),
             "notes": handler_result.get("notes", []),
         }
-        _finish(result, name, args, requested_by, calls_log_path)
+        _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
         return result
 
-    # 6. Real tool, handler নেই — bug, silent pass নয়।
+    # 6. Real tool, no handler — a bug, not a silent pass.
     result = {
         "status": "error",
         "tool": name,
         "error": f"Real tool {name!r} has no implementation (no handler).",
     }
-    _finish(result, name, args, requested_by, calls_log_path)
+    _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
     return result
 
 
-def _finish(result, name, args, requested_by, calls_log_path):
-    """Call-এর ফলাফল log-এ append করা। Log fail করলে result-এ log_error বসে।"""
+def _finish(result, name, args, requested_by, calls_log_path, ledger_path=None,
+            task_id=None):
+    """Append a call's result to the log. If the log fails, log_error is set on the result.
+    With ledger_path, a receipt is also written to the usage ledger (mock call = $0.00);
+    even if the ledger write fails, the call's result is returned, with ledger_error."""
     record = {
         "id": uuid.uuid4().hex[:12],
         "tool": name,
@@ -532,13 +586,23 @@ def _finish(result, name, args, requested_by, calls_log_path):
     }
     try:
         _log_call(record, calls_log_path=calls_log_path)
-    except Exception as exc:  # noqa: BLE001 — log কখনো call-কে crash করাবে না
+    except Exception as exc:  # noqa: BLE001 — the log must never crash the call
         result["log_error"] = f"Could not write calls log: {exc}"
+    if ledger_path is not None:
+        try:
+            kind = {"draft-ready": "mock", "pending-approval": "gate",
+                    "blocked-trust": "gate"}.get(result.get("status"), "error")
+            ledger = UsageLedger(ledger_path=ledger_path)
+            ledger.record(kind, "mock", "mock", cost_usd=0.0,
+                          task_id=task_id, action=name,
+                          note=f"tool_call status={result.get('status')}")
+        except Exception as exc:  # noqa: BLE001 — the ledger must never crash the call
+            result["ledger_error"] = f"Could not write usage ledger: {exc}"
     return result
 
 
 if __name__ == "__main__":
-    # Self-test — শুধু TEMP ফাইল, আসল store ছোঁয়া হয় না।
+    # Self-test — TEMP files only, the real store is never touched.
     import tempfile
 
     tmp_dir = tempfile.mkdtemp()

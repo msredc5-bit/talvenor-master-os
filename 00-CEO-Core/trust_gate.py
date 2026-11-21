@@ -1,52 +1,52 @@
 """Trust gate — Nod-style approval gate as code (Improvement Phase 1).
 
-Nod-এর systematic pattern (~/workspace/nod-reverse/reverse-engineering.md,
-trust.ts + approvals.ts — file:line evidence সহ):
-  - একটাই server-side trust check: শুধু owner-এর (Boss-এর) নিজের কথাই
-    permission; বাকি সবকিছু data, কখনো permission নয়।
-  - Checker-কে Boss-এর সঠিক কথা quote করতে হয়; server সেই quote verify
-    করে — quote করা কথা সত্যিই Boss লিখেছেন/বলেছেন কি না।
-  - Reads / drafts চলে free; writes / commits-এর জন্য Boss-এর কথা লাগে।
-  - Confirmation একদম exact action + arguments-এর সাথে বাঁধা; একবার
-    চলে; failed / interrupted action UNCERTAIN — কখনো re-run নয়;
-    repeat-এর জন্য নতুন confirmation লাগে।
+Nod's systematic pattern (~/workspace/nod-reverse/reverse-engineering.md,
+trust.ts + approvals.ts — with file:line evidence):
+  - One server-side trust check: only the owner's (Boss's) own words are
+    permission; everything else is data, never permission.
+  - The checker must quote Boss's exact words; the server verifies that quote
+    — whether the quoted words were really written/spoken by Boss.
+  - Reads / drafts run free; writes / commits need Boss's words.
+  - A confirmation is bound to one exact action + arguments; it runs once;
+    a failed / interrupted action is UNCERTAIN — never re-run;
+    a repeat needs a new confirmation.
 
-এই ফাইলে (Python, rule-based classifier প্রথমে — কোনো model judge নয়,
-কোনো live call নয়, stdlib only):
+In this file (Python, a rule-based classifier first — no model judge,
+no live call, stdlib only):
   1. trust_check() — read/write split + quote verification + coverage +
-     standing-rule deny (spend cap $0, dental/medical DQ)।
-  2. ConfirmationStore — run-once confirmation, ApprovalGateway-এর সাথে
-     wired (gateway-ই approval-এর একমাত্র সত্য; confirmation record
-     approval_id দিয়ে link করা)।
-  3. Dispatcher wiring — tool_calling.call_tool()-এর gated branch
-     trust_check চালায়: deny হলে "blocked-trust" (কোনো approval
-     রেকর্ড হয় না, কিছু execute হয় না); নইলে আগের মতো PENDING,
-     result-এ trust decision attach থাকে।
+     standing-rule deny (spend cap $0, dental/medical DQ).
+  2. ConfirmationStore — run-once confirmation, wired to the ApprovalGateway
+     (the gateway is the only truth of approval; the confirmation record
+     is linked by approval_id).
+  3. Dispatcher wiring — tool_calling.call_tool()'s gated branch
+     runs trust_check: on deny, "blocked-trust" (no approval
+     is recorded, nothing executes); otherwise PENDING as before,
+     with the trust decision attached to the result.
 
-Standing নিয়ম (config.json থেকে পড়া, Boss-এর সিদ্ধান্ত):
-  - Spend cap $0 — cap-এর বেশি খরচ trust deny (কোনো check-এ এই পথ
-    ব্যবহৃত হয় না; existing behavior বদলায় না)।
-  - Dental / medical / patient-health — hard DQ, trust deny।
-  - Email PAUSED (2026-11-14) — deny নয়: decision "ask", note-এ
-    PAUSED লেখা থাকে; PENDING approval-ই restart-এর পথ, তাই
-    check_live_tools.py-এর "gmail_send -> pending-approval" অপরিবর্তিত।
-  - Gateway-ই চূড়ান্ত authority: trust "allow" হলেও gated handler
-    execute হয় না — Boss-এর exact gate word ছাড়া কিছু এগোয় না।
-    এই repo-তে কোনো auto-approve পথ নেই, কোডেও নেই।
+Standing rules (read from config.json, Boss's decision):
+  - Spend cap $0 — spend above the cap is a trust deny (this path is not
+    used in any check; existing behaviour does not change).
+  - Dental / medical / patient-health — hard DQ, trust deny.
+  - Email PAUSED (2026-11-14) — not a deny: decision "ask", with PAUSED
+    written in the note; the PENDING approval is the restart path, so
+    check_live_tools.py's "gmail_send -> pending-approval" is unchanged.
+  - The gateway is the final authority: even when trust says "allow", the gated
+    handler does not execute — nothing moves without Boss's exact gate word.
+    There is no auto-approve path in this repo, not even in the code.
 
-ব্যবহার:
+Usage:
   from trust_gate import trust_check, ConfirmationStore
   d = trust_check("send", {"to": "a@b.com", "subject": "Hi", "body": ".."},
-                  owner_words=["Day 4 batch পাঠাও"],
-                  owner_source="Boss (chat 2026-11-21): Day 4 batch পাঠাও")
+                  owner_words=["Day 4 batch send"],
+                  owner_source="Boss (chat 2026-11-21): Day 4 batch send")
   # d["decision"] = "allow" | "ask" | "deny"
   store = ConfirmationStore()  # store/confirmations.json
-  c = store.create("send", {"to": "a@b.com"}, "Day 4 batch পাঠাব?", "Main CEO Bot")
+  c = store.create("send", {"to": "a@b.com"}, "Send the Day 4 batch?", "Main CEO Bot")
   store.approve(c["id"], gate_word="send")
   store.execute_once(c["id"], runner)  # runner(canonical_args) -> result
 
-Status: REAL (Improvement Phase 1, 2026-11-21) — mock brain-এ চলে, কোনো
-live brain / API key / network লাগে না। Brain এখনো mock।
+Status: REAL (Improvement Phase 1, 2026-11-21) — runs on the mock brain, no
+live brain / API key / network needed. The brain is still mock.
 """
 
 import json
@@ -65,15 +65,15 @@ _STORE_DIR = os.path.join(_MASTER_OS_DIR, "store")
 CONFIG_PATH = os.path.join(CEO_CORE_DIR, "config.json")
 DEFAULT_CONFIRMATIONS_PATH = os.path.join(_STORE_DIR, "confirmations.json")
 
-# Commit = যা বাইরে কিছু বদলায় (পাঠানো / পাবলিশ / খরচ / মোছা / বুক / পে)।
+# Commit = what changes something outside (sending / publishing / spending / deleting / booking / paying).
 COMMIT_ACTIONS = ("send", "publish", "spend", "delete", "upload",
                   "book", "pay", "order", "cancel")
-# Read = শুধু পড়া / draft — free চলে।
+# Read = only reading / drafting — runs free.
 READ_ACTIONS = ("read", "draft", "status", "search", "list")
 
-# Gate word -> action (human_approval_gateway.GATE_WORD_FOR_ACTION-এর mirror;
-# import cycle এড়াতে এখানে duplicate — দুটো একই থাকতে হবে, check_gate.py
-# সেটা যাচাই করে)।
+# Gate word -> action (a mirror of human_approval_gateway.GATE_WORD_FOR_ACTION;
+# duplicated here to avoid an import cycle — the two must stay identical, and
+# check_gate.py verifies that).
 GATE_WORD_FOR_ACTION = {
     "send": ("send", "পাঠাও"),
     "publish": ("post it", "post all"),
@@ -82,10 +82,10 @@ GATE_WORD_FOR_ACTION = {
     "upload": ("upload it",),
 }
 
-# Hard-DQ niches (Boss-এর স্থায়ী সিদ্ধান্ত — কখনো target নয়)।
+# Hard-DQ niches (Boss's permanent decision — never a target).
 EXCLUDED_NICHE_WORDS = ("dental", "dentist", "medical", "patient-health")
 
-# Email restart-এর স্পষ্ট কথা (PAUSED তোলার একমাত্র override)।
+# The explicit words for an email restart (the only override that lifts PAUSED).
 EMAIL_RESTART_MARKERS = ("email restart", "email পাঠাও", "email চালু")
 
 
@@ -115,10 +115,10 @@ def _email_paused(config):
 
 
 def _standing_owner_text(config):
-    """Boss-এর স্থায়ী কথা (gate words + standing rules) — quote verify-এর
-    default source। শুধু এখানে লেখা কথাই standing source হিসেবে গোনা হয়।"""
+    """Boss's standing words (gate words + standing rules) — the default source
+    for quote verification. Only the words written here count as a standing source."""
     words = (config.get("gates") or {}).get("words") or {}
-    lines = ["Boss-এর gate words:"]
+    lines = ["Boss's gate words:"]
     for word, meaning in sorted(words.items()):
         lines.append(f"- {word!r} = {meaning}")
     lines.append("Standing rules: spend cap is $0. "
@@ -129,14 +129,14 @@ def _standing_owner_text(config):
 
 
 def _normalize(text):
-    """Quote মেলানোর জন্য whitespace normalize (case-sensitive — Boss-এর
-    সঠিক কথাই মিলতে হবে, ছোট-বড় হাতের ভুল চলবে না)।"""
+    """Normalize whitespace for quote matching (case-sensitive — Boss's
+    exact words must match; a capitalisation mistake does not count)."""
     return re.sub(r"\s+", " ", str(text or "")).strip()
 
 
 def verify_quote(quote, source_text):
-    """একটা quote সত্যিই source-এ verbatim আছে কি না। খালি quote কখনো
-    verify হয় না (Nod: quote না থাকলে ask করো, run করো না)।"""
+    """Whether a quote really is verbatim in the source. An empty quote never
+    verifies (Nod: without a quote, ask; do not run)."""
     q = _normalize(quote)
     if not q:
         return False
@@ -144,7 +144,7 @@ def verify_quote(quote, source_text):
 
 
 def _args_text(args):
-    """Args-এর সব string value একসাথে — niche scan + coverage-এর জন্য।"""
+    """All string values of the args together — for the niche scan + coverage."""
     parts = []
     for value in (args or {}).values():
         if isinstance(value, str):
@@ -157,10 +157,10 @@ def _args_text(args):
 
 
 def _material_targets(action, args, tool_name=None):
-    """এই action-এর material target — quote-এ এগুলোর অন্তত একটা থাকতে
-    হবে, নইলে quote এই action-কে cover করে না। Generic শব্দ (যেমন
-    শুধু "email") target নয় — প্রাপক / event / পরিমাণের মতো সুনির্দিষ্ট
-    মানই target।"""
+    """This action's material target — at least one of these must be in the quote,
+    otherwise the quote does not cover this action. A generic word (e.g.
+    just "email") is not a target — only a specific value like the recipient /
+    event / amount is a target."""
     args = args or {}
     targets = []
     if action == "send":
@@ -168,7 +168,7 @@ def _material_targets(action, args, tool_name=None):
         if to:
             targets.append(to)
             if "@" in to:
-                targets.append(to.split("@", 1)[1])  # domain-ও চলে
+                targets.append(to.split("@", 1)[1])  # a domain also counts
     if tool_name == "n8n_trigger":
         event = (args.get("event") or "").strip()
         if event:
@@ -196,12 +196,12 @@ def _material_targets(action, args, tool_name=None):
 
 
 def _covers(action, args, quotes_text, tool_name=None):
-    """Verified quote-গুলো এই action-কে cover করে কি না: gate word +
-    অন্তত একটা material target — দুটোই লাগবে (rule-based)।"""
+    """Whether the verified quotes cover this action: gate word +
+    at least one material target — both are needed (rule-based)."""
     allowed_words = GATE_WORD_FOR_ACTION.get(action)
     if not allowed_words:
-        # Gate word table-এ নেই এমন commit action (upload/book/pay/...) —
-        # rule-based classifier জানে না, তাই cover ধরা যায় না: ask করো।
+        # A commit action not in the gate-word table (upload/book/pay/...) —
+        # the rule-based classifier does not know it, so it cannot count as covered: ask.
         return False, f"No gate word mapping for action {action!r} — ask Boss."
     text = _normalize(quotes_text)
     if not any(_normalize(w) in text for w in allowed_words):
@@ -215,27 +215,27 @@ def _covers(action, args, quotes_text, tool_name=None):
 
 
 # ---------------------------------------------------------------------------
-# trust_check() — একটাই server-side check (Nod trust.ts-এর আদলে)
+# trust_check() — one server-side check (modelled on Nod's trust.ts)
 # ---------------------------------------------------------------------------
 
 def trust_check(action, args=None, owner_words=None, owner_source=None,
                 config=None, tool_name=None, config_path=None):
-    """একটা action চালানোর আগে trust সিদ্ধান্ত।
+    """The trust decision before running an action.
 
     Decision:
-      "allow" — Boss-এর quote verify হয়েছে + action cover করে।
-      "ask"   — Boss-এর কথা লাগবে (quote নেই / cover করে না / PAUSED note)।
-      "deny"  — quote verify হয়নি, বা standing rule (spend cap / DQ niche)
-                স্পষ্টভাবে বারণ করেছে। Deny মানে: approval-ও রেকর্ড হয় না।
+      "allow" — Boss's quote verified + it covers the action.
+      "ask"   — Boss's words are needed (no quote / does not cover / PAUSED note).
+      "deny"  — the quote did not verify, or a standing rule (spend cap / DQ niche)
+                explicitly refused. Deny means: no approval is recorded either.
 
-    কোনো সিদ্ধান্তই gated handler execute করে না — execute শুধু
-    ApprovalGateway-এ Boss-এর exact gate word-এর পরে, ভবিষ্যৎ live path-এ।
+    No decision executes a gated handler — execution happens only after
+    Boss's exact gate word in the ApprovalGateway, in the future live path.
     """
     args = args or {}
     cfg = config if isinstance(config, dict) else _load_config(config_path)
     action = (action or "").strip().lower()
 
-    # 1. Read / draft — free চলে (Nod: reads/drafts run free)।
+    # 1. Read / draft — runs free (Nod: reads/drafts run free).
     if action in READ_ACTIONS:
         return {
             "decision": "allow",
@@ -245,8 +245,8 @@ def trust_check(action, args=None, owner_words=None, owner_source=None,
             "quotes_verified": [],
         }
 
-    # 2. অচেনা action — classifier জানে না: ask করো, deny নয় (fail-safe:
-    #    না জানলে Boss-কে জিজ্ঞেস করো, নিজে সিদ্ধান্ত নিয়ো না)।
+    # 2. Unknown action — the classifier does not know it: ask, do not deny (fail-safe:
+    #    if unknown, ask Boss; do not decide yourself).
     if action not in COMMIT_ACTIONS:
         return {
             "decision": "ask",
@@ -256,8 +256,8 @@ def trust_check(action, args=None, owner_words=None, owner_source=None,
             "quotes_verified": [],
         }
 
-    # 3. Standing-rule deny — এগুলো সবকিছুর ওপরে জেতে (Nod: a rule to
-    #    ask first wins over everything)।
+    # 3. Standing-rule deny — these win over everything (Nod: a rule to
+    #    ask first wins over everything).
     if action == "spend":
         amount = args.get("amount_usd")
         cap = _spend_cap_usd(cfg)
@@ -270,7 +270,7 @@ def trust_check(action, args=None, owner_words=None, owner_source=None,
                     "reason": "Standing rule: spend cap $0 — no spend authorized.",
                     "quotes_verified": [],
                 }
-        # amount নেই বা 0 — quote ছাড়া সিদ্ধান্ত নয়, ask-এ পড়বে।
+        # no amount, or 0 — no decision without a quote; it falls to ask.
 
     args_text = _args_text(args).lower()
     for word in EXCLUDED_NICHE_WORDS:
@@ -285,9 +285,9 @@ def trust_check(action, args=None, owner_words=None, owner_source=None,
 
     notes = []
     if action == "send" and _email_paused(cfg):
-        # যেকোনো send tool (gmail_send, n8n_trigger, ...) — PAUSED
-        # note শুধু gmail_send-এর নয়; email বন্ধ থাকতে সব send-এই
-        # একই সত্য কথা থাকে।
+        # Any send tool (gmail_send, n8n_trigger, ...) — the PAUSED
+        # note is not only gmail_send's; while email is off, the same
+        # truth applies to every send.
         quotes_so_far = " ".join(owner_words or [])
         restarted = any(m in _normalize(quotes_so_far).lower()
                         for m in EMAIL_RESTART_MARKERS)
@@ -296,7 +296,7 @@ def trust_check(action, args=None, owner_words=None, owner_source=None,
                          "the PENDING approval is the restart path; "
                          "execution stays blocked until Boss restarts.")
 
-    # 4. Boss-এর কথা নেই — ask করো (Nod: quote না থাকলে ask, run নয়)।
+    # 4. No Boss words — ask (Nod: without a quote, ask; do not run).
     owner_words = [w for w in (owner_words or []) if _normalize(w)]
     if not owner_words:
         return {
@@ -307,7 +307,7 @@ def trust_check(action, args=None, owner_words=None, owner_source=None,
             "quotes_verified": [],
         }
 
-    # 5. Quote verification — প্রতিটা quote source-এ verbatim থাকতে হবে।
+    # 5. Quote verification — every quote must be verbatim in the source.
     source = owner_source if owner_source is not None else _standing_owner_text(cfg)
     verified = []
     for quote in owner_words:
@@ -321,7 +321,7 @@ def trust_check(action, args=None, owner_words=None, owner_source=None,
             }
         verified.append(quote)
 
-    # 6. Coverage — quote এই exact action-কে cover করে কি না।
+    # 6. Coverage — whether the quote covers this exact action.
     quotes_text = " ".join(verified)
     covered, cover_reason = _covers(action, args, quotes_text, tool_name=tool_name)
     if not covered:
@@ -343,7 +343,7 @@ def trust_check(action, args=None, owner_words=None, owner_source=None,
 
 
 # ---------------------------------------------------------------------------
-# ConfirmationStore — run-once confirmation (Nod approvals.ts-এর আদলে)
+# ConfirmationStore — run-once confirmation (modelled on Nod's approvals.ts)
 # ---------------------------------------------------------------------------
 
 CONFIRMATION_STATUSES = ("asked", "approved", "declined", "executed",
@@ -351,20 +351,20 @@ CONFIRMATION_STATUSES = ("asked", "approved", "declined", "executed",
 
 
 def _canonical_args(args):
-    """Exact action + arguments — canonical JSON (key order স্থির, তাই
-    একই args সবসময় একই string)।"""
+    """Exact action + arguments — canonical JSON (key order is fixed, so the
+    same args always give the same string)."""
     return json.dumps(args or {}, sort_keys=True, ensure_ascii=False)
 
 
 class ConfirmationStore:
-    """Run-once confirmation — ApprovalGateway-এর সাথে wired।
+    """Run-once confirmation — wired to the ApprovalGateway.
 
-    একটা confirmation = একটা exact action + exact args + একটা প্রশ্ন।
-    Gateway-ই approval-এর সত্য: create() gateway-এ approval request
-    লেখে (approval_id link করা থাকে); approve() gateway record-ও
-    approve করে (gate word মিলতেই হবে)। execute_once() runner-কে
-    canonical args দিয়ে ঠিক একবার চালায়; fail করলে status UNCERTAIN
-    — আর কখনো re-run নয়; repeat-এর জন্য নতুন confirmation লাগে।
+    One confirmation = one exact action + exact args + one question.
+    The gateway is the truth of approval: create() writes an approval request
+    to the gateway (linked by approval_id); approve() also approves the gateway
+    record (the gate word must match). execute_once() runs the runner exactly once
+    with the canonical args; on failure the status is UNCERTAIN
+    — never re-run again; a repeat needs a new confirmation.
     """
 
     def __init__(self, confirmations_path=None, approvals_path=None):
@@ -396,12 +396,12 @@ class ConfirmationStore:
             json.dump(payload, f, indent=2, ensure_ascii=False)
 
     def create(self, action, args, question, requested_by="Main CEO Bot"):
-        """নতুন confirmation + gateway-এ linked approval request।
+        """A new confirmation + a linked approval request in the gateway.
 
-        শুধু gateway-এর এই ৪টা gated action (send / publish / spend /
-        delete) — upload-এর gate word gateway-এ আছে, কিন্তু
-        confirmation store-এ upload-এর path এখনো নেই (gateway-এ
-        request করা যায়, confirmation এখানে নয়)।
+        Only these 4 gated actions of the gateway (send / publish / spend /
+        delete) — upload's gate word exists in the gateway, but
+        the confirmation store has no upload path yet (a request can be made
+        in the gateway, but not a confirmation here).
         """
         if action not in ("send", "publish", "spend", "delete"):
             raise ValueError(
@@ -445,12 +445,12 @@ class ConfirmationStore:
         return [dict(r) for r in self.records if r["status"] == "asked"]
 
     def sweep_expired(self):
-        """TTL পেরিয়ে যাওয়া 'asked' confirmation-গুলোকে 'expired' করো।
+        """Mark 'asked' confirmations past their TTL as 'expired'.
 
-        TTL: human_approval_gateway.APPROVAL_TTL_MINUTES (২০ মিনিট —
-        recorded chat-card expiry, MEMORY.md)। Linked gateway
-        record-ও একই sweep-এ expire হয়, তাই দুই store একমত থাকে।
-        ফেরত: expired হওয়া confirmation id-গুলো।
+        TTL: human_approval_gateway.APPROVAL_TTL_MINUTES (20 minutes —
+        recorded chat-card expiry, MEMORY.md). Linked gateway
+        record expires in the same sweep, so the two stores agree.
+        Returns: the ids of the confirmations that expired.
         """
         from human_approval_gateway import (  # noqa: PLC0415
             APPROVAL_TTL_MINUTES, ApprovalGateway)
@@ -463,7 +463,7 @@ class ConfirmationStore:
                 asked = datetime.fromisoformat(
                     str(record.get("requested_at")).replace("Z", "+00:00"))
             except (TypeError, ValueError):
-                continue  # timestamp পড়া না গেলে expire করা হয় না
+                continue  # if the timestamp cannot be read, it is not expired
             if now - asked > timedelta(minutes=APPROVAL_TTL_MINUTES):
                 record["status"] = "expired"
                 record["decided_at"] = now.isoformat()
@@ -473,15 +473,15 @@ class ConfirmationStore:
             try:
                 ApprovalGateway(
                     approvals_path=self.approvals_path).sweep_expired()
-            except Exception:  # noqa: BLE001 — gateway sweep কখনো confirmation-কে ভাঙবে না
+            except Exception:  # noqa: BLE001 — the gateway sweep must never break a confirmation
                 pass
         return expired_ids
 
     def approve(self, confirmation_id, gate_word, decided_by="Boss"):
-        """Boss অনুমোদন দিলে — gate word মিলতেই হবে। Gateway record-ও
-        approve হয় (একই gate word); gateway fail করলে confirmation
-        'asked'-ই থাকে (আধা-অবস্থা নয়)। মেয়াদোত্তীর্ণ (expired)
-        confirmation approve করা যায় না — আগে sweep_expired() চলে।"""
+        """When Boss approves — the gate word must match. The gateway record is
+        also approved (with the same gate word); if the gateway fails, the confirmation
+        stays 'asked' (no half-state). An expired confirmation
+        cannot be approved — sweep_expired() runs first."""
         self.sweep_expired()
         record = self._find(confirmation_id)
         if record["status"] == "expired":
@@ -523,7 +523,7 @@ class ConfirmationStore:
             try:
                 gateway.reject(record["approval_id"], decided_by=decided_by)
             except ValueError:
-                pass  # gateway record already decided — confirmation-ই সত্য
+                pass  # gateway record already decided — the confirmation is the truth
         record["status"] = "declined"
         record["decided_at"] = _now_iso()
         self._save()
@@ -541,13 +541,13 @@ class ConfirmationStore:
         return dict(record)
 
     def execute_once(self, confirmation_id, runner):
-        """Exact saved action + args ঠিক একবার চালানো।
+        """Run the exact saved action + args exactly once.
 
-        runner(canonical_args_dict) -> result (যেকোনো JSON-able মান)।
-        Success -> "executed"। Exception / interruption -> "uncertain"
-        (আর কখনো re-run নয় — "may have run, check the app")। "executed"
-        বা "uncertain"-এ আবার execute করলে ValueError — repeat-এর জন্য
-        নতুন confirmation লাগে।
+        runner(canonical_args_dict) -> result (any JSON-able value).
+        Success -> "executed". Exception / interruption -> "uncertain"
+        (Never re-run again — "may have run, check the app"). "executed"
+        or "uncertain" — executing again raises ValueError; a repeat needs a
+        new confirmation.
         """
         record = self._find(confirmation_id)
         if record["status"] != "approved":
@@ -580,38 +580,38 @@ class ConfirmationStore:
 
 
 if __name__ == "__main__":
-    # হাতে চেক: TEMP file-এ, আসল store ছোঁয়া হয় না।
+    # Manual check: in a TEMP file, the real store is never touched.
     import tempfile
 
     tmp_dir = tempfile.mkdtemp()
     tmp_conf = os.path.join(tmp_dir, "confirmations-test.json")
     tmp_appr = os.path.join(tmp_dir, "approvals-test.json")
 
-    # 1. Read/draft free।
+    # 1. Read/draft free.
     assert trust_check("read", {})["decision"] == "allow"
     assert trust_check("draft", {})["decision"] == "allow"
-    # 2. Quote নেই -> ask।
+    # 2. No quote -> ask.
     assert trust_check("send", {"to": "a@b.com"})["decision"] == "ask"
-    # 3. Spend cap-এর বেশি -> deny।
+    # 3. Above the spend cap -> deny.
     assert trust_check("spend", {"amount_usd": 5, "purpose": "ads"})["decision"] == "deny"
-    # 4. Dental -> deny।
+    # 4. Dental -> deny.
     assert trust_check("send", {"to": "x@dental.com"})["decision"] == "deny"
-    # 5. ভুল quote -> deny।
+    # 5. Wrong quote -> deny.
     d = trust_check("send", {"to": "a@b.com"},
-                    owner_words=["Day 4 batch পাঠাও"],
-                    owner_source="Boss: আজ ছুটি")
+                    owner_words=["Day 4 batch send"],
+                    owner_source="Boss: today is off")
     assert d["decision"] == "deny", d
-    # 6. সঠিক quote + coverage -> allow।
+    # 6. Correct quote + coverage -> allow.
     d = trust_check("send", {"to": "a@b.com", "subject": "Hi", "body": "x"},
-                    owner_words=["Day 4 batch পাঠাও — a@b.com-কে email"],
-                    owner_source="Boss (chat): Day 4 batch পাঠাও — a@b.com-কে email")
+                    owner_words=["Day 4 batch send — email a@b.com"],
+                    owner_source="Boss (chat): Day 4 batch send — email a@b.com")
     assert d["decision"] == "allow", d
 
-    # 7. Confirmation lifecycle: create -> approve -> execute once।
+    # 7. Confirmation lifecycle: create -> approve -> execute once.
     store = ConfirmationStore(confirmations_path=tmp_conf,
                               approvals_path=tmp_appr)
     c = store.create("send", {"to": "a@b.com", "subject": "Hi"},
-                     "Day 4 batch পাঠাব?", "Main CEO Bot")
+                     "Send the Day 4 batch?", "Main CEO Bot")
     assert c["status"] == "asked" and c["approval_id"]
     ran = []
     store.approve(c["id"], gate_word="send")
@@ -622,7 +622,7 @@ if __name__ == "__main__":
         raise SystemExit("FAIL: re-execution was allowed")
     except ValueError:
         pass
-    # 8. Fail -> uncertain, never re-run।
+    # 8. Fail -> uncertain, never re-run.
     c2 = store.create("send", {"to": "b@c.com"}, "Test?", "Main CEO Bot")
     store.approve(c2["id"], gate_word="send")
     def _boom(_args):
