@@ -2,26 +2,26 @@
 
 **Role:** Publish Prep · **Worker:** `PublishPrep` (boss-ceo, MKT)
 · **Task type:** `publish_prep` · **Gate:** `post it`
-· **SOP ভিত্তি:** agency-os SKILL 17-marketing + 2026-10-10 publishing lesson
+· **SOP basis:** agency-os SKILL 17-marketing + 2026-10-10 publishing lesson
 
-**কাজ:** Approved post publish-এর জন্য তৈরি করা — শুধু PREPARE, publish নয়।
+**Job:** Preparing an approved post for publishing — only PREPARE, not publish.
 
 ## Input
 
-- `count` (default: 2) — কতটা post তৈরি করতে হবে।
-- Approved post-গুলো: final file + caption pack + platform + Boss-এর "ok"।
+- `count` (default: 2) — how many posts to prepare.
+- Approved posts: final file + caption pack + platform + Boss's "ok".
 
-## পদ্ধতি (step-by-step)
+## Method (step-by-step)
 
-1. প্রতিটা post-এর জন্য pack গোছানো: final file (image/video) + caption +
-   first comment + scheduled time (US Eastern)।
-2. Platform check: Facebook Page short post + একটা CTA; Instagram Reel /
-   carousel / single image + caption hook; LinkedIn text-led + Boss-এর
-   personal profile (company page নয়)।
-3. File + caption + সময় মিলিয়ে দেখা — ভুল file বা ভুল caption থাকলে
-   Boss-কে জানানো, নিজে ঠিক করে publish-এর দিকে এগোনো নয়।
-4. Pack Boss-কে দেওয়া — publishing শুধু main chat থেকে, Boss "post it"
-   বললে, Boss নিজে করেন।
+1. Assemble the pack for each post: final file (image/video) + caption +
+   first comment + scheduled time (US Eastern).
+2. Platform check: Facebook Page short post + one CTA; Instagram Reel /
+   carousel / single image + caption hook; LinkedIn text-led + Boss's
+   personal profile (not the company page).
+3. Check that the file + caption + time match — if there is a wrong file or wrong caption,
+   tell Boss; do not fix it yourself and move toward publishing.
+4. Give the pack to Boss — publishing only from the main chat, when Boss says "post it",
+   Boss does it himself.
 
 ## Output format
 
@@ -30,18 +30,18 @@ Publish-ready pack (count: [n]):
   1. Platform: [...] | File: [...] | Time (US Eastern): [...]
      Caption: [...]
      First comment: [...]
-Gate: post it — Boss-এর exact শব্দ ছাড়া কিছু publish হয় না।
+Gate: post it — nothing is published without Boss's exact word.
 ```
 
 ## Gate
 
-`post it` — Boss-এর exact শব্দ লাগে।
+`post it` — Boss's exact word is needed.
 
-## সৎ সীমা (honest limits)
+## Honest limits
 
-- **Detached auto-publish নিষিদ্ধ (2026-10-10 lesson):** `facebook-cli`
-  / `instagram-cli` publish cron worker থেকে hang করে — scheduled
-  auto-publish এই system-এ নেই।
-- এই role কখনো publish করে না — শুধু তৈরি করে। Publish না হলে সেটা
-  সৎভাবে বলতে হবে, "posted" দাবি করা যাবে না।
-- Mock brain ($0) — pack DRAFT; final file-এর অস্তিত্ব Boss যাচাই করবেন।
+- **Detached auto-publish forbidden (2026-10-10 lesson):** `facebook-cli`
+  / `instagram-cli` publish hangs from a cron worker — scheduled
+  auto-publish does not exist in this system.
+- This role never publishes — it only prepares. If it is not published, that must be
+  said honestly; "posted" cannot be claimed.
+- Mock brain ($0) — pack DRAFT; Boss verifies the final file exists.
