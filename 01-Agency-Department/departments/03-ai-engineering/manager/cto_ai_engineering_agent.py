@@ -1,21 +1,21 @@
-"""CTO AI Engineering Agent — AI Engineering department-এর manager (Phase 1).
+"""CTO AI Engineering Agent — manager of the AI Engineering department (Phase 1).
 
-ভূমিকা (role): AI Engineering department-এর specialist-দের delegate করা —
-receptionist build (DRAFT plan only), QA checklist (shared, dept 07), আর
-৭ specialist (solution, conversation, prompt, Vapi, calendar, n8n,
-deployment) — এদের task এলে manager specialist-কে load করে চালায়, শুধু
-plan দেয় না। এই manager delegation plan-এর DRAFT বানায়; engine/section-এর পুরনো worker execute করে না, কিছু deploy করে না।
-Gate: ok — delegation plan-এ Boss-এর "ok" লাগে; deploy/send/spend/delete
-কোনো gated action এই manager নিজে করে না।
-অবস্থা (status): DRAFT ONLY — mock brain ($0), draft-ই শেষ কথা।
+Role: delegating to the AI Engineering department's specialists —
+receptionist build (DRAFT plan only), QA checklist (shared, dept 07), and
+7 specialist (solution, conversation, prompt, Vapi, CRM integration, calendar, n8n,
+deployment) — when their task comes in, the manager loads and runs the specialist, not just
+a plan. This manager makes a DRAFT of the delegation plan; it does not execute an engine/section old worker, deploys nothing.
+Gate: ok — Boss's "ok" is needed for the delegation plan; deploy/send/spend/delete
+This manager itself performs no gated action.
+Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 LIVE production voice stack Vapi: Sophia, live receptionist, +1 (947)
-223-0244 — Sophia কোনো demo agent নয়। Retell DROPPED 2026-10-26;
-RetellBuilder শুধু DRAFT plan, production নয়।
-Agency Chief wiring Phase 2 DONE — Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে call করে।
-এই manager কখনো করে না: engine/section-এর পুরনো worker execute করে না, কিছু deploy করে না,
-production-এ কিছু বদলায় না, কিছু পাঠায় না, খরচ করে না, মুছে না,
-client-এর তথ্য/দাম/পরিসংখ্যান বানায় না, কোনো guarantee দেয় না,
-dental/medical বা patient-health ব্যবসা নেয় না।
+223-0244 — Sophia is no demo agent. Retell DROPPED 2026-10-26;
+RetellBuilder is DRAFT plan only, not production.
+Agency Chief wiring Phase 2 DONE — the Chief now calls this manager via DEPARTMENT_ROUTING.
+This manager never: executes an engine/section old worker, deploys anything,
+changes anything in production, sends anything, spends anything, deletes anything,
+invents client information/prices/statistics, gives any guarantee,
+dental/medical or patient-health businesses.
 """
 
 import importlib.util
@@ -67,9 +67,10 @@ DEPARTMENT_TASKS = {
     },
     "crm_integration": {
         "specialist": "CRM Integration Agent",
-        "file": "GAP — no worker file; CRM (n8n Data Tables) planned, not live",
+        "class": "CRMIntegrationAgent",
+        "file": "departments/03-ai-engineering/specialists/crm_integration_agent.py",
         "gate": "ok",
-        "status": "GAP",
+        "status": "EXISTING",
     },
     "calendar_integration": {
         "specialist": "Calendar Integration Agent",
@@ -92,12 +93,13 @@ DEPARTMENT_TASKS = {
 }
 
 # task_kind -> specialist class name (manager -> specialist importlib loading,
-# Chief-এর DEPARTMENT_ROUTING loader-এর মতো)।
+# like the Chief's DEPARTMENT_ROUTING loader).
 SPECIALIST_CLASSES = {
     "solution_architect": "AISolutionArchitect",
     "conversation_design": "ConversationDesigner",
     "prompt_engineering": "PromptEngineeringAgent",
     "vapi_integration": "VapiIntegrationAgent",
+    "crm_integration": "CRMIntegrationAgent",
     "calendar_integration": "CalendarIntegrationAgent",
     "n8n_automation": "N8nAutomationEngineer",
     "deployment": "DeploymentAgent",
@@ -105,7 +107,7 @@ SPECIALIST_CLASSES = {
 
 
 class CTOAIEngineeringAgent:
-    """AI Engineering specialist-দের delegation plan DRAFT বানায় + Phase 3 specialist-দের load করে চালায় (DRAFT only); deploy করে না।"""
+    """Makes a DRAFT of the delegation plan for AI Engineering specialists + loads and runs the Phase 3 specialists (DRAFT only); does not deploy."""
 
     task_kind = "manage_ai_engineering"
     gate = "ok"
@@ -113,7 +115,7 @@ class CTOAIEngineeringAgent:
     role = "CTO AI Engineering Agent"
 
     def _gateway(self, approvals_path=None):
-        """ApprovalGateway lazy-load — top level-এ কোনো repo import নয়।"""
+        """ApprovalGateway lazy-load — no repo import at top level."""
         here = os.path.dirname(os.path.abspath(__file__))
         ceo_core = os.path.normpath(os.path.join(
             here, "..", "..", "..", "..", "00-CEO-Core"))
@@ -125,7 +127,7 @@ class CTOAIEngineeringAgent:
         return ApprovalGateway()
 
     def _request_approval(self, gateway, gated_action, title):
-        """PENDING approval record করা — execute নয়, auto-approve নয়।"""
+        """Record a PENDING approval — not execute, not auto-approve."""
         action = _GATE_ACTION_MAP.get(gated_action, gated_action)
         if action in _GATED_ACTIONS:
             return gateway.request(action, title, type(self).__name__)
@@ -154,14 +156,14 @@ class CTOAIEngineeringAgent:
         )
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
-        """Delegation plan DRAFT বানানো + Phase 3 specialist load+run (DRAFT only)। কোনো file লেখে না, network ছোঁয় না।"""
+        """Build a delegation plan DRAFT + Phase 3 specialist load+run (DRAFT only). Writes no file, touches no network."""
         task = task or {}
         title = task.get("title") or "Manage AI Engineering"
         gated_action = task.get("gated_action")
         approval_id = task.get("approval_id")
 
-        # Gated action থাকলে আগে approval — অনুমোদন ছাড়া draft-ও নয়,
-        # PENDING record করে থামা।
+        # If there is a gated action, approval first — no draft without approval,
+        # record PENDING and stop.
         if gated_action:
             gw = gateway if gateway is not None else self._gateway(approvals_path)
             approved = False
@@ -207,14 +209,14 @@ class CTOAIEngineeringAgent:
                 "Note: Live voice stack Vapi/Sophia (+1 (947) 223-0244) — "
                 "Retell DROPPED 2026-10-26, RetellBuilder DRAFT plan only. "
                 "QAEngineer shared with dept 07 (QA checklist, partial). "
-                "CRM not live — CRM integration GAP. n8n workflows READY, not LIVE."
+                "CRM not live — CRM integration DRAFT plan only (worker EXISTS, CRM PLANNED). n8n workflows READY, not LIVE."
             )
             lines.append(f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}")
             lines.append(f"Brain note: {brain_text}")
             notes = (
-                "DRAFT ONLY — mock brain ($0). Overview delegation plan, কোনো "
-                "worker execute নয়, কোনো deploy নয়। Agency Chief wiring Phase 2 DONE — "
-                "Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে call করে।"
+                "DRAFT ONLY — mock brain ($0). Overview delegation plan, no "
+                "no worker execution, no deploy. Agency Chief wiring Phase 2 DONE — "
+                "The Chief now calls this manager via DEPARTMENT_ROUTING."
             )
             return {
                 "status": "draft-ready",
@@ -229,13 +231,13 @@ class CTOAIEngineeringAgent:
         if entry is None:
             output = (
                 "[MOCK DRAFT] AI Engineering — unknown task (DRAFT ONLY)\n"
-                f"Requested task_kind '{task_kind}' এই department-এ নেই।\n"
+                f"Requested task_kind '{task_kind}' is not in this department.\n"
                 "Known task kinds: " + ", ".join(known_kinds) + ".\n"
-                "কোনো worker execute হয়নি; সঠিক task_kind দিয়ে আবার চাইতে হবে।"
+                "No worker executed; ask again with the correct task_kind."
             )
             notes = (
-                "Unknown task — delegation plan বানানো হয়নি। এই department-এর "
-                "task kind-গুলো উপরে তালিকায় আছে।"
+                "Unknown task — no delegation plan was made. This department's "
+                "task kinds are listed above."
             )
             return {
                 "status": "unknown-task",
@@ -246,10 +248,10 @@ class CTOAIEngineeringAgent:
                 "gate": self.gate,
             }
 
-        # Specialist-এর standalone .py থাকলে (departments/03-ai-engineering/
-        # specialists/) importlib দিয়ে load করে চালানো — Chief-এর loader-এর
-        # মতো। Receptionist build/QA (engine/workers) আর GAP/ROLE-ONLY
-        # kind-গুলো নিচের delegation plan branch-এ যায়।
+        # If the specialist has a standalone .py (departments/03-ai-engineering/
+        # specialists/), load and run it with importlib — like the Chief's loader.
+        # Receptionist build/QA (engine/workers) and GAP/ROLE-ONLY
+        # kinds go to the delegation plan branch below.
         if (entry["status"] == "EXISTING"
                 and entry["file"].startswith(
                     "departments/03-ai-engineering/specialists/")):
@@ -274,42 +276,43 @@ class CTOAIEngineeringAgent:
             f"Specialist: {entry['specialist']} | File/skill: {entry['file']}\n"
             f"Gate needed: {entry['gate'] or 'none'} | Status: {entry['status']}\n"
             "Plan (DRAFT):\n"
-            f"1. {entry['specialist']}-কে task দেওয়া হবে — manager নিজে কাজটি করে না।\n"
-            "2. Specialist-এর output DRAFT হিসেবে Boss-কে দেখানো হবে।\n"
+            f"1. {entry['specialist']} will be given the task — the manager does not do the work itself.\n"
+            "2. The specialist's output will be shown to Boss as a DRAFT.\n"
         )
         if entry["gate"]:
             output += (
-                f"3. Gate '{entry['gate']}' — Boss-এর exact word ছাড়া production-এ "
-                "কিছু বদলানো/পাঠানো/খরচ করা যাবে না।\n"
+                f"3. Gate '{entry['gate']}' — without Boss's exact word, nothing in production "
+                "may be changed/sent/spent.\n"
             )
         if task_kind == "receptionist_build":
             output += (
                 "4. RetellBuilder DRAFT plan ONLY — live stack Vapi/Sophia; "
-                "Retell DROPPED 2026-10-26, production-এ Retell নয়।\n"
+                "Retell DROPPED 2026-10-26, Retell is not in production.\n"
             )
         if task_kind == "receptionist_qa":
             output += (
                 "4. QAEngineer shared with dept 07 — QA checklist, partial; "
-                "verdict-এর জন্য Boss-এর ok লাগে।\n"
+                "Boss's ok is needed for the verdict.\n"
             )
         if entry["status"] == "ROLE-ONLY":
             output += (
-                "4. ROLE-ONLY — এই role-এর কোনো worker code নেই; skill doc "
-                "অনুযায়ী Boss/Elora হাতে কাজটি করবেন।\n"
+                "4. ROLE-ONLY — this role has no worker code; the skill doc "
+                "says Boss/Elora will do the work by hand.\n"
             )
         if entry["status"] == "GAP":
             output += (
-                "4. GAP — এই role-এর কোনো worker/skill নেই; CRM live না হওয়া "
-                "পর্যন্ত integration সম্ভব নয়।\n"
+                "4. GAP — (worker + skill EXISTING on 2026-11-21) — CRM Integration "
+                "Agent: departments/03-ai-engineering/specialists/crm_integration_agent.py; "
+                "integration DRAFT plan only until the CRM (n8n Data Tables) goes live.\n"
             )
         output += (
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
-            "DRAFT ONLY — mock brain ($0). Delegation plan মাত্র; worker "
-            "execute হয়নি, কিছু deploy হয়নি। Agency Chief wiring Phase 2 DONE — "
-            "Chief এখন DEPARTMENT_ROUTING দিয়ে এই manager-কে call করে।"
+            "DRAFT ONLY — mock brain ($0). Delegation plan only; the worker "
+            "nothing was executed, nothing was deployed. Agency Chief wiring Phase 2 DONE — "
+            "The Chief now calls this manager via DEPARTMENT_ROUTING."
         )
         return {
             "status": "draft-ready",
