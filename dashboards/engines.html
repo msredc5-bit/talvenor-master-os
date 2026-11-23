@@ -20,9 +20,9 @@ footer { margin-top: 32px; color: #666; font-size: 13px; }
 <p>Boss → Jarvis (voice) → Main CEO Bot (second brain) → 3 Engines / Office System.
 Each engine has its own Staff, its own Tool Calling System, its own Skills.</p>
 <p>This page is made from the real engine files by <code>scripts/sync_engines.py</code> —
-if numbers are changed by hand, sync reverts them.</p>
+if you change a number by hand, sync will revert it.</p>
 
-<h2>The engines</h2>
+<h2>The Engines</h2>
 <table>
 <tr><th>Engine</th><th>Staff</th><th>Tools</th><th>Mock</th><th>Gated</th><th>Skills</th><th>Gated tool (never executes)</th></tr>
 <tr><td><b>Agency Office</b><br><small>Talvenor AI Receptionist Agency</small></td><td>15</td><td>8</td><td>5</td><td>3</td><td>15</td><td><small>send_email, publish_post, spend</small></td></tr>
@@ -30,19 +30,20 @@ if numbers are changed by hand, sync reverts them.</p>
 <tr><td><b>Creator OS / Content Machine and Engine</b><br><small>Creator OS — ToolPilot @ToolPilotai69</small></td><td>10</td><td>8</td><td>6</td><td>2</td><td>10</td><td><small>upload_video, spend</small></td></tr>
 </table>
 
-<h2>True state (from the real files)</h2>
+<h2>True State (from the real files)</h2>
 <ul>
 <li><b>Paying clients:</b> 0 &nbsp;|&nbsp; <b>First mail:</b> 162</li>
 <li><b>Email:</b> PAUSED since 2026-11-14 - SPF/DMARC DNS fix pending from Boss</li>
 <li><b>Vet Kit Gate 0:</b> NOT PASSED (2026-11-16)</li>
 <li><b>Creator OS 13 stage:</b> REAL 0 / MOCK 10 / STUB 0 / BLOCKED 3</li>
+<li><b>Staff check (every skill file listed in its STAFF.md):</b> Agency Office: OK; Digital Product Business Office: OK; Creator OS / Content Machine and Engine: OK</li>
 <li><b>Shared core handlers (from tools.json, 9 tools):</b> booking_reply (mock), draft_caption (mock), draft_email (mock), draft_script (mock), gmail_send (live-ready), kit_outline_read (mock), n8n_trigger (live-ready), research_notes (mock), status_read (mock)</li>
 </ul>
 
-<div class="note"><b>Gate (the law):</b> <code>ok</code> / <code>post it</code> / <code>upload it</code> /
+<div class="note"><b>Gate (law):</b> <code>ok</code> / <code>post it</code> / <code>upload it</code> /
 <code>send</code> / <code>go</code> — without Boss's exact word, no send / publish /
-spend / delete. Calling a gated tool writes PENDING in the ApprovalGateway,
-and nothing executes. Spend cap <b>$0</b>. Jarvis voice REAL (offline, $0).</div>
+spend / delete. A gated tool call writes PENDING to the ApprovalGateway,
+nothing executes. Spend cap <b>$0</b>. Jarvis voice REAL (offline, $0).</div>
 
 <footer>Built 2026-11-16 (Phase 5) — folder <code>~/workspace/talvenor-master-os/</code> |
 Host: Muse runtime + bridge cron ($0) — no 24/7 server.</footer>
