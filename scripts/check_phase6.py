@@ -358,6 +358,17 @@ def main():
 
     # 12. No live 136 scope in repo docs — only DROPPED notes allowed.
     # (This file itself is excluded: it holds the search pattern.)
+    # store/ is excluded too: it is runtime state, not scope docs — the
+    # lead store (store/leads.json) carries real phone numbers, lead
+    # IDs (L-0136) and review counts ("4.9/136 Google") that contain
+    # the digit sequence "136" without claiming any 136 scope. Same
+    # class of exclusion as models/ below (voice config data).
+    # Check scripts (check_*.py) are excluded as well: they enforce
+    # this rule and therefore name the pattern in their own assertions
+    # (e.g. check_unified_phase4.py asserts the new Phase 4 files
+    # contain no such digit sequence). They are enforcement code, not
+    # scope docs — the guard still covers every doc, config, page and
+    # worker in the repo.
     try:
         needles = ("136", "1189", "1,189")
         bad_lines = []
@@ -365,12 +376,17 @@ def main():
             # models/ excluded: upstream voice/model data file (Piper
             # .onnx.json has the number "136" — a voice config value, not scope)
             dirs[:] = [d for d in dirs
-                       if d not in ("__pycache__", ".git", "models")]
+                       if d not in ("__pycache__", ".git", "models", "store")]
             for name in files:
                 if not name.endswith((".md", ".json", ".html", ".py")):
                     continue
                 path = os.path.join(root, name)
                 if os.path.abspath(path) == os.path.abspath(__file__):
+                    continue
+                # Check scripts enforce this rule, so they name the
+                # pattern in their assertions — enforcement code, not
+                # scope docs.
+                if name.startswith("check_") and name.endswith(".py"):
                     continue
                 with open(path, encoding="utf-8", errors="replace") as f:
                     for lineno, line in enumerate(f, 1):

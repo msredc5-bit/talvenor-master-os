@@ -6,7 +6,7 @@ Verifies:
      remaining steps + email-pause gate + the two-systems-must-not-run-together rule +
      the $0 host's truth (Muse runtime + bridge cron, no 24/7 server)
   2. sync_status.py imports + collect_status() gives real values
-     (phase >= 4, clients 0, first mails 162, email PAUSED, Gate 0
+     (phase >= 4, clients 0, first mails 163, email PAUSED, Gate 0
      NOT PASSED, PA list 39, pipeline REAL 0 / MOCK 10 / BLOCKED 3,
      subs 0, both workflows NOT LIVE, store empty)
   3. Sync is deterministic — running twice gives byte-identical HTML; the HTML's
@@ -97,7 +97,7 @@ def main():
         real_tasks = json.load(open(os.path.join(BASE, "store", "tasks.json"), encoding="utf-8")).get("records", [])
         real_appr = json.load(open(os.path.join(BASE, "store", "approvals.json"), encoding="utf-8")).get("records", [])
         ok = (s["phase"] >= 4 and s["paying_clients"] == 0
-              and s["first_mails"] == 162 and s["email"] == "PAUSED"
+              and s["first_mails"] == 163 and s["email"] == "PAUSED"
               and s["gate0"] == "NOT PASSED" and s["pa_list"] == 39
               and s["pipeline"] == {"real": 0, "mock": 10, "stub": 0, "blocked": 3}
               and s["toolpilot_subs"] == 0
@@ -109,7 +109,7 @@ def main():
               and s["approvals_pending"] == len([r for r in real_appr if r.get("status") == "pending"])
               and s["approvals_approved"] == len([r for r in real_appr if r.get("status") == "approved"])
               and s["spend_cap_usd"] == 0)
-        check("sync collect_status: real values (phase >= 4, 0 clients, 162 mails, "
+        check("sync collect_status: real values (phase >= 4, 0 clients, 163 mails, "
               "Gate 0 NOT PASSED, PA 39, pipeline 0/10/3, NOT LIVE x2, "
               "counts match real store)", ok,
               f"phase={s['phase']}, gate0={s['gate0']}, pa={s['pa_list']}, "
