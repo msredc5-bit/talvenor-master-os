@@ -20,9 +20,9 @@ Telling Tier 1/2 leads about the Talvenor AI receptionist with personalized emai
 ## True status (CURRENT STATE — PAUSED)
 
 - **Email PAUSED since 2026-11-14.** Reason: DNS fix pending (SPF has no Gmail include, DMARC missing). Restart only once Boss fixes it in the DNS panel + says "check koro".
-- **First mail 162** — PA 39, TX 15, GA 16, FL 54, CA 14, NC 5, IL 9, MI 5, OH 1, NY 4.
+- **First mail 163** — PA 39, TX 15, GA 16, FL 54, CA 15, NC 5, IL 9, MI 5, OH 1, NY 4.
 - **Day 4 / Day 5 / Day 6 drafts — 25 each READY, not sent.** Once the pause lifts, what Boss says goes.
-- **Follow-up rule (standing, 2026-11-10):** no follow-up for a state until 100 first mails are complete in that state. No state is at 100 (FL ceiling 98 — it cannot reach 100). So follow-up is **PARKED**.
+- **Follow-up rule (standing, 2026-11-10):** no follow-up for a state until 100 first mails are complete in that state. No state is at 100 (FL ceiling 99 — it cannot reach 100). So follow-up is **PARKED**.
 - **IG DM: 5–10/day** via `@talvenor_ai` — needs Boss's approval tap.
 - **n8n auto-send READY, not LIVE** — Boss's import + 1 test mail pending.
 
@@ -53,7 +53,7 @@ Telling Tier 1/2 leads about the Talvenor AI receptionist with personalized emai
 ### Step 4 — Follow-up (PARKED)
 
 1. **100-mail rule:** follow-up for a state's leads only once 100 first mails are complete in that state.
-2. No state is at 100 now — **so no follow-up**. PA has 37 first mails.
+2. No state is at 100 now — **so no follow-up**. PA has 39 first mails (2026-11-12 count — the old "37" in this step was stale; PA `emailed.csv` holds 39 rows + header, matching the §True-status count above).
 3. A follow-up draft (`FollowUpAgent`) may be written, but it cannot be sent.
 4. **Gate:** `send` — + the 100-mail rule fulfilled.
 

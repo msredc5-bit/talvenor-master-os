@@ -21,7 +21,12 @@ Finding, verifying, scoring, and filing US home-service businesses (plumbing, HV
 ## True status (2026-11-19)
 
 - **Lead pool: 507 rows** — Tier 1: 2, Tier 2: 505. Files: `~/workspace/talvenor/leads-organized/` (state-wise folders: PA, TX, GA, FL, CA, NC, IL, MI, OH, NY).
-- **First mail 162** — PA 39, TX 15, GA 16, FL 54, CA 14, NC 5, IL 9, MI 5, OH 1, NY 4.
+  - **507 vs 537 note (Phase 2, 2026-11-23):** `pipeline.md` says 537 unique leads.
+    Both are right — 537 = 507 pool rows + 30 sent-history-only leads (already
+    emailed, score below 60, kept only to prevent double-mailing). Source:
+    `DELETION-LOG-2026-11-10.md` ("Total unique leads now: 537 (507 pool + 30
+    sent-history-only)").
+- **First mail 163** — PA 39, TX 15, GA 16, FL 54, CA 15, NC 5, IL 9, MI 5, OH 1, NY 4.
 - **Email PAUSED since 2026-11-14** — no mail goes to new leads, only discovery/filing continues.
 
 ## Step-by-step
