@@ -69,7 +69,7 @@ dashboards\status.json  ← numbers come here (not hand-written)
 |---|---|
 | Brain | **mock** — thinking is DRAFT, the live brain has not been flipped on |
 | Email outreach | **PAUSED** (since 2026-11-14) — the SPF/DMARC DNS fix is still in your hands |
-| Paying client | **0** · first mail 162 |
+| Paying client | **0** · first mail 163 |
 | Gate 0 (Vet Kit) | **NOT PASSED** — the Lemon Squeezy test is your step |
 | n8n workflows | **READY, NOT LIVE** — import + connect + test remaining |
 | YouTube upload | **OFF** — needs "upload it" + credentials |

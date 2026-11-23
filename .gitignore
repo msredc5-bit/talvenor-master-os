@@ -2,3 +2,14 @@ __pycache__/
 *.pyc
 00-CEO-Core/voice/models/
 00-CEO-Core/voice/output/
+
+# Phase 1 (Unified OS) — secrets and local state never belong in the repo.
+# API keys live in Windows environment variables ONLY (never in a file,
+# never in a public repo). store/ is deliberately NOT ignored —
+# store/tasks.json is tracked on GitHub.
+.env
+*.pem
+credentials*
+*.key
+*.lock
+backups/
