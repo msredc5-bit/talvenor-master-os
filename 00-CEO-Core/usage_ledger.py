@@ -39,6 +39,13 @@ import json
 import os
 from datetime import datetime, timezone
 
+try:
+    from store_io import write_json_atomic
+except ImportError:  # direct import from another directory
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from store_io import write_json_atomic  # noqa: E402
+
 _MASTER_OS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _STORE_DIR = os.path.join(_MASTER_OS_DIR, "store")
 CONFIG_PATH = os.path.join(_MASTER_OS_DIR, "00-CEO-Core", "config.json")
@@ -96,11 +103,9 @@ class UsageLedger:
             "task_cap_usd": self.task_cap_usd,
             "records": self.records,
         }
-        parent = os.path.dirname(self.ledger_path)
-        if parent:
-            os.makedirs(parent, exist_ok=True)
-        with open(self.ledger_path, "w", encoding="utf-8") as f:
-            json.dump(payload, f, indent=2, ensure_ascii=False)
+        # Phase 1 (Unified OS): atomic write — a concurrent writer can
+        # no longer tear a half-written ledger.
+        write_json_atomic(self.ledger_path, payload)
 
     def record(self, kind, provider, model, prompt_tokens=0,
                completion_tokens=0, cost_usd=0.0, task_id=None,

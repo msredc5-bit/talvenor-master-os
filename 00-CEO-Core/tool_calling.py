@@ -62,8 +62,11 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from audit import audit_log  # noqa: E402
 from human_approval_gateway import GATED_ACTIONS, ApprovalGateway  # noqa: E402
 from live_tools import LIVE_HANDLERS  # noqa: E402
+from permissions import check_permission, resolve_agent  # noqa: E402
+from store_io import update_json  # noqa: E402
 from trust_gate import trust_check  # noqa: E402
 from usage_ledger import UsageLedger  # noqa: E402
 
@@ -74,6 +77,29 @@ KIT_OUTLINE_PATH = os.path.join(
     _MASTER_OS_DIR, "02-Digital-Product-Department", "kit-outline.md"
 )
 CONFIG_PATH = os.path.join(_MASTER_OS_DIR, "00-CEO-Core", "config.json")
+GATE0_STATUS_PATH = os.path.join(
+    _MASTER_OS_DIR, "02-Digital-Product-Department", "gate0-status.md"
+)
+
+
+def _read_gate0_status():
+    """Gate 0 state from gate0-status.md's Status line — fail-closed.
+
+    Same parse as scripts/sync_status.py read_gate0_status(): the line
+    starting "**Status:" decides; anything else is UNKNOWN."""
+    try:
+        with open(GATE0_STATUS_PATH, "r", encoding="utf-8") as f:
+            text = f.read()
+    except OSError:
+        return "UNKNOWN"
+    for line in text.splitlines():
+        if line.strip().startswith("**Status:"):
+            if "NOT PASSED" in line:
+                return "NOT PASSED"
+            if "PASSED" in line:
+                return "PASSED"
+            return "UNKNOWN"
+    return "UNKNOWN"
 
 BOOKING_LINK = "https://calendar.app.google/WLoxBfnLGTdjK3LB8"
 BRAND_LINE = "You run the jobs. We run the phone."
@@ -239,7 +265,12 @@ def kit_outline_read(args, context=None):
 
 
 def status_read(args, context=None):
-    """Reads the real config.json and returns the honest status + phase + spend cap."""
+    """Reads the real config.json and returns the honest status + phase + spend cap.
+
+    Phase 2: the notes are built from the values actually read — the old
+    hardcoded "Spend cap is $0. Email outreach is PAUSED. Gate 0 NOT
+    PASSED." line is gone. Gate 0 comes from gate0-status.md, not config.
+    """
     try:
         with open(CONFIG_PATH, "r", encoding="utf-8") as f:
             config = json.load(f)
@@ -250,6 +281,11 @@ def status_read(args, context=None):
             "error": f"Config file unreadable: {CONFIG_PATH} ({exc})",
         }
     honest = config.get("honest_status", {})
+    spend_cap = config.get("spend_cap_usd")
+    spend_note = (
+        f"${spend_cap}" if isinstance(spend_cap, (int, float)) else "UNKNOWN"
+    )
+    email_note = honest.get("email_outreach") or "UNKNOWN"
     status = {
         "honest_status": honest,
         "phase": config.get("phase"),
@@ -259,7 +295,8 @@ def status_read(args, context=None):
         "output": json.dumps(status, indent=2, ensure_ascii=False),
         "notes": [
             "Read from the real config.json — not invented.",
-            "Spend cap is $0. Email outreach is PAUSED. Gate 0 NOT PASSED.",
+            f"Spend cap is {spend_note}. Email outreach: {email_note}. "
+            f"Gate 0: {_read_gate0_status()} (gate0-status.md).",
         ],
     }
 
@@ -374,19 +411,16 @@ class ToolRegistry:
 
 def _log_call(record, calls_log_path=None):
     path = calls_log_path or DEFAULT_CALLS_LOG_PATH
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+    # Phase 1 (Unified OS): locked read-modify-write + atomic write —
+    # a concurrent caller can no longer lose another call's record.
+    def _apply(data):
         records = data.get("records", []) if isinstance(data, dict) else []
-    except (FileNotFoundError, json.JSONDecodeError):
-        records = []
-    records.append(record)
-    payload = {"schema": "tool-calls-v1", "records": records}
-    parent = os.path.dirname(path)
-    if parent:
-        os.makedirs(parent, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, indent=2, ensure_ascii=False)
+        if not isinstance(records, list):
+            records = []
+        records.append(record)
+        return {"schema": "tool-calls-v1", "records": records}
+
+    update_json(path, _apply, default={"schema": "tool-calls-v1", "records": []})
 
 
 def _validate_args(tool, args):
@@ -421,16 +455,22 @@ def call_tool(name, args, context=None, registry=None, approvals_path=None,
 
     Order:
       1. Unknown tool -> error
-      2. args validation fail -> error
-      3. gated tool -> trust_check (Phase 1): on deny, "blocked-trust"
+      2. Permission -> an identified agent that may not use this tool
+         gets "denied-permission" (permissions.py — the enforced
+         agent-tool table). A call with no identified agent follows the
+         legacy dispatcher path (see permissions.py).
+      3. args validation fail -> error
+      4. gated tool -> trust_check (Phase 1): on deny, "blocked-trust"
          (no approval is recorded); otherwise a PENDING request in the
          ApprovalGateway, the handler does not run
-      4. stub -> blocked-stub
-      4b. live-ready (if it got past the gated intercept) -> error, fail-closed
-      5. mock -> run HANDLERS[handler], draft-ready
-      6. real + no handler -> error (a bug, not a silent pass)
-      7. Every call is appended to the calls log (log_error if the log fails);
+      5. stub -> blocked-stub
+      5b. live-ready (if it got past the gated intercept) -> error, fail-closed
+      6. mock -> run HANDLERS[handler], draft-ready
+      7. real + no handler -> error (a bug, not a silent pass)
+      8. Every call is appended to the calls log (log_error if the log fails);
          with ledger_path, a receipt is also written to the usage ledger (cost $0.00).
+         Gate decisions and permission denials are also appended to the
+         audit log (store/audit.log, next to the calls log).
     """
     args = args if isinstance(args, dict) else {}
     requested_by = "Main CEO Bot"
@@ -448,13 +488,28 @@ def call_tool(name, args, context=None, registry=None, approvals_path=None,
         _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
         return result
 
+    # 2. Permission — the enforced agent-tool allowlist (Phase 1).
+    agent_key = resolve_agent(context)
+    allowed, perm_reason = check_permission(agent_key, name)
+    if not allowed:
+        result = {
+            "status": "denied-permission",
+            "tool": name,
+            "agent": agent_key,
+            "error": perm_reason,
+            "note": ("Permission denied — this agent has no tool "
+                     "assignment for this tool. Nothing was executed."),
+        }
+        _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
+        return result
+
     validation_error = _validate_args(tool, args)
     if validation_error:
         result = {"status": "error", "tool": name, "error": validation_error}
         _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
         return result
 
-    # 3. Gated tool — the handler never runs at all, even with an approval_id.
+    # 4. Gated tool — the handler never runs at all, even with an approval_id.
     if tool.get("gated"):
         gated_action = tool.get("gated_action")
         if gated_action not in GATED_ACTIONS:
@@ -505,7 +560,7 @@ def call_tool(name, args, context=None, registry=None, approvals_path=None,
         _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
         return result
 
-    # 4. Stub — absent, cannot be run.
+    # 5. Stub — absent, cannot be run.
     if tool.get("status") == "stub":
         result = {
             "status": "blocked-stub",
@@ -515,7 +570,7 @@ def call_tool(name, args, context=None, registry=None, approvals_path=None,
         _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
         return result
 
-    # 4b. Live-ready — fail-closed if it gets here after the gated intercept:
+    # 5b. Live-ready — fail-closed if it gets here after the gated intercept:
     # no direct execution path exists. (A gated live-ready tool never
     # gets here — it becomes PENDING in step 3. This branch is only defense.)
     if tool.get("status") == "live-ready":
@@ -528,7 +583,7 @@ def call_tool(name, args, context=None, registry=None, approvals_path=None,
         _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
         return result
 
-    # 5. Mock — run the handler, return a DRAFT.
+    # 6. Mock — run the handler, return a DRAFT.
     if tool.get("status") == "mock":
         handler_name = tool.get("handler")
         handler = HANDLERS.get(handler_name)
@@ -561,7 +616,7 @@ def call_tool(name, args, context=None, registry=None, approvals_path=None,
         _finish(result, name, args, requested_by, calls_log_path, ledger_path, task_id)
         return result
 
-    # 6. Real tool, no handler — a bug, not a silent pass.
+    # 7. Real tool, no handler — a bug, not a silent pass.
     result = {
         "status": "error",
         "tool": name,
@@ -571,11 +626,47 @@ def call_tool(name, args, context=None, registry=None, approvals_path=None,
     return result
 
 
+def _audit_call(result, name, requested_by, calls_log_path):
+    """Append gate decisions + permission denials to the audit log.
+
+    The audit file lives next to the calls log (same store dir), so a
+    TEMP calls log keeps its audit in TEMP too. audit_log() never raises.
+    """
+    status = result.get("status")
+    if status in ("blocked-trust", "pending-approval"):
+        audit_path = None
+        if calls_log_path:
+            audit_path = os.path.join(
+                os.path.dirname(os.path.abspath(calls_log_path)), "audit.log")
+        audit_log("gate_decision", {
+            "tool": name,
+            "status": status,
+            "gated_action": result.get("gated_action"),
+            "requested_by": requested_by,
+            "approval_id": (result.get("approval") or {}).get("id"),
+        }, audit_path=audit_path)
+    elif status == "denied-permission":
+        audit_path = None
+        if calls_log_path:
+            audit_path = os.path.join(
+                os.path.dirname(os.path.abspath(calls_log_path)), "audit.log")
+        audit_log("permission_denied", {
+            "tool": name,
+            "agent": result.get("agent"),
+            "requested_by": requested_by,
+            "error": result.get("error"),
+        }, audit_path=audit_path)
+
+
 def _finish(result, name, args, requested_by, calls_log_path, ledger_path=None,
             task_id=None):
     """Append a call's result to the log. If the log fails, log_error is set on the result.
     With ledger_path, a receipt is also written to the usage ledger (mock call = $0.00);
-    even if the ledger write fails, the call's result is returned, with ledger_error."""
+    even if the ledger write fails, the call's result is returned, with ledger_error.
+    Gate decisions (blocked-trust / pending-approval) and permission denials are
+    also appended to the audit log (audit.log next to the calls log, so a TEMP
+    calls log keeps its audit in TEMP too — the real store is never touched
+    by a test run). A failed audit write never breaks the call."""
     record = {
         "id": uuid.uuid4().hex[:12],
         "tool": name,
@@ -588,6 +679,7 @@ def _finish(result, name, args, requested_by, calls_log_path, ledger_path=None,
         _log_call(record, calls_log_path=calls_log_path)
     except Exception as exc:  # noqa: BLE001 — the log must never crash the call
         result["log_error"] = f"Could not write calls log: {exc}"
+    _audit_call(result, name, requested_by, calls_log_path)
     if ledger_path is not None:
         try:
             kind = {"draft-ready": "mock", "pending-approval": "gate",
@@ -643,6 +735,23 @@ if __name__ == "__main__":
         "handler": "draft_email",
     })
 
+    registry.register({
+        "name": "gmail_send",
+        "description": "Send an email (gated — test double with a mock handler).",
+        "params": {
+            "type": "object",
+            "properties": {
+                "business_name": {"type": "string", "description": "Business name."},
+                "topic": {"type": "string", "description": "Email topic."},
+            },
+            "required": ["business_name", "topic"],
+        },
+        "gated": True,
+        "gated_action": "send",
+        "status": "mock",
+        "handler": "draft_email",
+    })
+
     mock_result = call_tool(
         "draft_email",
         {"business_name": "ABC Plumbing", "topic": "missed calls"},
@@ -675,9 +784,45 @@ if __name__ == "__main__":
     )
     assert unknown_result["status"] == "error", unknown_result
 
+    # Permission (Phase 1, Unified OS) — an identified agent that may not
+    # use the tool is denied; an unidentified caller follows the legacy path.
+    denied_result = call_tool(
+        "draft_email",
+        {"business_name": "ABC Plumbing", "topic": "missed calls"},
+        context={"agent": "main_ceo_bot"},
+        registry=registry, approvals_path=tmp_approvals, calls_log_path=tmp_log,
+    )
+    assert denied_result["status"] == "denied-permission", denied_result
+    assert denied_result["agent"] == "main_ceo_bot"
+    assert "not allowed" in denied_result["error"]
+
+    gated_denied = call_tool(
+        "gmail_send",
+        {"business_name": "ABC Plumbing", "topic": "missed calls"},
+        context={"agent": "OutreachDrafter"},
+        registry=registry, approvals_path=tmp_approvals, calls_log_path=tmp_log,
+    )
+    assert gated_denied["status"] == "denied-permission", gated_denied
+
+    allowed_result = call_tool(
+        "draft_email",
+        {"business_name": "ABC Plumbing", "topic": "missed calls"},
+        context={"agent": "OutreachDrafter"},
+        registry=registry, approvals_path=tmp_approvals, calls_log_path=tmp_log,
+    )
+    assert allowed_result["status"] == "draft-ready", allowed_result
+
     with open(tmp_log, "r", encoding="utf-8") as f:
         logged = json.load(f)
     assert logged["schema"] == "tool-calls-v1"
-    assert len(logged["records"]) == 4, logged  # mock + gated + bad + unknown
+    assert len(logged["records"]) == 7, logged  # mock + gated + bad + unknown + denied x2 + allowed
+
+    # Gate decisions + denials landed in the audit log next to the calls log.
+    audit_path = os.path.join(tmp_dir, "audit.log")
+    with open(audit_path, "r", encoding="utf-8") as f:
+        audit_lines = [json.loads(line) for line in f if line.strip()]
+    audit_events = [r["event"] for r in audit_lines]
+    assert "gate_decision" in audit_events, audit_lines
+    assert audit_events.count("permission_denied") == 2, audit_lines
 
     print("tool_calling: OK")
