@@ -31,7 +31,7 @@
 | `draft_caption` | mock, draft-only | DRAFT of a caption + hashtag + CTA pack |
 | `draft_script` | mock, draft-only | DRAFT of a Reel / video script outline |
 | `kit_outline_read` | mock, read-only | Reading the kit outline file |
-| `status_read` | mock, read-only | Reading the Agency's true status (first mails 162, clients 0, email PAUSED) |
+| `status_read` | mock, read-only | Reading the Agency's true status (first mails 163, clients 0, email PAUSED) |
 | `booking_reply` | mock, draft-only | DRAFT of a one-line reply with the booking link |
 | `gmail_send` | **gated, live-ready** | Sending a real email — never executes |
 | `n8n_trigger` | **gated, live-ready** | Triggering an n8n webhook — never executes |

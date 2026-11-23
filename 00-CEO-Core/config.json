@@ -84,7 +84,8 @@
   ],
   "honest_status": {
     "email_outreach": "PAUSED since 2026-11-14 - SPF/DMARC DNS fix pending from Boss",
-    "first_mails_sent": 162,
+    "first_mails_sent": 163,
+    "first_mails_sent_note": "163 = 162 filed emailed.csv rows + 1 verified filing gap: Isackson Plumbing (San Francisco CA) sent 2026-11-12, Gmail Sent message 1a1cfb0ff25cdb8c, no emailed.csv row (verified 2026-11-23). Lead store (store/leads.json) computes the same 163 from sent records.",
     "paying_clients": 0,
     "phases": {
       "phase_0": "BUILT (this folder)",
@@ -104,7 +105,7 @@
       "phase_11_providers": "BUILT 2026-11-20 - 7 LLM providers (meta, openai, anthropic, gemini, kimi, grok, openrouter) + fallback chain in config; brain still mock; no live calls, no keys on record; model name now comes from config",
       "improvement_p1_gate": "BUILT 2026-11-21 - trust_gate.py: rule-based trust check (read/draft free, quote verification, coverage, standing deny spend cap $0 + dental/medical DQ) + ConfirmationStore run-once (failed = UNCERTAIN, never re-run), wired into ApprovalGateway + call_tool (blocked-trust, no approval recorded); brain still mock; check_gate.py 24/24",
       "improvement_p2_memory_ledger": "BUILT 2026-11-21 - owner_memory.py (quote-verified, owner-messages-only, 256 KiB cap, 3 seed entries from Boss's recorded words) + usage_ledger.py ($0 cap as measurement, task check-in threshold $0, mock always $0.00) + dispatcher ledger threading; check_memory_ledger.py 19/19",
-      "improvement_p3_quiet_schedules": "BUILT 2026-11-21 - quiet_schedules.py (watchMarker sha256, skip when unchanged, one run at a time, corrections keep the rest, failed work keeps marker); 1 schedule seeded (taskboard-queue-watch, paused, no runner attached); check_quiet_schedules.py 15/15"
+      "improvement_p3_quiet_schedules": "BUILT 2026-11-21 - quiet_schedules.py (watchMarker sha256, skip when unchanged, one run at a time, corrections keep the rest, failed work keeps marker); 1 schedule seeded (taskboard-queue-watch, paused, no runner attached); check_quiet_schedules.py 16/16"
     }
   },
   "owner": "Md Mainuddin (Boss)",

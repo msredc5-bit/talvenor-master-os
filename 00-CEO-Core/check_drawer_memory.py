@@ -17,7 +17,7 @@ Structure — DECIDED on merit (2026-11-21,
 Checks:
   1. store/memory.json is the only memory JSON; no per-agent
      memory file in the repo
-  2. BOXES has 11 fixed boxes (shared + CEO + Chief + 8 dept)
+  2. BOXES has 13 fixed boxes (shared + CEO + Chief + 8 dept + products + content)
   3. Real store: 3 seed owner entries intact, all owner entries
      quote-verified (live notes may grow — not "exactly 3 entries")
   4. Temp store seed -> 3 entries, all shared
@@ -94,7 +94,11 @@ def main():
                         and n.endswith(".json")]
         stray = []
         for root, _dirs, files in os.walk(BASE):
-            if "__pycache__" in root or ".git" in root:
+            if ("__pycache__" in root or ".git" in root
+                    or "backups" in root.split(os.sep)):
+                # Phase 1 (Unified OS): backups/ holds snapshots of the
+                # one store file (scripts/backup_store.py) — not live
+                # per-agent memory files, so it is not a stray.
                 continue
             for name in files:
                 path = os.path.join(root, name)
@@ -110,18 +114,19 @@ def main():
     except Exception as e:  # noqa: BLE001
         check("one store file; no per-agent memory files in the repo", False, str(e))
 
-    # 2. BOXES — 11 fixed boxes.
+    # 2. BOXES — 13 fixed boxes.
     try:
         from owner_memory import BOXES, SHARED_BOX, SEED_ENTRIES, OwnerMemory  # noqa: PLC0415
         expected = {"shared", "main_ceo_bot", "chief_of_staff_agency",
                     "dept_sales", "dept_marketing", "dept_engineering",
                     "dept_operations", "dept_strategy", "dept_finance",
-                    "dept_quality", "dept_innovation"}
-        check("BOXES has all 11 fixed boxes (shared + CEO + Chief + 8 dept)",
+                    "dept_quality", "dept_innovation",
+                    "products", "content"}
+        check("BOXES has all 13 fixed boxes (shared + CEO + Chief + 8 dept + products + content)",
               set(BOXES) == expected and SHARED_BOX == "shared",
               f"boxes={len(BOXES)}")
     except Exception as e:  # noqa: BLE001
-        check("BOXES has all 11 fixed boxes (shared + CEO + Chief + 8 dept)",
+        check("BOXES has all 13 fixed boxes (shared + CEO + Chief + 8 dept + products + content)",
               False, str(e))
         return 1
 
