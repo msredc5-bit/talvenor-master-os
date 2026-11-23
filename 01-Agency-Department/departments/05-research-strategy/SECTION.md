@@ -5,7 +5,7 @@ industry, pricing, niche, offer, and market opportunity, so the Agency
 moves ahead with the right niche and the right offer. The manager delegates the task to the specialist
 and returns their DRAFT (Phase 3, 2026-11-19).
 
-**Honest status (2026-11-19):** Paying client 0. First mail 162. Email PAUSED
+**Honest status (2026-11-19):** Paying client 0. First mail 163. Email PAUSED
 (since 2026-11-14, DNS fix pending). Brain mock ($0). Booking:
 https://calendar.app.google/WLoxBfnLGTdjK3LB8 · Phone +1 (947) 223-0244.
 
@@ -52,7 +52,7 @@ competitor, industry, pricing, niche, offer, market.
 | Niche Selection Agent | EXISTING | `specialists/niche_selection_agent.py` (`niche_selection`, gate none) — dental/medical always DQ, legal gated until the 4th client; skill `skills/niche-selection-agent.md`. |
 | Offer Development Agent | EXISTING | `specialists/offer_development_agent.py` (`offer_development`, gate none) — no guarantee; skill `skills/offer-development-agent.md`. |
 | Market Opportunity Agent | EXISTING | `specialists/market_opportunity_agent.py` (`market_opportunity`, gate none) — no invented market size/stat; skill `skills/market-opportunity-agent.md`. |
-| Business Intelligence Agent | EXISTING | `specialists/business_intelligence_agent.py` (`business_intelligence`, gate none) — only real numbers (client 0, first mail 162, email PAUSED, revenue $0); skill `skills/business-intelligence-agent.md`. |
+| Business Intelligence Agent | EXISTING | `specialists/business_intelligence_agent.py` (`business_intelligence`, gate none) — only real numbers (client 0, first mail 163, email PAUSED, revenue $0); skill `skills/business-intelligence-agent.md`. |
 
 ## Missing roles (no worker)
 
@@ -73,5 +73,5 @@ There is no GAP role in this department.
 - LOCKED pricing (2026-11-12) internal only — never quote a price to a prospect.
 - Dental/medical/patient-health never a target.
 - Chief wiring Phase 2 DONE — the Agency Chief now calls this manager via DEPARTMENT_ROUTING.
-- Paying client 0; first mail 162; Email PAUSED (since 2026-11-14).
+- Paying client 0; first mail 163; Email PAUSED (since 2026-11-14).
 - Live voice stack Vapi/Sophia — Sophia is a live receptionist, not a demo.

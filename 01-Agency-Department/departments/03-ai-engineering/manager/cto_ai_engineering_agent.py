@@ -43,24 +43,28 @@ DEPARTMENT_TASKS = {
     },
     "solution_architect": {
         "specialist": "AI Solution Architect",
+        "class": "AISolutionArchitect",
         "file": "departments/03-ai-engineering/specialists/ai_solution_architect.py",
         "gate": None,
         "status": "EXISTING",
     },
     "conversation_design": {
         "specialist": "Conversation Designer",
+        "class": "ConversationDesigner",
         "file": "departments/03-ai-engineering/specialists/conversation_designer.py",
         "gate": None,
         "status": "EXISTING",
     },
     "prompt_engineering": {
         "specialist": "Prompt Engineering Agent",
+        "class": "PromptEngineeringAgent",
         "file": "departments/03-ai-engineering/specialists/prompt_engineering_agent.py",
         "gate": None,
         "status": "EXISTING",
     },
     "vapi_integration": {
         "specialist": "Vapi Integration Agent",
+        "class": "VapiIntegrationAgent",
         "file": "departments/03-ai-engineering/specialists/vapi_integration_agent.py",
         "gate": None,
         "status": "EXISTING",
@@ -74,36 +78,30 @@ DEPARTMENT_TASKS = {
     },
     "calendar_integration": {
         "specialist": "Calendar Integration Agent",
+        "class": "CalendarIntegrationAgent",
         "file": "departments/03-ai-engineering/specialists/calendar_integration_agent.py",
         "gate": None,
         "status": "EXISTING",
     },
     "n8n_automation": {
         "specialist": "n8n Automation Engineer",
+        "class": "N8nAutomationEngineer",
         "file": "departments/03-ai-engineering/specialists/n8n_automation_engineer.py",
         "gate": None,
         "status": "EXISTING",
     },
     "deployment": {
         "specialist": "Deployment Agent",
+        "class": "DeploymentAgent",
         "file": "departments/03-ai-engineering/specialists/deployment_agent.py",
         "gate": None,
         "status": "EXISTING",
     },
 }
 
-# task_kind -> specialist class name (manager -> specialist importlib loading,
-# like the Chief's DEPARTMENT_ROUTING loader).
-SPECIALIST_CLASSES = {
-    "solution_architect": "AISolutionArchitect",
-    "conversation_design": "ConversationDesigner",
-    "prompt_engineering": "PromptEngineeringAgent",
-    "vapi_integration": "VapiIntegrationAgent",
-    "crm_integration": "CRMIntegrationAgent",
-    "calendar_integration": "CalendarIntegrationAgent",
-    "n8n_automation": "N8nAutomationEngineer",
-    "deployment": "DeploymentAgent",
-}
+# NOTE (Phase 2): the old SPECIALIST_CLASSES parallel map was deleted.
+# The class for a standalone specialist comes from the DEPARTMENT_TASKS
+# entry itself, so the map cannot drift out of sync.
 
 
 class CTOAIEngineeringAgent:
@@ -263,7 +261,9 @@ class CTOAIEngineeringAgent:
                 f"dept03_specialist_{task_kind}", specialist_path)
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
-            specialist_cls = getattr(mod, SPECIALIST_CLASSES[task_kind])
+            # Phase 2: the class comes from the DEPARTMENT_TASKS entry
+            # itself — the old SPECIALIST_CLASSES parallel map is gone.
+            specialist_cls = getattr(mod, entry["class"])
             specialist = specialist_cls()
             gw = gateway if gateway is not None else self._gateway(approvals_path)
             return specialist.run(task, brain, gw, approvals_path)

@@ -98,7 +98,7 @@ Only an approved item is written.
 
 ## Honest Status
 
-- Paying clients: **0**. Email **PAUSED since 2026-11-14**; first mails 162.
+- Paying clients: **0**. Email **PAUSED since 2026-11-14**; first mails 163.
 - **CRM: n8n Cloud Data Tables PLANNED, not live** — there is no live record.
 - Lead pool: 537 unique (CSV) — this is what works in place of the CRM now.
 - Brain: **mock ($0)**; live MetaSpark UNPROVEN.

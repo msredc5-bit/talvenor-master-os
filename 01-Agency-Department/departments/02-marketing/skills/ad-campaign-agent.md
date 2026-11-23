@@ -107,7 +107,7 @@ if a Green has < 10 conversions, scale carefully.
 
 ## Honest Status
 
-- Paying clients: **0**. Email **PAUSED since 2026-11-14**; first mails 162.
+- Paying clients: **0**. Email **PAUSED since 2026-11-14**; first mails 163.
 - **Paid ads: never run, $0 spent.** No ad account is connected.
 - Brain: **mock ($0)**; live MetaSpark UNPROVEN.
 - $0 spend cap.

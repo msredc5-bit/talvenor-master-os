@@ -9,12 +9,12 @@
 
 ## Goal
 
-Making a DRAFT of a BI summary from the topic Boss gave — using only real numbers (client 0, first mail 162, email PAUSED, revenue $0).
+Making a DRAFT of a BI summary from the topic Boss gave — using only real numbers (client 0, first mail 163, email PAUSED, revenue $0).
 
 ## Instructions (step-by-step)
 
 1. Look at the task's `payload.topic` — if missing, "BOSS INPUT REQUIRED".
-2. Write only real numbers: client 0, first mail 162, email PAUSED, revenue $0.
+2. Write only real numbers: client 0, first mail 163, email PAUSED, revenue $0.
 3. If any other metric is not known, "BOSS INPUT REQUIRED" — no guessing.
 4. Start the draft with `[MOCK DRAFT]`; the DRAFT is the final word.
 5. If there is a `gated_action`, approval first — no draft without approval, record PENDING and stop.
@@ -50,7 +50,7 @@ Making a DRAFT of a BI summary from the topic Boss gave — using only real numb
 
 ## Honest status
 
-- **Paying client 0; first mail 162; Email PAUSED (since 2026-11-14).**
+- **Paying client 0; first mail 163; Email PAUSED (since 2026-11-14).**
 - Brain mock ($0) — all output is DRAFT.
 - Live voice stack Vapi/Sophia — Sophia is a live receptionist, not a demo.
 
