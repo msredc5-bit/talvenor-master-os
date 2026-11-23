@@ -53,30 +53,35 @@ DEPARTMENT_TASKS = {
     },
     "call_scenario_testing": {
         "specialist": "Call Scenario Testing Agent",
+        "class": "CallScenarioTestingAgent",
         "file": "departments/07-quality-security/specialists/call_scenario_testing_agent.py",
         "gate": None,
         "status": "EXISTING",
     },
     "workflow_testing": {
         "specialist": "Workflow Testing Agent",
+        "class": "WorkflowTestingAgent",
         "file": "departments/07-quality-security/specialists/workflow_testing_agent.py",
         "gate": None,
         "status": "EXISTING",
     },
     "data_validation": {
         "specialist": "Data Validation Agent",
+        "class": "DataValidationAgent",
         "file": "departments/07-quality-security/specialists/data_validation_agent.py",
         "gate": None,
         "status": "EXISTING",
     },
     "security_monitoring": {
         "specialist": "Security Monitoring Agent",
+        "class": "SecurityMonitoringAgent",
         "file": "departments/07-quality-security/specialists/security_monitoring_agent.py",
         "gate": None,
         "status": "EXISTING",
     },
     "access_control": {
         "specialist": "Access Control Agent",
+        "class": "AccessControlAgent",
         "file": "departments/07-quality-security/specialists/access_control_agent.py",
         "gate": None,
         "status": "EXISTING",
@@ -90,41 +95,17 @@ DEPARTMENT_TASKS = {
     },
     "compliance_review": {
         "specialist": "Compliance Review Agent",
+        "class": "ComplianceReviewAgent",
         "file": "departments/07-quality-security/specialists/compliance_review_agent.py",
         "gate": None,
         "status": "EXISTING",
     },
 }
 
-# task_kind -> (specialist module file, relative to 01-Agency-Department/,
-# class name). Only for standalone .py specialists — QAEngineer
-# (engine/workers/...) is not here; for it, the plan-draft behavior stays.
-SPECIALIST_MODULES = {
-    "call_scenario_testing": (
-        "departments/07-quality-security/specialists/call_scenario_testing_agent.py",
-        "CallScenarioTestingAgent",
-    ),
-    "workflow_testing": (
-        "departments/07-quality-security/specialists/workflow_testing_agent.py",
-        "WorkflowTestingAgent",
-    ),
-    "data_validation": (
-        "departments/07-quality-security/specialists/data_validation_agent.py",
-        "DataValidationAgent",
-    ),
-    "security_monitoring": (
-        "departments/07-quality-security/specialists/security_monitoring_agent.py",
-        "SecurityMonitoringAgent",
-    ),
-    "access_control": (
-        "departments/07-quality-security/specialists/access_control_agent.py",
-        "AccessControlAgent",
-    ),
-    "compliance_review": (
-        "departments/07-quality-security/specialists/compliance_review_agent.py",
-        "ComplianceReviewAgent",
-    ),
-}
+# NOTE (Phase 2): the old SPECIALIST_MODULES parallel map was deleted.
+# The file + class for a standalone specialist come from the
+# DEPARTMENT_TASKS entry itself, so the map cannot drift out of sync —
+# that drift is what left backup_recovery unreachable before Phase 2.
 
 
 class ChiefQualitySecurityAgent:
@@ -185,17 +166,19 @@ class ChiefQualitySecurityAgent:
             "No dental/medical."
         )
 
-    def _load_specialist(self, task_kind):
-        """Loading a standalone specialist .py with importlib (like the Chief's loader)."""
-        module_file, class_name = SPECIALIST_MODULES[task_kind]
+    def _load_specialist(self, entry):
+        """Loading a standalone specialist .py with importlib (like the Chief's loader).
+
+        The file + class come from the DEPARTMENT_TASKS entry itself —
+        there is no second map to drift out of sync."""
         here = os.path.dirname(os.path.abspath(__file__))
         agency_dir = os.path.normpath(os.path.join(here, "..", "..", ".."))
-        specialist_path = os.path.join(agency_dir, module_file)
+        specialist_path = os.path.join(agency_dir, entry["file"])
         spec = importlib.util.spec_from_file_location(
-            f"dept07_specialist_{task_kind}", specialist_path)
+            f"dept07_specialist_{entry['class']}", specialist_path)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
-        return getattr(mod, class_name)()
+        return getattr(mod, entry["class"])()
 
     def run(self, task, brain=None, gateway=None, approvals_path=None):
         """Running a specialist or building a delegation plan DRAFT. Writes no file, touches no network."""
@@ -276,8 +259,15 @@ class ChiefQualitySecurityAgent:
 
         # If a standalone specialist exists, load and run it (importlib,
         # like the Chief's loader) — return the specialist's result.
-        if task_kind in SPECIALIST_MODULES:
-            specialist = self._load_specialist(task_kind)
+        # The file + class come from the DEPARTMENT_TASKS entry itself
+        # (Phase 2: the old SPECIALIST_MODULES parallel map was deleted).
+        # QAEngineer (engine/workers/...) is not a standalone specialist;
+        # for it, the plan-draft behavior below stays.
+        if (entry is not None
+                and entry["file"].startswith(
+                    "departments/07-quality-security/specialists/")
+                and entry.get("class")):
+            specialist = self._load_specialist(entry)
             return specialist.run(task, brain, gateway, approvals_path)
 
         if entry is None:

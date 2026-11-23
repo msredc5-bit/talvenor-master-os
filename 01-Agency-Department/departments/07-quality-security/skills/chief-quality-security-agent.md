@@ -87,7 +87,7 @@ not execution, not running a check yourself.
 ## Honest status
 
 - **Mapped staff 8** — QAEngineer (also shared with dept 03) + 7 specialists (6 from Phase 3 + Backup & Recovery 2026-11-21; all DRAFT only, gate None); voice quality partial; backup & recovery EXISTING — DRAFT plan only, restore test not done.
-- **Paying client 0; first mail 162; Email PAUSED (since 2026-11-14).**
+- **Paying client 0; first mail 163; Email PAUSED (since 2026-11-14).**
 - Brain mock ($0) — all output is DRAFT.
 - Chief wiring Phase 2 DONE — Agency Chief now calls this manager through DEPARTMENT_ROUTING.
 - Live voice stack Vapi/Sophia — Sophia is a live receptionist, not a demo.

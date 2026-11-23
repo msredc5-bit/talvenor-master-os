@@ -70,7 +70,7 @@ The checklist is the final word; running validation yourself is not.
 
 ## Honest status
 
-- **Paying client 0; first mail 162; Email PAUSED (since 2026-11-14).**
+- **Paying client 0; first mail 163; Email PAUSED (since 2026-11-14).**
 - Brain mock ($0) — all output is DRAFT.
 - DB = JSON store files; CRM (n8n Cloud Data Tables) PLANNED, not live.
 - This agent reads no file — writing checklists is its job.

@@ -121,7 +121,7 @@ It is not enough for only one person to be able to read the runbook — anyone m
 
 ## Honest Status
 
-- Paying clients: **0**. Email **PAUSED since 2026-11-14**; first mails 162.
+- Paying clients: **0**. Email **PAUSED since 2026-11-14**; first mails 163.
 - **Backup system: not yet** — the repo is pushed to GitHub (that is the backup for now),
   no dated backup of the store file, no restore test done.
 - Brain: **mock ($0)**; live MetaSpark UNPROVEN.

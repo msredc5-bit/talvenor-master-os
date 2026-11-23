@@ -6,7 +6,7 @@ monitoring, access control, backup, compliance review. The manager loads and run
 specialists (DRAFT only); for QAEngineer it only builds a DRAFT of the DELEGATION PLAN
 for routing the task to a specialist.
 
-**True status (2026-11-19):** Paying client 0. First mail 162. Email PAUSED
+**True status (2026-11-19):** Paying client 0. First mail 163. Email PAUSED
 (since 2026-11-14, DNS fix pending). Brain mock ($0). Booking:
 https://calendar.app.google/WLoxBfnLGTdjK3LB8 · Phone +1 (947) 223-0244.
 Live voice stack Vapi/Sophia — Sophia is a live receptionist, not a demo.
@@ -75,5 +75,5 @@ builds a DRAFT of the delegation plan as before.
 - No client facts/statistics are invented — if absent, "BOSS INPUT REQUIRED".
 - Dental/medical/patient-health is never a target.
 - Chief wiring Phase 2 DONE — Agency Chief now calls this manager through DEPARTMENT_ROUTING.
-- Paying client 0; first mail 162; Email PAUSED (since 2026-11-14).
+- Paying client 0; first mail 163; Email PAUSED (since 2026-11-14).
 - Live voice stack Vapi/Sophia — Sophia is a live receptionist, not a demo.
