@@ -61,7 +61,7 @@ If an unknown task type arrives, the Chief admits the mistake and stops — it d
 ## True State (Phase 1)
 
 - Email PAUSED — the DNS fix is still in Boss's hands.
-- First mail 162, paying clients 0, replies seen in Gmail 0 (Zoho unchecked).
+- First mail 163, paying clients 0, replies seen in Gmail 0 (Zoho unchecked).
 - Day 4/5/6 drafts: 25 each READY, not sent (verified from the files).
-- Follow-up: due nowhere (100-mail rule; FL ceiling 98).
+- Follow-up: due nowhere (100-mail rule; FL ceiling 99).
 - Mock brain ($0) — results carry a "MOCK" label; the live brain is not here.
