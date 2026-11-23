@@ -62,7 +62,7 @@ so follow-up is **PARKED** — no follow-up in any state until 100 first mails.
 - **Paying clients: 0** — there is still no paying client.
 - **Email PAUSED since 2026-11-14** — no email goes out until the SPF/DMARC fix;
   first mails are stuck at 162.
-- **Follow-ups PARKED** — 100-mail rule; Pennsylvania 37 first mails.
+- **Follow-ups PARKED** — 100-mail rule; Pennsylvania 39 first mails (2026-11-12 count).
 - **Brain: mock ($0)** — live MetaSpark UNPROVEN; all output is DRAFT.
 - **DB: JSON store files** (`store/tasks.json`, `store/approvals.json`) — this is the DB, no other database.
 - **CRM: n8n Cloud Data Tables PLANNED, not live.**

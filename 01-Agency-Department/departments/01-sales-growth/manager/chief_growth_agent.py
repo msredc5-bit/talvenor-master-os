@@ -211,9 +211,11 @@ class ChiefGrowthAgent:
                     f"gate: {entry['gate'] or 'none'} | {entry['status']}"
                 )
             lines.append(
-                "Note: FollowUpAgent follow-ups PARKED — Pennsylvania 37 first "
-                "mails; under the 100-mail rule, no follow-up in any state until 100 first mails "
-                "have been sent. Email PAUSED since 2026-11-14."
+                "Note: FollowUpAgent follow-ups PARKED — Pennsylvania 39 first "
+                "mails (2026-11-12 count, verified against "
+                "leads-organized/*/emailed.csv); under the 100-mail rule, no "
+                "follow-up in any state until 100 first mails have been sent. "
+                "Email PAUSED since 2026-11-14."
             )
             lines.append(f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}")
             lines.append(f"Brain note: {brain_text}")
@@ -288,8 +290,9 @@ class ChiefGrowthAgent:
             )
         if task_kind == "followup_draft":
             output += (
-                "4. Follow-up PARKED — 100-mail rule: Pennsylvania 37 first "
-                "mails; no follow-up in any state until 100 first mails.\n"
+                "4. Follow-up PARKED — 100-mail rule: Pennsylvania 39 first "
+                "mails (2026-11-12 count); no follow-up in any state until "
+                "100 first mails.\n"
             )
         if entry["status"] == "ROLE-ONLY":
             output += (

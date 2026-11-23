@@ -47,7 +47,7 @@
   {
     "department": "01 Sales & Growth",
     "gate": "send",
-    "notes": "Worker: FollowUpAgent (followup_draft). PARKED by the 100-mail rule: PA has 37 first mails, no state at 100 yet.",
+    "notes": "Worker: FollowUpAgent (followup_draft). PARKED by the 100-mail rule: PA has 39 first mails (2026-11-12 count), no state at 100 yet.",
     "role": "Follow-up Agent",
     "skill_file": "01-Agency-Department/sections/sell/skills/followup-agent.md",
     "status": "EXISTING",

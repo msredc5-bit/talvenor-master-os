@@ -47,6 +47,7 @@ Routing table: TASK_TYPE -> (worker class, division, gate word)
 import importlib.util
 import json
 import os
+import re
 import sys
 import uuid
 from datetime import datetime, timezone
@@ -60,9 +61,11 @@ ENGINE_WORKERS_DIR = os.path.join(
 sys.path.insert(0, CEO_CORE_DIR)
 sys.path.insert(0, ENGINE_WORKERS_DIR)
 
+from audit import audit_log  # noqa: E402
 from human_approval_gateway import ApprovalGateway  # noqa: E402
 from owner_memory import OwnerMemory  # noqa: E402
 from brain import BrainFactory  # noqa: E402
+from store_io import update_json, write_json_atomic  # noqa: E402
 from src.contracts.models import Task as EngineTask  # noqa: E402
 from src.workers.acquisition import (  # noqa: E402
     NegotiationCoach,
@@ -131,6 +134,119 @@ ROUTING = {
 STORE_DIR = os.path.join(MASTER_OS_DIR, "store")
 DEFAULT_TASKS_PATH = os.path.join(STORE_DIR, "tasks.json")
 DEFAULT_APPROVALS_PATH = os.path.join(STORE_DIR, "approvals.json")
+DEFAULT_AGENT_RUNS_PATH = os.path.join(STORE_DIR, "agent_runs.json")
+
+# --- Phase 1 (Unified OS): registry as runtime source of truth --------------
+# registry.json is read at runtime, read-only, never written by the Chief.
+# It is the single source of truth for who an agent is (role, department,
+# task kind); registry.md is only its generated view.
+REGISTRY_JSON_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "agents", "agent-registry", "registry.json")
+_REGISTRY_CACHE = {"mtime": None, "entries": None}
+
+_WORKER_RE = re.compile(r"Worker: (\w+) \((\w+)\)")
+_COUNTERPART_RE = re.compile(r"no brief counterpart \((\w+)\)")
+
+
+def load_registry(registry_path=None):
+    """Loads registry.json (read-only). Cached per process; re-read when
+    the file's mtime changes. A missing or corrupt file returns [] —
+    routing never breaks because the registry is unreadable."""
+    path = registry_path or REGISTRY_JSON_PATH
+    try:
+        mtime = os.path.getmtime(path)
+    except OSError:
+        return []
+    if (_REGISTRY_CACHE["entries"] is not None
+            and _REGISTRY_CACHE["mtime"] == mtime):
+        return _REGISTRY_CACHE["entries"]
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            entries = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return []
+    if not isinstance(entries, list):
+        return []
+    _REGISTRY_CACHE["mtime"] = mtime
+    _REGISTRY_CACHE["entries"] = entries
+    return entries
+
+
+def _entry_kind(entry):
+    """The task kind of a registry entry, from its notes."""
+    notes = entry.get("notes", "") or ""
+    m = _WORKER_RE.search(notes)
+    if m:
+        return m.group(2)
+    m = _COUNTERPART_RE.search(notes)
+    return m.group(1) if m else ""
+
+
+def lookup_registry_entry(task_type=None, worker=None, registry_path=None):
+    """Finds the registry entry for a run: first by task kind
+    (the task type IS the worker's kind for engine/section workers),
+    then by worker class name in the notes, then by role name.
+    Returns the entry dict, or None when the agent is not in the
+    registry (department managers are not — they live outside the 69)."""
+    entries = load_registry(registry_path)
+    if task_type:
+        for entry in entries:
+            if _entry_kind(entry) == task_type:
+                return entry
+    if worker:
+        for entry in entries:
+            if f"Worker: {worker} (" in (entry.get("notes", "") or ""):
+                return entry
+        for entry in entries:
+            if (entry.get("role") == worker
+                    or entry.get("role", "") + "Agent" == worker):
+                return entry
+    return None
+
+
+def _log_agent_run(record, tasks_path=None, registry_path=None):
+    """Records one agent run in store/agent_runs.json (append-only,
+    atomic via store_io), next to tasks.json — so a check run that
+    passes a TEMP tasks path also keeps its run log in TEMP, and the
+    real store is only touched by a real run. The worker name, the
+    registry role/department, and whether the agent is in the registry
+    are recorded; managers are honestly marked in_registry=False.
+    Never raises — a failed run log must not break routing."""
+    worker = record.get("worker")
+    if not worker:
+        return False
+    entry = lookup_registry_entry(
+        task_type=record.get("type"), worker=worker,
+        registry_path=registry_path)
+    run = {
+        "id": record.get("id"),
+        "ran_at": record.get("logged_at") or _now_iso(),
+        "worker": worker,
+        "role": entry.get("role") if entry else None,
+        "department": entry.get("department") if entry else None,
+        "task_kind": _entry_kind(entry) if entry else None,
+        "task_type": record.get("type"),
+        "status": record.get("status"),
+        "in_registry": entry is not None,
+    }
+    runs_path = (os.path.join(os.path.dirname(os.path.abspath(
+        tasks_path)), "agent_runs.json") if tasks_path
+        else DEFAULT_AGENT_RUNS_PATH)
+
+    def _apply(data):
+        records = data.get("records", []) if isinstance(data, dict) else []
+        if not isinstance(records, list):
+            records = []
+        records.append(run)
+        return {"schema": "agent-runs-v1", "records": records}
+
+    try:
+        update_json(runs_path, _apply,
+                    default={"schema": "agent-runs-v1", "records": []})
+    except Exception:  # noqa: BLE001 - run log must never break routing
+        return False
+    return True
 
 # --- Phase 7 sections -------------------------------------------------------
 SECTIONS_DIR = os.path.join(
@@ -172,18 +288,29 @@ def _now_iso():
 
 def _log_task(record, tasks_path=None):
     """Appends every routed task to store/tasks.json. Never deletes another
-    department's entry — read-modify-write."""
+    department's entry — locked read-modify-write + atomic write
+    (Phase 1, Unified OS: store_io). A corrupt tasks file is reset to
+    just this record and the reset is written to the audit log — the
+    old silent reset is gone."""
     path = tasks_path or DEFAULT_TASKS_PATH
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+
+    def _apply(data):
         records = data.get("records", []) if isinstance(data, dict) else []
-    except (FileNotFoundError, json.JSONDecodeError):
-        records = []
-    records.append(record)
-    payload = {"schema": "tasks-v1", "records": records}
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, indent=2, ensure_ascii=False)
+        if not isinstance(records, list):
+            records = []
+        records.append(record)
+        return {"schema": "tasks-v1", "records": records}
+
+    try:
+        update_json(path, _apply, default={"schema": "tasks-v1", "records": []})
+    except json.JSONDecodeError:
+        audit_log("store_corrupt_reset", {
+            "file": path, "kept_record": record.get("id"),
+            "note": "tasks.json was corrupt — reset to this record only.",
+        }, audit_path=os.path.join(os.path.dirname(os.path.abspath(path)),
+                                   "audit.log"))
+        write_json_atomic(path, {"schema": "tasks-v1", "records": [record]})
+    _log_agent_run(record, tasks_path=tasks_path)
     return record
 
 

@@ -68,7 +68,7 @@ giving a DRAFT plan of that, so Boss/Elora can search by hand and fill the list 
 
 ## Honest Status
 
-- Paying clients: **0**. Email **PAUSED since 2026-11-14**; first mails 162.
+- Paying clients: **0**. Email **PAUSED since 2026-11-14**; first mails 163.
 - Brain: **mock ($0)**; live MetaSpark UNPROVEN.
 - DB: JSON store files — this is the DB, no other database. CRM: n8n Data Tables PLANNED, not live.
 - $0 spend cap.

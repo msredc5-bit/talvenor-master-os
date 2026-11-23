@@ -28,7 +28,7 @@ given as a plan DRAFT — so Boss can see it at a glance and say "ok".
    the manager itself loads and runs with importlib — not a plan-draft for them,
    the specialist's own draft is returned.
 7. Always write in a `followup_draft` plan: follow-up PARKED under the 100-mail rule
-   (Pennsylvania 37 first mails).
+   (Pennsylvania 39 first mails (2026-11-12 count)).
 8. If any information is missing, write `BOSS INPUT REQUIRED` — never invent it.
 
 ## Tools
@@ -82,8 +82,8 @@ given as a plan DRAFT — so Boss can see it at a glance and say "ok".
 
 ## Honest Status
 
-- Paying clients: **0**. Email **PAUSED since 2026-11-14**; first mails 162.
-- Follow-ups **PARKED** — 100-mail rule; Pennsylvania 37 first mails.
+- Paying clients: **0**. Email **PAUSED since 2026-11-14**; first mails 163.
+- Follow-ups **PARKED** — 100-mail rule; Pennsylvania 39 first mails (2026-11-12 count).
 - Brain: **mock ($0)**; live MetaSpark UNPROVEN.
 - DB: JSON store files — this is the DB, no other database. CRM: n8n Data Tables PLANNED, not live.
 - **Agency Chief wiring Phase 2 DONE** — the Chief now calls this manager via DEPARTMENT_ROUTING.

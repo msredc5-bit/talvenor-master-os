@@ -72,7 +72,7 @@ can organise records as per that plan.
 
 ## Honest Status
 
-- Paying clients: **0**. Email **PAUSED since 2026-11-14**; first mails 162.
+- Paying clients: **0**. Email **PAUSED since 2026-11-14**; first mails 163.
 - **CRM: n8n Cloud Data Tables PLANNED, not live** — there is no live record.
 - Brain: **mock ($0)**; live MetaSpark UNPROVEN.
 - DB: JSON store files — this is the DB, no other database.

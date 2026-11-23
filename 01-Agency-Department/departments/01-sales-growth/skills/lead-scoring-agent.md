@@ -77,8 +77,8 @@ lead's score is set by guessing.
 
 ## Honest Status
 
-- Paying clients: **0**. Email **PAUSED since 2026-11-14**; first mails 162.
-- Follow-ups **PARKED** — 100-mail rule; Pennsylvania 37 first mails.
+- Paying clients: **0**. Email **PAUSED since 2026-11-14**; first mails 163.
+- Follow-ups **PARKED** — 100-mail rule; Pennsylvania 39 first mails (2026-11-12 count).
 - Brain: **mock ($0)**; live MetaSpark UNPROVEN.
 - DB: JSON store files — this is the DB, no other database. CRM: n8n Data Tables PLANNED, not live.
 - $0 spend cap.
