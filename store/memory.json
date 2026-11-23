@@ -12,7 +12,9 @@
     "dept_strategy",
     "dept_finance",
     "dept_quality",
-    "dept_innovation"
+    "dept_innovation",
+    "products",
+    "content"
   ],
   "entries": [
     {
