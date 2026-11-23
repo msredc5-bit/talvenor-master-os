@@ -18,10 +18,18 @@ Endpoints (localhost only — no auth, never expose publicly):
       type: snake_case task type, e.g. research, caption_write (required)
       business: agency | digital-product | content (default: agency)
       payload: object (optional, default {})
+      priority: integer, higher drains first (optional, default 0)
+      depends_on: list of task ids that must be done first (optional)
+      max_retries: integer >= 0 (optional, default 0)
+      idempotency_key: string (optional) — a second POST with a key
+        that already exists returns 200 + the existing record, and
+        queues nothing new
       -> 201 with the created record:
       {"id": "...", "status": "queued", "business": "agency",
        "type": "research", "title": "...", "payload": {...},
-       "queued_at": "..."}
+       "queued_at": "...", "priority": 0, "depends_on": [],
+       "retries": 0, "max_retries": 0, "cancelled": false,
+       "idempotency_key": null, "last_error": null}
   DELETE /api/tasks/<id> -> cancel one QUEUED task only (done/failed
       tasks cannot be deleted — history stays); missing id -> 404,
       non-queued -> 409.
@@ -43,10 +51,17 @@ import argparse
 import json
 import os
 import re
+import sys
 import threading
 import uuid
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(BASE, "00-CEO-Core"))
+
+from audit import audit_log  # noqa: E402
+from store_io import read_json, write_json_atomic  # noqa: E402
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DASHBOARDS_DIR = os.path.join(BASE, "dashboards")
@@ -69,21 +84,22 @@ def _now_iso():
 
 
 def _read_tasks():
+    # Phase 1 (Unified OS): locked read via store_io; a corrupt file
+    # reads as empty (same as before — the board never crashes on it).
     try:
-        with open(TASKS_PATH, encoding="utf-8") as f:
-            data = json.load(f)
-        records = data.get("records", []) if isinstance(data, dict) else []
-        return list(records) if isinstance(records, list) else []
-    except (FileNotFoundError, json.JSONDecodeError):
+        data = read_json(TASKS_PATH,
+                         default={"schema": "tasks-v1", "records": []})
+    except json.JSONDecodeError:
         return []
+    records = data.get("records", []) if isinstance(data, dict) else []
+    return list(records) if isinstance(records, list) else []
 
 
 def _write_tasks(records):
-    payload = {"schema": "tasks-v1", "records": records}
-    tmp_path = TASKS_PATH + ".tmp"
-    with open(tmp_path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, indent=2, ensure_ascii=False)
-    os.replace(tmp_path, TASKS_PATH)
+    # Phase 1 (Unified OS): atomic write — the in-process _store_lock
+    # stays (same-process threads); store_io adds the cross-process
+    # file lock.
+    write_json_atomic(TASKS_PATH, {"schema": "tasks-v1", "records": records})
 
 
 def validate_task_body(body):
@@ -106,6 +122,29 @@ def validate_task_body(body):
     payload = body.get("payload", {})
     if not isinstance(payload, dict):
         return None, "Field 'payload' must be an object."
+    # Phase 1 (Unified OS) tasks-v1 fields.
+    priority = body.get("priority", 0)
+    if isinstance(priority, bool) or not isinstance(priority, int):
+        return None, "Field 'priority' must be an integer."
+    depends_on = body.get("depends_on", [])
+    if (not isinstance(depends_on, list)
+            or any(not isinstance(d, str) for d in depends_on)):
+        return None, "Field 'depends_on' must be a list of task ids."
+    max_retries = body.get("max_retries", 0)
+    if (isinstance(max_retries, bool) or not isinstance(max_retries, int)
+            or max_retries < 0):
+        return None, "Field 'max_retries' must be an integer >= 0."
+    idempotency_key = body.get("idempotency_key")
+    if idempotency_key is not None and (
+            not isinstance(idempotency_key, str)
+            or not idempotency_key.strip()
+            or len(idempotency_key) > 128):
+        return None, ("Field 'idempotency_key' must be a non-empty "
+                      "string (max 128 chars).")
+    if body.get("cancelled") not in (None, False):
+        return None, "A new task cannot be created cancelled."
+    if body.get("retries") not in (None, 0):
+        return None, "Field 'retries' starts at 0."
     record = {
         "id": uuid.uuid4().hex[:12],
         "status": "queued",
@@ -113,6 +152,13 @@ def validate_task_body(body):
         "type": task_type,
         "title": title.strip(),
         "payload": payload,
+        "priority": priority,
+        "depends_on": depends_on,
+        "retries": 0,
+        "max_retries": max_retries,
+        "cancelled": False,
+        "idempotency_key": idempotency_key,
+        "last_error": None,
         "queued_at": _now_iso(),
     }
     return record, None
@@ -181,8 +227,22 @@ class TaskboardHandler(BaseHTTPRequestHandler):
         with _store_lock:
             # Re-read first: the bridge may have written meanwhile.
             records = _read_tasks()
+            key = record.get("idempotency_key")
+            if key:
+                existing = next(
+                    (r for r in records
+                     if r.get("idempotency_key") == key), None)
+                if existing is not None:
+                    # Same key twice = one execution — queue nothing new.
+                    self._send_json(200, existing)
+                    return
             records.append(record)
             _write_tasks(records)
+        audit_log("task_queued", {
+            "task_id": record["id"], "business": record["business"],
+            "type": record["type"],
+        }, audit_path=os.path.join(os.path.dirname(TASKS_PATH),
+                                   "audit.log"))
         self._send_json(201, record)
 
     def do_DELETE(self):
@@ -208,6 +268,10 @@ class TaskboardHandler(BaseHTTPRequestHandler):
                 return
             records = [r for r in records if r.get("id") != task_id]
             _write_tasks(records)
+        audit_log("task_cancelled", {
+            "task_id": task_id, "title": target.get("title"),
+        }, audit_path=os.path.join(os.path.dirname(TASKS_PATH),
+                                   "audit.log"))
         self._send_json(200, {"cancelled": target})
 
 

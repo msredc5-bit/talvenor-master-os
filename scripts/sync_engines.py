@@ -47,14 +47,26 @@ def collect():
         skills_dir = os.path.join(eng_dir, "skills")
         skills = sorted(f for f in os.listdir(skills_dir) if f.endswith(".md"))
         staff = read_text(os.path.join(eng_dir, "STAFF.md"))
+        # Phase 1 (Unified OS) fix: the old check was
+        # `... in staff or True` — always True, so a skill missing from
+        # STAFF.md was never caught. staff_ok is now the honest
+        # computation, and staff_missing names the gaps.
+        # Matching rule: the skill file's stem must appear in STAFF.md
+        # (e.g. "qa-engineer" in "engine/skills/qa-engineer.md").
+        # Title-cased matching ("Qa Engineer") is WRONG here — STAFF.md
+        # writes acronyms as "QAEngineer" / "Kit QA", so it produced
+        # false gaps for qa-engineer, kit-qa, payment-rails-checker
+        # even though all three files exist. (Corrected 2026-11-22.)
+        skill_stems = [os.path.splitext(s)[0] for s in skills]
+        staff_missing = [s for s in skill_stems if s not in staff]
         engines.append({
             "dept": dept, "title": title, "subtitle": subtitle,
             "staff": len(skills), "tools_total": len(tools),
             "tools_mock": len(mock), "tools_gated": len(gated),
             "skills": len(skills),
             "gated_names": ", ".join(t["name"] for t in gated),
-            "staff_ok": all(
-                s.replace("-", " ").title() in staff or True for s in skills),
+            "staff_ok": not staff_missing,
+            "staff_missing": staff_missing,
         })
     # Agency status — config honest_status
     config = read_json(os.path.join(ROOT, "00-CEO-Core", "config.json"))
@@ -139,6 +151,7 @@ if you change a number by hand, sync will revert it.</p>
 <li><b>Email:</b> {s['email']}</li>
 <li><b>Vet Kit Gate 0:</b> {s['gate0']}</li>
 <li><b>Creator OS 13 stage:</b> REAL {s['pipeline']['real']} / MOCK {s['pipeline']['mock']} / STUB {s['pipeline']['stub']} / BLOCKED {s['pipeline']['blocked']}</li>
+<li><b>Staff check (every skill file listed in its STAFF.md):</b> {'; '.join(f"{e['title']}: {'OK' if e['staff_ok'] else 'MISSING ' + ', '.join(e['staff_missing'])}" for e in s['engines'])}</li>
 <li><b>Shared core handlers (from tools.json, 9 tools):</b> {', '.join(f"{h} ({s['handler_status'].get(h, 'mock')})" for h in s['handlers'])}</li>
 </ul>
 
@@ -162,7 +175,8 @@ def main():
     print(f"sync done -> {OUT}")
     for e in status["engines"]:
         print(f"{e['title']}: staff={e['staff']} tools={e['tools_total']} "
-              f"(mock {e['tools_mock']}, gated {e['tools_gated']}) skills={e['skills']}")
+              f"(mock {e['tools_mock']}, gated {e['tools_gated']}) skills={e['skills']} "
+              f"staff_ok={e['staff_ok']} missing={e['staff_missing']}")
     print(f"gate0={status['gate0']} pipeline={status['pipeline']}")
 
 

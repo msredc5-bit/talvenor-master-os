@@ -35,15 +35,27 @@ dir for tests so the real store stays empty (0 records).
 --business accepts: agency, products (= digital-product), content.
 
 Queued-task record shape (in store/tasks.json, written by whatever
-queues work — e.g. the bridge cron in dashboards/n8n-wiring.md):
+queues work — e.g. the bridge cron in dashboards/n8n-wiring.md).
+Phase 1 (Unified OS) extends the tasks-v1 schema — old records
+without the new fields still drain (defaults fill in):
   {"id": "...", "status": "queued", "business": "agency",
    "type": "outreach_draft", "title": "...", "payload": {...},
-   "gated_action": "send", "queued_at": "..."}
+   "gated_action": "send", "queued_at": "...",
+   "priority": 0,              # higher drains first
+   "depends_on": [],           # ids that must be "done" first
+   "retries": 0, "max_retries": 0,   # failure retry budget
+   "cancelled": false,        # cancelled tasks are never run
+   "idempotency_key": null,    # same key twice = one execution
+   "last_error": null}         # set on a failed attempt that retries
 Drain marks each processed record "done" (or "failed") with its
-result attached. Each queued task runs in its OWN subprocess: the
-two vendored worker trees both expose a top-level `src` package, so
-an agency task and a content task cannot be imported in one process
-(verified Phase 6) — subprocesses keep drain correct for any mix.
+result attached; a record whose dependency failed is "blocked"; a
+second record with an already-used idempotency key is "duplicate";
+a cancelled record is marked "cancelled". Every transition is
+appended to store/audit.log. Each queued task runs in its OWN
+subprocess: the two vendored worker trees both expose a top-level
+`src` package, so an agency task and a content task cannot be
+imported in one process (verified Phase 6) — subprocesses keep
+drain correct for any mix.
 
 Stdlib only. No network, no send, no publish, no spend, no delete.
 """
@@ -61,6 +73,8 @@ DEFAULT_STORE_DIR = os.path.join(ROOT, "store")
 
 sys.path.insert(0, CEO_CORE_DIR)
 
+from audit import audit_log  # noqa: E402
+from store_io import update_json, write_json_atomic  # noqa: E402
 import main_ceo_bot  # noqa: E402
 import vault  # noqa: E402 — D3: drain writes done/failed task results to the vault
 
@@ -90,9 +104,25 @@ def _read_store_tasks(tasks_path):
 
 
 def _write_store_tasks(tasks_path, records):
+    # Phase 1 (Unified OS): atomic write — a concurrent writer can no
+    # longer tear a half-written tasks file.
     payload = {"schema": "tasks-v1", "records": records}
-    with open(tasks_path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, indent=2, ensure_ascii=False)
+    write_json_atomic(tasks_path, payload)
+
+
+def normalize_task_record(record):
+    """Fills the Phase 1 (Unified OS) tasks-v1 fields with defaults, so
+    a record queued before Phase 1 still drains. Returns the record."""
+    record.setdefault("priority", 0)
+    record.setdefault("depends_on", [])
+    record.setdefault("retries", 0)
+    record.setdefault("max_retries", 0)
+    record.setdefault("cancelled", False)
+    record.setdefault("idempotency_key", None)
+    record.setdefault("last_error", None)
+    if not isinstance(record.get("depends_on"), list):
+        record["depends_on"] = []
+    return record
 
 
 def parse_input(raw):
@@ -173,54 +203,230 @@ def _run_one_subprocess(record, store_dir):
                        "stdout": proc.stdout[-500:]}
 
 
-def _mark_queued_record(tasks_path, record_id, status, result):
-    """Update one queued record IN PLACE, re-reading the file first.
+def _audit_task_transition(store_dir, record_id, from_status, to_status,
+                           note=None):
+    """Appends one task transition to store/audit.log (Phase 1).
+    Never raises — a failed audit write must not break the drain."""
+    entry = {"task_id": record_id, "from": from_status, "to": to_status}
+    if note:
+        entry["note"] = note
+    audit_log("task_transition", entry,
+              audit_path=os.path.join(store_dir, "audit.log"))
+
+
+def _mark_queued_record(tasks_path, record_id, status, result,
+                        retries=None, last_error=None):
+    """Update one queued record IN PLACE, re-reading the file first
+    under the store lock (Phase 1, Unified OS: store_io.update_json).
 
     Re-reading matters: the subprocess run already appended the
     Chief's own log entry to tasks.json — a blind write-back of the
     pre-drain records would delete it. After marking, the result is also written
     to the vault (store/vault/README.md's promise — D3); if the vault write fails,
     the drain result still stands, only vault_error is set.
-    """
-    records = _read_store_tasks(tasks_path)
-    vault_error = None
-    for rec in records:
-        if rec.get("id") == record_id:
-            rec["status"] = status
-            rec["result"] = result
-            rec["drained_at"] = _now_iso()
-            break
-    else:
-        _write_store_tasks(tasks_path, records)
-        return None
-    _write_store_tasks(tasks_path, records)
+    Returns the vault error (None when the vault write worked or the
+    record was not found), or "store_corrupt_reset" when tasks.json
+    was corrupt and had to be reset."""
+    holder = {}
+
+    def _apply(data):
+        records = data.get("records", []) if isinstance(data, dict) else []
+        if not isinstance(records, list):
+            records = []
+        for rec in records:
+            if rec.get("id") == record_id:
+                normalize_task_record(rec)  # old records gain the new fields
+                rec["status"] = status
+                rec["result"] = result
+                rec["drained_at"] = _now_iso()
+                if retries is not None:
+                    rec["retries"] = retries
+                if last_error is not None:
+                    rec["last_error"] = last_error
+                holder["rec"] = rec
+                break
+        return {"schema": "tasks-v1", "records": records}
+
+    try:
+        update_json(tasks_path, _apply,
+                    default={"schema": "tasks-v1", "records": []})
+    except json.JSONDecodeError:
+        # Corrupt store — keep the drain alive, audit it, write fresh.
+        # The record being marked is lost with the corrupt file; the
+        # drain reports it instead of silently pretending success.
+        _audit_task_transition(
+            os.path.dirname(tasks_path), record_id, "queued", status,
+            note="tasks.json was corrupt — reset; this record was lost.")
+        write_json_atomic(tasks_path, {"schema": "tasks-v1", "records": []})
+        return "store_corrupt_reset"
+    rec = holder.get("rec")
+    if rec is None:
+        return None  # record vanished meanwhile — nothing to mark
+    if status not in ("done", "failed"):
+        return None  # only done/failed results go to the vault (D3)
     try:
         store_dir = os.path.dirname(tasks_path)
         vault.write_result(store_dir, rec)
     except Exception as exc:  # noqa: BLE001 — the vault never breaks the drain
-        vault_error = f"{type(exc).__name__}: {exc}"
-    return vault_error
+        return f"{type(exc).__name__}: {exc}"
+    return None
+
+
+def _sweep_terminal_states(tasks_path, records):
+    """Marks queued records that can never run: cancelled ones, and
+    duplicates of an idempotency key that already ran (or is queued
+    earlier). Returns the list of (id, new status) marked. The first
+    record with a key runs; later ones are duplicates."""
+    store_dir = os.path.dirname(tasks_path)
+    marked = []
+    # First record (by queued_at) with a key is the keeper; later ones
+    # with the same key are duplicates.
+    seen_keys = {}
+    for rec in sorted(records, key=lambda r: r.get("queued_at") or ""):
+        key = rec.get("idempotency_key")
+        if key and key not in seen_keys:
+            seen_keys[key] = rec.get("id")
+    done_or_failed_keys = {
+        rec.get("idempotency_key") for rec in records
+        if rec.get("status") in ("done", "failed")
+        and rec.get("idempotency_key")}
+    for rec in records:
+        if rec.get("status") != "queued":
+            continue
+        if rec.get("cancelled") or rec.get("status") == "cancelled":
+            _mark_queued_record(tasks_path, rec["id"], "cancelled",
+                                {"note": "Task was cancelled — never run."})
+            _audit_task_transition(store_dir, rec["id"], "queued",
+                                   "cancelled")
+            marked.append((rec["id"], "cancelled"))
+            continue
+        key = rec.get("idempotency_key")
+        if key and (key in done_or_failed_keys
+                    or seen_keys.get(key) != rec.get("id")):
+            _mark_queued_record(
+                tasks_path, rec["id"], "duplicate",
+                {"note": f"Idempotency key {key!r} already used — not run again."})
+            _audit_task_transition(store_dir, rec["id"], "queued",
+                                   "duplicate",
+                                   note=f"idempotency_key={key}")
+            marked.append((rec["id"], "duplicate"))
+    return marked
+
+
+def _blocked_by_failed_dep(record, records):
+    """The id of a failed/blocked/cancelled/duplicate dependency, or
+    None when every dependency is done (or there is none)."""
+    by_id = {rec.get("id"): rec for rec in records}
+    terminal_bad = ("failed", "blocked", "cancelled", "duplicate")
+    for dep_id in record.get("depends_on") or []:
+        dep = by_id.get(dep_id)
+        if dep is None:
+            return dep_id  # dependency does not exist — can never be done
+        if dep.get("status") in terminal_bad:
+            return dep_id
+    return None
 
 
 def drain_queue(store_dir, max_tasks):
-    """Process up to max_tasks queued records; return a summary dict."""
+    """Process up to max_tasks queued records; return a summary dict.
+
+    Order: priority desc, then queued_at asc. A record runs only when
+    every depends_on id is "done". Cancelled records are marked
+    "cancelled", duplicates "duplicate", records whose dependency
+    failed "blocked" — none of those counts toward max_tasks, only
+    executions do. A failed run retries (stays queued, retries += 1)
+    while retries < max_retries, else it is "failed". Records are
+    re-read before every pick, so a dependency chain drains in one
+    run. Every transition is appended to store/audit.log."""
     os.makedirs(store_dir, exist_ok=True)
     tasks_path = os.path.join(store_dir, "tasks.json")
-    queued = [r for r in _read_store_tasks(tasks_path)
-              if r.get("status") == "queued"][:max_tasks]
     processed = []
-    for record in queued:
+    executions = 0
+    # Safety bound: bookkeeping sweeps + executions cannot loop forever.
+    for _ in range(max_tasks * 10 + 50):
+        if executions >= max_tasks:
+            break
+        records = [normalize_task_record(r)
+                   for r in _read_store_tasks(tasks_path)]
+        _sweep_terminal_states(tasks_path, records)
+        records = [normalize_task_record(r)
+                   for r in _read_store_tasks(tasks_path)]
+        queued = [r for r in records if r.get("status") == "queued"]
+        if not queued:
+            break
+        # Block records whose dependency can never complete.
+        blocked_any = False
+        for rec in queued:
+            bad_dep = _blocked_by_failed_dep(rec, records)
+            if bad_dep is not None:
+                _mark_queued_record(
+                    tasks_path, rec["id"], "blocked",
+                    {"note": f"Dependency {bad_dep!r} failed or is missing — never run."})
+                _audit_task_transition(store_dir, rec["id"], "queued",
+                                       "blocked", note=f"dep={bad_dep}")
+                processed.append({"id": rec["id"],
+                                  "business": rec.get("business"),
+                                  "type": rec.get("type"),
+                                  "status": "blocked"})
+                blocked_any = True
+        if blocked_any:
+            continue
+        # Next eligible: all deps done, highest priority first.
+        by_id = {r.get("id"): r for r in records}
+        eligible = [
+            r for r in queued
+            if all(by_id.get(d, {}).get("status") == "done"
+                   for d in (r.get("depends_on") or []))]
+        if not eligible:
+            break  # waiting on queued deps that cannot run in this pass
+        eligible.sort(key=lambda r: (-(r.get("priority") or 0),
+                                     r.get("queued_at") or ""))
+        record = eligible[0]
         try:
             ok, result = _run_one_subprocess(record, store_dir)
         except Exception as exc:  # noqa: BLE001 — a failed drain must not crash the run
             ok, result = False, {"error": f"{type(exc).__name__}: {exc}"}
-        status = "done" if ok and result.get("status") != "error" else "failed"
-        vault_error = _mark_queued_record(tasks_path, record["id"], status, result)
-        entry = {"id": record["id"], "business": record.get("business"),
-                 "type": record.get("type"), "status": status}
-        if vault_error:
-            entry["vault_error"] = vault_error
-        processed.append(entry)
+        executions += 1
+        if ok and result.get("status") != "error":
+            vault_error = _mark_queued_record(
+                tasks_path, record["id"], "done", result)
+            _audit_task_transition(store_dir, record["id"], "queued", "done")
+            entry = {"id": record["id"], "business": record.get("business"),
+                     "type": record.get("type"), "status": "done"}
+            if vault_error:
+                entry["vault_error"] = vault_error
+            processed.append(entry)
+        else:
+            retries = (record.get("retries") or 0) + 1
+            chief_result = result.get("chief_result") or {}
+            last_error = str(result.get("error")
+                             or chief_result.get("error")
+                             or result.get("status")
+                             or "run failed")
+            if retries <= (record.get("max_retries") or 0):
+                _mark_queued_record(tasks_path, record["id"], "queued",
+                                    result, retries=retries,
+                                    last_error=last_error)
+                _audit_task_transition(store_dir, record["id"], "queued",
+                                       "queued",
+                                       note=f"retry {retries}/{record.get('max_retries')}")
+                processed.append({"id": record["id"],
+                                  "business": record.get("business"),
+                                  "type": record.get("type"),
+                                  "status": "queued-retry",
+                                  "retries": retries})
+            else:
+                vault_error = _mark_queued_record(
+                    tasks_path, record["id"], "failed", result,
+                    retries=retries, last_error=last_error)
+                _audit_task_transition(store_dir, record["id"], "queued",
+                                       "failed", note=last_error)
+                entry = {"id": record["id"],
+                         "business": record.get("business"),
+                         "type": record.get("type"), "status": "failed"}
+                if vault_error:
+                    entry["vault_error"] = vault_error
+                processed.append(entry)
     return {"mode": "drain-queue", "store_dir": store_dir,
             "max": max_tasks, "processed": processed}
 
