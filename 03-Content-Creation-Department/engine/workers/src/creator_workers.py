@@ -51,9 +51,11 @@ class ScriptWriter(WorkerBase):
     default_payload = {"topic": "", "format": "short video"}
 
     def do_work(self, task):
+        # Phase 2: the fallback is the class default ("short video"),
+        # not "" — the old literal disagreed with default_payload.
         text = self.llm.complete(
             f"[ScriptWriter] Write a script for format "
-            f"'{task.payload.get('format', '')}' on topic "
+            f"'{task.payload.get('format', self.default_payload['format'])}' on topic "
             f"'{task.payload.get('topic', '')}'. Structure: hook in first "
             f"2 seconds, one clear idea, simple CTA. {RULES}"
         )
@@ -68,8 +70,10 @@ class VisualProducer(WorkerBase):
     default_payload = {"topic": "", "format": "short video"}
 
     def do_work(self, task):
+        # Phase 2: the fallback is the class default ("short video"),
+        # not "" — the old literal disagreed with default_payload.
         text = self.llm.complete(
-            f"[VisualProducer] Visual plan for '{task.payload.get('format', '')}' "
+            f"[VisualProducer] Visual plan for '{task.payload.get('format', self.default_payload['format'])}' "
             f"on '{task.payload.get('topic', '')}': shot list, thumbnail idea, "
             f"on-screen text (verbatim, short, readable). Real footage first; "
             f"if a shot cannot be filmed, say so instead of faking it. {RULES}"

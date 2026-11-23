@@ -18,7 +18,9 @@
 | 7 | Content Planner | no worker — Chief-level role |
 | 8 | Performance Analyst | no worker — Chief-level role |
 
-Details: `STAFF.md`. One skill each: 8 files in `skills/`.
+Details: `STAFF.md`. One skill each: 10 files in `skills/` — the 8 roles
+below plus `growth-agent.md` and `repurpose-agent.md` (added later; no
+worker class yet — the old "8 files" count was stale, corrected Phase 2).
 
 ## Tools — 8 (`tools.json`)
 
