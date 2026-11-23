@@ -346,3 +346,20 @@ in new files + store-unchanged). Full suite re-run after Phase 4:
 **686/687 PASS** (baseline 616/617 + the new 70/70 suite; sole
 failure remains the pre-existing `check_voice` sounddevice import,
 VM-only).
+
+## Push — 2026-11-23 (Unified OS Phases 0–4)
+
+PUSHED to GitHub (msredc5-bit/talvenor-master-os, branch main) on Boss's
+word "push": 20 batches, 133 files (28 new + 105 modified), 1.16 MB.
+Remote head before: 5723355abd1facbb4e4e3bbaeb5c6653bebb51aa (2026-11-21).
+Remote head after batch 20: b054eac25cf266c75e7eae90a32b5dbede892ce9.
+Sync record: ~/workspace/talvenor-master-os.muse-github-snapshot-sync.json
+(97 entries after batch 20).
+
+NOT pushed in this push (deliberate): store/leads.json — 524 real prospect
+businesses with emails/phones; the repo is PUBLIC. It stays local-only
+until Boss explicitly says "push with leads".
+Still on GitHub (snapshot push cannot delete): LOCAL-RUN-BANGLA.md and
+00-CEO-Core/PROVIDERS-SETUP-BANGLA.md — stale old-named files, deletion
+needs Boss's separate approval.
+Voice models (~361 MB) stay gitignored and were never pushed.
