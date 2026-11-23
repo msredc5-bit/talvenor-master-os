@@ -6,9 +6,11 @@ Gate: None — the draft itself is safe.
 Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
 Known facts (2026-11-19): Vapi — free credit $5 (verified 2026-11-11),
-no paid plan yet, paid $0; Twilio — number not imported yet;
+no paid plan yet; Twilio — number not imported yet;
 n8n Cloud — plan/cost unknown (BOSS INPUT REQUIRED). $0 spend cap —
-no paid subscription without Boss's approval.
+no paid subscription without Boss's approval. The paid-subscriptions
+TOTAL has no source field anywhere in the repo, so the output says
+UNKNOWN for the total instead of claiming $0 (Phase 2).
 
 This agent never does this: it does not invent subscription/plan/cost,
 does not buy a subscription, does not spend, does not change plans, sends nothing, gives no guarantee,
@@ -21,8 +23,9 @@ import sys
 BOOKING_LINK = "https://calendar.app.google/WLoxBfnLGTdjK3LB8"
 TALVENOR_PHONE = "+1 (947) 223-0244"
 
-# Known facts (2026-11-19) — paid subscription $0 so far.
-PAID_SUBSCRIPTIONS_TOTAL = 0
+# (Phase 2: the old hardcoded PAID_SUBSCRIPTIONS_TOTAL = 0 is gone.
+# No source field exists for the paid total, so the output says UNKNOWN
+# instead of claiming $0 — see run().)
 
 _GATE_ACTION_MAP = {"post it": "publish", "upload it": "publish"}
 _GATED_ACTIONS = ("send", "publish", "spend", "delete")
@@ -111,7 +114,8 @@ class SubscriptionTrackingAgent:
         output = (
             "[MOCK DRAFT] Subscription tracking — DRAFT ONLY\n"
             f"Department: {self.department} | Worker: {self.role}\n"
-            f"Paid subscriptions total (real): ${PAID_SUBSCRIPTIONS_TOTAL} — $0 spend cap.\n"
+            "Paid subscriptions total (real): UNKNOWN — no source field "
+            "exists for the paid total; no total is claimed. $0 spend cap.\n"
             "Known subscriptions (only known facts):\n"
             "- Vapi (live voice stack, Sophia): free credit $5, no paid plan yet.\n"
             "- Twilio: number not imported yet — cost BOSS INPUT REQUIRED.\n"
@@ -122,8 +126,8 @@ class SubscriptionTrackingAgent:
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Subscription tracking ONLY — "
-            "No subscription/plan/cost was invented. Paid $0 so far. "
-            "Gate: None."
+            "No subscription/plan/cost was invented. Paid total UNKNOWN "
+            "(no source). Gate: None."
         )
         return {
             "status": "draft-ready",

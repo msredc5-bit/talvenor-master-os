@@ -5,10 +5,12 @@ never invent revenue, never put in a client's name/money.
 Gate: None — the draft itself is safe.
 Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-True state (2026-11-19): paying client 0, revenue $0 — no revenue to track.
-The template has only column headers + space for empty rows;
-no filled row. LOCKED pricing internal only — no price numbers are put in the template;
-never quote a price to a prospect.
+Paying clients are read live from 00-CEO-Core/config.json honest_status
+at run time (Phase 2) — no hardcoded copy lives in this file. Revenue
+has no source field anywhere in the repo, so the output says UNKNOWN
+for revenue instead of claiming $0. The template has only column headers
++ space for empty rows; no filled row. LOCKED pricing internal only — no
+price numbers are put in the template; never quote a price to a prospect.
 
 This agent never: invents revenue, puts in a client/money,
 issues an invoice, takes a payment, sends anything, spends anything,
@@ -21,9 +23,9 @@ import sys
 BOOKING_LINK = "https://calendar.app.google/WLoxBfnLGTdjK3LB8"
 TALVENOR_PHONE = "+1 (947) 223-0244"
 
-# True state (2026-11-19) — no revenue to track.
-PAYING_CLIENTS = 0
-REVENUE_TOTAL = 0
+# (Phase 2: the old hardcoded PAYING_CLIENTS = 0 / REVENUE_TOTAL = 0 are
+# gone — paying clients are read live from config.json honest_status,
+# see _paying_clients; revenue has no source field, so it is UNKNOWN.)
 
 _GATE_ACTION_MAP = {"post it": "publish", "upload it": "publish"}
 _GATED_ACTIONS = ("send", "publish", "spend", "delete")
@@ -36,6 +38,19 @@ class RevenueTrackingAgent:
     gate = None
     department = "06-finance-admin"
     role = "Revenue Tracking Agent"
+
+    def _paying_clients(self):
+        """Paying clients, read live from config.json honest_status.
+
+        Phase 2: no hardcoded copy in this file. When the config has no
+        value, returns "UNKNOWN" — never a guessed number."""
+        here = os.path.dirname(os.path.abspath(__file__))
+        ceo_core = os.path.normpath(os.path.join(
+            here, "..", "..", "..", "..", "00-CEO-Core"))
+        if ceo_core not in sys.path:
+            sys.path.insert(0, ceo_core)
+        import honest_status
+        return honest_status.paying_clients()
 
     def _gateway(self, approvals_path=None):
         """ApprovalGateway lazy-load — no repo import at top level."""
@@ -110,23 +125,38 @@ class RevenueTrackingAgent:
         else:
             brain_text = "No brain passed — template built from task only."
 
+        paying_clients = self._paying_clients()
+        if paying_clients == "UNKNOWN":
+            clients_line = (
+                "Paying clients: UNKNOWN — config.json honest_status has no "
+                "paying_clients value; no client count is claimed."
+            )
+        else:
+            clients_line = (
+                "Paying clients (read from config.json honest_status): "
+                f"{paying_clients}."
+            )
+        revenue_line = (
+            "Revenue (real): UNKNOWN — no revenue source field exists in "
+            "config.json honest_status; no revenue figure is claimed."
+        )
+
         output = (
             "[MOCK DRAFT] Revenue tracking template — DRAFT ONLY\n"
             f"Department: {self.department} | Worker: {self.role}\n"
-            f"Paying clients (real, 2026-11-19): {PAYING_CLIENTS} | "
-            f"Revenue (real): ${REVENUE_TOTAL} — no revenue to track.\n"
+            f"{clients_line}\n"
+            f"{revenue_line}\n"
             "Template (columns only — no filled row):\n"
             "Client | Tier | Monthly | Build fee | Status\n"
             "--- Boss will fill the row, when a paying client comes ---\n"
-            "Total revenue: $0 (paying client 0).\n"
             "LOCKED pricing internal only — no price numbers are put in the template; never quote a price to a prospect.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
         notes = (
             "DRAFT ONLY — mock brain ($0). Revenue tracking template ONLY — "
-            "No revenue/client/money was invented. Paying client 0, "
-            "revenue $0. Gate: None."
+            "No revenue/client/money was invented. Paying clients read from "
+            "config.json honest_status; revenue UNKNOWN (no source). Gate: None."
         )
         return {
             "status": "draft-ready",

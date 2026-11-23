@@ -4,7 +4,7 @@ Role: write a DRAFT of a BI summary using only real numbers — never send it.
 Gate: none — the draft itself is safe, there is no gate.
 Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
-Only real numbers: paying client 0, first mail 162, Email PAUSED (since 2026-11-14), revenue $0. No metric may be invented.
+Only real numbers: paying client 0, first mail 163, Email PAUSED (since 2026-11-14), revenue $0. No metric may be invented.
 
 This agent never: sends anything, publishes anything, spends anything,
 does not delete, does not invent client/competitor/price/statistic facts,
@@ -60,7 +60,7 @@ class BusinessIntelligenceAgent:
         payload = task.get("payload") or {}
         topic = payload.get("topic") or "BOSS INPUT REQUIRED"
         return (
-            "Business intelligence draft for Talvenor from REAL numbers only: paying clients 0, first mails 162, email PAUSED since 2026-11-14, revenue $0. Never invent a metric. "
+            "Business intelligence draft for Talvenor from REAL numbers only: paying clients 0, first mails 163, email PAUSED since 2026-11-14, revenue $0. Never invent a metric. "
             f"Topic: {topic}. "
             "Do not invent any client fact, price, or statistic; mark "
             "missing facts 'BOSS INPUT REQUIRED'. No guarantee, "
@@ -106,7 +106,7 @@ class BusinessIntelligenceAgent:
         output = (
             "[MOCK DRAFT] Business intelligence — DRAFT ONLY\n"
             f"Topic: {topic}\n"
-            "Real numbers only (2026-11-19): paying clients 0; first mails 162; email PAUSED since 2026-11-14; revenue $0; spend cap $0.\nLive stack: Vapi/Sophia, +1 (947) 223-0244; booking link 15-min, New York Time.\nAny other metric: BOSS INPUT REQUIRED — nothing was written without a real number.\n"
+            "Real numbers only (2026-11-19): paying clients 0; first mails 163; email PAUSED since 2026-11-14; revenue $0; spend cap $0.\nLive stack: Vapi/Sophia, +1 (947) 223-0244; booking link 15-min, New York Time.\nAny other metric: BOSS INPUT REQUIRED — nothing was written without a real number.\n"
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )

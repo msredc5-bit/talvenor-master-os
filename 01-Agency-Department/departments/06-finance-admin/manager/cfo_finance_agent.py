@@ -53,6 +53,7 @@ DEPARTMENT_TASKS = {
     },
     "invoice_management": {
         "specialist": "BillingInvoiceAgent",
+        "alias_of": "billing_invoice",
         "file": "sections/ops/agents/billing_invoice_agent.py",
         "gate": "ok",
         "status": "EXISTING",
@@ -65,6 +66,7 @@ DEPARTMENT_TASKS = {
     },
     "financial_reporting": {
         "specialist": "ReportCompiler",
+        "alias_of": "report_compile",
         "file": "engine/workers/src/workers/admin.py",
         "gate": None,
         "status": "EXISTING",
@@ -114,6 +116,16 @@ class CFOFinanceAgent:
     gate = "ok"
     department = "06-finance-admin"
     role = "CFO Finance Agent"
+
+    def _honest_status(self):
+        """honest_status module — read-only live business numbers (Phase 2)."""
+        here = os.path.dirname(os.path.abspath(__file__))
+        ceo_core = os.path.normpath(os.path.join(
+            here, "..", "..", "..", "..", "00-CEO-Core"))
+        if ceo_core not in sys.path:
+            sys.path.insert(0, ceo_core)
+        import honest_status
+        return honest_status
 
     def _gateway(self, approvals_path=None):
         """ApprovalGateway lazy-load — no repo import at top level."""
@@ -220,15 +232,30 @@ class CFOFinanceAgent:
             ]
             for kind in sorted(DEPARTMENT_TASKS.keys()):
                 overview_entry = DEPARTMENT_TASKS[kind]
+                alias_note = (
+                    f" | alias of {overview_entry['alias_of']}"
+                    if overview_entry.get("alias_of") else ""
+                )
                 lines.append(
                     f"- {kind}: {overview_entry['specialist']} | "
                     f"{overview_entry['file']} | "
                     f"gate: {overview_entry['gate'] or 'none'} | "
-                    f"{overview_entry['status']}"
+                    f"{overview_entry['status']}{alias_note}"
                 )
+            # Phase 2: the money facts are read live from config.json
+            # honest_status — no hardcoded "paying client 0 / revenue $0".
+            # Revenue has no source field, so it is UNKNOWN, never $0.
+            hs = self._honest_status()
+            clients = hs.paying_clients()
+            clients_note = (
+                f"Paying clients (config honest_status): {clients}"
+                if clients != "UNKNOWN" else
+                "Paying clients: UNKNOWN (config has no value)"
+            )
             lines.append(
-                "Note: Paying client 0, revenue $0; invoice only for a paying "
-                "client, on Boss's word. Email PAUSED since 2026-11-14."
+                f"Note: {clients_note}; revenue: UNKNOWN — no revenue source "
+                "in config; invoice only for a paying client, on Boss's word. "
+                f"Email: {hs.email_outreach()}."
             )
             lines.append(
                 f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}")
@@ -249,6 +276,13 @@ class CFOFinanceAgent:
             }
 
         entry = DEPARTMENT_TASKS.get(task_kind)
+
+        # Phase 2: alias kinds resolve to their canonical kind — one
+        # definition, no duplicate that can drift. invoice_management is
+        # billing_invoice; financial_reporting is report_compile.
+        if entry is not None and entry.get("alias_of"):
+            task_kind = entry["alias_of"]
+            entry = DEPARTMENT_TASKS.get(task_kind)
 
         if entry is None:
             kinds = ", ".join(sorted(DEPARTMENT_TASKS))
@@ -327,9 +361,16 @@ class CFOFinanceAgent:
             f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}\n"
             f"Brain note: {brain_text}"
         )
+        # Phase 2: the client count in the notes is read live, not hardcoded.
+        clients_note = self._honest_status().paying_clients()
+        clients_text = (
+            f"paying clients {clients_note}"
+            if clients_note != "UNKNOWN" else
+            "paying clients UNKNOWN (config has no value)"
+        )
         notes = (
             "DRAFT ONLY — mock brain ($0). Delegation plan, not execution. "
-            "Invoice only for a paying client, on Boss's word; paying client 0. "
+            f"Invoice only for a paying client, on Boss's word; {clients_text}. "
             "LOCKED pricing internal only — never quote a price to a prospect. Gate: ok."
         )
         return {
