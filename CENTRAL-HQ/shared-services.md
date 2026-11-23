@@ -70,7 +70,7 @@
 |---|---|
 | What it really is | The combined financial picture of the three businesses — only what is true. |
 | Where it lives | `00-CEO-Core/config.json` (honest_status); Agency finance: `01-Agency-Department/sections/ops/agents/billing_invoice_agent.py` (invoices — never made without a paying client); reporting: `ReportCompiler` (`01-Agency-Department/engine/workers/src/workers/admin.py`) |
-| Real state | BUILT (reporting draft-only). Real numbers: paying clients 0, revenue $0, spend cap $0, first mails 162, Vet Kit sales 0. Pricing LOCKED (internal only): Starter $547/mo + $597 build; Growth $1,109/mo + $1,297 build; Scale $1,672/mo + $1,997 build — never quote to a prospect. |
+| Real state | BUILT (reporting draft-only). Real numbers: paying clients 0, revenue $0, spend cap $0, first mails 163, Vet Kit sales 0. Pricing LOCKED (internal only): Starter $547/mo + $597 build; Growth $1,109/mo + $1,297 build; Scale $1,672/mo + $1,997 build — never quote to a prospect. |
 
 ## 8. Security & Governance — Agency governance (4 files) + Gates
 

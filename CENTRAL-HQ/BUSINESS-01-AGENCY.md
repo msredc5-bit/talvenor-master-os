@@ -69,7 +69,7 @@ Plus the engine's **15 workers** (`01-Agency-Department/engine/workers/`) — **
 | Item | State |
 |---|---|
 | Email outreach | **PAUSED** — since 2026-11-14 (SPF/DMARC DNS fix still with Boss) |
-| First mail | **162** |
+| First mail | **163** |
 | Paying client | **0** |
 | Revenue | **$0** |
 | Spend cap | **$0** |
