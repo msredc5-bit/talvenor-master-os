@@ -6,7 +6,7 @@ and preparing to close the call. This section sends nothing, calls nobody,
 closes nothing — it only builds DRAFTs. Boss takes the call himself.
 
 **True status (2026-11-16):** Email PAUSED (since 2026-11-14, DNS fix pending).
-Paying client 0. First mail 162 — no state is at 100, so no
+Paying client 0. First mail 163 — no state is at 100, so no
 state's follow-up is due (20 ready PA follow-up drafts PARKED).
 Booking: https://calendar.app.google/WLoxBfnLGTdjK3LB8 ·
 Phone +1 (947) 223-0244.
@@ -47,7 +47,7 @@ Phone +1 (947) 223-0244.
 
 - Email PAUSED (since 2026-11-14) — the draft is the final word.
 - **100-mail rule (Boss 2026-11-10):** without 100 first mails in a state,
-  no follow-up; total first mail 162, no state is at 100.
+  no follow-up; total first mail 163, no state is at 100.
 - All output is DRAFT, mock brain ($0). No price quote, no guarantee,
   no invented client/testimonial/statistic.
 - Paying client 0. Never dental/medical.

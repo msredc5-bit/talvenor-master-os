@@ -6,11 +6,17 @@ Status: DRAFT ONLY — mock brain ($0), the draft is the final word.
 
 Boss's standing 100-mail rule (2026-11-10, mandatory):
 without 100 first mails complete in a state, no follow-up for that state.
-Current truth (2026-11-16): total first mail 162, but
-no state has reached 100 — so no state's follow-up is due
-now. 20 ready PA follow-up drafts are PARKED. This rule cannot be broken:
-if a state's first-mail count is below 100, the draft must say PARKED — follow-up
-not due, and it cannot be written as if to send a follow-up.
+The total first-mail count is read live from the lead store
+(store/leads.json, computed from sent records) at run time (Phase 3),
+falling back to 00-CEO-Core/config.json honest_status — no hardcoded
+copy lives in this file. The PER-STATE count is read from
+the lead store (store/leads.json) at run time (Phase 3) when the task
+payload does not carry state_first_mails — the payload still wins when
+present. When neither source has the count, the output says
+BOSS INPUT REQUIRED instead of guessing. 20 ready PA follow-up drafts
+are PARKED. This rule cannot be broken: if a state's first-mail count
+is below 100, the draft must say PARKED — follow-up not due, and it
+cannot be written as if to send a follow-up.
 
 This agent never does this: it never auto-sends, never sends a follow-up, never breaks the 100-mail
 rule, never quotes a price, never invents client information/statistics,
@@ -25,7 +31,8 @@ BOOKING_LINK = "https://calendar.app.google/WLoxBfnLGTdjK3LB8"
 TALVENOR_PHONE = "+1 (947) 223-0244"
 
 # Boss's standing rule: without 100 first mails in a state, no follow-up.
-FIRST_MAILS_TOTAL = 162
+# (Phase 2: the old hardcoded FIRST_MAILS_TOTAL = 162 is gone — the total
+# is read live from config.json honest_status, see _first_mails_total.)
 FOLLOWUP_THRESHOLD_PER_STATE = 100
 
 _GATE_ACTION_MAP = {"post it": "publish", "upload it": "publish"}
@@ -51,6 +58,50 @@ class FollowUpAgent:
         if approvals_path:
             return ApprovalGateway(approvals_path=approvals_path)
         return ApprovalGateway()
+
+    def _first_mails_total(self):
+        """Total first mails, read live — lead store first, config second.
+
+        Phase 3: the lead store computes the total from sent records
+        (163, incl. the verified Isackson filing gap); config.json
+        honest_status still holds the older 162 snapshot. The store
+        wins when readable; the config is the fallback. When neither
+        has a value, returns "UNKNOWN" — never a guessed number."""
+        here = os.path.dirname(os.path.abspath(__file__))
+        ceo_core = os.path.normpath(os.path.join(
+            here, "..", "..", "..", "..", "00-CEO-Core"))
+        if ceo_core not in sys.path:
+            sys.path.insert(0, ceo_core)
+        try:
+            import lead_store
+            total = lead_store.first_mails_total()
+            if isinstance(total, int):
+                return total
+        except Exception:
+            pass
+        import honest_status
+        return honest_status.first_mails_sent()
+
+    def _state_first_mails(self, state):
+        """First mails for one state, read live from the lead store.
+
+        Phase 3: the lead store (store/leads.json) computes the count
+        from sent records — no hardcoded copy in this file. Returns an
+        int, or None when the store is unreadable (the caller then
+        says BOSS INPUT REQUIRED instead of guessing)."""
+        if not state or state == "BOSS INPUT REQUIRED":
+            return None
+        here = os.path.dirname(os.path.abspath(__file__))
+        ceo_core = os.path.normpath(os.path.join(
+            here, "..", "..", "..", "..", "00-CEO-Core"))
+        if ceo_core not in sys.path:
+            sys.path.insert(0, ceo_core)
+        try:
+            import lead_store
+            value = lead_store.first_mails_for_state(state)
+        except Exception:
+            return None
+        return value if isinstance(value, int) else None
 
     def _request_approval(self, gateway, gated_action, title):
         """Recording a PENDING approval — not executing, not auto-approving."""
@@ -109,9 +160,18 @@ class FollowUpAgent:
         prospect = payload.get("prospect") or "BOSS INPUT REQUIRED"
         state = payload.get("state") or "BOSS INPUT REQUIRED"
         state_first_mails = payload.get("state_first_mails")
+        # Phase 3: when the payload carries no count, read it from the
+        # lead store (computed from sent records). The payload still
+        # wins when present.
+        if state_first_mails is None:
+            state_first_mails = self._state_first_mails(state)
 
         # 100-mail rule: if the state's count is known, verify it; if not,
         # BOSS INPUT REQUIRED — do not claim a follow-up is due by guessing.
+        # The count comes from the payload when present, else from the
+        # lead store (Phase 3); the line below says which source it was.
+        count_source = ("payload" if payload.get("state_first_mails")
+                        is not None else "lead store")
         if state_first_mails is None:
             due_line = (
                 "100-mail rule check: state first-mail count = "
@@ -127,13 +187,15 @@ class FollowUpAgent:
             if count >= FOLLOWUP_THRESHOLD_PER_STATE:
                 due_line = (
                     f"100-mail rule check: {state} first mails = {count} "
-                    f"(threshold {FOLLOWUP_THRESHOLD_PER_STATE}) — follow-up due."
+                    f"(read from the {count_source}; threshold "
+                    f"{FOLLOWUP_THRESHOLD_PER_STATE}) — follow-up due."
                 )
                 due = True
             else:
                 due_line = (
                     f"100-mail rule check: {state} first mails = {count} "
-                    f"(threshold {FOLLOWUP_THRESHOLD_PER_STATE}) — "
+                    f"(read from the {count_source}; threshold "
+                    f"{FOLLOWUP_THRESHOLD_PER_STATE}) — "
                     "PARKED, follow-up not due yet."
                 )
                 due = False
@@ -146,12 +208,26 @@ class FollowUpAgent:
         else:
             brain_text = "No brain passed — follow-up built from payload only."
 
+        total_first_mails = self._first_mails_total()
+        if total_first_mails == "UNKNOWN":
+            total_line = (
+                "Overall first mails: UNKNOWN — neither the lead store "
+                "nor config.json honest_status has a value; no total is "
+                "claimed."
+            )
+        else:
+            total_line = (
+                "Overall first mails (read live from the lead store when "
+                "readable, else config.json honest_status): "
+                f"{total_first_mails}. Whether a state is at 100 is checked "
+                "per state (payload or lead store) above."
+            )
+
         output = (
             "[MOCK DRAFT] Follow-up — DRAFT ONLY\n"
             f"Prospect: {prospect} | State: {state}\n"
             f"{due_line}\n"
-            "Overall first mails (real, 2026-11-16): "
-            f"{FIRST_MAILS_TOTAL} — no state at 100 yet.\n"
+            f"{total_line}\n"
             "Follow-up draft (short, plain US English, 1 CTA):\n"
             "\"Hi — quick follow-up. Missed calls still mean lost jobs, "
             "and our AI receptionist answers 24/7 so none slip through. "

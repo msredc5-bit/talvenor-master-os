@@ -30,8 +30,8 @@
 ```text
 [MOCK DRAFT] Follow-up — DRAFT ONLY
 Prospect: [prospect] | State: [state]
-100-mail rule check: [state] first mails = [count] (threshold 100) — [DUE | PARKED, follow-up not due yet]
-Overall first mails (real, 2026-11-16): 162 — no state at 100 yet.
+100-mail rule check: [state] first mails = [count] (read from the [payload | lead store]; threshold 100) — [DUE | PARKED, follow-up not due yet]
+Overall first mails (read live from the lead store when readable, else config.json honest_status): 163 — no state at 100 yet.
 Follow-up draft (short, plain US English, 1 CTA):
 "[Hi — quick follow-up. Missed calls still mean lost jobs, and our AI receptionist answers 24/7... Book here: https://calendar.app.google/WLoxBfnLGTdjK3LB8]"
 Status: [DUE — draft ready for Boss review | PARKED — do NOT send]
@@ -48,9 +48,13 @@ Gate: send — nothing can be sent without Boss's exact word.
 ## Honest limits
 
 - **100-mail rule (Boss 2026-11-10, standing):** without 100 first mails in a state,
-  no follow-up for that state. Current truth: total first mail 162,
+  no follow-up for that state. Current truth: total first mail 163,
   no state is at 100 — no state's follow-up is due now.
-  20 ready PA follow-up drafts are PARKED. FL's ceiling is 98.
+  (163 = 162 filed emailed.csv rows + 1 verified filing gap: Isackson
+  Plumbing, CA, sent 2026-11-12, Gmail Sent message 1a1cfb0ff25cdb8c.)
+  20 ready PA follow-up drafts are PARKED. FL's ceiling is 99 unique
+  leads (2026-11-23 count; the 2026-11-10 figure of 98 was the Nov 10
+  pool snapshot).
 - **Email PAUSED (since 2026-11-14)** — SPF has no Gmail include, no DMARC;
   the DNS fix is still in Boss's hands. The draft is the final word.
 - Mock brain ($0) — output DRAFT. A timeout does not mean failure — before retry,
@@ -60,9 +64,11 @@ Gate: send — nothing can be sent without Boss's exact word.
 ## Worked example (with real information)
 
 Input: `prospect` = BOSS INPUT REQUIRED, `state` = PA,
-`state_first_mails` = 37 (real number, 2026-11-16).
+`state_first_mails` = 39 (real number, 2026-11-12 count — the old "37" in
+this example was stale; PA `emailed.csv` holds 39 rows + header).
 
-Output: 100-mail rule check — PA first mails = 37 (threshold 100) —
-PARKED, follow-up not due yet. Overall first mails 162 — no state at 100 yet.
+Output: 100-mail rule check — PA first mails = 39 (read from the lead
+store; threshold 100) — PARKED, follow-up not due yet. Overall first
+mails read live from the lead store (163) — no state at 100 yet.
 The draft is written, but Status: PARKED — do NOT send. It was not sent,
 the rule was not broken.

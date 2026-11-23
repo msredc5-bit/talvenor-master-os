@@ -10,7 +10,7 @@ there is no workflow here — it comes in Phase 4 (n8n wiring).
 - **DNS fix pending:** adding `include:_spf.google.com` to SPF + a new
   `_dmarc` record — work for Boss's DNS panel. File:
   `~/workspace/talvenor/outreach/dns-fix-copy-paste-2026-11-14.md`
-- **First mail:** 162 sent (Day 1–3), paying client 0.
+- **First mail:** 163 sent (Day 1–3), paying client 0.
 - **Day 4/5/6 drafts:** 25 each READY, not sent — once the pause lifts,
   what Boss says goes.
 - **n8n auto-send:** READY, not LIVE — Boss's import + 1 test

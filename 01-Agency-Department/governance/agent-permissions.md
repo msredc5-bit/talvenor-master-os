@@ -67,7 +67,10 @@ All managers' permission level is on the same basis: **plan + delegate + draft; 
 | 07 | Quality & Security Manager | 07 Quality & Security | Plan + delegate + draft | ApprovalGateway PENDING → Boss's gate word is needed |
 | 08 | Product & Innovation Manager | 08 Product & Innovation | Plan + delegate + draft | ApprovalGateway PENDING → Boss's gate word is needed |
 
-**Note:** Agency Chief wiring is Phase 2 work — in this Phase 1, Chief wiring above the managers has not been done yet. In Phase 1, managers report directly to Main CEO Bot / Boss.
+**Note:** Agency Chief wiring is DONE (Phase 2, 2026-11-19) — the Agency Chief
+now calls all 8 department managers via DEPARTMENT_ROUTING in
+`chief_of_staff_agency.py`. The old "not done yet" line was corrected in
+Unified Business OS Phase 2 (2026-11-23).
 
 ## 6. Special limits
 

@@ -61,7 +61,9 @@ class PublishPrep(WorkerBase):
     requires_gate = "post it"
 
     def do_work(self, task: Task) -> tuple[str, dict]:
-        n = task.payload.get("count", 1)
+        # Phase 2: the fallback is the class default (2), not a second
+        # literal (1) that disagreed with default_payload.
+        n = task.payload.get("count", self.default_payload["count"])
         plan = self.llm.complete(
             f"Prepare {n} post(s) for publishing: final file + caption + first "
             f"comment + scheduled time (US Eastern). Publishing runs ONLY from the "

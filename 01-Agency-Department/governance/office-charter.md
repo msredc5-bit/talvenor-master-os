@@ -29,7 +29,9 @@ The 8 departments live only inside 01-Agency-Department. No department can be bu
 - **Main CEO Bot** — Boss's second brain. It runs the office on Boss's instructions, and comes back to Boss for decisions.
 - **Jarvis (voice)** — Boss's voice interface. Boss speaks, Jarvis listens, and tells Main CEO Bot.
 - **Agency Chief of Staff** — the Agency Department's day-to-day coordinator. It plans and delegates manager agents' work and creates drafts. But the Chief of Staff itself cannot execute any gated action — that needs Boss's approval through ApprovalGateway.
-  - **Note (Phase 2):** Agency Chief wiring is Phase 2 work. In this Phase 1 only the governance foundation is being built; Chief wiring has not been done yet.
+  - **Note:** Agency Chief wiring is DONE (Phase 2, 2026-11-19) — the Chief
+    now calls all 8 managers via DEPARTMENT_ROUTING. The old "not done
+    yet" line was corrected in Unified Business OS Phase 2 (2026-11-23).
 
 ## 4. The 8 departments
 
@@ -86,6 +88,8 @@ No wrong information can be given about the infrastructure this office runs on:
 
 ## 8. Limits of this Charter
 
-- This charter is the Phase 1 foundation. Agency Chief wiring happens in Phase 2 — not in this phase.
+- This charter is the Phase 1 foundation. Agency Chief wiring is DONE
+  (Phase 2, 2026-11-19) — the old "happens in Phase 2, not in this phase"
+  line was corrected in Unified Business OS Phase 2 (2026-11-23).
 - Changing this charter needs Boss's approval. No agent can change the charter itself.
 - If another AI's brief conflicts with the Charter, this Charter's LOCKED FACTS are correct. Vapi live, Retell dropped, database JSON store, CRM planned not live — these cannot be changed.

@@ -10,12 +10,20 @@ pest, vet). MAIN business.
 
 | # | Step | Who does it | Gate | True status (2026-11-16) |
 |---|---|---|---|---|
-| 1 | **Finding leads** — US home-service SMB, looking for missed-call signals | ProspectResearcher (ACQ) | None (research only) | Lead universe: **537 unique leads** (Tier 1/2 pool) — `~/workspace/talvenor/leads-organized/` |
+| 1 | **Finding leads** — US home-service SMB, looking for missed-call signals | ProspectResearcher (ACQ) | None (research only) | Lead universe: **537 unique leads** (Tier 1/2 pool) — `~/workspace/talvenor/leads-organized/` — see the 507 vs 537 note below |
+
+> **507 vs 537 — reconciled (Phase 2, 2026-11-23, sourced):** the outreach pool
+> file (`scoring/outreach-pool-tier1-tier2.csv`) holds **507 rows** (Tier 1: 2,
+> Tier 2: 505). The **537** total unique leads = 507 pool + **30 sent-history-only**
+> leads — already emailed, score below 60, kept ONLY so they are never mailed
+> again. Source: `~/workspace/talvenor/leads-organized/DELETION-LOG-2026-11-10.md`
+> ("Total unique leads now: 537 (507 pool + 30 sent-history-only)") and
+> `OVERVIEW.md`. The two numbers count different sets; neither is wrong.
 | 2 | **Writing drafts** — cold email / IG DM, short, plain US English, 1 CTA | OutreachDrafter (ACQ) | `send` | The draft is the final word — not sending |
 | 3 | **Boss's approval** — ok / send after seeing the draft | Boss | `ok` / `send` | Every send needs Boss's tap |
 | 4 | **Sending** — email / IG DM | Boss himself (not this system) | `send` | **PAUSED — since 2026-11-14.** DNS fix (SPF + DMARC) is still in Boss's hands; nothing goes until he says "check koro" |
-| 5 | **Follow-up** — writing again if no reply comes | OutreachDrafter (ACQ) | `send` | **Nobody's follow-up is due yet.** Rule: no follow-up in a state until 100 first mails in that state. FL's ceiling is 98 — so no follow-up is due anywhere. 20 ready PA follow-up drafts are PARKED |
-| 6 | **Reply triage** — sorting interest / decline / question | ReplyHandler (ACQ) + InboxTriager (OPS) | `send` (on an interest reply) | **First mail 162, 0 replies seen in Gmail.** hello@ replies go to Zoho — Elora cannot see them; Boss must check Zoho |
+| 5 | **Follow-up** — writing again if no reply comes | OutreachDrafter (ACQ) | `send` | **Nobody's follow-up is due yet.** Rule: no follow-up in a state until 100 first mails in that state. FL's ceiling is 99 — so no follow-up is due anywhere. 20 ready PA follow-up drafts are PARKED |
+| 6 | **Reply triage** — sorting interest / decline / question | ReplyHandler (ACQ) + InboxTriager (OPS) | `send` (on an interest reply) | **First mail 163, 0 replies seen in Gmail.** hello@ replies go to Zoho — Elora cannot see them; Boss must check Zoho |
 | 7 | **Booking a call** — 15-min demo call | SchedulerAssistant (OPS) | None | Booking link: https://calendar.app.google/WLoxBfnLGTdjK3LB8 (New York Time) |
 | 8 | **Building the receptionist** — Vapi Sophia | RetellBuilder = DRAFT plan only (DEL) | `ok` | Live stack **Vapi / Sophia** — phone +1 (947) 223-0244. Boss will not pay for Retell, so RetellBuilder only writes the plan, never builds live |
 | 9 | **QA + launch** — checklist, onboarding | QAEngineer + OnboardingAgent (DEL) | `ok` | Paying client **0** — no client has launched yet |
@@ -27,7 +35,7 @@ pest, vet). MAIN business.
 - Day 4 draft file: **25** READY, not sent
 - Day 5 draft file: **25** READY, not sent
 - Day 6 draft file: **25** READY, not sent
-- First mails total: **162** (locked record — Day 1–3 + earlier batch)
+- First mails total: **163** (locked record — Day 1–3 + earlier batch)
 - Paying client: **0**
 - Demo video (60-second): https://facebook.com/reel/2947321012290705/
 

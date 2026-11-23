@@ -5,7 +5,7 @@ receiving leads, organizing the inbox, research, and helping with scheduling. Th
 sends nothing, calls nobody — only receiving and organizing.
 
 **True status (2026-11-16):** Email PAUSED (since 2026-11-14, DNS fix pending).
-Paying client 0. First mail 162. Booking:
+Paying client 0. First mail 163. Booking:
 https://calendar.app.google/WLoxBfnLGTdjK3LB8 · Phone +1 (947) 223-0244.
 
 ## Staff roster
@@ -38,5 +38,5 @@ https://calendar.app.google/WLoxBfnLGTdjK3LB8 · Phone +1 (947) 223-0244.
 
 - Email PAUSED (since 2026-11-14) — the draft is the final word, not even an attempt to send.
 - All output is DRAFT, mock brain ($0). No lead/client information is invented.
-- Paying client 0; first mail 162.
+- Paying client 0; first mail 163.
 - No price, guarantee, or invented testimonial/statistic.

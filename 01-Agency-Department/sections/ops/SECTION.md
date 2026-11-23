@@ -4,7 +4,7 @@
 client's invoice DRAFT. This section sends nothing, takes no payment —
 only accounts and drafts.
 
-**True status (2026-11-16):** Paying client 0. First mail 162. Email PAUSED
+**True status (2026-11-16):** Paying client 0. First mail 163. Email PAUSED
 (since 2026-11-14, DNS fix pending). Booking:
 https://calendar.app.google/WLoxBfnLGTdjK3LB8 · Phone +1 (947) 223-0244.
 
@@ -39,4 +39,4 @@ https://calendar.app.google/WLoxBfnLGTdjK3LB8 · Phone +1 (947) 223-0244.
   without a number that can be seen, the report says "none".
 - There is no price except LOCKED pricing; no price is told to a prospect.
 - No payment collection — no payment link/charge.
-- Paying client 0; first mail 162.
+- Paying client 0; first mail 163.
