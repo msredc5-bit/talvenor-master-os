@@ -112,6 +112,13 @@ def handle(request, registry):
             }, req_id)
         result = tool_calling.call_tool(
             name, arguments, registry=registry,
+            # Phase 1 (Unified OS): an MCP client may identify its agent
+            # ("agent": "<agent key>" in the call params) — then the
+            # permission allowlist is enforced. Without it, the legacy
+            # dispatcher path applies (see permissions.py).
+            context=({"agent": params["agent"]}
+                     if isinstance(params.get("agent"), str)
+                     and params["agent"].strip() else None),
             approvals_path=os.environ.get("TALVENOR_MCP_APPROVALS"),
             calls_log_path=os.environ.get("TALVENOR_MCP_CALLS_LOG"),
             ledger_path=os.environ.get("TALVENOR_MCP_LEDGER",

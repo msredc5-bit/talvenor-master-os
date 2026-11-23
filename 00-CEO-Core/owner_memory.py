@@ -48,7 +48,7 @@ decide on merit, not from analogy):
     + each agent's own box (main_ceo_bot, chief_of_staff_agency,
     dept_sales / dept_marketing / dept_engineering / dept_operations /
     dept_strategy / dept_finance / dept_quality / dept_innovation,
-    worker:<specialist-slug>).
+    products, content, worker:<specialist-slug>).
   - Boss's words go only to the shared box (learn() takes no other box).
   - Agents' work notes go only to their own box (note_work()) —
     one box's note cannot be read by another box; no work note can be
@@ -83,6 +83,9 @@ STALE_TENTATIVE_DAYS = 60  # Nod: a tentative entry unrepeated for 60 days is st
 # Drawer boxes — one drawer (store/memory.json), separate boxes inside.
 # "shared": Boss's words — every agent reads them. The rest are one agent's
 # own box each; a worker box is named "worker:<specialist-slug>".
+# Phase 1 (Unified OS): "products" + "content" are the Digital Product
+# and Content Creation departments' boxes, alongside the 8 agency dept
+# boxes — 13 fixed boxes in total.
 SHARED_BOX = "shared"
 BOXES = (
     "shared",
@@ -96,6 +99,8 @@ BOXES = (
     "dept_finance",
     "dept_quality",
     "dept_innovation",
+    "products",
+    "content",
 )
 
 
@@ -199,6 +204,10 @@ class OwnerMemory:
         needs = any("box" not in e or "origin" not in e
                     for e in raw_entries)
         needs = needs or "boxes" not in raw
+        # Phase 1 (Unified OS): the stored boxes list must match BOXES —
+        # a store written before the products/content boxes were added
+        # is healed here (entries are untouched).
+        needs = needs or raw.get("boxes") != list(BOXES)
         if needs:
             self._save()
             return True
@@ -521,6 +530,29 @@ class OwnerMemory:
         return [dict(e) for e in self.entries
                 if e.get("box", SHARED_BOX) == box
                 and e["status"] != "archived"]
+
+    def search(self, query, box=None, include_archived=False):
+        """Substring search over entries (Phase 1, Unified OS).
+
+        Matches case-insensitively against text, quote, source_message,
+        slug, and area. Box permission is enforced the same way as
+        list_entries(): box=None searches everything (admin view);
+        box=X searches only shared + box X — another box's work notes
+        never appear in the results. An empty query matches nothing."""
+        q = _normalize(query).lower()
+        if not q:
+            return []
+        out = []
+        for entry in self.list_entries(box=box,
+                                       include_archived=include_archived):
+            haystack = " ".join([
+                entry.get("text", ""), entry.get("quote", ""),
+                entry.get("source_message", ""), entry.get("slug", ""),
+                entry.get("area", ""),
+            ]).lower()
+            if q in haystack:
+                out.append(dict(entry))
+        return out
 
     def edit(self, area, slug, new_text=None, quote=None,
              source_message=None, source_ref=None, status=None, box=None):
