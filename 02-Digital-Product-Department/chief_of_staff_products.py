@@ -47,8 +47,10 @@ DEPT_DIR = os.path.join(MASTER_OS_DIR, "02-Digital-Product-Department")
 
 sys.path.insert(0, CEO_CORE_DIR)
 
+from audit import audit_log  # noqa: E402
 from human_approval_gateway import ApprovalGateway  # noqa: E402
 from brain import BrainFactory  # noqa: E402
+from store_io import update_json, write_json_atomic  # noqa: E402
 
 DEPARTMENT = "digital-product"
 BUSINESS = "Vet No-Show Recovery Kit"
@@ -163,18 +165,27 @@ def _read_pa_list():
 
 def _log_task(record, tasks_path=None):
     """Appends every routed task to store/tasks.json. Never deletes
-    another department's entry — read-modify-write."""
+    another department's entry — locked read-modify-write + atomic write
+    (Phase 1, Unified OS: store_io). A corrupt tasks file is reset to
+    just this record and the reset is written to the audit log."""
     path = tasks_path or DEFAULT_TASKS_PATH
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+
+    def _apply(data):
         records = data.get("records", []) if isinstance(data, dict) else []
-    except (FileNotFoundError, json.JSONDecodeError):
-        records = []
-    records.append(record)
-    payload = {"schema": "tasks-v1", "records": records}
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, indent=2, ensure_ascii=False)
+        if not isinstance(records, list):
+            records = []
+        records.append(record)
+        return {"schema": "tasks-v1", "records": records}
+
+    try:
+        update_json(path, _apply, default={"schema": "tasks-v1", "records": []})
+    except json.JSONDecodeError:
+        audit_log("store_corrupt_reset", {
+            "file": path, "kept_record": record.get("id"),
+            "note": "tasks.json was corrupt — reset to this record only.",
+        }, audit_path=os.path.join(os.path.dirname(os.path.abspath(path)),
+                                   "audit.log"))
+        write_json_atomic(path, {"schema": "tasks-v1", "records": [record]})
     return record
 
 

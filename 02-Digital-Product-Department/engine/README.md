@@ -20,9 +20,9 @@
 
 | Item | Count |
 |---|---|
-| Staff (`STAFF.md`) | **5** — Kit Builder, Clinic Researcher, Launch Manager, Payment-Rails Checker, Support Drafter |
+| Staff (`STAFF.md`) | **7** — Kit Builder, Clinic Researcher, Launch Manager, Payment-Rails Checker, Support Drafter, Kit QA, Kit Sales |
 | Tools (`tools.json`) | **8** — mock **6** (kit_outline_read, research_notes, draft_email, draft_caption, draft_script, status_read), gated stub **2** (launch_kit — publish, sell_kit — spend) |
-| Skills (`skills/`) | **5** — one .md for each staff role |
+| Skills (`skills/`) | **7** — one .md for each staff role (Kit QA + Kit Sales added after the first 5; the old "5" count was stale — corrected Phase 2) |
 | Wrapper (`tool_calling.py`) | thin wrapper over the shared core (`00-CEO-Core/tool_calling.py`) — `call()` + `list_tools()` |
 
 ## What is blocked, and on whom
