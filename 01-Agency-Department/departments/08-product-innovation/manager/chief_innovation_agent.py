@@ -185,6 +185,56 @@ class ChiefInnovationAgent:
         task_kind = task.get("task_kind")
         entry = DEPARTMENT_TASKS.get(task_kind)
 
+        # Overview — if there is no task_kind (or the manager's own kind):
+        # an overview DRAFT listing all the department's specialists.
+        # (Phase 2: this branch was missing — the other 7 managers have it;
+        # without it a bare call returned unknown-task instead of the roster.)
+        if not task_kind or task_kind == self.task_kind:
+            if brain is not None:
+                try:
+                    brain_text = brain.complete(
+                        "Product Innovation department overview for Talvenor. "
+                        "List the department specialists, their files, gates, "
+                        "and honest status. Do not invent any fact.")
+                except TypeError:
+                    brain_text = brain.complete(
+                        "Product Innovation department overview for Talvenor.",
+                        max_tokens=500)
+            else:
+                brain_text = ("No brain passed — overview built from "
+                              "DEPARTMENT_TASKS only.")
+            lines = [
+                "[MOCK DRAFT] Product Innovation — department overview delegation plan (DRAFT ONLY)",
+                "Manager: Chief Innovation Agent | task_kind: manage_product_innovation | gate: ok",
+                "Specialists (6 EXISTING):",
+            ]
+            for kind in sorted(DEPARTMENT_TASKS.keys()):
+                item = DEPARTMENT_TASKS[kind]
+                lines.append(
+                    f"- {kind}: {item['specialist']} | {item['file']} | "
+                    f"gate: {item['gate'] or 'none'} | {item['status']}"
+                )
+            lines.append(
+                "Note: Agency service innovation only — the Vet No-Show "
+                "Recovery Kit belongs to the Digital Product Department, "
+                "not here. All 6 specialists DRAFT only, gate None."
+            )
+            lines.append(f"Booking link (real): {BOOKING_LINK} | Phone (real): {TALVENOR_PHONE}")
+            lines.append(f"Brain note: {brain_text}")
+            notes = (
+                "DRAFT ONLY — mock brain ($0). Overview delegation plan, "
+                "no worker execution. Chief wiring Phase 2 DONE — "
+                "Agency Chief now calls this manager through DEPARTMENT_ROUTING."
+            )
+            return {
+                "status": "draft-ready",
+                "output": "\n".join(lines),
+                "notes": notes,
+                "draft_only": True,
+                "mock_brain": True,
+                "gate": self.gate,
+            }
+
         if entry is None:
             kinds = ", ".join(sorted(DEPARTMENT_TASKS))
             roster = "\n".join(

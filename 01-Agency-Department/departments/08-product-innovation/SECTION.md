@@ -6,7 +6,7 @@ improvement, and prototype ideas. The manager picks the right specialist worker 
 runs it and returns its DRAFT; the specialists only build
 DRAFTs — no research/prototype is executed live.
 
-**True status (2026-11-19):** Paying client 0. First mail 162. Email PAUSED
+**True status (2026-11-19):** Paying client 0. First mail 163. Email PAUSED
 (since 2026-11-14, DNS fix pending). Brain mock ($0). Booking:
 https://calendar.app.google/WLoxBfnLGTdjK3LB8 · Phone +1 (947) 223-0244.
 **Phase 3 DONE (2026-11-19):** all 6 specialists are EXISTING — skill .md +
@@ -73,5 +73,5 @@ no GAP role.
 - $0 spend cap — no tool is bought, no spend.
 - Dental/medical/patient-health is never a target.
 - Chief wiring Phase 2 DONE — Agency Chief now calls this manager through DEPARTMENT_ROUTING.
-- Paying client 0; first mail 162; Email PAUSED (since 2026-11-14).
+- Paying client 0; first mail 163; Email PAUSED (since 2026-11-14).
 - Live voice stack Vapi/Sophia — Sophia is a live receptionist, not a demo.

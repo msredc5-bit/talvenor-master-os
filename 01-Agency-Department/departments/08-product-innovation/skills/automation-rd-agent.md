@@ -70,7 +70,7 @@ word; not a live automation.
 
 ## Honest status
 
-- **Paying client 0; first mail 162; Email PAUSED (since 2026-11-14).**
+- **Paying client 0; first mail 163; Email PAUSED (since 2026-11-14).**
 - Brain mock ($0) — all output is DRAFT.
 - n8n workflows READY, not LIVE — Boss's import + test pending.
 - CRM n8n Cloud Data Tables PLANNED, not live.

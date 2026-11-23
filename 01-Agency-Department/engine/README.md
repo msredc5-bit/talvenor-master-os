@@ -76,13 +76,13 @@ never invented facts.
 2. **Send / publish / spend / delete** — nothing happens without Boss's exact gate word
    (`send` / `post it` / `ok` / `upload it` / `go`);
    there is no auto-approve path. Boss himself does the sending/publishing.
-3. **Paying client 0, first mail 162** — 0 replies seen in Gmail;
+3. **Paying client 0, first mail 163** — 0 replies seen in Gmail;
    hello@ replies go to Zoho; Boss must check Zoho.
-4. **Follow-up** — none due anywhere (100-mail rule; FL ceiling 98).
+4. **Follow-up** — none due anywhere (100-mail rule; FL ceiling 99).
    20 ready PA follow-up drafts are PARKED.
-5. **Shared core** — `00-CEO-Core/tool_calling.py` is being built in a parallel build;
-   this engine's wrapper cannot run without it
-   (the file did not exist at build time — no live run has been verified).
+5. **Shared core** — `00-CEO-Core/tool_calling.py` exists and the wrapper
+   runs on it (check_engines 44/44, Phase 2). The earlier note that the
+   shared core "is being built in a parallel build" is stale and removed.
 
 ## Rules (locked)
 
