@@ -4,7 +4,7 @@
 · **Task type:** `reply_triage` · **Gate:** `send`
 · **SOP basis:** agency-os SKILL 16-sales-outreach (reply rule, 2026-10-14)
 
-**True status:** first mail 162, 0 replies seen in Gmail. hello@ replies
+**True status:** first mail 163, 0 replies seen in Gmail. hello@ replies
 go to Zoho — Elora cannot see them; Boss must check Zoho.
 
 ## Input

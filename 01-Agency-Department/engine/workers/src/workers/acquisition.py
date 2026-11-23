@@ -45,7 +45,12 @@ class ReplyHandler(WorkerBase):
     """Triage prospect replies per the locked 2026-10-14 reply rule."""
     task_kind = "reply_triage"
     default_payload = {"reply_type": "interest"}
-    requires_gate = "send"  # interest replies need Boss's eyes before anything sends
+    # Phase 2 — this attr is a class-level DEFAULT, not the per-type gate.
+    # do_work() returns gate=None for a decline (polite exit is allowed
+    # to send) and gate="send" otherwise; the returned dict's gate is
+    # authoritative per reply_type. No code reads this attr (verified
+    # 2026-11-23) — it is documentation only, so it must not over-claim.
+    requires_gate = "send"
 
     def do_work(self, task: Task) -> tuple[str, dict]:
         reply_type = task.payload.get("reply_type", "interest")

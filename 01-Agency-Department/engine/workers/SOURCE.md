@@ -37,6 +37,31 @@ workers belong upstream first, then get re-vendored here.
 Total: 18 files, 24,621 bytes. Verified byte-identical to upstream with
 `diff -r` at vendoring time. No `__pycache__` / `*.pyc` files were copied.
 
+## Added after vendoring (Phase 11, 2026-11-20 — live providers)
+
+Six more live providers were added in `src/live/` (same pattern as
+meta_provider — stdlib urllib, env-var auth, unwired by default):
+
+| Vendored file | Provider | Bytes (2026-11-23) |
+|---|---|---|
+| `src/live/openai_provider.py` | OpenAI (gpt-4o) | 3966 |
+| `src/live/anthropic_provider.py` | Claude (claude-sonnet-4-5) | 4303 |
+| `src/live/gemini_provider.py` | Gemini (gemini-2.5-flash) | 4167 |
+| `src/live/kimi_provider.py` | Kimi (kimi-k2.5) | 4141 |
+| `src/live/grok_provider.py` | Grok (grok-4) | 4044 |
+| `src/live/openrouter_provider.py` | OpenRouter (`openrouter/free`) | 4648 |
+
+So `src/live/` now holds 7 providers (meta + these 6). The table above
+still describes the 2026-11-16 vendoring exactly; this section is the
+Phase 2 (2026-11-23) update, not a re-verification of the original copy.
+
+## `__pycache__` note (Phase 2 correction)
+
+"No `__pycache__` / `*.pyc` files were copied" was true at copy time.
+`__pycache__` directories now exist throughout the vendored tree — they
+were created by later test runs on this VM. They are gitignored build
+artifacts, not source, and were never part of the vendored copy.
+
 ## What was NOT copied, and why
 
 - `src/mock/scenarios.py` — nothing in the copied set imports it
@@ -49,12 +74,15 @@ Total: 18 files, 24,621 bytes. Verified byte-identical to upstream with
 - `dynamic_credentials` — `src/live/meta_provider.py` imports it, but
   the module does NOT live inside boss-ceo. It lives at
   `/opt/muse/skills/custom-connector-setup/bin/dynamic_credentials.py`
-  (the connector Secure Vault surrogate), and `meta_provider.py`
-  already inserts that directory on `sys.path` itself (line 22 of the
-  vendored file), so it resolves exactly as it did upstream. No key or
-  credential path was invented, and no key appears anywhere in this
-  repo. Note: the live provider is unwired here — the Chief only ever
-  constructs `MockLLMProvider`.
+  (the connector Secure Vault surrogate). Phase 2 (2026-11-23) changed
+  how it is loaded: the old top-level `sys.path.insert` + import broke
+  the module import on a plain checkout (Boss's PC), so the import is
+  now LAZY — inside `complete()`, only when a live call actually runs.
+  On the Muse VM the surrogate still resolves from that bin directory;
+  on a machine without it, the live call fails with a clear error
+  instead of the import failing. No key or credential path was invented,
+  and no key appears anywhere in this repo. Note: the live provider is
+  unwired here — the Chief only ever constructs `MockLLMProvider`.
 
 ## Import notes
 

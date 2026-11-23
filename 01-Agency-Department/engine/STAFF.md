@@ -6,7 +6,7 @@ workers, not one invented. Names, divisions, gates — taken verbatim from the C
 (`../chief_of_staff_agency.py`).
 
 True status (2026-11-16): Email PAUSED (since 2026-11-14, DNS fix pending) —
-the draft is the final word, not sending. Paying client 0. First mail 162.
+the draft is the final word, not sending. Paying client 0. First mail 163.
 Booking: https://calendar.app.google/WLoxBfnLGTdjK3LB8 · Phone +1 (947) 223-0244.
 All workers run on MockLLMProvider (mock brain, $0) — all output is DRAFT.
 Live stack Vapi/Sophia — RetellBuilder's output is only a DRAFT build plan.
@@ -179,7 +179,7 @@ task types (the ROUTING's 15 are unchanged).
 | ops | BillingInvoiceAgent | `billing_invoice` | `sections/ops/agents/billing_invoice_agent.py` | `sections/ops/skills/billing-invoice-agent.md` | `ok` | NEW |
 
 **True status (2026-11-17, Phase 7):** Email PAUSED (since 2026-11-14) —
-the draft is the final word. Paying client 0. First mail 162 — no state is at 100,
+the draft is the final word. Paying client 0. First mail 163 — no state is at 100,
 no follow-up is due (100-mail rule). LOCKED pricing only for the invoice
 (Starter $547/mo + $597 build; Growth $1,109/mo + $1,297 build;
 Scale $1,672/mo + $1,997 build) — never quote a price to a prospect.

@@ -43,7 +43,9 @@ class SchedulerAssistant(WorkerBase):
     requires_gate = None
 
     def do_work(self, task: Task) -> tuple[str, dict]:
-        what = task.payload.get("what", "client call")
+        # Phase 2: the fallback is the class default ("client demo call"),
+        # not a second literal ("client call") that disagreed with it.
+        what = task.payload.get("what", self.default_payload["what"])
         plan = self.llm.complete(
             f"Schedule '{what}': propose 3 slots in Asia/Dhaka with US-Eastern "
             f"equivalents, draft the invite. Boss confirms before anything is sent."

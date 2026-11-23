@@ -15,14 +15,36 @@ is NOT yet proven; retry only on Boss's word.
 from __future__ import annotations
 
 import json
-import sys
 import time
 import urllib.request
 
-sys.path.insert(0, "/opt/muse/skills/custom-connector-setup/bin")
-from dynamic_credentials import add_surrogate_to_request, read_json_response  # noqa: E402
+from src.contracts.llm import LLMProvider
 
-from src.contracts.llm import LLMProvider  # noqa: E402
+
+def _load_surrogate():
+    """Secure Vault surrogate — imported LAZILY (Phase 2).
+
+    The old top-level ``sys.path.insert(0, "/opt/muse/skills/..."
+    + "custom-connector-setup/bin")`` + ``from dynamic_credentials import
+    ...`` made this module un-importable on a plain checkout (Boss's
+    PC), where that VM-only directory does not exist. Now the import
+    happens only when complete() actually runs a live call, and a
+    missing surrogate fails that call with a clear error instead of
+    breaking the import.
+    """
+    import sys
+
+    sys.path.insert(0, "/opt/muse/skills/custom-connector-setup/bin")
+    try:
+        from dynamic_credentials import (  # noqa: E402
+            add_surrogate_to_request, read_json_response)
+    except ImportError as exc:
+        raise RuntimeError(
+            "live brain unavailable: the Meta connector surrogate "
+            "(dynamic_credentials) is not installed on this machine — "
+            "run on the Muse VM, or install the connector first"
+        ) from exc
+    return add_surrogate_to_request, read_json_response
 
 SYSTEM_PROMPT = (
     "You are a specialist worker inside CEO-OS, a personal CEO agent "
@@ -64,6 +86,7 @@ class MetaSparkProvider(LLMProvider):
             headers={"Content-Type": "application/json"},
             method="POST",
         )
+        add_surrogate_to_request, read_json_response = _load_surrogate()
         add_surrogate_to_request(
             req, "custom.meta-model-api-2", allowed_hosts=["api.meta.ai"])
         t0 = time.time()

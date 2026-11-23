@@ -33,7 +33,15 @@ class MockLLMProvider(LLMProvider):
         idx = int(digest[:8], 16) % len(_TEMPLATES)
         hint = " ".join(prompt.split())[:48]
         text = _TEMPLATES[idx].format(hint=hint)
-        return text[:max_tokens]
+        # Phase 2: max_tokens is a TOKEN budget, not a character budget.
+        # The old text[:max_tokens] cut mid-word and overstated the
+        # budget ~5x (a ~150-char template is ~30 words). The mock has
+        # no tokenizer, so truncate by whitespace-separated words — the
+        # closest stdlib approximation of tokens.
+        words = text.split()
+        if len(words) > max_tokens:
+            text = " ".join(words[:max_tokens])
+        return text
 
     def health(self) -> dict:
         return {"provider": self.name, "ok": True, "calls": self.calls, "cost_usd": 0.0}

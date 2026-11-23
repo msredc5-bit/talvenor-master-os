@@ -27,7 +27,7 @@ Short, plain US English, hook first, one CTA.
    testimonial / statistic, no dental/medical. Try sending to the owner's named address —
    generic info@ replies under 1% (known fact).
 5. Remember the follow-up rule: if a state has not reached 100 first mails, no
-   follow-up for that state. FL's ceiling is 98 — no follow-up is due anywhere now.
+   follow-up for that state. FL's ceiling is 99 — no follow-up is due anywhere now.
    20 ready PA follow-up drafts are PARKED.
 6. Show the draft to Boss — not send it.
 

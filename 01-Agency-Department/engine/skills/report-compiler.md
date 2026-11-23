@@ -25,7 +25,7 @@ never guesses.
    next step of everyone who showed interest — no contact without Boss's approval.
 4. Next week: what changes — one clear decision (e.g. which pillar more,
    which format less).
-5. Write the true numbers: first mail 162, paying client 0, email PAUSED
+5. Write the true numbers: first mail 163, paying client 0, email PAUSED
    (since 2026-11-14) — nothing but verified numbers.
 
 ## Output format
