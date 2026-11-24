@@ -32,6 +32,17 @@ Rules (written in code):
     if it is in the payload, is placed at top level (the manager reads task.get
     ("task_kind")); if missing, M1–M4 give an overview, M5–M8
     return "unknown-task" (with a list of known kinds).
+  - Skill hook WIRED (2026-11-25, Phase 2 local-first): _handle_task_inner
+    loads the skill for a non-gated task AFTER the gated block via
+    load_skill_for_task (00-CEO-Core/skill_finder.py — progressive
+    disclosure, full text only for the top match) and attaches it as an
+    additive result["skill"] key (name, repo path, loaded bool,
+    ambiguous, candidates); department managers get the skill name/path
+    as advisory context on their task copy. The hook is read-only and
+    never executes a gated action; a lookup failure never breaks
+    routing. CAVEAT: live-model skill execution still awaits Boss's PC
+    live proof — the mock brain only drafts, the skill text is context,
+    not a live run.
 - Memory wiring (2026-11-21, MEMORY-STRUCTURE-DECISION-2026-11-21.md):
     handle_task() reads memory on every task — context_for(
     "chief_of_staff_agency") is attached to the result as "memory"
@@ -286,6 +297,63 @@ def _now_iso():
     return datetime.now(timezone.utc).isoformat()
 
 
+def _skill_query_for_task(task):
+    """Derive a skill-finder query from a task (Phase 2, 2026-11-25).
+
+    Query = task title + task type (underscores -> spaces) + payload
+    task_kind (when present and not already in the query). The type
+    alone is usually enough ("caption_write" -> caption-writer); the
+    title adds the task's own words; task_kind adds the manager's
+    kind. Read-only string work — no file or network access.
+    """
+    parts = []
+    title = (task.get("title") or "").strip()
+    if title:
+        parts.append(title)
+    task_type = (task.get("type") or "").strip()
+    if task_type:
+        parts.append(task_type.replace("_", " "))
+    payload = task.get("payload") or {}
+    kind = payload.get("task_kind") or task.get("task_kind") or ""
+    if isinstance(kind, str) and kind.strip():
+        kind = kind.strip().replace("_", " ")
+        if kind not in " ".join(parts):
+            parts.append(kind)
+    return " ".join(parts).strip()
+
+
+def _load_skill_for_task(task):
+    """Load the skill for a task (Phase 2 skill hook, 2026-11-25).
+
+    Calls the hardened finder (skill_finder.load_skill_for_task —
+    progressive disclosure, full text only for the top match) and
+    returns an additive info dict: {"query", "name", "path", "loaded",
+    "ambiguous", "candidates"}. Read-only: loading never executes a
+    gated action and never writes a skill file. NEVER raises — a
+    missing finder, an empty query, or a lookup failure returns
+    loaded=False (with "error" when the finder itself raised) so
+    routing continues exactly as before.
+    """
+    query = _skill_query_for_task(task)
+    info = {"query": query, "name": None, "path": None,
+            "loaded": False, "ambiguous": False, "candidates": []}
+    if not query:
+        return info
+    try:
+        import skill_finder  # noqa: PLC0415 (CEO_CORE_DIR is on sys.path)
+        found = skill_finder.load_skill_for_task(query)
+    except Exception as e:  # noqa: BLE001 - skill lookup never breaks routing
+        info["error"] = f"{type(e).__name__}: {e}"
+        return info
+    loaded = found.get("loaded") or {}
+    info["name"] = loaded.get("name")
+    info["path"] = loaded.get("path")
+    info["loaded"] = bool(loaded)
+    info["ambiguous"] = bool(found.get("ambiguous"))
+    info["candidates"] = list(found.get("candidates") or [])
+    return info
+
+
 def _log_task(record, tasks_path=None):
     """Appends every routed task to store/tasks.json. Never deletes another
     department's entry — locked read-modify-write + atomic write
@@ -396,6 +464,14 @@ def _handle_task_inner(task, tasks_path=None, approvals_path=None):
         }, tasks_path=tasks_path)
         return result
 
+    # 1a. Phase 2 skill hook (2026-11-25) — AFTER the gated block, so a
+    # gated task never reaches skill loading (it returned above).
+    # Read-only: load_skill_for_task loads the top match's full text
+    # only; nothing is executed and no gated action can fire from a
+    # skill. Additive only: result["skill"] is a new key; no existing
+    # key or status changes. A lookup failure never breaks routing.
+    skill_info = _load_skill_for_task(task)
+
     # 1b. Phase 7 section agents — alongside ROUTING, after the gated block.
     # If a gated action was present the block above already returned, so here the task
     # No gated_action — the agent only makes a DRAFT.
@@ -447,6 +523,7 @@ def _handle_task_inner(task, tasks_path=None, approvals_path=None):
                 "gate": gate_word,
                 "note": note,
             }
+        result["skill"] = skill_info
         _log_task({
             "id": uuid.uuid4().hex[:12],
             "department": DEPARTMENT,
@@ -477,6 +554,11 @@ def _handle_task_inner(task, tasks_path=None, approvals_path=None):
         payload_kind = (task.get("payload") or {}).get("task_kind")
         if payload_kind and not manager_task.get("task_kind"):
             manager_task["task_kind"] = payload_kind
+        # Phase 2 skill hook (advisory only): the skill name/path ride
+        # on the manager's task copy; managers ignore unknown keys.
+        # Nothing is injected into any engine EngineTask payload.
+        manager_task["skill"] = {"name": skill_info.get("name"),
+                                 "path": skill_info.get("path")}
         manager_result = manager.run(
             manager_task, BrainFactory.get_brain("agency"), gw, approvals_path)
         department_folder = module_file.split("/")[0]
@@ -531,7 +613,41 @@ def _handle_task_inner(task, tasks_path=None, approvals_path=None):
                 "gate": gate_word,
                 "note": note,
             }
-        _log_task({
+        # Phase 5 shared-runtime hook (2026-11-25): when the incoming
+        # task carries "execute": True AND the manager returned a
+        # draft, run the department workflow through the shared
+        # runtime (AgentRuntime + workflow engine, behind the gate).
+        # A gated step comes back pending-approval and NEVER
+        # executes — recorded as "executed-partial", not a failure.
+        # Without "execute": True, or for pending-approval /
+        # unknown-task manager results, behaviour is EXACTLY as
+        # before: no new keys, no status change, no "executions"
+        # in the log record. The department_runtime import is lazy
+        # (inside this branch) and failure-proof: a missing/broken
+        # module only attaches an error "execution" dict and never
+        # changes result["status"].
+        _exec_record = None
+        if (task.get("execute") is True
+                and manager_result.get("status") == "draft-ready"):
+            try:
+                if DEPARTMENTS_DIR not in sys.path:
+                    sys.path.insert(0, DEPARTMENTS_DIR)
+                import department_runtime  # noqa: PLC0415 (lazy)
+                _exec = department_runtime.execute_department_task(
+                    department_folder, manager_task, manager_result)
+                result["execution"] = _exec.get("execution")
+                if _exec.get("status") in ("executed",
+                                           "executed-partial"):
+                    result["status"] = _exec["status"]
+                elif _exec.get("status") == "error":
+                    result["status"] = "error"
+                _exec_record = _exec.get("execution_record")
+            except Exception as _exc:  # noqa: BLE001 — never break routing
+                result["execution"] = {
+                    "status": "error",
+                    "error": f"{type(_exc).__name__}: {_exc}"}
+        result["skill"] = skill_info
+        _log_record = {
             "id": uuid.uuid4().hex[:12],
             "department": DEPARTMENT,
             "title": title,
@@ -539,7 +655,10 @@ def _handle_task_inner(task, tasks_path=None, approvals_path=None):
             "worker": class_name,
             "status": result["status"],
             "logged_at": _now_iso(),
-        }, tasks_path=tasks_path)
+        }
+        if _exec_record is not None:
+            _log_record["executions"] = [_exec_record]
+        _log_task(_log_record, tasks_path=tasks_path)
         return result
 
     # 2. Task without a type — only a routing probe, no worker runs.
@@ -552,6 +671,7 @@ def _handle_task_inner(task, tasks_path=None, approvals_path=None):
             "note": "No task type given — routing probe only, no worker ran.",
             "routing_keys": sorted(ROUTING),
         }
+        result["skill"] = skill_info
         _log_task({
             "id": uuid.uuid4().hex[:12],
             "department": DEPARTMENT,
@@ -572,6 +692,7 @@ def _handle_task_inner(task, tasks_path=None, approvals_path=None):
             "type": task_type,
             "error": f"Unknown task type {task_type!r}. Known: {sorted(ROUTING)}",
         }
+        result["skill"] = skill_info
         _log_task({
             "id": uuid.uuid4().hex[:12],
             "department": DEPARTMENT,
@@ -628,6 +749,7 @@ def _handle_task_inner(task, tasks_path=None, approvals_path=None):
         "gate": gate_word,
         "note": note,
     }
+    result["skill"] = skill_info
     _log_task({
         "id": uuid.uuid4().hex[:12],
         "department": DEPARTMENT,

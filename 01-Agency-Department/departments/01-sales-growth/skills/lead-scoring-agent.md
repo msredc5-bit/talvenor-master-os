@@ -1,3 +1,8 @@
+---
+name: lead-scoring-agent
+description: "The Sales & Growth department's scoring specialist. For putting verified leads"
+---
+
 # Lead Scoring Agent — Skill
 
 ## Role

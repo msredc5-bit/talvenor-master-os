@@ -1,3 +1,8 @@
+---
+name: chief-growth-agent
+description: "Manager of the Sales & Growth department. When a task comes from Boss/Chief, the right"
+---
+
 # Chief Growth Agent — Skill
 
 ## Role

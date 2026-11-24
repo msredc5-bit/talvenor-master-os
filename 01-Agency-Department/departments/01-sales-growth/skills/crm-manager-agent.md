@@ -1,3 +1,8 @@
+---
+name: crm-manager-agent
+description: "The Sales & Growth department's CRM specialist. For organising leads in the CRM"
+---
+
 # CRM Manager Agent — Skill
 
 ## Role

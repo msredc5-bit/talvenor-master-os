@@ -1,3 +1,8 @@
+---
+name: business-verification-agent
+description: "The Sales & Growth department's verification specialist. The prospect's website,"
+---
+
 # Business Verification Agent — Skill
 
 ## Role

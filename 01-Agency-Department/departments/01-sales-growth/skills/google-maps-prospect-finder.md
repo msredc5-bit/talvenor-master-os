@@ -1,3 +1,8 @@
+---
+name: google-maps-prospect-finder
+description: "The Sales & Growth department's discovery specialist. From Maps/Places data"
+---
+
 # Google Maps Prospect Finder — Skill
 
 ## Role
