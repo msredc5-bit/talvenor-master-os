@@ -1,3 +1,8 @@
+---
+name: tool-allowlist
+description: "Enforcing per-agent tool allowlists in the Tool Gateway — which agent may run which"
+---
+
 # Tool-Allowlist Enforcement — Skill (for the Agency Chief of Staff)
 
 ## Role

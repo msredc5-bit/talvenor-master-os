@@ -1,3 +1,8 @@
+---
+name: skill-finder
+description: "When a new capability is needed for a task — one no agent's skill has —"
+---
+
 # Skill: Skill-Finder (the Main CEO Bot's skill for finding skills)
 
 **Role:** When a new capability is needed for a task — one no agent's skill has —

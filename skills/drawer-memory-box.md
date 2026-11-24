@@ -1,3 +1,8 @@
+---
+name: drawer-memory-box
+description: "How to use Master OS memory — one drawer"
+---
+
 # Drawer Memory-Box — Skill (for all agents)
 
 ## Role

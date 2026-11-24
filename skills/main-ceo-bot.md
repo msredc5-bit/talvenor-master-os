@@ -1,3 +1,8 @@
+---
+name: main-ceo-bot
+description: "The Master OS brain — reads Boss's (or Jarvis's) task and sends it to the right"
+---
+
 # Skill: Main CEO Bot
 
 **Role:** The Master OS brain — reads Boss's (or Jarvis's) task and sends it to the right
