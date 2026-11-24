@@ -1,3 +1,8 @@
+---
+name: product-improvement-agent
+description: "Product Improvement Agent · Worker: ProductImprovementAgent"
+---
+
 # Skill: Product Improvement Agent — Agency Department 08 (Phase 3)
 
 **Role:** Product Improvement Agent · **Worker:** `ProductImprovementAgent`

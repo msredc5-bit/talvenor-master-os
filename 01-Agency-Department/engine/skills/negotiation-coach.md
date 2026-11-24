@@ -1,3 +1,8 @@
+---
+name: negotiation-coach
+description: "Negotiation Coach · Worker: NegotiationCoach (boss-ceo, ACQ)"
+---
+
 # Skill: Negotiation Coach — Agency (Phase 5)
 
 **Role:** Negotiation Coach · **Worker:** `NegotiationCoach` (boss-ceo, ACQ)

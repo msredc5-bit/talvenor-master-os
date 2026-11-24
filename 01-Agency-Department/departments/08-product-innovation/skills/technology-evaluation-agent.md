@@ -1,3 +1,8 @@
+---
+name: technology-evaluation-agent
+description: "Technology Evaluation Agent · Worker: TechnologyEvaluationAgent"
+---
+
 # Skill: Technology Evaluation Agent — Agency Department 08 (Phase 3)
 
 **Role:** Technology Evaluation Agent · **Worker:** `TechnologyEvaluationAgent`

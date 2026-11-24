@@ -1,3 +1,8 @@
+---
+name: inbox-triager
+description: "Inbox Triager · Worker: InboxTriager (boss-ceo, OPS)"
+---
+
 # Skill: Inbox Triager — Agency (Phase 5)
 
 **Role:** Inbox Triager · **Worker:** `InboxTriager` (boss-ceo, OPS)

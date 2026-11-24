@@ -1,3 +1,8 @@
+---
+name: content-planner
+description: "Content Planner · Worker: ContentPlanner (boss-ceo, MKT)"
+---
+
 # Skill: Content Planner — Agency (Phase 5)
 
 **Role:** Content Planner · **Worker:** `ContentPlanner` (boss-ceo, MKT)

@@ -1,3 +1,8 @@
+---
+name: new-feature-research-agent
+description: "New Feature Research Agent · Worker: NewFeatureResearchAgent"
+---
+
 # Skill: New Feature Research Agent — Agency Department 08 (Phase 3)
 
 **Role:** New Feature Research Agent · **Worker:** `NewFeatureResearchAgent`

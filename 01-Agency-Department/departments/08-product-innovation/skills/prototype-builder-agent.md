@@ -1,3 +1,8 @@
+---
+name: prototype-builder-agent
+description: "Prototype Builder Agent · Worker: PrototypeBuilderAgent"
+---
+
 # Skill: Prototype Builder Agent — Agency Department 08 (Phase 3)
 
 **Role:** Prototype Builder Agent · **Worker:** `PrototypeBuilderAgent`

@@ -1,3 +1,8 @@
+---
+name: caption-writer
+description: "Caption Writer · Worker: CaptionWriter (boss-ceo, MKT)"
+---
+
 # Skill: Caption Writer — Agency (Phase 5)
 
 **Role:** Caption Writer · **Worker:** `CaptionWriter` (boss-ceo, MKT)
