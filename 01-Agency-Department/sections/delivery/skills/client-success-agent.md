@@ -1,3 +1,8 @@
+---
+name: client-success-agent
+description: "Client Success Agent · Worker: ClientSuccessAgent (Phase 7, delivery section)"
+---
+
 # Skill: Client Success Agent — Agency (Phase 7)
 
 **Role:** Client Success Agent · **Worker:** `ClientSuccessAgent` (Phase 7, delivery section)

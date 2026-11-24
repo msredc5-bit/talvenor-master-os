@@ -1,3 +1,8 @@
+---
+name: client-intake-receiver
+description: "Client Intake Receiver · Worker: ClientIntakeReceiverAgent (Phase 7, receive section)"
+---
+
 # Skill: Client Intake Receiver — Agency (Phase 7)
 
 **Role:** Client Intake Receiver · **Worker:** `ClientIntakeReceiverAgent` (Phase 7, receive section)

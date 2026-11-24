@@ -1,3 +1,8 @@
+---
+name: followup-agent
+description: "Follow-up Agent · Worker: FollowUpAgent (Phase 7, sell section)"
+---
+
 # Skill: Follow-up Agent — Agency (Phase 7)
 
 **Role:** Follow-up Agent · **Worker:** `FollowUpAgent` (Phase 7, sell section)

@@ -46,7 +46,7 @@ meta_provider — stdlib urllib, env-var auth, unwired by default):
 |---|---|---|
 | `src/live/openai_provider.py` | OpenAI (gpt-4o) | 3966 |
 | `src/live/anthropic_provider.py` | Claude (claude-sonnet-4-5) | 4303 |
-| `src/live/gemini_provider.py` | Gemini (gemini-2.5-flash) | 4167 |
+| `src/live/gemini_provider.py` | Gemini (gemini-2.5-flash-lite) | 4167 |
 | `src/live/kimi_provider.py` | Kimi (kimi-k2.5) | 4141 |
 | `src/live/grok_provider.py` | Grok (grok-4) | 4044 |
 | `src/live/openrouter_provider.py` | OpenRouter (`openrouter/free`) | 4648 |

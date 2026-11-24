@@ -1,3 +1,8 @@
+---
+name: service-delivery-manager
+description: "Service Delivery Manager · Worker: ServiceDeliveryManagerAgent (Phase 7, delivery section)"
+---
+
 # Skill: Service Delivery Manager — Agency (Phase 7)
 
 **Role:** Service Delivery Manager · **Worker:** `ServiceDeliveryManagerAgent` (Phase 7, delivery section)

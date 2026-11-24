@@ -33,7 +33,7 @@ SYSTEM_PROMPT = (
 
 ENV_VAR = "GEMINI_API_KEY"
 ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
-DEFAULT_MODEL = "gemini-2.5-flash"
+DEFAULT_MODEL = "gemini-2.5-flash-lite"
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -82,6 +82,14 @@ class GeminiProvider(LLMProvider):
                     req, timeout=self.timeout) as resp:
                 payload = json.loads(resp.read().decode("utf-8"))
         except Exception as exc:
+            # Phase 1: surface the HTTP status explicitly so the
+            # free-only guard's rate-limit detection (is_rate_limit_error)
+            # can see a 429 even if the wrapped message is reworded.
+            code = getattr(exc, "code", None)
+            if isinstance(code, int):
+                raise RuntimeError(
+                    f"live brain call failed: HTTP {code}: "
+                    f"{type(exc).__name__}: {exc}")
             raise RuntimeError(
                 f"live brain call failed: {type(exc).__name__}: {exc}")
         if "error" in payload:

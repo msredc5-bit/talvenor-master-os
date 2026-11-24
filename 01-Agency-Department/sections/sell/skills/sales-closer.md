@@ -1,3 +1,8 @@
+---
+name: sales-closer
+description: "Sales Closer · Worker: SalesCloserAgent (Phase 7, sell section)"
+---
+
 # Skill: Sales Closer — Agency (Phase 7)
 
 **Role:** Sales Closer · **Worker:** `SalesCloserAgent` (Phase 7, sell section)

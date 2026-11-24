@@ -1,3 +1,8 @@
+---
+name: billing-invoice-agent
+description: "Billing Invoice Agent · Worker: BillingInvoiceAgent (Phase 7, ops section)"
+---
+
 # Skill: Billing Invoice Agent — Agency (Phase 7)
 
 **Role:** Billing Invoice Agent · **Worker:** `BillingInvoiceAgent` (Phase 7, ops section)

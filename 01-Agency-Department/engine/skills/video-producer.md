@@ -1,3 +1,8 @@
+---
+name: video-producer
+description: "Video Producer · Worker: VideoProducer (boss-ceo, MKT)"
+---
+
 # Skill: Video Producer — Agency (Phase 5)
 
 **Role:** Video Producer · **Worker:** `VideoProducer` (boss-ceo, MKT)
