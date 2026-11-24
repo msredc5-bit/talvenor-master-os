@@ -1,3 +1,8 @@
+---
+name: chief-products
+description: "Chief of the Vet No-Show Recovery Kit ($49 one-time) — listing,"
+---
+
 # Skill: Chief of Staff — Digital Product
 
 **Role:** Chief of the Vet No-Show Recovery Kit ($49 one-time) — listing,

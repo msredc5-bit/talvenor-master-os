@@ -33,6 +33,7 @@ import json
 import os
 import re
 import sys
+from datetime import datetime, timezone
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CEO_CORE_DIR = os.path.join(BASE, "00-CEO-Core")
@@ -295,6 +296,220 @@ def read_usage_ledger():
                 "over_monthly_cap": UNKNOWN}
 
 
+# --- Phase 7 (Worker A): founder-dashboard extension, additive only. ---
+
+DEPARTMENTS = [
+    ("01-sales-growth", "Sales & Growth"),
+    ("02-marketing", "Marketing"),
+    ("03-ai-engineering", "AI Engineering"),
+    ("04-client-operations", "Client Operations"),
+    ("05-research-strategy", "Research & Strategy"),
+    ("06-finance-admin", "Finance & Admin"),
+    ("07-quality-security", "Quality & Security"),
+    ("08-product-innovation", "Product Innovation"),
+]
+
+TASK_STATUSES = ("queued", "done", "dead_letter", "blocked",
+                 "cancelled", "duplicate", "failed-legacy")
+
+APPROVAL_TTL_MINUTES = 20  # mirrors human_approval_gateway.APPROVAL_TTL_MINUTES
+
+
+def _parse_iso(value):
+    """ISO timestamp -> aware datetime, or None (never raises)."""
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def _chain_records():
+    """Phase 6 chain records under store/chains/ — read-only, never invent.
+
+    Returns a list of (filename, dict) pairs, or [] when the dir is absent
+    (no chain has run against the real store yet)."""
+    chains_dir = os.path.join(BASE, "store", "chains")
+    try:
+        names = sorted(os.listdir(chains_dir))
+    except OSError:
+        return []
+    out = []
+    for name in names:
+        if not name.endswith(".json"):
+            continue
+        data = _read_json(os.path.join(chains_dir, name))
+        if isinstance(data, dict):
+            out.append((name, data))
+    return out
+
+
+def read_departments():
+    """Per-department status for all 8 departments.
+
+    workflow: True when a *.json workflow file exists in workflows/.
+    report_compiles: True when reports/report.py parses (compile check only).
+    last_execution: outcome from a real chain record naming the department,
+    else "unknown" — tasks.json carries no department field, so nothing is
+    guessed from it."""
+    chains = _chain_records()
+    dept_dir = os.path.join(BASE, "01-Agency-Department", "departments")
+    result = {}
+    for slug, label in DEPARTMENTS:
+        base = os.path.join(dept_dir, slug)
+        try:
+            wf_names = [f for f in os.listdir(os.path.join(base, "workflows"))
+                        if f.endswith(".json")]
+        except OSError:
+            wf_names = []
+        report_path = os.path.join(base, "reports", "report.py")
+        report_src = _read_text(report_path)
+        try:
+            compile(report_src, report_path, "exec") if report_src else None
+            report_compiles = report_src is not None
+        except SyntaxError:
+            report_compiles = False
+        last_execution = UNKNOWN
+        for fname, rec in chains:
+            hay = fname + json.dumps(rec, default=str)
+            if slug in hay or label.lower() in hay.lower():
+                last_execution = (rec.get("outcome") or rec.get("status")
+                                  or rec.get("result") or UNKNOWN)
+                break
+        result[slug] = {
+            "label": label,
+            "workflow_file": wf_names[0] if wf_names else UNKNOWN,
+            "workflow_present": bool(wf_names),
+            "report_compiles": report_compiles,
+            "last_execution": last_execution,
+        }
+    return result
+
+
+def read_task_counts(task_records):
+    """tasks.json records counted by status. Unknown statuses land in
+    "other" — never dropped, never invented."""
+    counts = {st: 0 for st in TASK_STATUSES}
+    counts["other"] = 0
+    if isinstance(task_records, list):
+        for rec in task_records:
+            st = rec.get("status") if isinstance(rec, dict) else None
+            if st in counts:
+                counts[st] += 1
+            else:
+                counts["other"] += 1
+    counts["total"] = sum(counts.values())
+    return counts
+
+
+def read_approvals_detail(appr_records):
+    """Pending approvals with age (minutes since requested_at) and
+    expires_in (minutes left of the 20-min TTL). Unparseable timestamps
+    give "unknown", never a guessed number."""
+    pending = []
+    if isinstance(appr_records, list):
+        now = datetime.now(timezone.utc)
+        for rec in appr_records:
+            if not isinstance(rec, dict) or rec.get("status") != "pending":
+                continue
+            requested = _parse_iso(rec.get("requested_at"))
+            if requested is not None:
+                age = int((now - requested).total_seconds() // 60)
+                expires_in = APPROVAL_TTL_MINUTES - age
+            else:
+                age = UNKNOWN
+                expires_in = UNKNOWN
+            pending.append({
+                "id": rec.get("id", UNKNOWN),
+                "action": rec.get("action", UNKNOWN),
+                "detail": rec.get("detail", UNKNOWN),
+                "requested_by": rec.get("requested_by", UNKNOWN),
+                "requested_at": rec.get("requested_at", UNKNOWN),
+                "age_minutes": age,
+                "expires_in_minutes": expires_in,
+            })
+    oldest_age = UNKNOWN
+    ages = [p["age_minutes"] for p in pending
+            if isinstance(p["age_minutes"], int)]
+    if ages:
+        oldest_age = max(ages)
+    return {
+        "pending": pending,
+        "pending_count": len(pending),
+        "oldest_age_minutes": oldest_age,
+    }
+
+
+def read_control():
+    """Pause / emergency-stop state from store/control.json (Worker C's
+    file). Missing or unreadable = unknown state, never a crash — the
+    sync must keep working when Worker C has not created it yet."""
+    default = {"paused": False, "emergency_stop": False, "state": UNKNOWN}
+    data = _read_json(os.path.join(BASE, "store", "control.json"))
+    if not isinstance(data, dict):
+        return dict(default)
+    return {
+        "paused": bool(data.get("paused", False)),
+        "emergency_stop": bool(data.get("emergency_stop", False)),
+        "state": data.get("state", UNKNOWN),
+    }
+
+
+def read_ceo_report():
+    """Latest CEO report from reports/ceo/ (Worker B's output), if any.
+
+    Newest file by mtime wins. JSON reports contribute their own period /
+    generated_at / counts when present; anything missing is "unknown"."""
+    ceo_dir = os.path.join(BASE, "reports", "ceo")
+    try:
+        names = [f for f in sorted(os.listdir(ceo_dir))
+                 if os.path.isfile(os.path.join(ceo_dir, f))]
+    except OSError:
+        return {"available": False}
+    if not names:
+        return {"available": False}
+    latest = max(names, key=lambda n: os.path.getmtime(
+        os.path.join(ceo_dir, n)))
+    path = os.path.join("reports", "ceo", latest)
+    full = os.path.join(BASE, path)
+    result = {
+        "available": True,
+        "path": path,
+        "period": UNKNOWN,
+        "generated_at": UNKNOWN,
+        "task_counts": UNKNOWN,
+        "approval_counts": UNKNOWN,
+    }
+    try:
+        result["generated_at"] = datetime.fromtimestamp(
+            os.path.getmtime(full), tz=timezone.utc).isoformat()
+    except OSError:
+        pass
+    if latest.endswith(".json"):
+        data = _read_json(full)
+        if isinstance(data, dict):
+            result["period"] = data.get("period", UNKNOWN)
+            if isinstance(data.get("generated_at"), str):
+                result["generated_at"] = data["generated_at"]
+            result["task_counts"] = data.get(
+                "task_counts",
+                (data.get("tasks") or {}).get("by_status", UNKNOWN)
+                if isinstance(data.get("tasks"), dict) else UNKNOWN)
+            result["approval_counts"] = data.get(
+                "approval_counts", data.get("approvals", UNKNOWN))
+    else:
+        text = _read_text(full)
+        if text:
+            m = re.search(r"[Pp]eriod:\s*(.+)", text)
+            if m:
+                result["period"] = m.group(1).strip()
+            m = re.search(r"[Gg]enerated(?:_at)?:\s*(.+)", text)
+            if m:
+                result["generated_at"] = m.group(1).strip()
+    return result
+
+
 def collect_status():
     """Gathers the true state from all sources in one place. Unknown if a value is missing."""
     cfg = _read_json(os.path.join(BASE, "00-CEO-Core", "config.json")) or {}
@@ -340,6 +555,13 @@ def collect_status():
         "business_os": read_business_os(),
         "workflow_auto_send": read_workflow_status(AUTO_SEND_PATH),
         "workflow_callback": read_workflow_status(CALLBACK_PATH),
+        # Phase 7 (Worker A) — additive keys only; dashboard-3d.html reads
+        # this JSON, so existing keys are never renamed or removed.
+        "departments": read_departments(),
+        "task_counts": read_task_counts(task_records),
+        "approvals": read_approvals_detail(appr_records),
+        "control": read_control(),
+        "ceo_report": read_ceo_report(),
     }
 
 
@@ -391,6 +613,85 @@ def render_html(s):
         if status == "LIVE":
             return _badge("LIVE", "built")
         return _badge("unknown", "stub")
+
+    # --- Phase 7 (Worker A) cards — built here, inserted before Contact. ---
+    depts = s.get("departments") or {}
+    tc = s.get("task_counts") or {}
+    appr = s.get("approvals") or {}
+    ctrl = s.get("control") or {}
+    ceo = s.get("ceo_report") or {}
+
+    if ctrl.get("emergency_stop") is True:
+        control_badge = _badge("EMERGENCY STOP", "paused")
+    elif ctrl.get("paused") is True:
+        control_badge = _badge("PAUSED", "paused")
+    elif ctrl.get("state") == UNKNOWN:
+        control_badge = _badge("unknown", "stub")
+    else:
+        control_badge = _badge("RUNNING", "built")
+    appr_pending = appr.get("pending_count", UNKNOWN)
+    appr_oldest = appr.get("oldest_age_minutes", UNKNOWN)
+    oldest_txt = (f"oldest {appr_oldest} min ago" if isinstance(appr_oldest, int)
+                  else "oldest age unknown")
+    founder_control_card = (
+        '<div class="card">\n'
+        '    <h2>Founder Control</h2>\n'
+        f'    <p>System state: {control_badge} '
+        f'(paused: {ctrl.get("paused", UNKNOWN)} · '
+        f'emergency stop: {ctrl.get("emergency_stop", UNKNOWN)})</p>\n'
+        f'    <p>Approval centre: <strong>{appr_pending}</strong> pending · '
+        f'{oldest_txt} · approved {s["approvals_approved"]}</p>\n'
+        '    <p class="note">No gated action runs without Boss\'s gate word. '
+        'Pause / emergency stop is read from store/control.json when present.</p>\n'
+        '  </div>\n'
+    )
+
+    dept_rows = ""
+    for slug, _label in DEPARTMENTS:
+        dept = depts.get(slug) or {}
+        wf = (_badge("present", "built") if dept.get("workflow_present") is True
+              else _badge("unknown", "stub"))
+        rep = (_badge("compiles", "built") if dept.get("report_compiles") is True
+               else _badge("unknown", "stub"))
+        last = dept.get("last_execution", UNKNOWN)
+        dept_rows += (
+            f'      <tr><td><strong>{dept.get("label", slug)}</strong> '
+            f'({slug})</td><td>{wf}</td><td>{rep}</td>'
+            f'<td>{last}</td></tr>\n'
+        )
+    departments_card = (
+        '<div class="card">\n'
+        '    <h2>Departments — 8 inside Agency</h2>\n'
+        '    <table>\n'
+        '      <tr><th>Department</th><th>Workflow</th><th>report.py</th>'
+        '<th>Last execution</th></tr>\n'
+        f'{dept_rows}'
+        '    </table>\n'
+        '    <p class="note">Workflow = a *.json file in the department\'s '
+        'workflows/ folder. Last execution comes from a real Phase 6 chain '
+        'record in store/chains/ — "unknown" means no record exists yet.</p>\n'
+        '  </div>\n'
+    )
+
+    if ceo.get("available") is True:
+        ceo_body = (
+            f'    <p>Period: <strong>{ceo.get("period", UNKNOWN)}</strong> · '
+            f'generated: {ceo.get("generated_at", UNKNOWN)}</p>\n'
+            f'    <p>Tasks summarised: {ceo.get("task_counts", UNKNOWN)} · '
+            f'approvals summarised: {ceo.get("approval_counts", UNKNOWN)}</p>\n'
+            f'    <p class="note">File: {ceo.get("path", UNKNOWN)}</p>\n'
+        )
+    else:
+        ceo_body = (
+            '    <p>No CEO report yet — Worker B\'s ceo_reporting has not '
+            'produced one.</p>\n'
+        )
+    ceo_card = (
+        '<div class="card">\n'
+        '    <h2>CEO Report — latest</h2>\n'
+        f'{ceo_body}'
+        '  </div>\n'
+    )
 
     return f"""<!DOCTYPE html>
 <html lang="bn">
@@ -497,6 +798,9 @@ def render_html(s):
     <p class="note">Gemini's map had 4 errors, fixed here: (1) Jarvis ≠ Main CEO Bot, separate; (2) an approval/gate layer exists; (3) store/Vault exists; (4) digital product = Vet Kit $49, not generic "Notion Kits".</p>
   </div>
 
+  {founder_control_card}
+  {departments_card}
+  {ceo_card}
   <div class="card">
     <h2>Contact (real)</h2>
     <p>Booking: https://calendar.app.google/WLoxBfnLGTdjK3LB8 (15 min, New York Time)<br>
@@ -547,6 +851,13 @@ def main():
           f"{bo['commerce']['kit_total']} "
           f"media {bo['media']['sections']} sections / "
           f"{bo['media']['agents']} agents")
+    depts_ok = sum(1 for d in status["departments"].values()
+                   if d["workflow_present"] and d["report_compiles"])
+    print(f"phase7: departments {depts_ok}/8 ok · "
+          f"task_counts={status['task_counts']} · "
+          f"approvals_pending={status['approvals']['pending_count']} · "
+          f"control={status['control']} · "
+          f"ceo_report_available={status['ceo_report']['available']}")
     return 0
 
 

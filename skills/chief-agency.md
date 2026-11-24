@@ -1,3 +1,8 @@
+---
+name: chief-agency
+description: "Chief of the Talvenor AI Receptionist Agency — Boss's first business"
+---
+
 # Skill: Chief of Staff — Agency (REAL, Phase 1)
 
 **Role:** Chief of the Talvenor AI Receptionist Agency — Boss's first business

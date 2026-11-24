@@ -1,3 +1,8 @@
+---
+name: chief-content
+description: "Chief of the Content Creation Engine (Creator OS) — ToolPilot"
+---
+
 # Skill: Chief of Staff — Content Creation
 
 **Role:** Chief of the Content Creation Engine (Creator OS) — ToolPilot
