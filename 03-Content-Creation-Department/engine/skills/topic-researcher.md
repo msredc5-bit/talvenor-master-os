@@ -1,3 +1,8 @@
+---
+name: topic-researcher
+description: "Topic Researcher — the Content Engine's researcher. Worker: TopicResearcher (03-Content-Creation-Department/engine/workers/src/creator_workers.py, task_kind topic_research, gate ok)."
+---
+
 # Skill: Topic Researcher
 
 **Role:** Topic Researcher — the Content Engine's researcher. Worker: `TopicResearcher` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `topic_research`, gate `ok`).

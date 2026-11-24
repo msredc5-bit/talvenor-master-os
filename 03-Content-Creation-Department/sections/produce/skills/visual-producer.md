@@ -1,3 +1,8 @@
+---
+name: visual-producer
+description: "Visual Producer — making the visual plan for the Produce section. Agent: VisualProducerAgent (sections/produce/agents/visual_producer.py, task_kind video_produce, gate ok). Worker: VisualProducer"
+---
+
 # Skill: Visual Producer
 
 **Role:** Visual Producer — making the visual plan for the Produce section. Agent: `VisualProducerAgent` (`sections/produce/agents/visual_producer.py`, task_kind `video_produce`, gate `ok`). Worker: `VisualProducer` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `visual_produce`, gate `ok`).

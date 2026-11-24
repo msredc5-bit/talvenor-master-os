@@ -1,7 +1,12 @@
+---
+name: script-writer
+description: "Script Writer — the Content Engine's script writer. Worker: ScriptWriter (03-Content-Creation-Department/engine/workers/src/creator_workers.py, task_kind script_write, gate ok)."
+---
+
 # Skill: Script Writer
 
-**Role:** Script Writer — the Content Engine's script writer. Worker: `ScriptWriter` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `script_write`, gate `ok`).
-**Chief task type:** `script_write`. **Stage:** 2b-script (`youtube-skills/yt-script/` + `hookscore.py`).
+**Role:** Script Writer — the Content Engine's script writer. Worker: `ScriptWriter` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `script_write`, gate `ok`). Section agent: `ScriptWriterAgent` (`sections/produce/agents/script_writer.py`, task_kind `script_write`, gate `ok`).
+**Chief task type:** `script_write`. **Stage:** 2b-script (`youtube-skills/yt-script/` + `hookscore.py`) — MOCK.
 
 ## ⚠️ VOICE.md DRAFT — read first
 

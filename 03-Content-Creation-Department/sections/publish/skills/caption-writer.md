@@ -1,3 +1,8 @@
+---
+name: caption-writer
+description: "Caption Writer — caption + hashtag pack writer for the Publish section. Agent: CaptionWriterAgent (sections/publish/agents/caption_writer.py, task_kind caption_write, gate ok). Worker: CaptionWriter"
+---
+
 # Skill: Caption Writer
 
 **Role:** Caption Writer — caption + hashtag pack writer for the Publish section. Agent: `CaptionWriterAgent` (`sections/publish/agents/caption_writer.py`, task_kind `caption_write`, gate `ok`). Worker: `CaptionWriter` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `caption_write`, gate `ok`).

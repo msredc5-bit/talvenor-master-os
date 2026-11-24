@@ -1,3 +1,8 @@
+---
+name: topic-researcher
+description: "Topic Researcher — topic picker for the Plan section. Agent: TopicResearcherAgent (sections/plan/agents/topic_researcher.py, task_kind content_plan, gate ok). Worker: TopicResearcher"
+---
+
 # Skill: Topic Researcher
 
 **Role:** Topic Researcher — topic picker for the Plan section. Agent: `TopicResearcherAgent` (`sections/plan/agents/topic_researcher.py`, task_kind `content_plan`, gate `ok`). Worker: `TopicResearcher` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `topic_research`, gate `ok`).

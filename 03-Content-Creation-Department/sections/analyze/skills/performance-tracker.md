@@ -1,3 +1,8 @@
+---
+name: performance-tracker
+description: "Performance Tracker — making the report template/setup for the Analyze section. Agent: PerformanceTrackerAgent (sections/analyze/agents/performance_tracker.py, task_kind performance_track, gate ok)."
+---
+
 # Skill: Performance Tracker
 
 **Role:** Performance Tracker — making the report template/setup for the Analyze section. Agent: `PerformanceTrackerAgent` (`sections/analyze/agents/performance_tracker.py`, task_kind `performance_track`, gate `ok`). Worker: `PerformanceTracker` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `performance_track`, gate `ok`).

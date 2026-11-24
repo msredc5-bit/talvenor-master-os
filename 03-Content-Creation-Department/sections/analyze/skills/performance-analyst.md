@@ -1,3 +1,8 @@
+---
+name: performance-analyst
+description: "Performance Analyst — real-numbers analysis for the Analyze section. Agent: PerformanceAnalystAgent (sections/analyze/agents/performance_analyst.py, task_kind performance_analyze, gate ok). Worker:"
+---
+
 # Skill: Performance Analyst
 
 **Role:** Performance Analyst — real-numbers analysis for the Analyze section. Agent: `PerformanceAnalystAgent` (`sections/analyze/agents/performance_analyst.py`, task_kind `performance_analyze`, gate `ok`). Worker: none — Chief-level role.

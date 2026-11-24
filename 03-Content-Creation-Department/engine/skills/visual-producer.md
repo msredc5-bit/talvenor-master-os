@@ -1,3 +1,8 @@
+---
+name: visual-producer
+description: "Visual Producer — makes the Content Engine's visual plan, does not make a video file. Worker: VisualProducer (03-Content-Creation-Department/engine/workers/src/creator_workers.py, task_kind"
+---
+
 # Skill: Visual Producer
 
 **Role:** Visual Producer — makes the Content Engine's visual plan, does not make a video file. Worker: `VisualProducer` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `visual_produce`, gate `ok`).

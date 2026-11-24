@@ -1,3 +1,8 @@
+---
+name: content-planner
+description: "Content Planner — making the Plan section's weekly/monthly plan. Agent: ContentPlannerAgent (sections/plan/agents/content_planner.py, task_kind plan_weekly, gate ok). Worker: none — Chief-level role."
+---
+
 # Skill: Content Planner
 
 **Role:** Content Planner — making the Plan section's weekly/monthly plan. Agent: `ContentPlannerAgent` (`sections/plan/agents/content_planner.py`, task_kind `plan_weekly`, gate `ok`). Worker: none — Chief-level role.
