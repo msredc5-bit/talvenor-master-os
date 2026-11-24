@@ -1,3 +1,8 @@
+---
+name: publish-prep
+description: "Publish Prep · Worker: PublishPrep (boss-ceo, MKT)"
+---
+
 # Skill: Publish Prep — Agency (Phase 5)
 
 **Role:** Publish Prep · **Worker:** `PublishPrep` (boss-ceo, MKT)

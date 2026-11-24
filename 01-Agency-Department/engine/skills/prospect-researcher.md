@@ -1,3 +1,8 @@
+---
+name: prospect-researcher
+description: "Prospect Researcher · Worker: ProspectResearcher (boss-ceo, ACQ)"
+---
+
 # Skill: Prospect Researcher — Agency (Phase 5)
 
 **Role:** Prospect Researcher · **Worker:** `ProspectResearcher` (boss-ceo, ACQ)

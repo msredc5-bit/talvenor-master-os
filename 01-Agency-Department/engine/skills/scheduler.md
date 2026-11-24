@@ -1,3 +1,8 @@
+---
+name: scheduler
+description: "Scheduler · Worker: SchedulerAssistant (boss-ceo, OPS)"
+---
+
 # Skill: Scheduler — Agency (Phase 5)
 
 **Role:** Scheduler · **Worker:** `SchedulerAssistant` (boss-ceo, OPS)

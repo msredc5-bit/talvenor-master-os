@@ -1,3 +1,8 @@
+---
+name: outreach-drafter
+description: "Outreach Drafter · Worker: OutreachDrafter (boss-ceo, ACQ)"
+---
+
 # Skill: Outreach Drafter — Agency (Phase 5)
 
 **Role:** Outreach Drafter · **Worker:** `OutreachDrafter` (boss-ceo, ACQ)

@@ -1,3 +1,8 @@
+---
+name: report-compiler
+description: "Report Compiler · Worker: ReportCompiler (boss-ceo, OPS)"
+---
+
 # Skill: Report Compiler — Agency (Phase 5)
 
 **Role:** Report Compiler · **Worker:** `ReportCompiler` (boss-ceo, OPS)

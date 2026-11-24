@@ -1,3 +1,8 @@
+---
+name: qa-engineer
+description: "QA Engineer · Worker: QAEngineer (boss-ceo, DEL)"
+---
+
 # Skill: QA Engineer — Agency (Phase 5)
 
 **Role:** QA Engineer · **Worker:** `QAEngineer` (boss-ceo, DEL)

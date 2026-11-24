@@ -1,3 +1,8 @@
+---
+name: objection-simulator
+description: "Objection Simulator · Worker: ObjectionSimulator (boss-ceo, MKT)"
+---
+
 # Skill: Objection Simulator — Agency (Phase 5)
 
 **Role:** Objection Simulator · **Worker:** `ObjectionSimulator` (boss-ceo, MKT)

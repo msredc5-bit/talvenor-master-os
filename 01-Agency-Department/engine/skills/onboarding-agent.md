@@ -1,3 +1,8 @@
+---
+name: onboarding-agent
+description: "Onboarding Agent · Worker: OnboardingAgent (boss-ceo, DEL)"
+---
+
 # Skill: Onboarding Agent — Agency (Phase 5)
 
 **Role:** Onboarding Agent · **Worker:** `OnboardingAgent` (boss-ceo, DEL)

@@ -1,3 +1,8 @@
+---
+name: reply-triager
+description: "Reply Triager · Worker: ReplyHandler (boss-ceo, ACQ)"
+---
+
 # Skill: Reply Triager — Agency (Phase 5)
 
 **Role:** Reply Triager · **Worker:** `ReplyHandler` (boss-ceo, ACQ)

@@ -1,3 +1,8 @@
+---
+name: receptionist-builder
+description: "Receptionist Builder · Worker: RetellBuilder (boss-ceo, DEL)"
+---
+
 # Skill: Receptionist Builder — Agency (Phase 5)
 
 **Role:** Receptionist Builder · **Worker:** `RetellBuilder` (boss-ceo, DEL)
