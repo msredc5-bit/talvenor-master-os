@@ -123,6 +123,10 @@ def route_task(task, tasks_path=None, approvals_path=None, memory_path=None):
 
         query = task.get("query", "")
         local = skill_finder.find_skill_local(query)
+        # Progressive-disclosure loader (2026-11-24): the top match's FULL
+        # skill text is loaded here (activation); the rest stay index-only.
+        # Additive key only — the existing keys below are unchanged.
+        loaded = skill_finder.load_skill_for_task(query)
         proposal = None
         if task.get("propose") and task.get("candidate_repo"):
             proposal = skill_finder.propose_skill(
@@ -138,6 +142,7 @@ def route_task(task, tasks_path=None, approvals_path=None, memory_path=None):
             "title": task.get("title", f"find skill: {query}"),
             "status": "skill-search",
             "local_matches": local,
+            "loaded_skill": loaded["loaded"],
             "proposal": proposal,
             "memory": load_memory(memory_path).context_for("main_ceo_bot"),
             "spend_cap_usd": config["spend_cap_usd"],
