@@ -1,3 +1,8 @@
+---
+name: client_reporting
+description: "Client-reporting specialist of the Client Operations department. It makes a template + DRAFT of a report"
+---
+
 # Client Reporting Agent — Skill
 
 ## Role

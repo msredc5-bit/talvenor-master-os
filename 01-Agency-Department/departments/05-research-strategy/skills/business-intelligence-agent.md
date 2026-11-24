@@ -1,3 +1,8 @@
+---
+name: business-intelligence-agent
+description: "Business Intelligence Agent · Worker: BusinessIntelligenceAgent"
+---
+
 # Skill: Business Intelligence Agent — Agency Department 05 (Phase 3)
 
 **Role:** Business Intelligence Agent · **Worker:** `BusinessIntelligenceAgent`

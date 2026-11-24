@@ -1,3 +1,8 @@
+---
+name: call_monitoring
+description: "Call-monitoring specialist of the Client Operations department. For Vapi/Sophia's"
+---
+
 # Call Monitoring Agent — Skill
 
 ## Role

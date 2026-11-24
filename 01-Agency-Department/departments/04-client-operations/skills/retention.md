@@ -1,3 +1,8 @@
+---
+name: retention
+description: "Retention specialist of the Client Operations department. For keeping a client,"
+---
+
 # Retention Agent — Skill
 
 ## Role

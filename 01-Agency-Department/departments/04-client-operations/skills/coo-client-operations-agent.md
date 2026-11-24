@@ -1,3 +1,8 @@
+---
+name: coo-client-operations-agent
+description: "Manager of the Client Operations department. When a task comes from Boss/Chief, the right"
+---
+
 # COO Client Operations Agent — Skill
 
 ## Role

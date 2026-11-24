@@ -1,3 +1,8 @@
+---
+name: renewal_upsell
+description: "Renewal/upsell specialist of the Client Operations department. For a paying"
+---
+
 # Renewal & Upsell Agent — Skill
 
 ## Role
