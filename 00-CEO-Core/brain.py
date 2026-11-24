@@ -22,9 +22,10 @@ LIVE BRAIN — Phase 10 (wired via live_brain.py):
   - The live call is the VENDORED MetaSparkProvider
     (01-Agency-Department/engine/workers/src/live/meta_provider.py),
     wrapped by LiveBrainAdapter (00-CEO-Core/live_brain.py). Its key
-    comes ONLY via the connector Secure Vault
-    (custom.meta-model-api-2, dynamic_credentials surrogate) — the
-    key never appears in any file, env var, argument, or log.
+    comes from the META_API_KEY environment variable (Boss's PC) or
+    via the connector Secure Vault (custom.meta-model-api-2,
+    dynamic_credentials surrogate) on the Muse VM — the key never
+    appears in any file, argument, or log.
   - If a live call fails (no credential, timeout, 403/401, API
     error), the adapter falls back LOUDLY to the department's own
     mock brain (writing the reason to stderr) — never silently pretends
@@ -52,6 +53,22 @@ LIVE BRAIN — Phase 11 (provider chain, same adapter):
   - Default stays "mock". A temp config {"brain": "live"} with no
     providers section still builds the old default chain ["meta"].
 
+DEV / PROD BRAIN SEPARATION — local-first Phase 1 (2026-11-24):
+  - Three modes: "mock" (default, $0, drafts only), "development"
+    (local free-tier testing only), "live" (production Live Brain).
+  - "development" reads ONLY config.json "development_brain"
+    (free_only, test_data_only, its own fallback_chain of free-tier
+    models) and builds the adapter with mode="development".
+  - "live" reads ONLY config.json "production_brain" and is LOCKED
+    unless "production_brain.unlocked" is explicitly true — a Boss
+    decision, never a dev change. With the lock in place, asking for
+    "live" raises RuntimeError instead of building anything.
+  - A dev brain can NEVER become the production brain: different
+    config blocks, different mode string, and production requires
+    the explicit unlocked flag. The top-level "brain" flag stays
+    "mock" and "fallback_chain" stays the production chain (unused
+    while locked).
+
 Stdlib only. No network, no spend, no secrets in this file.
 """
 
@@ -69,7 +86,7 @@ AGENCY_WORKERS_DIR = os.path.join(
 CONTENT_WORKERS_DIR = os.path.join(
     MASTER_OS_DIR, "03-Content-Creation-Department", "engine", "workers")
 
-BRAIN_MODES = ("mock", "live")
+BRAIN_MODES = ("mock", "development", "live")
 DEFAULT_BRAIN = "mock"
 
 # The seed each department's mock has always used — kept so flipping
@@ -118,7 +135,8 @@ class BrainFactory:
 
     @staticmethod
     def get_brain_mode(config_path=CONFIG_PATH):
-        """"mock" or "live" from config.json — "mock" if missing/unreadable."""
+        """"mock", "development" or "live" from config.json — "mock" if
+        missing/unreadable."""
         try:
             with open(config_path, "r", encoding="utf-8") as f:
                 cfg = json.load(f)
@@ -140,15 +158,38 @@ class BrainFactory:
         before — each Chief can use the result exactly as it used its
         mock before. Digital-product uses the agency mock tree (its
         workers are vendored there) with its own Phase 2 seed.
-        Live: LiveBrainAdapter wrapping the provider chain from
-        config.json "fallback_chain" (same adapter serves all
+        Development: LiveBrainAdapter in mode="development", built
+        from config.json "development_brain" (free-tier models only,
+        test data only) — never the production brain.
+        Live: LOCKED unless config.json "production_brain.unlocked"
+        is true (a Boss decision); otherwise raises RuntimeError.
+        When unlocked, LiveBrainAdapter wrapping the provider chain
+        from config.json "fallback_chain" (same adapter serves all
         departments — its complete(prompt, *, max_tokens) accepts the
         positional call both worker bases make; on live failure of
         every provider it falls back LOUDLY to that department's own
         mock).
         """
-        if BrainFactory.get_brain_mode(config_path) == "live":
+        mode = BrainFactory.get_brain_mode(config_path)
+        if mode == "live":
+            try:
+                with open(config_path, "r", encoding="utf-8") as f:
+                    cfg = json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                cfg = {}
+            if not cfg.get("production_brain", {}).get("unlocked") is True:
+                raise RuntimeError(
+                    "Production Live Brain is LOCKED: "
+                    "\"production_brain.unlocked\" is not true in "
+                    f"{config_path}. Use \"development\" mode for local "
+                    "free-tier testing. Unlocking the production Live "
+                    "Brain is a Boss decision — it is never unlocked "
+                    "by a dev change."
+                )
             return BrainFactory._live_brain(department, config_path=config_path)
+        if mode == "development":
+            return BrainFactory._development_brain(
+                department, config_path=config_path)
         if department == "agency":
             mod = _load_module(AGENCY_WORKERS_DIR, "src.mock.provider")
             return mod.MockLLMProvider(seed=seed or _AGENCY_MOCK_SEED)
@@ -162,6 +203,79 @@ class BrainFactory:
         raise ValueError(
             f"Unknown department: {department!r}. Known: ['agency', "
             "'digital-product', 'content']")
+
+    @staticmethod
+    def _development_brain(department, config_path=CONFIG_PATH):
+        """Construct the local-first Phase 1 development adapter — NO
+        network call here.
+
+        Reads ONLY config.json "development_brain" (free-tier models,
+        test data only) and builds the provider chain from its own
+        fallback_chain — never the production "fallback_chain" and
+        never the production brain. Returns LiveBrainAdapter with
+        mode="development". Construction only stores model/timeout;
+        each provider's key is fetched only when complete() is called
+        (env var only — never a file). A dev brain can never become
+        the production brain: different config block, different mode
+        string, and production requires the explicit unlocked flag.
+        """
+        if department == "agency":
+            mod = _load_module(AGENCY_WORKERS_DIR, "src.mock.provider")
+            mock = mod.MockLLMProvider(seed=_AGENCY_MOCK_SEED)
+        elif department == "digital-product":
+            mod = _load_module(AGENCY_WORKERS_DIR, "src.mock.provider")
+            mock = mod.MockLLMProvider(seed=_DIGITAL_PRODUCT_MOCK_SEED)
+        elif department == "content":
+            mod = _load_module(CONTENT_WORKERS_DIR, "src.workers.base")
+            mock = mod.MockLLM(seed=_CONTENT_MOCK_SEED)
+        else:
+            raise ValueError(
+                f"Unknown department: {department!r}. "
+                "Known: ['agency', 'digital-product', 'content']")
+        try:
+            if CEO_CORE_DIR not in sys.path:
+                sys.path.insert(0, CEO_CORE_DIR)
+            from live_brain import (  # noqa: E402
+                LiveBrainAdapter, build_provider_chain)
+            try:
+                with open(config_path, "r", encoding="utf-8") as f:
+                    cfg = json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                cfg = {}
+            dev = cfg.get("development_brain")
+            if not isinstance(dev, dict):
+                raise RuntimeError(
+                    "Development brain is not configured: "
+                    "\"development_brain\" is missing from "
+                    f"{config_path}.")
+            chain = build_provider_chain(
+                {"fallback_chain": dev["fallback_chain"],
+                 "providers": cfg.get("providers", {})},
+                mode="development")
+            return LiveBrainAdapter(
+                mock_brain=mock, live_providers=chain, mode="development")
+        except Exception as exc:  # noqa: BLE001 — re-raised as a clear error
+            # A free-only violation is a fail-closed guard decision, not
+            # a configuration error — propagate it unwrapped so callers
+            # see FreeOnlyViolation itself (check_providers §8(h)).
+            # CEO_CORE_DIR is on sys.path by now (inserted above before
+            # the live_brain import), so this import resolves.
+            try:
+                from free_only_guard import (  # noqa: PLC0415
+                    FreeOnlyViolation)
+            except Exception:  # noqa: BLE001 — guard module missing
+                FreeOnlyViolation = None
+            if (FreeOnlyViolation is not None
+                    and isinstance(exc, FreeOnlyViolation)):
+                raise
+            raise RuntimeError(
+                "Development brain is not configured: the development "
+                "adapter could not be constructed in this "
+                f"environment ({type(exc).__name__}: {exc}). Keys come "
+                "ONLY from environment variables — a key is never "
+                "stored in a file. Set \"brain\": \"mock\" in "
+                "00-CEO-Core/config.json to keep drafting at $0."
+            ) from exc
 
     @staticmethod
     def _live_brain(department, config_path=CONFIG_PATH):
@@ -206,8 +320,9 @@ class BrainFactory:
                 "Live brain is not configured: the live adapter "
                 "could not be constructed in this "
                 f"environment ({type(exc).__name__}: {exc}). Keys come "
-                "ONLY from environment variables (Meta: connector "
-                "Secure Vault custom.meta-model-api-2) — a key is never "
+                "ONLY from environment variables (Meta: META_API_KEY, "
+                "or the connector Secure Vault custom.meta-model-api-2 "
+                "on the Muse VM) — a key is never "
                 "stored in a file. Set \"brain\": \"mock\" in "
                 "00-CEO-Core/config.json to keep drafting at $0."
             ) from exc

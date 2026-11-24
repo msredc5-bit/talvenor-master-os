@@ -2,6 +2,23 @@
   "brain": "mock",
   "brain_provider": "meta",
   "brain_model": null,
+  "development_brain": {
+    "enabled": false,
+    "provider": "gemini",
+    "model": "gemini-2.5-flash-lite",
+    "free_only": true,
+    "test_data_only": true,
+    "fallback_chain": [
+      "gemini:gemini-2.5-flash-lite",
+      "openrouter:openrouter/free"
+    ],
+    "note": "Local development brain ONLY: free-tier models, test data only. Never production. Enable on Boss's PC only when testing with his own free-tier key."
+  },
+  "production_brain": {
+    "mode": "mock",
+    "unlocked": false,
+    "note": "Production Live Brain stays mock/blocked until Boss separately authorizes it. Never unlock from a dev change."
+  },
   "brand": {
     "headline": "Never miss a call. Never lose a job.",
     "line": "You run the jobs. We run the phone."
@@ -102,10 +119,11 @@
       "unified_os": "BUILT 2026-11-19 - CENTRAL-HQ/ 7 doc files (architecture layer only, no new repo, no new monorepo): Agency = 01-Agency-Department, Commerce = Vet Kit (Etsy CLOSED, Amazon GATED, Shopify PARKED Boss-direct), Media = 03-Content-Creation-Department; ONE brain (mock) + 3 Chiefs",
       "phase_9_connections": "BUILT 2026-11-20 - taskboard (dashboards/taskboard.html + scripts/taskboard_server.py, port 8766, POST /api/tasks -> queued in store/tasks.json) + MCP stdio server (00-CEO-Core/mcp/, 7 mock tools only, check 9/9) + live-ready tool code (00-CEO-Core/live_tools.py: gmail_send + n8n_trigger, env-only creds, gated, DRAFT fallback, never sends; tools.json 9 tools, check 7/7); brain still mock; store now a live queue",
       "phase_10_live_brain": "NOT PROVEN LIVE — probe 2026-11-20 01:44 failed (tunnel 403, api.meta.ai unreachable from this VM), $0 spent, key validity UNPROVEN; brain stays mock",
-      "phase_11_providers": "BUILT 2026-11-20 - 7 LLM providers (meta, openai, anthropic, gemini, kimi, grok, openrouter) + fallback chain in config; brain still mock; no live calls, no keys on record; model name now comes from config",
+      "phase_11_providers": "BUILT 2026-11-20 - 7 LLM providers (meta, openai, anthropic, gemini, kimi, grok, openrouter) + fallback chain in config; brain still mock; no live calls, no keys on record; model name now comes from config. Meta key slot added 2026-11-25 (META_API_KEY env var for the PC; connector path kept for the Muse VM) — key still unproven, brain still mock.",
       "improvement_p1_gate": "BUILT 2026-11-21 - trust_gate.py: rule-based trust check (read/draft free, quote verification, coverage, standing deny spend cap $0 + dental/medical DQ) + ConfirmationStore run-once (failed = UNCERTAIN, never re-run), wired into ApprovalGateway + call_tool (blocked-trust, no approval recorded); brain still mock; check_gate.py 24/24",
       "improvement_p2_memory_ledger": "BUILT 2026-11-21 - owner_memory.py (quote-verified, owner-messages-only, 256 KiB cap, 3 seed entries from Boss's recorded words) + usage_ledger.py ($0 cap as measurement, task check-in threshold $0, mock always $0.00) + dispatcher ledger threading; check_memory_ledger.py 19/19",
-      "improvement_p3_quiet_schedules": "BUILT 2026-11-21 - quiet_schedules.py (watchMarker sha256, skip when unchanged, one run at a time, corrections keep the rest, failed work keeps marker); 1 schedule seeded (taskboard-queue-watch, paused, no runner attached); check_quiet_schedules.py 16/16"
+      "improvement_p3_quiet_schedules": "BUILT 2026-11-21 - quiet_schedules.py (watchMarker sha256, skip when unchanged, one run at a time, corrections keep the rest, failed work keeps marker); 1 schedule seeded (taskboard-queue-watch, paused, no runner attached); check_quiet_schedules.py 16/16",
+      "local_dev_phase_1": "BUILT 2026-11-24 - local-first Phase 1 (worker A): development_brain / production_brain config separation, Gemini model list updated (deprecated gemini-2.5-flash removed), live mode locked behind production_brain.unlocked; brain still mock, $0, no live calls."
     }
   },
   "owner": "Md Mainuddin (Boss)",
@@ -116,9 +134,10 @@
       "models": [
         "muse-spark-1.3"
       ],
-      "env_var": null,
+      "env_var": "META_API_KEY",
       "endpoint": "https://api.meta.ai/v1/chat/completions",
-      "key_via": "connector custom.meta-model-api-2 (Secure Vault surrogate, never in a file)"
+      "key_via": "META_API_KEY env var (Boss's PC) or connector custom.meta-model-api-2 (Muse VM); never in a file",
+      "note": "Paid/credit-based (Boss's Muse Spark credit) — PRODUCTION brain only; never in the free-only dev allowlist, never the dev brain."
     },
     "openai": {
       "enabled": false,
@@ -143,12 +162,14 @@
     "gemini": {
       "enabled": false,
       "models": [
-        "gemini-2.5-flash",
-        "gemini-2.0-flash"
+        "gemini-2.5-flash-lite",
+        "gemini-3.5-flash-lite"
       ],
       "env_var": "GEMINI_API_KEY",
       "endpoint": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-      "key_from": "https://aistudio.google.com/apikey"
+      "key_from": "https://aistudio.google.com/apikey",
+      "free_tier": true,
+      "note": "gemini-2.5-flash removed as deprecated by Google (auto-routes to gemini-3.5-flash-lite from Dec 1, 2026); use gemini-2.5-flash-lite / gemini-3.5-flash-lite."
     },
     "kimi": {
       "enabled": false,
@@ -180,7 +201,9 @@
       "env_var": "OPENROUTER_API_KEY",
       "endpoint": "https://openrouter.ai/api/v1/chat/completions",
       "key_from": "https://openrouter.ai/keys",
-      "free_limits": "20 requests/min, 50 requests/day; 1,000/day after $10 lifetime credits; limits count requests, not tokens; free models rotate in/out"
+      "free_limits": "20 requests/min, 50 requests/day; 1,000/day after $10 lifetime credits; limits count requests, not tokens; free models rotate in/out",
+      "free_only": true,
+      "note": "Only :free models may ever be used; the same key would bill on a non-:free model."
     }
   },
   "reused_systems": {
