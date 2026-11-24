@@ -1,3 +1,8 @@
+---
+name: analytics-agent
+description: "Makes a DRAFT of Talvenor's analytics/report — using only VISIBLE metrics."
+---
+
 # Analytics Agent — Skill
 
 ## Role

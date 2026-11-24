@@ -1,3 +1,8 @@
+---
+name: ad-campaign-agent
+description: "The Marketing department's paid ads specialist. A DRAFT"
+---
+
 # Ad Campaign Agent — Skill
 
 ## Role

@@ -1,3 +1,8 @@
+---
+name: social-media-agent
+description: "Makes a DRAFT of Talvenor's social content planning — for the Facebook Page,"
+---
+
 # Social Media Agent — Skill
 
 ## Role

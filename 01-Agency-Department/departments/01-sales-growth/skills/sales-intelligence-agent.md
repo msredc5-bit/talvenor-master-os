@@ -1,3 +1,8 @@
+---
+name: sales-intelligence-agent
+description: "The Sales & Growth department's intelligence specialist. From a prospect's reply"
+---
+
 # Sales Intelligence Agent — Skill
 
 ## Role

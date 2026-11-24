@@ -1,3 +1,8 @@
+---
+name: market-positioning-agent
+description: "Makes a DRAFT of Talvenor's positioning/messaging — AI receptionist, for US"
+---
+
 # Market Positioning Agent — Skill
 
 ## Role

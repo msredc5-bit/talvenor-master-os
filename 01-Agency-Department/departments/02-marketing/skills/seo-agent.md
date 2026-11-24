@@ -1,3 +1,8 @@
+---
+name: seo-agent
+description: "Makes a DRAFT of Talvenor's SEO — keyword suggestions, page title/meta"
+---
+
 # SEO Agent — Skill
 
 ## Role

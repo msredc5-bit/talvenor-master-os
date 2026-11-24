@@ -1,3 +1,8 @@
+---
+name: marketing-director-agent
+description: "Manager of the Marketing department. When a task comes from Boss/Chief, the right"
+---
+
 # Marketing Director Agent — Skill
 
 ## Role
