@@ -1,3 +1,8 @@
+---
+name: revenue-tracking-agent
+description: "Revenue Tracking Agent · Worker: RevenueTrackingAgent"
+---
+
 # Skill: Revenue Tracking Agent — Agency Department 06 (Phase 3)
 
 **Role:** Revenue Tracking Agent · **Worker:** `RevenueTrackingAgent`

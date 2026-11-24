@@ -1,3 +1,8 @@
+---
+name: document-management-agent
+description: "Document Management Agent · Worker: DocumentManagementAgent"
+---
+
 # Skill: Document Management Agent — Agency Department 06 (Phase 3)
 
 **Role:** Document Management Agent · **Worker:** `DocumentManagementAgent`

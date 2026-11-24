@@ -1,3 +1,8 @@
+---
+name: expense-tracking-agent
+description: "Expense specialist of the Finance & Admin department. For each of Talvenor's"
+---
+
 # Expense Tracking Agent — Skill
 
 ## Role

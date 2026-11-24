@@ -1,3 +1,8 @@
+---
+name: compliance-calendar-agent
+description: "Compliance Calendar Agent · Worker: ComplianceCalendarAgent"
+---
+
 # Skill: Compliance Calendar Agent — Agency Department 06 (Phase 3)
 
 **Role:** Compliance Calendar Agent · **Worker:** `ComplianceCalendarAgent`

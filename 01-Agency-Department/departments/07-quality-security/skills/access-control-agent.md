@@ -1,3 +1,8 @@
+---
+name: access-control-agent
+description: "Access Control Agent · Agent: AccessControlAgent"
+---
+
 # Skill: Access Control Agent — Agency Department 07 (Phase 3)
 
 **Role:** Access Control Agent · **Agent:** `AccessControlAgent`

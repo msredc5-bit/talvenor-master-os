@@ -1,3 +1,8 @@
+---
+name: backup-recovery-agent
+description: "Backup specialist of the Quality & Security department. How to restore Talvenor Master OS"
+---
+
 # Backup & Recovery Agent — Skill
 
 ## Role

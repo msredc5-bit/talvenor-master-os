@@ -1,3 +1,8 @@
+---
+name: call-scenario-testing-agent
+description: "Call Scenario Testing Agent · Agent: CallScenarioTestingAgent"
+---
+
 # Skill: Call Scenario Testing Agent — Agency Department 07 (Phase 3)
 
 **Role:** Call Scenario Testing Agent · **Agent:** `CallScenarioTestingAgent`

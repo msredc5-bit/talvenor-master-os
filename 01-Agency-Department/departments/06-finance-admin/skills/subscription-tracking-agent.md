@@ -1,3 +1,8 @@
+---
+name: subscription-tracking-agent
+description: "Subscription Tracking Agent · Worker: SubscriptionTrackingAgent"
+---
+
 # Skill: Subscription Tracking Agent — Agency Department 06 (Phase 3)
 
 **Role:** Subscription Tracking Agent · **Worker:** `SubscriptionTrackingAgent`
