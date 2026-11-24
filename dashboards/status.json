@@ -1,10 +1,15 @@
 {
+  "approvals": {
+    "oldest_age_minutes": "unknown",
+    "pending": [],
+    "pending_count": 0
+  },
   "approvals_approved": 0,
   "approvals_pending": 0,
   "built": "2026-11-21",
   "business_os": {
     "agency": {
-      "dept_count": 8,
+      "dept_count": 9,
       "manager_count": 8,
       "registry_entries": 69,
       "registry_existing": 69,
@@ -38,6 +43,88 @@
       "upload": "OFF"
     }
   },
+  "ceo_report": {
+    "approval_counts": {
+      "by_status": {},
+      "decided_in_window": 0,
+      "oldest_pending_age": null,
+      "pending": 0,
+      "pending_list": [],
+      "source": "store/approvals.json",
+      "status": "ok",
+      "total": 0
+    },
+    "available": true,
+    "generated_at": "2026-11-24T20:57:25.435880+00:00",
+    "path": "reports/ceo/weekly-2026-11-24.json",
+    "period": "weekly",
+    "task_counts": {
+      "done": 1
+    }
+  },
+  "control": {
+    "emergency_stop": false,
+    "paused": false,
+    "state": "unknown"
+  },
+  "departments": {
+    "01-sales-growth": {
+      "label": "Sales & Growth",
+      "last_execution": "unknown",
+      "report_compiles": true,
+      "workflow_file": "01-sales-growth-prospect_research.json",
+      "workflow_present": true
+    },
+    "02-marketing": {
+      "label": "Marketing",
+      "last_execution": "unknown",
+      "report_compiles": true,
+      "workflow_file": "02-marketing-content_plan.json",
+      "workflow_present": true
+    },
+    "03-ai-engineering": {
+      "label": "AI Engineering",
+      "last_execution": "unknown",
+      "report_compiles": true,
+      "workflow_file": "03-ai-engineering-solution_architect.json",
+      "workflow_present": true
+    },
+    "04-client-operations": {
+      "label": "Client Operations",
+      "last_execution": "unknown",
+      "report_compiles": true,
+      "workflow_file": "04-client-operations-client_reporting.json",
+      "workflow_present": true
+    },
+    "05-research-strategy": {
+      "label": "Research & Strategy",
+      "last_execution": "unknown",
+      "report_compiles": true,
+      "workflow_file": "05-research-strategy-competitor_research.json",
+      "workflow_present": true
+    },
+    "06-finance-admin": {
+      "label": "Finance & Admin",
+      "last_execution": "unknown",
+      "report_compiles": true,
+      "workflow_file": "06-finance-admin-revenue_tracking.json",
+      "workflow_present": true
+    },
+    "07-quality-security": {
+      "label": "Quality & Security",
+      "last_execution": "unknown",
+      "report_compiles": true,
+      "workflow_file": "07-quality-security-data_validation.json",
+      "workflow_present": true
+    },
+    "08-product-innovation": {
+      "label": "Product Innovation",
+      "last_execution": "unknown",
+      "report_compiles": true,
+      "workflow_file": "08-product-innovation-new_feature_research.json",
+      "workflow_present": true
+    }
+  },
   "email": "PAUSED",
   "first_mails": 163,
   "gate0": "NOT PASSED",
@@ -52,9 +139,10 @@
     "improvement_p1_gate": "BUILT 2026-11-21 - trust_gate.py: rule-based trust check (read/draft free, quote verification, coverage, standing deny spend cap $0 + dental/medical DQ) + ConfirmationStore run-once (failed = UNCERTAIN, never re-run), wired into ApprovalGateway + call_tool (blocked-trust, no approval recorded); brain still mock; check_gate.py 24/24",
     "improvement_p2_memory_ledger": "BUILT 2026-11-21 - owner_memory.py (quote-verified, owner-messages-only, 256 KiB cap, 3 seed entries from Boss's recorded words) + usage_ledger.py ($0 cap as measurement, task check-in threshold $0, mock always $0.00) + dispatcher ledger threading; check_memory_ledger.py 19/19",
     "improvement_p3_quiet_schedules": "BUILT 2026-11-21 - quiet_schedules.py (watchMarker sha256, skip when unchanged, one run at a time, corrections keep the rest, failed work keeps marker); 1 schedule seeded (taskboard-queue-watch, paused, no runner attached); check_quiet_schedules.py 16/16",
+    "local_dev_phase_1": "BUILT 2026-11-24 - local-first Phase 1 (worker A): development_brain / production_brain config separation, Gemini model list updated (deprecated gemini-2.5-flash removed), live mode locked behind production_brain.unlocked; brain still mock, $0, no live calls.",
     "phase_0": "BUILT (this folder)",
     "phase_10_live_brain": "NOT PROVEN LIVE — probe 2026-11-20 01:44 failed (tunnel 403, api.meta.ai unreachable from this VM), $0 spent, key validity UNPROVEN; brain stays mock",
-    "phase_11_providers": "BUILT 2026-11-20 - 7 LLM providers (meta, openai, anthropic, gemini, kimi, grok, openrouter) + fallback chain in config; brain still mock; no live calls, no keys on record; model name now comes from config",
+    "phase_11_providers": "BUILT 2026-11-20 - 7 LLM providers (meta, openai, anthropic, gemini, kimi, grok, openrouter) + fallback chain in config; brain still mock; no live calls, no keys on record; model name now comes from config. Meta key slot added 2026-11-25 (META_API_KEY env var for the PC; connector path kept for the Muse VM) — key still unproven, brain still mock.",
     "phase_1_agency": "BUILT 2026-11-16 - Agency Chief REAL, 15 workers wired, draft-only",
     "phase_2_digital_product": "BUILT as far as Gate 0 allows 2026-11-16 - Products Chief REAL, kit blueprint, PA list 39/100, launch/sale BLOCKED on Gate 0",
     "phase_3_creator_os": "BUILT 2026-11-16 - Content Chief REAL, 6 Creator OS workers wired (mock brain, draft-only), 13 stages REAL 0 / MOCK 10 / BLOCKED 3, upload OFF, VOICE.md DRAFT, GPU name missing, ToolPilot video 0",
@@ -72,6 +160,17 @@
     "stub": 0
   },
   "spend_cap_usd": 0,
+  "task_counts": {
+    "blocked": 0,
+    "cancelled": 0,
+    "dead_letter": 0,
+    "done": 1,
+    "duplicate": 0,
+    "failed-legacy": 0,
+    "other": 0,
+    "queued": 0,
+    "total": 1
+  },
   "tasks_count": 1,
   "toolpilot_subs": 0,
   "usage_ledger": {

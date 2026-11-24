@@ -1,3 +1,8 @@
+---
+name: publish-prep
+description: "Publish Prep — the pre-publish checklist for the Publish section. Agent: PublishPrepAgent (sections/publish/agents/publish_prep.py, task_kind publish_prep, gate post it). Worker: PublishPrep"
+---
+
 # Skill: Publish Prep
 
 **Role:** Publish Prep — the pre-publish checklist for the Publish section. Agent: `PublishPrepAgent` (`sections/publish/agents/publish_prep.py`, task_kind `publish_prep`, gate `post it`). Worker: `PublishPrep` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `publish_prep`, gate `post it`).

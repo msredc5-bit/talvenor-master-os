@@ -1,0 +1,219 @@
+{
+  "approvals": {
+    "by_status": {},
+    "decided_in_window": 0,
+    "oldest_pending_age": null,
+    "pending": 0,
+    "pending_list": [],
+    "source": "store/approvals.json",
+    "status": "ok",
+    "total": 0
+  },
+  "config": {
+    "email": "PAUSED since 2026-11-14 - SPF/DMARC DNS fix pending from Boss",
+    "first_mails_sent": 163,
+    "gates_enabled": true,
+    "paying_clients": 0,
+    "phase": 11,
+    "production_brain_unlocked": false,
+    "source": "00-CEO-Core/config.json",
+    "spend_cap_usd": 0,
+    "status": "ok",
+    "version": "0.9.0"
+  },
+  "departments": {
+    "departments": [
+      {
+        "department": "01-sales-growth",
+        "pending_approvals": 0,
+        "status": "ok",
+        "tasks_by_status": {
+          "done": 1
+        },
+        "tasks_total": 1
+      },
+      {
+        "department": "02-marketing",
+        "pending_approvals": 0,
+        "status": "ok",
+        "tasks_by_status": {
+          "done": 1
+        },
+        "tasks_total": 1
+      },
+      {
+        "department": "03-ai-engineering",
+        "pending_approvals": 0,
+        "status": "ok",
+        "tasks_by_status": {
+          "done": 1
+        },
+        "tasks_total": 1
+      },
+      {
+        "department": "04-client-operations",
+        "pending_approvals": 0,
+        "status": "ok",
+        "tasks_by_status": {
+          "done": 1
+        },
+        "tasks_total": 1
+      },
+      {
+        "department": "05-research-strategy",
+        "pending_approvals": 0,
+        "status": "ok",
+        "tasks_by_status": {
+          "done": 1
+        },
+        "tasks_total": 1
+      },
+      {
+        "department": "06-finance-admin",
+        "pending_approvals": 0,
+        "status": "ok",
+        "tasks_by_status": {
+          "done": 1
+        },
+        "tasks_total": 1
+      },
+      {
+        "department": "07-quality-security",
+        "pending_approvals": 0,
+        "status": "ok",
+        "tasks_by_status": {
+          "done": 1
+        },
+        "tasks_total": 1
+      },
+      {
+        "department": "08-product-innovation",
+        "pending_approvals": 0,
+        "status": "ok",
+        "tasks_by_status": {
+          "done": 1
+        },
+        "tasks_total": 1
+      }
+    ],
+    "source": "01-Agency-Department/departments/department_runtime.py"
+  },
+  "executive_summary": [
+    "1 task(s) in the store (1 in this window); 1 done, 0 queued.",
+    "No approvals pending.",
+    "Usage ledger: 64 call(s) in total, $0.00 spent ($0.00 cap); 64 call(s) in this window, $0.00.",
+    "Lead chain (sandbox): 0 run(s) recorded; deployment always BLOCKED.",
+    "Email outreach is PAUSED — no email goes out.",
+    "Gate 0 (Vet Kit) is NOT PASSED — kit launch/sale still blocked.",
+    "Paying clients: 0."
+  ],
+  "gate0": {
+    "gate0": "NOT PASSED",
+    "source": "02-Digital-Product-Department/gate0-status.md",
+    "status": "ok"
+  },
+  "generated_at": "2026-11-24T20:31:02.235535+00:00",
+  "generator": "ceo-reporting-1.0.0",
+  "lead_chain": {
+    "by_status": {},
+    "log_lines": "unknown",
+    "note": "store/chains/ absent — no lead-chain runs recorded.",
+    "source": "store/chains/",
+    "status": "missing",
+    "total_runs": 0
+  },
+  "memory": {
+    "boxes": 13,
+    "entries": 3,
+    "source": "store/memory.json",
+    "status": "ok"
+  },
+  "next_actions": [
+    "Email stays PAUSED until Boss applies the SPF/DMARC fix and says to restart it — nothing to send meanwhile.",
+    "Gate 0 is Boss's step (Lemon Squeezy signup test, ~15 min) — no kit work moves until it passes."
+  ],
+  "notes": [
+    "Monthly means the last 30 days (30-day window), not a calendar month.",
+    "Every figure cites its source file; a missing or unreadable source is shown as 'unknown', never invented.",
+    "This report is a draft for Boss to read. It is never sent or published by the generator."
+  ],
+  "period": "monthly",
+  "risks_blocked": [
+    {
+      "item": "Email outreach PAUSED",
+      "source": "00-CEO-Core/config.json",
+      "status": "PAUSED since 2026-11-14 - SPF/DMARC DNS fix pending from Boss"
+    },
+    {
+      "item": "Deployment BLOCKED (always — sandbox only)",
+      "source": "00-CEO-Core/config.json (production_brain.unlocked=false)",
+      "status": "BLOCKED"
+    },
+    {
+      "item": "Gate 0 (Vet Kit launch/sale)",
+      "source": "02-Digital-Product-Department/gate0-status.md",
+      "status": "NOT PASSED"
+    },
+    {
+      "item": "Live brain",
+      "source": "00-CEO-Core/config.json",
+      "status": "NOT PROVEN LIVE — brain is mock"
+    }
+  ],
+  "schedules": {
+    "by_status": {
+      "paused": 1
+    },
+    "source": "store/schedules.json",
+    "status": "ok",
+    "total": 1,
+    "weekly_ceo_report": {
+      "id": "weekly-ceo-report",
+      "note": "Defined (paused) in workflow_engine/scheduler.py; never activated in the real store. This generator does not activate any job.",
+      "status": "not present in store"
+    }
+  },
+  "store_dir": "/home/hatch/workspace/talvenor-master-os/store",
+  "tasks": {
+    "by_business": {
+      "agency": 1
+    },
+    "by_status": {
+      "done": 1
+    },
+    "by_type": {
+      "research": 1
+    },
+    "executions": 0,
+    "executions_cost_usd": 0.0,
+    "in_window": 1,
+    "source": "store/tasks.json",
+    "status": "ok",
+    "total": 1,
+    "undated": 0
+  },
+  "usage": {
+    "by_kind": {
+      "error": 22,
+      "gate": 21,
+      "mock": 21
+    },
+    "in_window_calls": 64,
+    "in_window_usd": 0.0,
+    "monthly_cap_usd": 0.0,
+    "monthly_total_usd": 0.0,
+    "over_monthly_cap": false,
+    "source": "store/usage_ledger.json",
+    "status": "ok",
+    "total_calls": 64,
+    "total_usd": 0.0
+  },
+  "window": {
+    "days": 30,
+    "end_dhaka": "2026-11-25 02:31 Dhaka",
+    "end_utc": "2026-11-24 20:31 UTC",
+    "label": "last 30 days (30-day window, not a calendar month)",
+    "start_dhaka": "2026-10-26 02:31 Dhaka",
+    "start_utc": "2026-10-25 20:31 UTC"
+  }
+}
