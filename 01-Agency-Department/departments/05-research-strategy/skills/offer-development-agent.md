@@ -1,3 +1,8 @@
+---
+name: offer-development-agent
+description: "Offer Development Agent · Worker: OfferDevelopmentAgent"
+---
+
 # Skill: Offer Development Agent — Agency Department 05 (Phase 3)
 
 **Role:** Offer Development Agent · **Worker:** `OfferDevelopmentAgent`

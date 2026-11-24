@@ -1,3 +1,8 @@
+---
+name: industry-research-agent
+description: "Industry Research Agent · Worker: IndustryResearchAgent"
+---
+
 # Skill: Industry Research Agent — Agency Department 05 (Phase 3)
 
 **Role:** Industry Research Agent · **Worker:** `IndustryResearchAgent`

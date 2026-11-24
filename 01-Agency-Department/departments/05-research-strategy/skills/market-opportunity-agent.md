@@ -1,3 +1,8 @@
+---
+name: market-opportunity-agent
+description: "Market Opportunity Agent · Worker: MarketOpportunityAgent"
+---
+
 # Skill: Market Opportunity Agent — Agency Department 05 (Phase 3)
 
 **Role:** Market Opportunity Agent · **Worker:** `MarketOpportunityAgent`

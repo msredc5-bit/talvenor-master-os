@@ -1,3 +1,8 @@
+---
+name: pricing-research-agent
+description: "Pricing Research Agent · Worker: PricingResearchAgent"
+---
+
 # Skill: Pricing Research Agent — Agency Department 05 (Phase 3)
 
 **Role:** Pricing Research Agent · **Worker:** `PricingResearchAgent`

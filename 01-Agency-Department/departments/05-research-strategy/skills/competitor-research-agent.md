@@ -1,3 +1,8 @@
+---
+name: competitor-research-agent
+description: "Competitor Research Agent · Worker: CompetitorResearchAgent"
+---
+
 # Skill: Competitor Research Agent — Agency Department 05 (Phase 3)
 
 **Role:** Competitor Research Agent · **Worker:** `CompetitorResearchAgent`

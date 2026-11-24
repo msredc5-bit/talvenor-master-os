@@ -1,3 +1,8 @@
+---
+name: niche-selection-agent
+description: "Niche Selection Agent · Worker: NicheSelectionAgent"
+---
+
 # Skill: Niche Selection Agent — Agency Department 05 (Phase 3)
 
 **Role:** Niche Selection Agent · **Worker:** `NicheSelectionAgent`

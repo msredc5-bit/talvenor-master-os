@@ -1,3 +1,8 @@
+---
+name: chief-strategy-agent
+description: "Chief Strategy Agent · Manager: ChiefStrategyAgent"
+---
+
 # Skill: Chief Strategy Agent — Agency Department 05 (Phase 1)
 
 **Role:** Chief Strategy Agent · **Manager:** `ChiefStrategyAgent`

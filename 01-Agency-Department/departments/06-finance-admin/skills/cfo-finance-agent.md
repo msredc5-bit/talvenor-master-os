@@ -1,3 +1,8 @@
+---
+name: cfo-finance-agent
+description: "CFO Finance Agent · Manager: CFOFinanceAgent"
+---
+
 # Skill: CFO Finance Agent — Agency Department 06 (Phase 1)
 
 **Role:** CFO Finance Agent · **Manager:** `CFOFinanceAgent`
