@@ -1,3 +1,8 @@
+---
+name: launch-manager
+description: "Build the Vet Kit launch checklist (DRAFT only) — not the launch itself."
+---
+
 # Skill: Launch Manager
 
 **Role:** Build the Vet Kit launch checklist (DRAFT only) — not the launch itself.

@@ -1,3 +1,8 @@
+---
+name: kit-builder
+description: "Build the Vet No-Show Recovery Kit's 6 parts — from blueprint to the real kit."
+---
+
 # Skill: Kit Builder
 
 **Role:** Build the Vet No-Show Recovery Kit's 6 parts — from blueprint to the real kit.

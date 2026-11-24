@@ -1,3 +1,8 @@
+---
+name: launch-manager
+description: "Build the Vet Kit launch checklist (DRAFT only) — Gate 0, the kit's 6 parts, Gate 1 check, store listing, sales page, emailing 100 clinics, writing replies + sales in a sheet."
+---
+
 # Skill: Launch Manager
 
 **Role:** Build the Vet Kit launch checklist (DRAFT only) — Gate 0, the kit's 6 parts, Gate 1 check, store listing, sales page, emailing 100 clinics, writing replies + sales in a sheet.

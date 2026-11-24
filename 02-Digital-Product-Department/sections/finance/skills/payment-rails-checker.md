@@ -1,3 +1,8 @@
+---
+name: payment-rails-checker
+description: "Write the Gate 0 test steps and record Boss's result — Lemon Squeezy signup (individual, checking whether BD bank payout is available), and if it fails, the fallback order: Polar → Gumroad (as an"
+---
+
 # Skill: Payment-Rails Checker
 
 **Role:** Write the Gate 0 test steps and record Boss's result — Lemon Squeezy signup (individual, checking whether BD bank payout is available), and if it fails, the fallback order: **Polar** → **Gumroad** (as an individual, not an LLC).

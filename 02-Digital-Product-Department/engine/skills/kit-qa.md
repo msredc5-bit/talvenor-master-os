@@ -1,3 +1,8 @@
+---
+name: kit-qa
+description: "Write a QA checklist DRAFT for the Vet No-Show Recovery Kit's 6 parts — whether any part has been built, and if so, what must be checked."
+---
+
 # Skill: Kit QA (NEW)
 
 **Role:** Write a QA checklist DRAFT for the Vet No-Show Recovery Kit's 6 parts — whether any part has been built, and if so, what must be checked.

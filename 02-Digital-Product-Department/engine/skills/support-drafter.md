@@ -1,3 +1,8 @@
+---
+name: support-drafter
+description: "Write DRAFT replies to kit buyers' questions — DRAFT only, never sent."
+---
+
 # Skill: Support Drafter
 
 **Role:** Write DRAFT replies to kit buyers' questions — DRAFT only, never sent.

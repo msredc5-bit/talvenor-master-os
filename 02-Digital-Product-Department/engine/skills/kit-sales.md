@@ -1,3 +1,8 @@
+---
+name: kit-sales
+description: "Write DRAFTs of Vet Kit outreach emails for verified PA clinics — DRAFTs only, never sent."
+---
+
 # Skill: Kit Sales (NEW)
 
 **Role:** Write DRAFTs of Vet Kit outreach emails for verified PA clinics — DRAFTs only, never sent.

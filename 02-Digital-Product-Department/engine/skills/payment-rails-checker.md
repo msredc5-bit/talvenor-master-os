@@ -1,3 +1,8 @@
+---
+name: payment-rails-checker
+description: "Write the Gate 0 test steps + record Boss's result — never"
+---
+
 # Skill: Payment-Rails Checker
 
 **Role:** Write the Gate 0 test steps + record Boss's result — never
