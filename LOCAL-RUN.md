@@ -50,6 +50,56 @@ python scripts\taskboard_server.py
 - To stop: **Ctrl+C** in the taskboard's window.
 - Details: `dashboards\TASKBOARD-README.md`.
 
+### Step 5 — Giving the brain a key (optional — the dashboard works without one)
+
+Without a key the brain stays **mock** (drafts only). Keys live in
+Windows environment variables ONLY — never in a file, never in chat.
+After `setx`, close the terminal and open a new one. Full guide:
+`00-CEO-Core\PROVIDERS-SETUP.md`.
+
+**Dev brain (FREE, $0) — Gemini:**
+
+```bat
+setx GEMINI_API_KEY "paste-key-here"
+```
+
+- Key from: https://aistudio.google.com/apikey (no card, no billing).
+- Curl test first, then the proof command:
+
+```bat
+python scripts\check_live_brain.py --live
+```
+
+- PASS only if mode is `live` AND `brain_kind` is `development`.
+  Without the key it prints the setup steps and exits without calling.
+
+**Production brain (PAID, Muse Spark) — META_API_KEY:**
+
+```bat
+setx META_API_KEY "paste-key-here"
+```
+
+- Key from: dev.meta.ai (your Muse Spark API key — the same one
+  behind the Meta connector on the Muse VM; the connector cannot
+  read it back, so take it from your Meta account).
+- It bills your Muse Spark credit — production brain ONLY, never
+  the dev brain, never a fallback for a failed free model.
+- Curl test first (this is the real proof — the 2026-11-20 probe
+  from this VM failed with a tunnel 403, $0 spent, key unproven):
+
+```bat
+curl.exe -s https://api.meta.ai/v1/chat/completions -H "Authorization: Bearer $env:META_API_KEY" -H "Content-Type: application/json" -d '{"model":"muse-spark-1.3","messages":[{"role":"user","content":"Reply with the single word: ok"}],"max_completion_tokens":30}'
+```
+
+- The full adapter proof runs only after YOU unlock the production
+  brain (`production_brain.unlocked` in `00-CEO-Core\config.json`) —
+  that unlock is your separate decision, never a dev change.
+  Note: `check_live_brain.py --live` proves the **Gemini dev brain**,
+  not Muse Spark.
+
+`run_local.bat` shows the key status at step [0/3] (set / not set —
+it never prints a key value).
+
 ## How is the dashboard connected to Master OS?
 
 ```
@@ -68,6 +118,8 @@ dashboards\status.json  ← numbers come here (not hand-written)
 | Item | State |
 |---|---|
 | Brain | **mock** — thinking is DRAFT, the live brain has not been flipped on |
+| Muse Spark key | **slot ready, not set** — `META_API_KEY` env var (PC) or connector (Muse VM); production brain locked; key validity UNPROVEN (2026-11-20 probe failed tunnel 403) |
+| Gemini dev key | **slot ready, not set** — `GEMINI_API_KEY` env var (free tier); dev brain stays mock until the `--live` proof passes |
 | Email outreach | **PAUSED** (since 2026-11-14) — the SPF/DMARC DNS fix is still in your hands |
 | Paying client | **0** · first mail 163 |
 | Gate 0 (Vet Kit) | **NOT PASSED** — the Lemon Squeezy test is your step |
@@ -86,7 +138,8 @@ dashboards\status.json  ← numbers come here (not hand-written)
 
 ## The files
 
-- `run_local.bat` — one-click dashboard
+- `run_local.bat` — one-click dashboard (also shows brain key status)
+- `00-CEO-Core\PROVIDERS-SETUP.md` — key setup guide (all 7 providers: where the key comes from, `setx`, live-proof steps)
 - `scripts\sync_status.py` — syncs the numbers (now also writes `status.json`)
 - `dashboards\dashboard-3d.html` — 3D dashboard (this file)
 - `dashboards\status.json` — real numbers (made by sync)

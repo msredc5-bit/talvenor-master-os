@@ -1,21 +1,36 @@
 """Layer 1 — MetaSparkProvider: the REAL brain (Muse Spark via Meta Model API).
 
 Same LLMProvider interface as MockLLMProvider, so swapping is a config
-change (boss_run.py --live). Auth uses the registered connector credential
-(custom.meta-model-api-2) via the Secure Vault surrogate — the real key
-never appears in a file, env var, argument, or log. One request per
-complete() call, no retries, no redirects. A failed call raises; the worker
-base catches it and marks the worker failed — the day never crashes.
+change (boss_run.py --live). Two key paths, in order:
+
+1. META_API_KEY environment variable — the PC path. Boss sets his own
+   Muse Spark key on his PC (Windows: setx META_API_KEY "paste-key-here");
+   the key is never in a file, an argument, or a log. This is the path
+   the Talvenor Master OS PC package uses (see 00-CEO-Core/PROVIDERS-SETUP.md
+   and 00-CEO-Core/config.json providers.meta.env_var).
+2. The registered connector credential (custom.meta-model-api-2) via the
+   Secure Vault surrogate — the Muse VM path. Used only when no env var
+   is set. The real key never appears in a file, env var, argument, or log.
+
+Muse Spark is PAID / credit-based: it is a PRODUCTION-brain option only.
+It is never in the free-only dev allowlist (00-CEO-Core/free_only_guard.py
+rejects it in development mode) and never the dev brain.
+
+One request per complete() call, no retries, no redirects. A failed call
+raises; the worker base catches it and marks the worker failed — the day
+never crashes.
 
 Boss approved the real brain 2026-11-06 00:18 (from his $150 credit).
 First live verification 2026-11-06 00:19 TIMED OUT after 60s ($0 spent,
 key validity unproven) — the provider code below is ready, the key path
-is NOT yet proven; retry only on Boss's word.
+is NOT yet proven; retry only on Boss's word. Second probe 2026-11-20
+01:44 failed (tunnel 403, api.meta.ai unreachable from this VM), $0
+spent, key validity still unproven — no further live retry from this VM.
 """
 from __future__ import annotations
 
 import json
-import time
+import os
 import urllib.request
 
 from src.contracts.llm import LLMProvider
@@ -42,7 +57,8 @@ def _load_surrogate():
         raise RuntimeError(
             "live brain unavailable: the Meta connector surrogate "
             "(dynamic_credentials) is not installed on this machine — "
-            "run on the Muse VM, or install the connector first"
+            "run on the Muse VM, or set META_API_KEY in the environment "
+            "(PC path, never in a file)"
         ) from exc
     return add_surrogate_to_request, read_json_response
 
@@ -52,6 +68,9 @@ SYSTEM_PROMPT = (
     "Never invent numbers, clients, prices, or results — if a number is "
     "needed and not given, say what input is missing."
 )
+
+ENV_VAR = "META_API_KEY"
+ENDPOINT = "https://api.meta.ai/v1/chat/completions"
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -80,22 +99,50 @@ class MetaSparkProvider(LLMProvider):
             "reasoning_effort": "minimal",
             "temperature": 0.3,
         }
-        req = urllib.request.Request(
-            "https://api.meta.ai/v1/chat/completions",
-            data=json.dumps(body).encode(),
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        add_surrogate_to_request, read_json_response = _load_surrogate()
-        add_surrogate_to_request(
-            req, "custom.meta-model-api-2", allowed_hosts=["api.meta.ai"])
-        t0 = time.time()
-        try:
-            with urllib.request.build_opener(NoRedirect()).open(
-                    req, timeout=self.timeout) as resp:
-                payload = read_json_response(resp)
-        except Exception as exc:
-            raise RuntimeError(f"live brain call failed: {type(exc).__name__}: {exc}")
+        api_key = os.environ.get(ENV_VAR)
+        if api_key:
+            # PC path: key from the environment (never a file).
+            req = urllib.request.Request(
+                ENDPOINT,
+                data=json.dumps(body).encode(),
+                headers={"Content-Type": "application/json",
+                         "Authorization": "Bearer " + api_key},
+                method="POST",
+            )
+            try:
+                with urllib.request.build_opener(NoRedirect()).open(
+                        req, timeout=self.timeout) as resp:
+                    payload = json.loads(resp.read().decode("utf-8"))
+            except Exception as exc:
+                raise RuntimeError(
+                    f"live brain call failed: {type(exc).__name__}: {exc}")
+        else:
+            # Muse VM path: key via the connector Secure Vault surrogate.
+            req = urllib.request.Request(
+                ENDPOINT,
+                data=json.dumps(body).encode(),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            try:
+                add_surrogate_to_request, read_json_response = (
+                    _load_surrogate())
+            except Exception as exc:  # noqa: BLE001 — no surrogate, no key
+                raise RuntimeError(
+                    "Muse Spark API key missing: set " + ENV_VAR + " in the "
+                    "environment (never in a file) — or run on the Muse VM "
+                    "where the Meta connector supplies the key. "
+                    f"Surrogate unavailable: {type(exc).__name__}: {exc}"
+                ) from exc
+            add_surrogate_to_request(
+                req, "custom.meta-model-api-2", allowed_hosts=["api.meta.ai"])
+            try:
+                with urllib.request.build_opener(NoRedirect()).open(
+                        req, timeout=self.timeout) as resp:
+                    payload = read_json_response(resp)
+            except Exception as exc:
+                raise RuntimeError(
+                    f"live brain call failed: {type(exc).__name__}: {exc}")
         if "error" in payload:
             raise RuntimeError(f"live brain API error: {payload['error']}")
         choice = payload["choices"][0]
