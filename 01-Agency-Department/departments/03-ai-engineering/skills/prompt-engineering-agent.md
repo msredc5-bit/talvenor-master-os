@@ -1,3 +1,8 @@
+---
+name: prompt-engineering-agent
+description: "The AI Engineering department's prompt engineer. For Sophia the receptionist's"
+---
+
 # Prompt Engineering Agent — Skill
 
 ## Role

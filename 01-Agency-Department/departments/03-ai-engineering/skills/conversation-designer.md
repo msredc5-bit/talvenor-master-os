@@ -1,3 +1,8 @@
+---
+name: conversation-designer
+description: "Conversation designer of the AI Engineering department. For Sophia the receptionist's"
+---
+
 # Conversation Designer — Skill
 
 ## Role

@@ -1,3 +1,8 @@
+---
+name: calendar-integration-agent
+description: "Calendar integration agent of the AI Engineering department. Google Calendar"
+---
+
 # Calendar Integration Agent — Skill
 
 ## Role

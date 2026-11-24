@@ -1,3 +1,8 @@
+---
+name: ai-solution-architect
+description: "Solution architect of the AI Engineering department. Hearing a client's need,"
+---
+
 # AI Solution Architect — Skill
 
 ## Role

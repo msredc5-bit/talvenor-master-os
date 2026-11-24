@@ -1,3 +1,8 @@
+---
+name: cto-ai-engineering-agent
+description: "Manager of the AI Engineering department. When a task comes from Boss/Chief, the right"
+---
+
 # CTO AI Engineering Agent — Skill
 
 ## Role

@@ -1,3 +1,8 @@
+---
+name: n8n-automation-engineer
+description: "The AI Engineering department's n8n automation engineer. For n8n workflows, it makes"
+---
+
 # n8n Automation Engineer — Skill
 
 ## Role

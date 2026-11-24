@@ -1,3 +1,8 @@
+---
+name: crm-integration-agent
+description: "CRM integration specialist of the AI Engineering department. How Lead/Deal"
+---
+
 # CRM Integration Agent — Skill
 
 ## Role

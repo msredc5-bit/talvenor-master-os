@@ -1,3 +1,8 @@
+---
+name: vapi-integration-agent
+description: "The AI Engineering department's Vapi integration agent. For connecting Vapi assistant Sophia,"
+---
+
 # Vapi Integration Agent — Skill
 
 ## Role

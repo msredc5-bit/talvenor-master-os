@@ -1,3 +1,8 @@
+---
+name: deployment-agent
+description: "Deployment agent of the AI Engineering department. It makes a plan DRAFT"
+---
+
 # Deployment Agent — Skill
 
 ## Role
