@@ -1,3 +1,8 @@
+---
+name: clinic-researcher
+description: "Grow the PA vet list toward 100 verified independent clinics."
+---
+
 # Skill: Clinic Researcher
 
 **Role:** Grow the PA vet list toward 100 verified independent clinics.

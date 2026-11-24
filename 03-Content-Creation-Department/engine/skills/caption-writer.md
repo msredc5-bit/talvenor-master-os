@@ -1,3 +1,8 @@
+---
+name: caption-writer
+description: "Caption Writer — the Content Engine's caption + hashtag writer. Worker: CaptionWriter (03-Content-Creation-Department/engine/workers/src/creator_workers.py, task_kind caption_write, gate ok)."
+---
+
 # Skill: Caption Writer
 
 **Role:** Caption Writer — the Content Engine's caption + hashtag writer. Worker: `CaptionWriter` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `caption_write`, gate `ok`).

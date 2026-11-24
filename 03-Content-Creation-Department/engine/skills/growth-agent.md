@@ -1,3 +1,8 @@
+---
+name: growth-agent
+description: "Growth Agent — trend research + collab-outreach draft for the Growth section. Agent: GrowthAgent (sections/growth/agents/growth_agent.py, task_kind growth_research, gate send). Worker: none — NEW"
+---
+
 # Skill: Growth Agent
 
 **Role:** Growth Agent — trend research + collab-outreach draft for the Growth section. Agent: `GrowthAgent` (`sections/growth/agents/growth_agent.py`, task_kind `growth_research`, gate `send`). Worker: none — NEW role (Phase 7).

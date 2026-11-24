@@ -1,3 +1,8 @@
+---
+name: publish-prep
+description: "Publish Prep — the Content Engine's publish-readiness checker. Worker: PublishPrep (03-Content-Creation-Department/engine/workers/src/creator_workers.py, task_kind publish_prep, gate post it)."
+---
+
 # Skill: Publish Prep
 
 **Role:** Publish Prep — the Content Engine's publish-readiness checker. Worker: `PublishPrep` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `publish_prep`, gate `post it`).

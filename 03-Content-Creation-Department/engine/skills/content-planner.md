@@ -1,3 +1,8 @@
+---
+name: content-planner
+description: "Content Planner — makes the Content Engine's weekly/monthly plan. Worker: no worker — Chief-level role. Method source: youtube-skills/yt-plan/SKILL.md + scripts/loop_next.py (stage 10-next-plan) +"
+---
+
 # Skill: Content Planner
 
 **Role:** Content Planner — makes the Content Engine's weekly/monthly plan. Worker: **no worker — Chief-level role**. Method source: `youtube-skills/yt-plan/SKILL.md` + `scripts/loop_next.py` (stage 10-next-plan) + `../pipeline.md`.

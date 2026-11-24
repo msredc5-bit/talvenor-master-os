@@ -1,3 +1,8 @@
+---
+name: performance-tracker
+description: "Performance Tracker — makes the Content Engine's tracking setup. Worker: PerformanceTracker (03-Content-Creation-Department/engine/workers/src/creator_workers.py, task_kind performance_track, gate"
+---
+
 # Skill: Performance Tracker
 
 **Role:** Performance Tracker — makes the Content Engine's tracking setup. Worker: `PerformanceTracker` (`03-Content-Creation-Department/engine/workers/src/creator_workers.py`, task_kind `performance_track`, gate `ok`).

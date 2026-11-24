@@ -1,3 +1,8 @@
+---
+name: repurpose-agent
+description: "Repurpose Agent — long-video-to-shorts plan for the Growth section. Agent: RepurposeAgent (sections/growth/agents/repurpose_agent.py, task_kind repurpose_plan, gate ok). Worker: none — NEW role"
+---
+
 # Skill: Repurpose Agent
 
 **Role:** Repurpose Agent — long-video-to-shorts plan for the Growth section. Agent: `RepurposeAgent` (`sections/growth/agents/repurpose_agent.py`, task_kind `repurpose_plan`, gate `ok`). Worker: none — NEW role (Phase 7).

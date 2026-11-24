@@ -1,3 +1,8 @@
+---
+name: performance-analyst
+description: "Performance Analyst — analyzes the real performance of published content. Worker: no worker — Chief-level role. Method source: youtube-skills/yt-retention/SKILL.md + youtube-skills/yt-audit/ +"
+---
+
 # Skill: Performance Analyst
 
 **Role:** Performance Analyst — analyzes the real performance of published content. Worker: **no worker — Chief-level role**. Method source: `youtube-skills/yt-retention/SKILL.md` + `youtube-skills/yt-audit/` + PerformanceTracker's template + `../pipeline.md` stage 8-report.
