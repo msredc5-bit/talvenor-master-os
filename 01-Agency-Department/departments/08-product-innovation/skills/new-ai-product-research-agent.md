@@ -1,3 +1,8 @@
+---
+name: new-ai-product-research-agent
+description: "New AI Product Research Agent · Worker: NewAIProductResearchAgent"
+---
+
 # Skill: New AI Product Research Agent — Agency Department 08 (Phase 3)
 
 **Role:** New AI Product Research Agent · **Worker:** `NewAIProductResearchAgent`

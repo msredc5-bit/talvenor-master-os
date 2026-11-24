@@ -1,3 +1,8 @@
+---
+name: data-validation-agent
+description: "Data Validation Agent · Agent: DataValidationAgent"
+---
+
 # Skill: Data Validation Agent — Agency Department 07 (Phase 3)
 
 **Role:** Data Validation Agent · **Agent:** `DataValidationAgent`

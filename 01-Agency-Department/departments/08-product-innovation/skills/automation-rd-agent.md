@@ -1,3 +1,8 @@
+---
+name: automation-rd-agent
+description: "Automation R&D Agent · Worker: AutomationRDAgent"
+---
+
 # Skill: Automation R&D Agent — Agency Department 08 (Phase 3)
 
 **Role:** Automation R&D Agent · **Worker:** `AutomationRDAgent`

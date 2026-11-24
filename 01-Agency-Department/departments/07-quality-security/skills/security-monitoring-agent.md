@@ -1,3 +1,8 @@
+---
+name: security-monitoring-agent
+description: "Security Monitoring Agent · Agent: SecurityMonitoringAgent"
+---
+
 # Skill: Security Monitoring Agent — Agency Department 07 (Phase 3)
 
 **Role:** Security Monitoring Agent · **Agent:** `SecurityMonitoringAgent`

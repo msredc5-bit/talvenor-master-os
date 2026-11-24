@@ -1,3 +1,8 @@
+---
+name: chief-innovation-agent
+description: "Chief Innovation Agent · Manager: ChiefInnovationAgent"
+---
+
 # Skill: Chief Innovation Agent — Agency Department 08 (Phase 1)
 
 **Role:** Chief Innovation Agent · **Manager:** `ChiefInnovationAgent`

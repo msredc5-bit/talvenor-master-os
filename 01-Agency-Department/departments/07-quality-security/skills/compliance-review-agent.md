@@ -1,3 +1,8 @@
+---
+name: compliance-review-agent
+description: "Compliance Review Agent · Agent: ComplianceReviewAgent"
+---
+
 # Skill: Compliance Review Agent — Agency Department 07 (Phase 3)
 
 **Role:** Compliance Review Agent · **Agent:** `ComplianceReviewAgent`

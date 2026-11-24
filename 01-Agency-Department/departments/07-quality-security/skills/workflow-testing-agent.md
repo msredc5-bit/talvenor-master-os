@@ -1,3 +1,8 @@
+---
+name: workflow-testing-agent
+description: "Workflow Testing Agent · Agent: WorkflowTestingAgent"
+---
+
 # Skill: Workflow Testing Agent — Agency Department 07 (Phase 3)
 
 **Role:** Workflow Testing Agent · **Agent:** `WorkflowTestingAgent`

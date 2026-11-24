@@ -1,3 +1,8 @@
+---
+name: chief-quality-security-agent
+description: "Chief Quality Security Agent · Manager: ChiefQualitySecurityAgent"
+---
+
 # Skill: Chief Quality Security Agent — Agency Department 07 (Phase 1)
 
 **Role:** Chief Quality Security Agent · **Manager:** `ChiefQualitySecurityAgent`
