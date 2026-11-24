@@ -12,7 +12,8 @@ Verifies:
      (agency MockLLMProvider, content MockLLM), 0 calls, $0
   5. Vendored live provider class imports + constructs with NO network
      call (0 calls, fast return)
-  6. Live-mode temp config returns the live brain; bad mode raises
+  6. Live-mode temp config: LOCKED without production_brain.unlocked;
+     unlocked returns the live brain; bad mode raises
   7. run_office.py smoke: agency draft task on a TEMP store
   8. run_office.py smoke: gated action -> PENDING on a TEMP store
   9. run_office.py smoke: content draft, [MOCK DRAFT] labelled
@@ -193,7 +194,10 @@ def main():
         check("vendored live provider imports + constructs, 0 calls, no network",
               False, str(e))
 
-    # 6. Live-mode temp config -> live brain; bad mode -> ValueError
+    # 6. Live-mode temp config: LOCKED without the production unlock
+    # (local-first Phase 1, 2026-11-24) — {"brain": "live"} with no
+    # production_brain.unlocked raises RuntimeError; with unlocked=true
+    # it returns the live brain (Phase 10 compat); bad mode -> ValueError.
     try:
         from brain import BrainFactory  # noqa: PLC0415
 
@@ -201,7 +205,19 @@ def main():
         live_cfg = os.path.join(tmpdir, "config-live.json")
         with open(live_cfg, "w", encoding="utf-8") as f:
             json.dump({"brain": "live"}, f)
-        live_brain = BrainFactory.get_brain("agency", config_path=live_cfg)
+        try:
+            BrainFactory.get_brain("agency", config_path=live_cfg)
+            locked_ok = False
+            locked_msg = "no error raised"
+        except RuntimeError as e:
+            locked_ok = "LOCKED" in str(e)
+            locked_msg = str(e)[:100]
+        unlocked_cfg = os.path.join(tmpdir, "config-unlocked.json")
+        with open(unlocked_cfg, "w", encoding="utf-8") as f:
+            json.dump({"brain": "live",
+                       "production_brain": {"unlocked": True}}, f)
+        live_brain = BrainFactory.get_brain("agency",
+                                            config_path=unlocked_cfg)
         live_ok = (type(live_brain).__name__ == "LiveBrainAdapter"
                    and live_brain.health()["provider"] == "live-brain-adapter"
                    and live_brain.health()["mode"] == "live"
@@ -214,11 +230,14 @@ def main():
             bad_ok = False
         except ValueError:
             bad_ok = True
-        check("live-mode config returns live brain; bad mode raises",
-              live_ok and bad_ok,
+        check("live-mode locked without unlock; unlocked returns live "
+              "brain; bad mode raises",
+              locked_ok and live_ok and bad_ok,
+              f"locked={locked_ok} ({locked_msg}), "
               f"live={type(live_brain).__name__}, bad-mode-raises={bad_ok}")
     except Exception as e:  # noqa: BLE001
-        check("live-mode config returns live brain; bad mode raises", False, str(e))
+        check("live-mode locked without unlock; unlocked returns live "
+              "brain; bad mode raises", False, str(e))
 
     # 7-10. Runner smoke tests on TEMP stores only
     tmp_store = tempfile.mkdtemp()

@@ -464,7 +464,7 @@ def main():
     except Exception as e:  # noqa: BLE001
         check("memory search (substring, per-box) + 13 boxes", False, str(e))
 
-    # 19. Skills dedup: the 3 pointer files exist, point at the canonical
+    # 19. Skills dedup: the 5 pointer files exist, point at the canonical
     # engine copy, and are not skills (no heading); the manifest lists them.
     try:
         pointers = [
@@ -474,6 +474,10 @@ def main():
              "03-Content-Creation-Department/engine/skills/growth-agent.md"),
             ("03-Content-Creation-Department/sections/growth/skills/repurpose-agent.md",
              "03-Content-Creation-Department/engine/skills/repurpose-agent.md"),
+            ("02-Digital-Product-Department/sections/product/skills/kit-qa.md",
+             "02-Digital-Product-Department/engine/skills/kit-qa.md"),
+            ("03-Content-Creation-Department/sections/produce/skills/script-writer.md",
+             "03-Content-Creation-Department/engine/skills/script-writer.md"),
         ]
         ok = True
         for ptr_rel, canon_rel in pointers:
@@ -490,10 +494,11 @@ def main():
                   encoding="utf-8") as f:
             manifest = f.read()
         ok = ok and all(s in manifest for s in
-                        ("growth-agent", "kit-sales", "repurpose-agent"))
-        check("skills dedup: 3 pointers + manifest", ok)
+                        ("growth-agent", "kit-sales", "repurpose-agent",
+                         "kit-qa", "script-writer"))
+        check("skills dedup: 5 pointers + manifest", ok)
     except Exception as e:  # noqa: BLE001
-        check("skills dedup: 3 pointers + manifest", False, str(e))
+        check("skills dedup: 5 pointers + manifest", False, str(e))
 
     # 20. store_io: atomic write + locked read-modify-write round-trip
     # in TEMP; no lock file is left behind.

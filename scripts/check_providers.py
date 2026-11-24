@@ -6,27 +6,44 @@ What it checks (mock mode ONLY — no live call, ever):
   2. Each provider constructs with its key unset — 0 calls, no network.
   3. Missing key -> clean RuntimeError naming the env var, and NO
      network attempted (urlopen patched to fail the test if called).
-     Meta is excepted here: its key comes from the connector surrogate,
-     so instead its module must reference the connector path and its
-     health() must be clean — complete() is NEVER called (no live call).
+     Meta has TWO key paths (META_API_KEY env var on a PC, connector
+     surrogate on the Muse VM): with no env var set, complete() would
+     take the surrogate path, so the generic missing-key test does not
+     apply — instead its module must reference both paths, and a
+     missing key with no surrogate must give a clean error naming
+     META_API_KEY. Sections 4-6 DO run for Meta (a fake key
+     in-process exercises the env-var path).
   4. Simulated success per env provider (fake key in-process only,
      fake opener returns a canned payload) -> text returned, tokens counted.
   5. Simulated API-error payload -> RuntimeError with "API error".
   6. Simulated timeout (URLError) -> RuntimeError.
   7. Adapter chain: stubs [fail, fail, ok] -> ok text; [fail, fail] ->
      mock fallback, reason recorded.
-  8. BrainFactory selection by temp config: {"brain": "live"} -> chain
-     [meta] (Phase 10 compat); fallback_chain ["openai", "meta", "mock"]
-     -> chain [openai, meta]; "provider:model" entries pick the model;
-     unknown provider / empty chain -> RuntimeError; brain mock -> mocks.
+  8. BrainFactory selection by temp config: {"brain": "live"} ->
+     RuntimeError (production LOCKED unless production_brain.unlocked
+     is true); {"brain": "live", "production_brain": {"unlocked": true}}
+     -> chain [meta] (unlocked compat); {"brain": "development"} ->
+     LiveBrainAdapter in dev mode (free-only guard, 0 calls);
+     dev chain with a paid model -> FreeOnlyViolation;
+     fallback_chain ["openai", "meta", "mock"] -> chain [openai, meta];
+     "provider:model" entries pick the model; unknown provider /
+     empty chain -> RuntimeError; brain mock -> mocks.
   9. Real config.json validation: providers section == registry (7),
-     each has https endpoint + env var (null only for meta) + non-empty
+     each has https endpoint + env var + non-empty
      models list containing its default model; fallback_chain entries
      resolve (known provider or "mock"), no duplicates; brain_provider
-     known; brain stays "mock"; phase 11 + v0.9.0.
+     known; brain stays "mock"; phase 11 + v0.9.0. Phase 1 (local dev):
+     development_brain present (free_only + test_data_only true,
+     model gemini-2.5-flash-lite, fallback_chain all allowlisted);
+     gemini models contain gemini-2.5-flash-lite and NOT the deprecated
+     gemini-2.5-flash; openrouter models all :free / openrouter/free
+     and free_only true; production_brain.unlocked is false.
  10. No secrets in the new/changed files (real key patterns only —
      env-var NAME references and os.environ.get() are not secrets).
  11. Real store unchanged by this check run (Phase 9: live queue).
+ 12. Real guard log untouched (section 7 stubs log to a temp file —
+     LiveBrainAdapter.complete() logs every attempt, so without the
+     redirect the offline stubs would pollute logs/dev_brain_calls.jsonl).
 
 No live call is made anywhere in this file. The fake key used in the
 simulated tests is the literal "test-fake-key" (not a real credential),
@@ -73,14 +90,15 @@ def _snapshot_store():
     return snap
 
 
-# (module, class, env var, default model) — Meta has no env var.
+# (module, class, env var, default model).
 PROVIDERS = [
-    ("src.live.meta_provider", "MetaSparkProvider", None, "muse-spark-1.3"),
+    ("src.live.meta_provider", "MetaSparkProvider", "META_API_KEY",
+     "muse-spark-1.3"),
     ("src.live.openai_provider", "OpenAIProvider", "OPENAI_API_KEY", "gpt-4o"),
     ("src.live.anthropic_provider", "AnthropicProvider", "ANTHROPIC_API_KEY",
      "claude-sonnet-4-5"),
     ("src.live.gemini_provider", "GeminiProvider", "GEMINI_API_KEY",
-     "gemini-2.5-flash"),
+     "gemini-2.5-flash-lite"),
     ("src.live.kimi_provider", "KimiProvider", "MOONSHOT_API_KEY", "kimi-k2.5"),
     ("src.live.grok_provider", "GrokProvider", "XAI_API_KEY", "grok-4"),
     ("src.live.openrouter_provider", "OpenRouterProvider",
@@ -173,6 +191,28 @@ def _unset_env(env_var):
 def main():
     store_before = _snapshot_store()
 
+    # Phase 1: LiveBrainAdapter.complete() logs EVERY attempt via the
+    # free-only guard — redirect that log to a temp file so the
+    # offline stub runs in section 7 never pollute the real
+    # logs/dev_brain_calls.jsonl (the real log is a record of real
+    # dev-brain calls, not test stubs).
+    guard_tmp_log = None
+    guard_real_log = None
+    guard_real_before = None
+    try:
+        import free_only_guard as _guard  # noqa: PLC0415
+        guard_tmp_log = os.path.join(tempfile.mkdtemp(), "guard-test.log")
+        guard_real_log = getattr(_guard, "LOG_PATH", None)
+        if guard_real_log:
+            try:
+                with open(guard_real_log, encoding="utf-8") as f:
+                    guard_real_before = f.read()
+            except OSError:
+                guard_real_before = None
+        _guard.LOG_PATH = guard_tmp_log
+    except ImportError:
+        _guard = None
+
     # 1. All 7 provider modules import standalone, fast, no network.
     try:
         ok_all = True
@@ -217,39 +257,73 @@ def main():
                   and getattr(provider, "model", None) == default_model,
                   f"model={getattr(provider, 'model', None)}")
 
-            if env_var is None:
-                # Meta: no env var — complete() is NEVER called here
-                # (it would touch the connector + network). Instead
-                # verify the module uses the connector path.
+            def _no_network(*args, **kwargs):
+                raise AssertionError("network attempted with no key")
+
+            if cls_name == "MetaSparkProvider":
+                # Meta has TWO key paths: the META_API_KEY env var (PC)
+                # and the connector surrogate (Muse VM). With no env var
+                # set, complete() would take the surrogate path, so the
+                # generic missing-key test below does not apply — and
+                # complete() is NEVER called unguarded here (it would
+                # touch the connector + network). Instead verify the
+                # module references both paths, and that a missing key
+                # with no surrogate gives a clean error naming
+                # META_API_KEY (surrogate loader patched out).
                 with open(os.path.join(
                         WORKERS_DIR, "src", "live", "meta_provider.py"),
                         encoding="utf-8") as f:
                     src = f.read()
-                check("MetaSparkProvider uses connector path, not env var",
+                check("MetaSparkProvider: META_API_KEY env var + "
+                      "connector path",
                       "custom.meta-model-api-2" in src
-                      and "os.environ" not in src,
-                      "surrogate path present")
-                continue
+                      and "META_API_KEY" in src
+                      and "os.environ" in src,
+                      "dual key path present")
+
+                def _no_surrogate(*args, **kwargs):
+                    raise ImportError("no surrogate on this machine")
+
+                with _unset_env(env_var):
+                    with mock.patch.object(
+                            mod, "_load_surrogate",
+                            side_effect=_no_surrogate):
+                        with mock.patch.object(
+                                urllib.request, "build_opener",
+                                side_effect=_no_network):
+                            try:
+                                provider.complete("smoke")
+                                raised = None
+                            except RuntimeError as e:
+                                raised = str(e)
+                            except AssertionError:
+                                raised = "NETWORK-ATTEMPTED"
+                check("MetaSparkProvider missing key + no surrogate -> "
+                      "error names META_API_KEY, no network",
+                      raised is not None and "META_API_KEY" in raised
+                      and "NETWORK-ATTEMPTED" not in raised,
+                      (raised or "no error")[:120])
+                # Fall through to sections 4-6: with a fake key set,
+                # the env-var path is exercised with a fake opener.
 
             # 3. Missing key -> clean error naming the env var, NO network.
-            def _no_network(*args, **kwargs):
-                raise AssertionError("network attempted with no key")
-
-            with _unset_env(env_var):
-                with mock.patch.object(urllib.request, "build_opener",
-                                      side_effect=_no_network):
-                    try:
-                        provider.complete("smoke")
-                        raised = None
-                    except RuntimeError as e:
-                        raised = str(e)
-                    except AssertionError:
-                        raised = "NETWORK-ATTEMPTED"
-            check(f"{cls_name} missing key -> error names {env_var}, "
-                  "no network",
-                  raised is not None and env_var in raised
-                  and "NETWORK-ATTEMPTED" not in raised,
-                  (raised or "no error")[:120])
+            # (Meta skipped: its missing-key case is covered above.)
+            if cls_name != "MetaSparkProvider":
+                with _unset_env(env_var):
+                    with mock.patch.object(urllib.request, "build_opener",
+                                          side_effect=_no_network):
+                        try:
+                            provider.complete("smoke")
+                            raised = None
+                        except RuntimeError as e:
+                            raised = str(e)
+                        except AssertionError:
+                            raised = "NETWORK-ATTEMPTED"
+                check(f"{cls_name} missing key -> error names {env_var}, "
+                      "no network",
+                      raised is not None and env_var in raised
+                      and "NETWORK-ATTEMPTED" not in raised,
+                      (raised or "no error")[:120])
 
             # 4-6. Simulated wire: success / API error / timeout.
             ok_payload = (ANTHROPIC_OK if cls_name == "AnthropicProvider"
@@ -340,19 +414,104 @@ def main():
     try:
         from brain import BrainFactory  # noqa: PLC0415
 
-        # (a) {"brain": "live"} -> default chain [meta] (Phase 10 compat).
+        # (a) {"brain": "live"} (no production_brain block) must now
+        # raise RuntimeError mentioning LOCKED — production live is
+        # locked behind production_brain.unlocked (Phase 1, worker A).
         cfg_a = _temp_config({"brain": "live"})
-        brain_a = BrainFactory.get_brain("agency", config_path=cfg_a)
-        h = brain_a.health()
-        check('factory {"brain": "live"} -> chain [meta] (Phase 10 compat)',
-              type(brain_a).__name__ == "LiveBrainAdapter"
-              and h["providers"] == ["meta-spark-live"]
-              and h["models"] == ["muse-spark-1.3"]
-              and h["calls"] == 0,
-              f"providers={h['providers']}, models={h['models']}")
+        try:
+            BrainFactory.get_brain("agency", config_path=cfg_a)
+            locked_ok = False
+            detail_a = "no error raised — production live NOT locked"
+        except RuntimeError as e:
+            locked_ok = "LOCKED" in str(e)
+            detail_a = str(e)[:120]
+        except Exception as e:  # noqa: BLE001
+            locked_ok = False
+            detail_a = f"{type(e).__name__}: {e}"[:120]
+        check('factory {"brain": "live"} -> RuntimeError (production LOCKED)',
+              locked_ok, detail_a)
+
+        # (f) {"brain": "live", "production_brain": {"unlocked": true}}
+        # -> LiveBrainAdapter chain [meta] (unlocked compat).
+        try:
+            cfg_f = _temp_config({"brain": "live",
+                                  "production_brain": {"unlocked": True}})
+            brain_f = BrainFactory.get_brain("agency", config_path=cfg_f)
+            h = brain_f.health()
+            check('factory {"brain": "live", "production_brain": '
+                  '{"unlocked": true}} -> chain [meta] (unlocked compat)',
+                  type(brain_f).__name__ == "LiveBrainAdapter"
+                  and h["providers"] == ["meta-spark-live"]
+                  and h["models"] == ["muse-spark-1.3"]
+                  and h["calls"] == 0,
+                  f"providers={h['providers']}, models={h['models']}")
+        except Exception as e:  # noqa: BLE001
+            check('factory {"brain": "live", "production_brain": '
+                  '{"unlocked": true}} -> chain [meta] (unlocked compat)',
+                  False, f"{type(e).__name__}: {e}"[:120])
+
+        # (g) {"brain": "development"} with a free-only chain ->
+        # LiveBrainAdapter in dev mode, guard on, 0 calls, no key needed.
+        try:
+            cfg_g = _temp_config(
+                {"brain": "development",
+                 "development_brain": {
+                     "enabled": True,
+                     "fallback_chain": ["gemini:gemini-2.5-flash-lite",
+                                        "openrouter:openrouter/free"],
+                     "free_only": True,
+                     "test_data_only": True}})
+            brain_g = BrainFactory.get_brain("agency", config_path=cfg_g)
+            h = brain_g.health()
+            check('factory {"brain": "development"} -> dev adapter, '
+                  'free-only guard, 0 calls',
+                  type(brain_g).__name__ == "LiveBrainAdapter"
+                  and h.get("brain_kind") == "development"
+                  and h.get("guard") == "free-only"
+                  and h["providers"] == ["gemini-live", "openrouter-live"]
+                  and h["models"] == ["gemini-2.5-flash-lite",
+                                      "openrouter/free"]
+                  and h["calls"] == 0,
+                  f"brain_kind={h.get('brain_kind')}, "
+                  f"guard={h.get('guard')}, providers={h['providers']}, "
+                  f"models={h['models']}")
+        except Exception as e:  # noqa: BLE001
+            check('factory {"brain": "development"} -> dev adapter, '
+                  'free-only guard, 0 calls',
+                  False, f"{type(e).__name__}: {e}"[:120])
+
+        # (h) dev chain with a paid model -> FreeOnlyViolation at build.
+        try:
+            from free_only_guard import FreeOnlyViolation  # noqa: PLC0415
+        except ImportError as e:
+            check('factory dev chain ["openai:gpt-4o"] -> FreeOnlyViolation',
+                  False, f"free_only_guard missing (worker B): {e}")
+        else:
+            cfg_h = _temp_config(
+                {"brain": "development",
+                 "development_brain": {
+                     "enabled": True,
+                     "fallback_chain": ["openai:gpt-4o"],
+                     "free_only": True,
+                     "test_data_only": True}})
+            try:
+                BrainFactory.get_brain("agency", config_path=cfg_h)
+                paid_ok = False
+                detail_h = "no error raised — paid model NOT rejected"
+            except FreeOnlyViolation as e:
+                paid_ok = True
+                detail_h = str(e)[:120]
+            except Exception as e:  # noqa: BLE001
+                paid_ok = False
+                detail_h = f"{type(e).__name__}: {e}"[:120]
+            check('factory dev chain ["openai:gpt-4o"] -> FreeOnlyViolation',
+                  paid_ok, detail_h)
 
         # (b) fallback_chain ["openai", "meta", "mock"] -> [openai, meta].
+        # Phase 1: production live is LOCKED, so the temp config must
+        # carry production_brain.unlocked to exercise the chain at all.
         cfg_b = _temp_config({"brain": "live",
+                              "production_brain": {"unlocked": True},
                               "fallback_chain": ["openai", "meta", "mock"]})
         brain_b = BrainFactory.get_brain("agency", config_path=cfg_b)
         h = brain_b.health()
@@ -364,6 +523,7 @@ def main():
         # (c) "provider:model" entries pick the model.
         cfg_c = _temp_config(
             {"brain": "live",
+             "production_brain": {"unlocked": True},
              "fallback_chain": ["openrouter:openrouter/free",
                                 "grok:grok-4.6"]})
         brain_c = BrainFactory.get_brain("agency", config_path=cfg_c)
@@ -375,6 +535,7 @@ def main():
 
         # (d) unknown provider / empty chain -> RuntimeError.
         cfg_d = _temp_config({"brain": "live",
+                              "production_brain": {"unlocked": True},
                               "fallback_chain": ["nope", "mock"]})
         try:
             BrainFactory.get_brain("agency", config_path=cfg_d)
@@ -382,6 +543,7 @@ def main():
         except RuntimeError:
             bad_ok = True
         cfg_e = _temp_config({"brain": "live",
+                              "production_brain": {"unlocked": True},
                               "fallback_chain": ["mock"]})
         try:
             BrainFactory.get_brain("agency", config_path=cfg_e)
@@ -423,8 +585,11 @@ def main():
                 problems.append(f"{name}: endpoint not https")
             env_var = entry.get("env_var")
             if name == "meta":
-                if env_var is not None:
-                    problems.append("meta: env_var must be null")
+                # Meta key slot (2026-11-25): META_API_KEY env var on
+                # the PC, connector surrogate on the Muse VM.
+                if env_var != "META_API_KEY":
+                    problems.append(
+                        "meta: env_var must be META_API_KEY")
             elif not isinstance(env_var, str) or not env_var:
                 problems.append(f"{name}: env_var missing")
             models = entry.get("models", [])
@@ -451,11 +616,65 @@ def main():
         # config bump, it does not stay 9.
         if cfg.get("phase") != 11 or cfg.get("version") != "0.9.0":
             problems.append("phase/version moved (must stay 11 / 0.9.0)")
-        check("real config.json: 7 providers + chain + mock default",
+        # Phase 1 (local dev): development_brain / production_brain.
+        dev = cfg.get("development_brain")
+        if not isinstance(dev, dict):
+            problems.append("development_brain block missing")
+        else:
+            if dev.get("free_only") is not True:
+                problems.append("development_brain.free_only is not true")
+            if dev.get("test_data_only") is not True:
+                problems.append(
+                    "development_brain.test_data_only is not true")
+            if dev.get("model") != "gemini-2.5-flash-lite":
+                problems.append(
+                    "development_brain.model is not gemini-2.5-flash-lite")
+            for entry in dev.get("fallback_chain", []):
+                name, _sep, model = str(entry).partition(":")
+                name = name.strip().lower()
+                model = model.strip()
+                if name == "gemini":
+                    if model not in ("gemini-2.5-flash-lite",
+                                     "gemini-3.5-flash-lite",
+                                     "gemini-2.0-flash"):
+                        problems.append(
+                            f"dev chain: non-allowlisted gemini {model!r}")
+                elif name == "openrouter":
+                    if not (model.endswith(":free")
+                            or model == "openrouter/free"):
+                        problems.append(
+                            f"dev chain: non-free openrouter {model!r}")
+                else:
+                    problems.append(
+                        f"dev chain: unknown provider {entry!r}")
+        prod = cfg.get("production_brain")
+        if not isinstance(prod, dict):
+            problems.append("production_brain block missing")
+        elif prod.get("unlocked") is not False:
+            problems.append("production_brain.unlocked is not false")
+        gemini_models = providers.get("gemini", {}).get("models", [])
+        if "gemini-2.5-flash-lite" not in gemini_models:
+            problems.append(
+                "gemini models lack gemini-2.5-flash-lite")
+        if "gemini-2.5-flash" in gemini_models:
+            problems.append(
+                "gemini models still contain deprecated gemini-2.5-flash")
+        or_models = providers.get("openrouter", {}).get("models", [])
+        for model in or_models:
+            if not (str(model).endswith(":free")
+                    or str(model) == "openrouter/free"):
+                problems.append(
+                    f"openrouter model not :free: {model!r}")
+        if providers.get("openrouter", {}).get("free_only") is not True:
+            problems.append("openrouter.free_only is not true")
+        check("real config.json: 7 providers + chain + mock default "
+              "+ dev/prod blocks",
               not problems, "; ".join(problems[:5]) if problems else
-              f"providers={len(providers)}, chain={chain}")
+              f"providers={len(providers)}, chain={chain}, "
+              f"dev={dev.get('model') if isinstance(dev, dict) else None}")
     except Exception as e:  # noqa: BLE001
-        check("real config.json: 7 providers + chain + mock default",
+        check("real config.json: 7 providers + chain + mock default "
+              "+ dev/prod blocks",
               False, str(e))
 
     # 10. No secrets in the new/changed files.
@@ -470,6 +689,7 @@ def main():
             r"password\s*=\s*[\"'][^\"']+[\"']")
         bad = []
         rels = [
+            "01-Agency-Department/engine/workers/src/live/meta_provider.py",
             "01-Agency-Department/engine/workers/src/live/openai_provider.py",
             "01-Agency-Department/engine/workers/src/live/anthropic_provider.py",
             "01-Agency-Department/engine/workers/src/live/gemini_provider.py",
@@ -478,6 +698,7 @@ def main():
             "01-Agency-Department/engine/workers/src/live/openrouter_provider.py",
             "00-CEO-Core/live_brain.py",
             "00-CEO-Core/brain.py",
+            "00-CEO-Core/free_only_guard.py",
             "00-CEO-Core/config.json",
             "00-CEO-Core/PROVIDERS-SETUP.md",
         ]
@@ -503,6 +724,26 @@ def main():
               "unchanged" if after == store_before else "CHANGED")
     except Exception as e:  # noqa: BLE001
         check("real store unchanged by this check run", False, str(e))
+
+    # 12. Real guard log untouched (section 7 stubs log to a temp file).
+    try:
+        if guard_real_log is None:
+            check("real guard log file untouched by this run",
+                  _guard is None,
+                  "no guard module — nothing to write"
+                  if _guard is None else "no real log path")
+        else:
+            try:
+                with open(guard_real_log, encoding="utf-8") as f:
+                    guard_real_after = f.read()
+            except OSError:
+                guard_real_after = None
+            check("real guard log file untouched by this run",
+                  guard_real_after == guard_real_before,
+                  "untouched" if guard_real_after == guard_real_before
+                  else "CHANGED — stub entries leaked into the real log")
+    except Exception as e:  # noqa: BLE001
+        check("real guard log file untouched by this run", False, str(e))
 
     failed = [r for r in results if not r[1]]
     print(f"\n{len(results) - len(failed)}/{len(results)} checks passed.")

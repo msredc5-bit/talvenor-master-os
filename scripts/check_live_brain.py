@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""check_live_brain.py — Phase 10 self-check for the live brain adapter.
+"""check_live_brain.py — Phase 1 (local-first) self-check for the live brain adapter.
 
 What it checks (mock mode — no network, no live call, ever):
   1. live_brain.py imports standalone (python3 -I), fast, no network.
@@ -13,21 +13,42 @@ What it checks (mock mode — no network, no live call, ever):
      DynamicCredentialError -> mock draft, reason recorded.
   6. Fallback on API error: stub raises API-error failure ->
      mock draft, reason recorded.
-  7. BrainFactory live-mode temp config returns LiveBrainAdapter
-     (agency + content), 0 calls; bad mode raises ValueError.
+  7. BrainFactory temp configs: {"brain": "live"} raises RuntimeError
+     (production LOCKED); {"brain": "development"} returns
+     LiveBrainAdapter x2 (agency + content) in dev mode, 0 calls;
+     bad mode raises ValueError.
   8. BrainFactory mock-mode temp config still returns each dept's
      own mock (unchanged behavior).
   9. No secrets in live_brain.py / brain.py / this file (no
      surrogate, no key literal, no password assignment).
  10. Real store unchanged by this check run (Phase 9: live queue).
+ 11. Real guard log untouched (the stub runs log to a temp file —
+     LiveBrainAdapter.complete() logs every attempt, so without the
+     redirect the offline stubs would pollute logs/dev_brain_calls.jsonl).
 
-LIVE PROBE (OFF by default — run only with --live):
-  One tiny real call through the sanctioned connector path
-  (custom.meta-model-api-2 surrogate, api.meta.ai, model
-  muse-spark-1.3, max 30 completion tokens). Exactly one request,
-  never retries. Prints reply, latency, tokens. Exit 0 + PASS only
-  if the adapter mode is "live" afterwards; otherwise FAILED with
-  the exact reason and the brain stays mock.
+NOTE: the stub providers in sections 2-6 run in default (live) mode,
+so the free-only guard does not apply there — guard enforcement is
+covered by scripts/check_dev_brain.py.
+
+LIVE PROBE (OFF by default — run only with --live, on Boss's PC):
+  One tiny real call through the DEV brain path: the Gemini free tier
+  (model gemini-2.5-flash-lite, max 30 completion tokens) via
+  BrainFactory.get_brain("agency") with a temp config mirroring the
+  real config's development_brain block — the real config's brain
+  flag is never flipped. Exactly one request, never retries. Prints
+  reply, latency, tokens, mode, brain_kind. Exit 0 + PASS only if
+  health mode is "live" AND brain_kind is "development"; otherwise
+  FAILED with the exact reason and the brain stays mock.
+  If GEMINI_API_KEY is not set, the probe prints the exact setup
+  steps and exits non-zero WITHOUT attempting any call.
+
+Boss PC steps (Windows):
+  1. Get a free key (no card, no billing): aistudio.google.com/apikey
+  2. Set it (then open a NEW terminal):
+     setx GEMINI_API_KEY "paste-key-here"
+  3. Direct curl test first:
+     curl.exe -s https://generativelanguage.googleapis.com/v1beta/openai/chat/completions -H "Authorization: Bearer $env:GEMINI_API_KEY" -H "Content-Type: application/json" -d '{"model":"gemini-2.5-flash-lite","messages":[{"role":"user","content":"Reply with the single word: ok"}]}'
+  4. Then run: python scripts\\check_live_brain.py --live
 
 Stdlib only. Run: python3 scripts/check_live_brain.py [--live]
 """
@@ -91,16 +112,50 @@ class _StubLive:
         raise RuntimeError(f"unknown stub behavior: {self.behavior}")
 
 
-def _temp_config(mode):
+def _temp_config(mode, extra=None):
     tmpdir = tempfile.mkdtemp()
     path = os.path.join(tmpdir, f"config-{mode}.json")
+    cfg = {"brain": mode}
+    if extra:
+        cfg.update(extra)
     with open(path, "w", encoding="utf-8") as f:
-        json.dump({"brain": mode}, f)
+        json.dump(cfg, f)
     return path
+
+
+def _dev_extra():
+    """The development_brain block a dev temp config needs."""
+    return {"development_brain": {
+        "enabled": True,
+        "fallback_chain": ["gemini:gemini-2.5-flash-lite",
+                           "openrouter:openrouter/free"],
+        "free_only": True,
+        "test_data_only": True}}
 
 
 def main():
     store_before = _snapshot_store()
+
+    # Phase 1: LiveBrainAdapter.complete() logs EVERY attempt via the
+    # free-only guard — redirect that log to a temp file so the
+    # offline stub runs in sections 2-6 never pollute the real
+    # logs/dev_brain_calls.jsonl.
+    guard_tmp_log = None
+    guard_real_log = None
+    guard_real_before = None
+    try:
+        import free_only_guard as _guard  # noqa: PLC0415
+        guard_tmp_log = os.path.join(tempfile.mkdtemp(), "guard-test.log")
+        guard_real_log = getattr(_guard, "LOG_PATH", None)
+        if guard_real_log:
+            try:
+                with open(guard_real_log, encoding="utf-8") as f:
+                    guard_real_before = f.read()
+            except OSError:
+                guard_real_before = None
+        _guard.LOG_PATH = guard_tmp_log
+    except ImportError:
+        _guard = None
 
     # 1. live_brain.py imports standalone, fast, no network.
     try:
@@ -188,33 +243,68 @@ def main():
             if not any(r[0] == name for r in results):
                 check(name, False, str(e))
 
-    # 7. BrainFactory live-mode temp config -> LiveBrainAdapter (both depts).
+    # 7. BrainFactory temp configs: "live" is production-LOCKED,
+    # "development" returns the dev adapter x2, bad mode raises.
     try:
         from brain import BrainFactory  # noqa: PLC0415
 
+        # (a) {"brain": "live"} -> RuntimeError (production LOCKED).
         live_cfg = _temp_config("live")
-        agency_live = BrainFactory.get_brain("agency", config_path=live_cfg)
-        content_live = BrainFactory.get_brain("content", config_path=live_cfg)
+        try:
+            BrainFactory.get_brain("agency", config_path=live_cfg)
+            locked_ok = False
+            locked_detail = "no error raised — production live NOT locked"
+        except RuntimeError as e:
+            locked_ok = "LOCKED" in str(e)
+            locked_detail = str(e)[:120]
+        except Exception as e:  # noqa: BLE001
+            locked_ok = False
+            locked_detail = f"{type(e).__name__}: {e}"[:120]
+        check('BrainFactory {"brain": "live"} -> RuntimeError '
+              '(production LOCKED)',
+              locked_ok, locked_detail)
+
+        # (b) {"brain": "development"} -> LiveBrainAdapter x2, dev mode.
+        dev_cfg = _temp_config("development", _dev_extra())
+        try:
+            agency_dev = BrainFactory.get_brain(
+                "agency", config_path=dev_cfg)
+            content_dev = BrainFactory.get_brain(
+                "content", config_path=dev_cfg)
+            h_a = agency_dev.health()
+            h_c = content_dev.health()
+            dev_ok = (type(agency_dev).__name__ == "LiveBrainAdapter"
+                      and type(content_dev).__name__ == "LiveBrainAdapter"
+                      and h_a.get("brain_kind") == "development"
+                      and h_c.get("brain_kind") == "development"
+                      and h_a["calls"] == 0 and h_c["calls"] == 0)
+            dev_detail = (f"agency={type(agency_dev).__name__}, "
+                          f"content={type(content_dev).__name__}, "
+                          f"brain_kind={h_a.get('brain_kind')}")
+        except Exception as e:  # noqa: BLE001
+            dev_ok = False
+            dev_detail = f"{type(e).__name__}: {e}"[:120]
+        check("BrainFactory development temp config -> LiveBrainAdapter "
+              "x2, brain_kind development, 0 calls",
+              dev_ok, dev_detail)
+
+        # (c) bad mode still raises ValueError.
         bad_cfg = _temp_config("bogus")
         try:
             BrainFactory.get_brain("agency", config_path=bad_cfg)
             bad_ok = False
         except ValueError:
             bad_ok = True
-        ok = (type(agency_live).__name__ == "LiveBrainAdapter"
-              and agency_live.health()["provider"] == "live-brain-adapter"
-              and agency_live.health()["mode"] == "live"
-              and agency_live.health()["calls"] == 0
-              and type(content_live).__name__ == "LiveBrainAdapter"
-              and content_live.health()["calls"] == 0
-              and bad_ok)
-        check("BrainFactory live-mode temp config -> LiveBrainAdapter x2; "
-              "bad mode raises",
-              ok, f"agency={type(agency_live).__name__}, "
-              f"content={type(content_live).__name__}, bad-raises={bad_ok}")
+        check("BrainFactory bad mode raises ValueError",
+              bad_ok, f"bad-raises={bad_ok}")
     except Exception as e:  # noqa: BLE001
-        check("BrainFactory live-mode temp config -> LiveBrainAdapter x2; "
-              "bad mode raises", False, str(e))
+        for name in ('BrainFactory {"brain": "live"} -> RuntimeError '
+                     '(production LOCKED)',
+                     "BrainFactory development temp config -> "
+                     "LiveBrainAdapter x2, brain_kind development, 0 calls",
+                     "BrainFactory bad mode raises ValueError"):
+            if not any(r[0] == name for r in results):
+                check(name, False, str(e))
 
     # 8. BrainFactory mock-mode temp config -> each dept's own mock.
     try:
@@ -262,6 +352,26 @@ def main():
     except Exception as e:  # noqa: BLE001
         check("real store unchanged by this check run", False, str(e))
 
+    # 11. Real guard log untouched (stub runs log to a temp file).
+    try:
+        if guard_real_log is None:
+            check("real guard log file untouched by this run",
+                  _guard is None,
+                  "no guard module — nothing to write"
+                  if _guard is None else "no real log path")
+        else:
+            try:
+                with open(guard_real_log, encoding="utf-8") as f:
+                    guard_real_after = f.read()
+            except OSError:
+                guard_real_after = None
+            check("real guard log file untouched by this run",
+                  guard_real_after == guard_real_before,
+                  "untouched" if guard_real_after == guard_real_before
+                  else "CHANGED — stub entries leaked into the real log")
+    except Exception as e:  # noqa: BLE001
+        check("real guard log file untouched by this run", False, str(e))
+
     failed = [r for r in results if not r[1]]
     print(f"\n{len(results) - len(failed)}/{len(results)} checks passed.")
     if failed:
@@ -272,13 +382,43 @@ def main():
 
 
 def live_probe():
-    """The ONE sanctioned live probe — only with --live. One request."""
-    from live_brain import LiveBrainAdapter  # noqa: PLC0415
+    """The ONE sanctioned live probe — only with --live, on Boss's PC.
+
+    Dev-brain path: Gemini free tier (gemini-2.5-flash-lite) through
+    BrainFactory.get_brain("agency") with a temp config mirroring the
+    REAL config's development_brain block. The real config's brain
+    flag is never flipped. One tiny call (max 30 tokens), never
+    retries. PASS (exit 0) only if health mode is "live" AND
+    brain_kind is "development".
+    """
     from brain import BrainFactory  # noqa: PLC0415
 
-    mock_cfg = _temp_config("mock")
-    agency_mock = BrainFactory.get_brain("agency", config_path=mock_cfg)
-    adapter = LiveBrainAdapter(mock_brain=agency_mock)
+    if not os.environ.get("GEMINI_API_KEY"):
+        print("[live-probe] GEMINI_API_KEY is not set — no call attempted.")
+        print("[live-probe] Setup steps (Boss's PC, Windows):")
+        print("[live-probe] 1. Get a free key (no card, no billing): "
+              "https://aistudio.google.com/apikey")
+        print('[live-probe] 2. Set it, then open a NEW terminal: '
+              'setx GEMINI_API_KEY "paste-key-here"')
+        print("[live-probe] 3. Direct curl test first:")
+        print("[live-probe]    curl.exe -s "
+              "https://generativelanguage.googleapis.com/v1beta/openai/"
+              "chat/completions -H \"Authorization: Bearer "
+              "$env:GEMINI_API_KEY\" -H \"Content-Type: application/json\" "
+              "-d '{\"model\":\"gemini-2.5-flash-lite\",\"messages\":"
+              "[{\"role\":\"user\",\"content\":\"Reply with the single "
+              "word: ok\"}]}'")
+        print("[live-probe] 4. Then run: "
+              "python scripts\\check_live_brain.py --live")
+        return 1
+
+    with open(os.path.join(CEO_CORE_DIR, "config.json"),
+              encoding="utf-8") as f:
+        real_cfg = json.load(f)
+    dev_block = real_cfg.get("development_brain") or {}
+    temp_cfg = _temp_config("development",
+                            {"development_brain": dev_block})
+    adapter = BrainFactory.get_brain("agency", config_path=temp_cfg)
     prompt = "Reply in 5 words: what does Talvenor Master OS do?"
     t0 = time.time()
     text = adapter.complete(prompt, max_tokens=30)
@@ -294,10 +434,14 @@ def live_probe():
           f"completion={tokens.get('completion_tokens')} "
           f"total={tokens.get('total_tokens')}")
     print(f"[live-probe] mode: {health['mode']}")
-    if health["mode"] == "live":
-        print("[live-probe] PASS: live Muse Spark path works via the adapter.")
+    print(f"[live-probe] brain_kind: {health.get('brain_kind')}")
+    if health["mode"] == "live" and health.get("brain_kind") == "development":
+        print("[live-probe] PASS: Gemini free-tier dev brain works via "
+              "the adapter.")
         return 0
-    print(f"[live-probe] FAILED: {health['last_failure']}")
+    print(f"[live-probe] FAILED: mode={health['mode']}, "
+          f"brain_kind={health.get('brain_kind')}, "
+          f"last_failure={health['last_failure']}")
     return 1
 
 
