@@ -49,3 +49,16 @@ listed here; a gated call only writes a PENDING approval, it never executes.
 ## Where the real engine lives
 
 A copy of the real engine for 15 workers is now inside this repo (`01-Agency-Department/engine/workers/`, vendored in Phase 6; upstream `~/workspace/boss-ceo/` stays canonical). This router calls workers from the inside copy.
+
+## CEO reporting (Phase 7)
+
+```bash
+python3 scripts/generate_ceo_report.py --period weekly   # daily | weekly | monthly
+```
+
+Draft-only Founder report from the real store — tasks, approvals, lead
+chain (sandbox), 8 departments, usage ledger ($0), schedules, Gate 0.
+Writes `reports/ceo/<period>-<YYYY-MM-DD>.md` + `.json` (same numbers).
+Monthly is the last 30 days, not a calendar month. A missing source is
+shown as "unknown", never invented. Code: `00-CEO-Core/ceo_reporting/`.
+It never writes to `store/`, never sends, never activates any job.
