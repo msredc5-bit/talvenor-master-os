@@ -4,7 +4,7 @@ The brain is mock now. To go live, 3 things are needed — one provider's
 key + choosing that provider in config + turning the brain "live". Never write
 a key in any file — only in an environment variable.
 
-## 1. The providers (7) — where to get the key, which env var
+## 1. The providers (8) — where to get the key, which env var
 
 | Provider | Where to get the key | Env var | Default model |
 |---|---|---|---|
@@ -15,6 +15,7 @@ a key in any file — only in an environment variable.
 | Kimi (Moonshot) | https://platform.moonshot.ai | MOONSHOT_API_KEY | kimi-k2.5 |
 | Grok (xAI) | https://console.x.ai | XAI_API_KEY | grok-4 |
 | OpenRouter (auto-router) | https://openrouter.ai/keys | OPENROUTER_API_KEY | openrouter/free |
+| Ollama (local, no key) | No key — install Ollama on your PC, pull a model | OLLAMA_HOST (server address, default localhost) | gemma4:12b |
 
 ## 2. Changing the model — one line in config
 
@@ -110,11 +111,72 @@ Note: `python scripts\check_live_brain.py --live` proves the
 one-command Muse Spark probe; the curl test above plus an
 unlocked adapter run is the proof.
 
-## 5. Going live with the brain — the last step (only on Boss's word)
+## 5. Ollama — the local brain (Gemma 4 on your PC, $0, no key)
 
-1. Put the key in an env var as above.
+Ollama is the local model server. There is no separate "Gemma 4
+adapter" — Ollama IS the adapter, and Gemma 4 is the model name.
+Once the Ollama adapter is in, ANY model Ollama serves works the
+same way — `gemma4:12b`, `qwen2.5-coder:1.5b`, or any other — just
+by naming it. No key, no account, no billing; data never leaves
+your PC.
+
+**Step 1 — Install Ollama:** download from https://ollama.com and
+install. Ollama starts by itself after install (or run
+`ollama serve` in a terminal).
+
+**Step 2 — Download the model:** in PowerShell:
+
+```
+ollama pull gemma4:12b
+```
+
+That is ~8 GB. Honest limit: gemma4:12b needs ~9.5 GB of memory
+and this PC has 8 GB total — it runs slow, so close Chrome and
+other apps first. The small fallback fits easily:
+
+```
+ollama pull qwen2.5-coder:1.5b
+```
+
+**Step 3 — Let setup find it:** no JSON editing, no key:
+
+```
+python scripts\setup_brain.py
+```
+
+It checks the local Ollama server FIRST (before any cloud key),
+lists the installed models, tests each one with a single tiny
+call, and saves the first working one as the dev brain
+(`ollama:gemma4:12b`).
+
+**Step 4 — Prove it live:**
+
+```
+python scripts\check_live_brain.py --live
+```
+
+PASS only if mode is `live` AND brain_kind is `development`.
+This makes the LOCAL model the dev brain (test data only, $0) —
+it does NOT touch the production brain, which stays locked.
+
+**Step 5 — Switch models without editing JSON:** set
+`BRAIN_PROVIDER` / `BRAIN_MODEL` (e.g.
+`setx BRAIN_PROVIDER ollama` + `setx BRAIN_MODEL qwen2.5-coder:1.5b`),
+then run the probe again. Or edit the dev chain entry
+(`"ollama:<model>"`) — the free-only guard allows any Ollama model.
+
+**If Ollama is not running:** the provider raises a clear error
+("Ollama is not reachable ... start Ollama ... ollama pull ...")
+and the dev chain falls through to Gemini/OpenRouter (if a key
+is set) and then to a loud mock draft — never a silent fake.
+
+## 6. Going live with the brain — the last step (only on Boss's word)
+
+1. Put the key in an env var as above (Ollama needs no key — just
+   install it and pull a model).
 2. Find a working free model automatically (no JSON editing):
-   `python scripts\setup_brain.py` — it asks the provider which free
+   `python scripts\setup_brain.py` — it checks the local Ollama
+   server first, then asks the provider which free
    models exist, tests each one with a single tiny call, and saves the
    first working one into `00-CEO-Core/config.json`
    (development_brain only). Any free key works (Gemini or OpenRouter);
@@ -127,12 +189,17 @@ unlocked adapter run is the proof.
    free-only guard still applies: a paid provider or model is refused,
    never called.
 
-## 6. True status (now)
+## 7. True status (now)
 
 - No provider's key has been given yet — Meta's key is also unproven
   (the 2026-11-20 probe got stuck on a tunnel 403). The Meta key slot
   now exists (`META_API_KEY` env var, added 2026-11-25), but no key
   value is on record anywhere, and no live call has been made from it.
+- Ollama (local Gemma 4) was added 2026-11-26 as the 8th provider:
+  no key needed, adapter verified against a mock server on this VM
+  (7/7) — the real proof still has to happen on your PC
+  (`ollama pull gemma4:12b` → `setup_brain.py` →
+  `check_live_brain.py --live`).
 - The brain is still mock, phase 11 / v0.9.0. No live call has happened, $0 spent.
 - `scripts\setup_brain.py` (2026-11-25) finds a working free model
   automatically and saves it — no more hand-editing config.json for

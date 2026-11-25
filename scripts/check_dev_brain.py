@@ -137,6 +137,9 @@ def _run_allowlist_and_rate_checks(guard, FreeOnlyViolation):
         ("openrouter", "openrouter/free"),
         ("openrouter", "deepseek/deepseek-r1-0528:free"),
         ("openrouter", "moonshotai/kimi-k2:free"),
+        # Ollama: local server — any installed model is free-only.
+        ("ollama", "gemma4:12b"),
+        ("ollama", "qwen2.5-coder:1.5b"),
     ]
     rejected = [
         ("openai", "gpt-4o"),
@@ -148,6 +151,7 @@ def _run_allowlist_and_rate_checks(guard, FreeOnlyViolation):
         ("grok", "grok-4"),
         ("openrouter", "nvidia/nemotron-3-ultra-550b-a55b"),
         ("nope", "whatever"),
+        ("ollama", ""),
     ]
     allow_bad = []
     for provider, model in allowed:

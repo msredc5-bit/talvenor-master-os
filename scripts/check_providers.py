@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""check_providers.py — Phase 11 self-check for the 7 LLM providers.
+"""check_providers.py — Phase 11 self-check for the 8 LLM providers.
 
 What it checks (mock mode ONLY — no live call, ever):
-  1. All 7 provider modules import standalone (python3 -I), fast, no network.
+  1. All 8 provider modules import standalone (python3 -I), fast, no network.
   2. Each provider constructs with its key unset — 0 calls, no network.
+     (Ollama has no key: it constructs with OLLAMA_HOST unset, default
+     localhost.)
   3. Missing key -> clean RuntimeError naming the env var, and NO
      network attempted (urlopen patched to fail the test if called).
      Meta has TWO key paths (META_API_KEY env var on a PC, connector
@@ -13,6 +15,8 @@ What it checks (mock mode ONLY — no live call, ever):
      missing key with no surrogate must give a clean error naming
      META_API_KEY. Sections 4-6 DO run for Meta (a fake key
      in-process exercises the env-var path).
+     Ollama has NO key at all: its section-3 test is "server down ->
+     clean error naming Ollama + the fix, no network".
   4. Simulated success per env provider (fake key in-process only,
      fake opener returns a canned payload) -> text returned, tokens counted.
   5. Simulated API-error payload -> RuntimeError with "API error".
@@ -28,13 +32,15 @@ What it checks (mock mode ONLY — no live call, ever):
      fallback_chain ["openai", "meta", "mock"] -> chain [openai, meta];
      "provider:model" entries pick the model; unknown provider /
      empty chain -> RuntimeError; brain mock -> mocks.
-  9. Real config.json validation: providers section == registry (7),
-     each has https endpoint + env var + non-empty
+  9. Real config.json validation: providers section == registry (8),
+     each has https endpoint (Ollama: http://localhost only — local
+     server, never remote) + env var + non-empty
      models list containing its default model; fallback_chain entries
      resolve (known provider or "mock"), no duplicates; brain_provider
      known; brain stays "mock"; phase 11 + v0.9.0. Phase 1 (local dev):
      development_brain present (free_only + test_data_only true,
-     model gemini-3.5-flash-lite, fallback_chain all allowlisted);
+     model gemini-3.5-flash-lite, fallback_chain all allowlisted —
+     ollama entries accept any non-empty model);
      gemini models contain gemini-3.5-flash-lite and NOT the deprecated
      gemini-2.5-flash; openrouter models all :free / openrouter/free
      and free_only true; production_brain.unlocked is false.
@@ -103,11 +109,21 @@ PROVIDERS = [
     ("src.live.grok_provider", "GrokProvider", "XAI_API_KEY", "grok-4"),
     ("src.live.openrouter_provider", "OpenRouterProvider",
      "OPENROUTER_API_KEY", "openrouter/free"),
+    ("src.live.ollama_provider", "OllamaProvider", "OLLAMA_HOST",
+     "gemma4:12b"),
 ]
 
 OPENAI_OK = {
     "choices": [{"message": {"content": "LIVE-REPLY: provider works."}}],
     "usage": {"prompt_tokens": 10, "completion_tokens": 5},
+}
+# Ollama /api/chat shape: message.content + eval counts.
+OLLAMA_OK = {
+    "message": {"role": "assistant",
+                "content": "LIVE-REPLY: provider works."},
+    "done": True,
+    "prompt_eval_count": 10,
+    "eval_count": 5,
 }
 ANTHROPIC_OK = {
     "content": [{"type": "text", "text": "LIVE-REPLY: provider works."}],
@@ -230,10 +246,10 @@ def main():
             ok_all = ok_all and good
             details.append(f"{module.split('.')[-1]}:{elapsed:.1f}s"
                            f":rc={proc.returncode}")
-        check("all 7 provider modules import standalone, fast, no network",
+        check("all 8 provider modules import standalone, fast, no network",
               ok_all, ", ".join(details))
     except Exception as e:  # noqa: BLE001
-        check("all 7 provider modules import standalone, fast, no network",
+        check("all 8 provider modules import standalone, fast, no network",
               False, str(e))
 
     # 2-6. Per-provider behavior (in-process, simulated only).
@@ -307,8 +323,10 @@ def main():
                 # the env-var path is exercised with a fake opener.
 
             # 3. Missing key -> clean error naming the env var, NO network.
-            # (Meta skipped: its missing-key case is covered above.)
-            if cls_name != "MetaSparkProvider":
+            # (Meta skipped: its missing-key case is covered above.
+            # Ollama skipped here too: it has no key — its own
+            # server-down test runs below.)
+            if cls_name not in ("MetaSparkProvider", "OllamaProvider"):
                 with _unset_env(env_var):
                     with mock.patch.object(urllib.request, "build_opener",
                                           side_effect=_no_network):
@@ -325,10 +343,39 @@ def main():
                       and "NETWORK-ATTEMPTED" not in raised,
                       (raised or "no error")[:120])
 
+            if cls_name == "OllamaProvider":
+                # No key exists for Ollama: with the server down,
+                # complete() must name Ollama + the fix (start it,
+                # pull the model) and attempt no real network.
+                fake_down = _FakeOpener(
+                    exc=urllib.error.URLError(
+                        "[Errno 111] Connection refused"))
+                with _unset_env(env_var):
+                    with mock.patch.object(urllib.request, "build_opener",
+                                          return_value=fake_down):
+                        try:
+                            provider.complete("smoke")
+                            raised = None
+                        except RuntimeError as e:
+                            raised = str(e)
+                check("OllamaProvider server down -> error names Ollama "
+                      "+ the fix, no network",
+                      raised is not None and "Ollama" in raised
+                      and "ollama pull" in raised,
+                      (raised or "no error")[:160])
+
             # 4-6. Simulated wire: success / API error / timeout.
-            ok_payload = (ANTHROPIC_OK if cls_name == "AnthropicProvider"
+            # Ollama speaks /api/chat (message.content), not the
+            # OpenAI choices shape — and OLLAMA_HOST is a server
+            # address, not a key, so the fake env value is a URL.
+            ok_payload = (OLLAMA_OK if cls_name == "OllamaProvider"
+                          else ANTHROPIC_OK
+                          if cls_name == "AnthropicProvider"
                           else OPENAI_OK)
-            with mock.patch.dict(os.environ, {env_var: "test-fake-key"}):
+            env_value = ("http://localhost:11434"
+                         if cls_name == "OllamaProvider"
+                         else "test-fake-key")
+            with mock.patch.dict(os.environ, {env_var: env_value}):
                 # 4. Success -> text + tokens counted.
                 fake = _FakeOpener(payload=ok_payload)
                 with mock.patch.object(urllib.request, "build_opener",
@@ -581,7 +628,14 @@ def main():
                 f"providers keys {sorted(providers)} != registry "
                 f"{sorted(PROVIDER_MODULES)}")
         for name, entry in providers.items():
-            if not str(entry.get("endpoint", "")).startswith("https://"):
+            if name == "ollama":
+                # Local server only — http://localhost, never remote.
+                if entry.get("endpoint") != \
+                        "http://localhost:11434/api/chat":
+                    problems.append(
+                        "ollama: endpoint must be "
+                        "http://localhost:11434/api/chat")
+            elif not str(entry.get("endpoint", "")).startswith("https://"):
                 problems.append(f"{name}: endpoint not https")
             env_var = entry.get("env_var")
             if name == "meta":
@@ -633,7 +687,12 @@ def main():
                 name, _sep, model = str(entry).partition(":")
                 name = name.strip().lower()
                 model = model.strip()
-                if name == "gemini":
+                if name == "ollama":
+                    # Local server: any non-empty model id is free-only.
+                    if not model:
+                        problems.append(
+                            "dev chain: ollama entry without a model")
+                elif name == "gemini":
                     if model not in ("gemini-3.5-flash-lite",
                                      "gemini-2.0-flash"):
                         problems.append(
@@ -669,13 +728,13 @@ def main():
                     f"openrouter model not :free: {model!r}")
         if providers.get("openrouter", {}).get("free_only") is not True:
             problems.append("openrouter.free_only is not true")
-        check("real config.json: 7 providers + chain + mock default "
+        check("real config.json: 8 providers + chain + mock default "
               "+ dev/prod blocks",
               not problems, "; ".join(problems[:5]) if problems else
               f"providers={len(providers)}, chain={chain}, "
               f"dev={dev.get('model') if isinstance(dev, dict) else None}")
     except Exception as e:  # noqa: BLE001
-        check("real config.json: 7 providers + chain + mock default "
+        check("real config.json: 8 providers + chain + mock default "
               "+ dev/prod blocks",
               False, str(e))
 
@@ -698,6 +757,7 @@ def main():
             "01-Agency-Department/engine/workers/src/live/kimi_provider.py",
             "01-Agency-Department/engine/workers/src/live/grok_provider.py",
             "01-Agency-Department/engine/workers/src/live/openrouter_provider.py",
+            "01-Agency-Department/engine/workers/src/live/ollama_provider.py",
             "00-CEO-Core/live_brain.py",
             "00-CEO-Core/brain.py",
             "00-CEO-Core/free_only_guard.py",

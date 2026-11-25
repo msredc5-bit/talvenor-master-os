@@ -12,8 +12,18 @@ This script removes the hand-editing. Run it after setting a key:
     python scripts\\setup_brain.py
     python scripts\\check_live_brain.py --live
 
+Or with NO key at all — a local Ollama model (Gemma 4 on Boss's PC):
+
+    ollama pull gemma4:12b
+    python scripts\\setup_brain.py
+    python scripts\\check_live_brain.py --live
+
 What it does:
-  1. Looks for free-tier keys in the environment (GEMINI_API_KEY,
+  0. First checks the LOCAL Ollama server (http://localhost:11434):
+     no key needed. Lists installed models, keeps chat models, sends
+     ONE tiny test call (max 30 tokens, no retries) per candidate.
+     The first model that answers wins.
+  1. Then looks for free-tier keys in the environment (GEMINI_API_KEY,
      OPENROUTER_API_KEY). Paid keys (META_API_KEY, OPENAI_API_KEY,
      ANTHROPIC_API_KEY, MOONSHOT_API_KEY, XAI_API_KEY) are listed but
      NEVER used for the dev brain — the dev brain is free-only.
@@ -28,8 +38,9 @@ What it does:
      "brain" flag is never flipped — the brain stays mock until the
      probe (check_live_brain.py --live) passes.
 
-If no free key is set, it prints the setup steps and exits non-zero
-WITHOUT any network call and WITHOUT changing config.json.
+If no Ollama server answers and no free key is set, it prints the
+setup steps and exits non-zero WITHOUT any network call and WITHOUT
+changing config.json.
 
 Safety: a key is never printed, never logged, never written to any
 file. Keys are read only from environment variables.
@@ -57,6 +68,15 @@ GEMINI_CHAT_URL = ("https://generativelanguage.googleapis.com/v1beta/openai/"
                    "chat/completions")
 OPENROUTER_LIST_URL = "https://openrouter.ai/api/v1/models"
 OPENROUTER_CHAT_URL = "https://openrouter.ai/api/v1/chat/completions"
+
+# Ollama — local server on Boss's PC. No key, no account, $0.
+# OLLAMA_HOST only changes the server address (default localhost).
+OLLAMA_DEFAULT_HOST = "http://localhost:11434"
+
+# Preferred local models, in order. gemma4:12b is the one Boss
+# downloads; qwen2.5-coder:1.5b is the small fallback that fits
+# easily on an 8 GB PC.
+OLLAMA_PREFERENCE = ("gemma4:12b", "qwen2.5-coder:1.5b")
 
 PROMPT = "Reply with the single word: ok"
 TIMEOUT = 30
@@ -92,6 +112,9 @@ def _is_free_model(provider, model):
         return model in _FALLBACK_FREE_GEMINI
     if provider == "openrouter":
         return model == "openrouter/free" or model.endswith(":free")
+    if provider == "ollama":
+        # Local server — any installed model is free ($0, no key).
+        return bool(model and model.strip())
     return False
 
 
@@ -187,6 +210,65 @@ def pick_openrouter_candidates(model_ids):
     return ["openrouter/free"] + listed[:MAX_OPENROUTER_CANDIDATES - 1]
 
 
+def _ollama_host():
+    """Ollama server base URL — OLLAMA_HOST, or localhost by default."""
+    return os.environ.get("OLLAMA_HOST", "").strip() or OLLAMA_DEFAULT_HOST
+
+
+def parse_ollama_models(payload):
+    """Model names from an Ollama /api/tags response."""
+    names = []
+    if not isinstance(payload, dict):
+        return names
+    for entry in payload.get("models", []) or []:
+        if isinstance(entry, dict) and entry.get("name"):
+            names.append(str(entry["name"]))
+    return names
+
+
+def pick_ollama_candidates(model_ids):
+    """Ordered local candidates: preferred models first, then the rest.
+
+    Embedding-only models (names containing "embed") cannot chat,
+    so they are dropped. Duplicates are removed, order kept.
+    """
+    usable = [m for m in model_ids if "embed" not in m.lower()]
+    preferred = [m for m in OLLAMA_PREFERENCE if m in usable]
+    rest = [m for m in usable if m not in preferred]
+    return preferred + rest
+
+
+def discover_ollama():
+    """(candidates, error): usable local Ollama models, or ([], reason)."""
+    try:
+        payload = _get_json(_ollama_host().rstrip("/") + "/api/tags")
+    except Exception as exc:  # noqa: BLE001 — server down / not installed
+        return [], f"Ollama server not reachable: {type(exc).__name__}"
+    return pick_ollama_candidates(parse_ollama_models(payload)), None
+
+
+def probe_ollama(model, key=None):
+    """Tiny test call on the same path the Ollama provider uses.
+
+    key is accepted and ignored (try_provider calls every probe with
+    (model, key); local Ollama needs no key)."""
+    body = {"model": model,
+            "messages": [{"role": "user", "content": PROMPT}],
+            "stream": False,
+            "options": {"num_predict": 30}}
+    req = urllib.request.Request(
+        _ollama_host().rstrip("/") + "/api/chat",
+        data=json.dumps(body).encode(),
+        headers={"Content-Type": "application/json"}, method="POST")
+    with urllib.request.build_opener(_NoRedirect()).open(
+            req, timeout=TIMEOUT) as resp:
+        payload = json.loads(resp.read().decode("utf-8"))
+    if isinstance(payload, dict) and "error" in payload:
+        raise RuntimeError(f"API error: {payload['error']}")
+    text = payload["message"].get("content") or ""
+    return text.strip()
+
+
 # --- Discovery + probe (one request per candidate, no retries) ---
 
 def discover_gemini(key):
@@ -227,7 +309,10 @@ def probe_openrouter(model, key):
 
 def try_provider(provider, key):
     """(model, reply) for the first working model, or (None, reason)."""
-    if provider == "gemini":
+    if provider == "ollama":
+        candidates, error = discover_ollama()
+        probe = probe_ollama
+    elif provider == "gemini":
         candidates, error = discover_gemini(key)
         probe = probe_gemini
     else:
@@ -296,8 +381,8 @@ def detect_keys():
 
 
 def print_no_key_steps(found):
-    print("[setup-brain] No free AI key is set — no call was made "
-          "and config was not changed.")
+    print("[setup-brain] No local Ollama model answered and no free AI "
+          "key is set — no call was made and config was not changed.")
     paid = [v for v in PAID_KEY_VARS if found.get(v)]
     if paid:
         print("[setup-brain] These keys ARE set, but they are paid — "
@@ -306,7 +391,12 @@ def print_no_key_steps(found):
             print(f"[setup-brain]   - {var} (paid, not used for the dev brain)")
     print("[setup-brain] Setup steps (Boss's PC, Windows — free, no card, "
           "no billing):")
-    print("[setup-brain] 1. Get a free Gemini key: "
+    print("[setup-brain] LOCAL (no key at all): install Ollama from "
+          "https://ollama.com, then pull a model and run again:")
+    print("[setup-brain]   ollama pull gemma4:12b")
+    print("[setup-brain]   (small fallback that fits easily: "
+          "ollama pull qwen2.5-coder:1.5b)")
+    print("[setup-brain] CLOUD (free key): get a free Gemini key: "
           "https://aistudio.google.com/apikey")
     print('[setup-brain] 2. Set it, then open a NEW terminal: '
           'setx GEMINI_API_KEY "paste-key-here"')
@@ -318,6 +408,26 @@ def print_no_key_steps(found):
 
 
 def main(argv=None):
+    # Local first: Ollama needs no key at all. If a local model
+    # answers, it wins — $0, private, no account.
+    print("[setup-brain] Trying local Ollama (no key needed)...")
+    model, outcome = try_provider("ollama", None)
+    if model is not None:
+        print(f"[setup-brain] ollama answered with model {model} — "
+              "saving it as the dev brain.")
+        try:
+            chain = save_dev_brain("ollama", model)
+        except Exception as exc:  # noqa: BLE001
+            print(f"[setup-brain] ERROR: could not save config: {exc}")
+            return 1
+        print(f"[setup-brain] DONE: dev brain is now ollama:{model}.")
+        print(f"[setup-brain] fallback_chain: {chain}")
+        print("[setup-brain] Next command (proves it live): "
+              "python scripts\\check_live_brain.py --live")
+        print("[setup-brain] The production brain was not touched and "
+              "is still locked.")
+        return 0
+    print(f"[setup-brain] ollama: no working model ({outcome}).")
     found = detect_keys()
     free_vars = [v for v in FREE_KEY_VARS if found.get(v)]
     if not free_vars:

@@ -6,7 +6,9 @@ truth for what "free-only" means in development mode):
 * Allowlist: Gemini free-tier models only — gemini-3.5-flash-lite,
   gemini-2.0-flash — and OpenRouter models that are
   free: any model id ending in ":free", or exactly "openrouter/free"
-  (the auto-router). Nothing else is free-only.
+  (the auto-router). Ollama local models: ANY model id is free-only
+  (the server runs on Boss's PC — no key, no account, no billing,
+  $0; data never leaves the PC). Nothing else is free-only.
 * Meta / OpenAI / Anthropic / Kimi / Grok are NEVER free-only: any model
   of theirs is a violation in development mode. An unknown provider name
   is also a violation (fail-closed).
@@ -17,7 +19,9 @@ truth for what "free-only" means in development mode):
   falls back loudly to mock. A 429 is a free-cap boundary, never a bill.
 * Test data only: free-tier models may receive test data only — never
   private client data (Gemini free tier uses data to improve products;
-  OpenRouter free models are served by third parties).
+  OpenRouter free models are served by third parties). Ollama local
+  models keep data on the PC, so they are the most private dev-brain
+  option — still test data only until Boss says otherwise.
 * Dev brain only: this guard applies to the development brain
   (LiveBrainAdapter mode="development"). The production brain is a
   separate path and stays locked behind its own Boss approval.
@@ -78,7 +82,8 @@ def is_free_model(provider, model):
 
     Gemini: model must be one of FREE_ONLY_MODELS["gemini"] (exact,
     case-sensitive ids). OpenRouter: model must end in ":free" (exact,
-    lower-case suffix) or be exactly "openrouter/free". Every other
+    lower-case suffix) or be exactly "openrouter/free". Ollama: any
+    non-empty model id (local server, $0, no key). Every other
     provider — including meta / openai / anthropic / kimi / grok and any
     unknown name — is never free-only, so this returns False for them.
     """
@@ -90,6 +95,8 @@ def is_free_model(provider, model):
     model_id = model.strip()
     if not model_id:
         return False
+    if name == "ollama":
+        return True
     if name == "gemini":
         return model_id in FREE_ONLY_MODELS["gemini"]
     if name == "openrouter":
@@ -112,7 +119,7 @@ def check_call(provider, model):
             "paid models are never allowed in development mode "
             "(free-only allowlist: Gemini gemini-3.5-flash-lite / "
             "gemini-2.0-flash, OpenRouter models ending in ':free' or "
-            "'openrouter/free').")
+            "'openrouter/free', any Ollama local model).")
     return True
 
 

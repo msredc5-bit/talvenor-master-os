@@ -46,7 +46,8 @@ LIVE BRAIN — Phase 11 (provider chain, same adapter):
     complete() interface, only the name changes.
   - Providers live in 01-Agency-Department/engine/workers/src/live/:
     meta (connector key), openai, anthropic, gemini, kimi, grok,
-    openrouter (each its own env var, never in a file). The model
+    openrouter (each its own env var, never in a file), ollama
+    (local server, no key at all). The model
     name now comes from config ("brain_model" or the chain entry
     "provider:model") — MetaSparkProvider is no longer pinned to
     one model by the factory.
@@ -92,10 +93,11 @@ BRAIN_MODES = ("mock", "development", "live")
 DEFAULT_BRAIN = "mock"
 
 # Free default model per dev provider — used only when BRAIN_PROVIDER
-# switches provider without BRAIN_MODEL. Only gemini/openrouter can
-# ever pass the free-only guard, so this map is complete for dev mode.
+# switches provider without BRAIN_MODEL. Only gemini/openrouter/ollama
+# can ever pass the free-only guard, so this map is complete for dev mode.
 _DEV_DEFAULT_MODELS = {"gemini": "gemini-3.5-flash-lite",
-                       "openrouter": "openrouter/free"}
+                       "openrouter": "openrouter/free",
+                       "ollama": "gemma4:12b"}
 
 # The seed each department's mock has always used — kept so flipping
 # the flag back to mock reproduces exactly the old drafts.

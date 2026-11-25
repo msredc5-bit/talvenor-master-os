@@ -32,28 +32,33 @@ covered by scripts/check_dev_brain.py.
 
 LIVE PROBE (OFF by default — run only with --live, on Boss's PC):
   One tiny real call through the DEV brain path: the free tier
-  (Gemini gemini-3.5-flash-lite, or whichever free model
-  scripts/setup_brain.py saved — max 30 completion tokens) via
-  BrainFactory.get_brain("agency") with a temp config mirroring the
-  real config's development_brain block — the real config's brain
-  flag is never flipped. Exactly one request, never retries. Prints
-  reply, latency, tokens, mode, brain_kind, and the exact model
-  tried. Exit 0 + PASS only if health mode is "live" AND brain_kind
-  is "development"; otherwise FAILED with the exact reason and the
-  brain stays mock.
-  If no key for the dev chain is set (GEMINI_API_KEY /
-  OPENROUTER_API_KEY), the probe prints the exact setup steps and
-  exits non-zero WITHOUT attempting any call.
+  (Ollama local Gemma 4 first, or Gemini gemini-3.5-flash-lite, or
+  whichever free model scripts/setup_brain.py saved — max 30
+  completion tokens) via BrainFactory.get_brain("agency") with a temp
+  config mirroring the real config's development_brain block — the
+  real config's brain flag is never flipped. Exactly one request,
+  never retries. Prints reply, latency, tokens, mode, brain_kind, and
+  the exact model tried. Exit 0 + PASS only if health mode is "live"
+  AND brain_kind is "development"; otherwise FAILED with the exact
+  reason and the brain stays mock.
+  If the dev chain has an Ollama entry, the probe runs with NO key
+  at all (local server). Otherwise it runs only when a key is set
+  for a provider in the chain (GEMINI_API_KEY / OPENROUTER_API_KEY);
+  with no key it prints the exact setup steps and exits non-zero
+  WITHOUT attempting any call.
 
 Boss PC steps (Windows):
-  1. Get a free key (no card, no billing): aistudio.google.com/apikey
-  2. Set it (then open a NEW terminal):
+  1. Local (no key): install Ollama (https://ollama.com), pull a model:
+     ollama pull gemma4:12b
+     (small fallback: ollama pull qwen2.5-coder:1.5b)
+  2. Or a free key (no card, no billing): aistudio.google.com/apikey
+  3. Set it (then open a NEW terminal):
      setx GEMINI_API_KEY "paste-key-here"
-  3. Find a working free model (no JSON editing):
+  4. Find a working free model (no JSON editing):
      python scripts\\setup_brain.py
-  4. Direct curl test first (optional):
+  5. Direct curl test first (optional):
      curl.exe -s https://generativelanguage.googleapis.com/v1beta/openai/chat/completions -H "Authorization: Bearer $env:GEMINI_API_KEY" -H "Content-Type: application/json" -d '{"model":"gemini-3.5-flash-lite","messages":[{"role":"user","content":"Reply with the single word: ok"}]}'
-  5. Then run: python scripts\\check_live_brain.py --live
+  6. Then run: python scripts\\check_live_brain.py --live
 
 Stdlib only. Run: python3 scripts/check_live_brain.py [--live]
 """
@@ -418,11 +423,20 @@ def live_probe():
         var = _DEV_KEY_VARS.get(name)
         if var:
             needed[name] = var
-    if needed and not any(os.environ.get(var) for var in needed.values()):
+    # Ollama needs no key: when the chain has an ollama entry, the
+    # probe runs without any key (the adapter tries the local server
+    # first; if it is down, the keyed providers fail loudly and the
+    # probe reports FAILED with the exact reasons).
+    has_ollama = any(
+        e.partition(":")[0].strip().lower() == "ollama" for e in chain)
+    if needed and not has_ollama and not any(
+            os.environ.get(var) for var in needed.values()):
         print("[live-probe] No key is set for the dev chain "
               f"({', '.join(sorted(set(needed.values())))}) — "
               "no call attempted.")
         print("[live-probe] Setup steps (Boss's PC, Windows):")
+        print("[live-probe] LOCAL (no key): install Ollama "
+              "https://ollama.com, then: ollama pull gemma4:12b")
         print("[live-probe] 1. Get a free key (no card, no billing): "
               "https://aistudio.google.com/apikey")
         print('[live-probe] 2. Set it, then open a NEW terminal: '

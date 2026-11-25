@@ -29,7 +29,7 @@ providers one after another per config's fallback_chain
 any chat model can be fitted, just by changing the name. The provider registry
 is below (PROVIDER_MODULES): module + class + default model. The key rule is
 the same in every provider file — from an env var (Meta only via the connector
-surrogate). No provider in the chain does network at construction;
+surrogate; Ollama needs no key at all). No provider in the chain does network at construction;
 the key is read only in complete().
 
 Stdlib only (+ dynamic_credentials, connector helper) — no pip.
@@ -89,6 +89,7 @@ PROVIDER_MODULES = {
     "kimi": ("src.live.kimi_provider", "KimiProvider"),
     "grok": ("src.live.grok_provider", "GrokProvider"),
     "openrouter": ("src.live.openrouter_provider", "OpenRouterProvider"),
+    "ollama": ("src.live.ollama_provider", "OllamaProvider"),
 }
 
 # Each provider's default model — used when config gives no model.
@@ -100,6 +101,7 @@ DEFAULT_MODELS = {
     "kimi": "kimi-k2.5",
     "grok": "grok-4",
     "openrouter": "openrouter/free",
+    "ollama": "gemma4:12b",
 }
 
 

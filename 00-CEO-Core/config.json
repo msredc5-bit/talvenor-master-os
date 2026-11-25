@@ -9,10 +9,11 @@
     "free_only": true,
     "test_data_only": true,
     "fallback_chain": [
+      "ollama:gemma4:12b",
       "gemini:gemini-3.5-flash-lite",
       "openrouter:openrouter/free"
     ],
-    "note": "Local development brain ONLY: free-tier models, test data only. Never production. Enable on Boss's PC only when testing with his own free-tier key."
+    "note": "Local development brain ONLY: free-tier models, test data only. Never production. Enable on Boss's PC only when testing with his own free-tier key. Ollama (local Gemma 4) is tried first when the server runs; without it, the chain falls back to Gemini/OpenRouter."
   },
   "production_brain": {
     "mode": "mock",
@@ -203,6 +204,18 @@
       "free_limits": "20 requests/min, 50 requests/day; 1,000/day after $10 lifetime credits; limits count requests, not tokens; free models rotate in/out",
       "free_only": true,
       "note": "Only :free models may ever be used; the same key would bill on a non-:free model."
+    },
+    "ollama": {
+      "enabled": true,
+      "models": [
+        "gemma4:12b",
+        "qwen2.5-coder:1.5b"
+      ],
+      "env_var": "OLLAMA_HOST",
+      "endpoint": "http://localhost:11434/api/chat",
+      "key_from": "none — local server, no key, no account, no billing",
+      "free_only": true,
+      "note": "Local Ollama server on Boss's PC ($0, data stays on the PC). Model must be pulled first: ollama pull gemma4:12b. gemma4:12b needs ~9.5 GB memory (8 GB PC: slow, close other apps); qwen2.5-coder:1.5b fits easily. OLLAMA_HOST only changes the server address (default localhost)."
     }
   },
   "reused_systems": {
