@@ -57,21 +57,32 @@ Windows environment variables ONLY — never in a file, never in chat.
 After `setx`, close the terminal and open a new one. Full guide:
 `00-CEO-Core\PROVIDERS-SETUP.md`.
 
-**Dev brain (FREE, $0) — Gemini:**
+**Dev brain (FREE, $0) — any free key works, no JSON editing:**
 
 ```bat
 setx GEMINI_API_KEY "paste-key-here"
-```
-
-- Key from: https://aistudio.google.com/apikey (no card, no billing).
-- Curl test first, then the proof command:
-
-```bat
+python scripts\setup_brain.py
 python scripts\check_live_brain.py --live
 ```
 
-- PASS only if mode is `live` AND `brain_kind` is `development`.
-  Without the key it prints the setup steps and exits without calling.
+- Key from: https://aistudio.google.com/apikey (no card, no billing).
+  An OpenRouter key works too: https://openrouter.ai/keys
+  (`setx OPENROUTER_API_KEY "paste-key-here"`).
+- `setup_brain.py` asks the provider which free models exist, tests
+  each one with a tiny call, and saves the first working model into
+  the config by itself — you never edit `config.json`. It only uses
+  free models; paid keys are never picked for the dev brain. (Old
+  models can stop working — Google stopped serving
+  gemini-2.5-flash-lite to new keys — and this script finds the
+  working one instead of you.)
+- The probe (`check_live_brain.py --live`) PASSES only if mode is
+  `live` AND `brain_kind` is `development`. Without a key it prints
+  the setup steps and exits without calling.
+- To switch the dev brain without editing JSON, set
+  `BRAIN_PROVIDER` / `BRAIN_MODEL` (e.g.
+  `setx BRAIN_PROVIDER openrouter`), then run the probe again. The
+  free-only guard still applies: a paid provider or model is
+  refused, never called.
 
 **Production brain (PAID, Muse Spark) — META_API_KEY:**
 

@@ -620,7 +620,9 @@ class TestItem15ProviderFailure:
         free_only_guard._CALL_LOG.clear()
 
     def test_free_only_allowlist(self):
-        assert is_free_model("gemini", "gemini-2.5-flash-lite") is True
+        # gemini-2.5-flash-lite: Google 404s it for new keys (Nov 2026),
+        # so it is no longer free-only.
+        assert is_free_model("gemini", "gemini-2.5-flash-lite") is False
         assert is_free_model("gemini", "gemini-3.5-flash-lite") is True
         assert is_free_model("gemini-live", "gemini-2.0-flash") is True
         assert is_free_model("openrouter", "openrouter/free") is True
@@ -632,7 +634,9 @@ class TestItem15ProviderFailure:
         assert is_free_model("unknown-provider", "free-model") is False
         # Model ids are case-sensitive.
         assert is_free_model("gemini", "GEMINI-2.5-FLASH-LITE") is False
-        assert check_call("gemini", "gemini-2.5-flash-lite") is True
+        assert check_call("gemini", "gemini-3.5-flash-lite") is True
+        with pytest.raises(FreeOnlyViolation):
+            check_call("gemini", "gemini-2.5-flash-lite")
         with pytest.raises(FreeOnlyViolation):
             check_call("openai", "gpt-4o")
 
@@ -654,7 +658,7 @@ class TestItem15ProviderFailure:
         assert is_rate_limit_error(exc) is expected
 
     def test_dev_brain_free_provider_succeeds_live(self):
-        good = _FakeProvider("gemini-live", "gemini-2.5-flash-lite",
+        good = _FakeProvider("gemini-live", "gemini-3.5-flash-lite",
                              lambda p: "live answer")
         adapter = LiveBrainAdapter(_FakeMockBrain(),
                                    live_provider=good, mode="development")
@@ -682,9 +686,9 @@ class TestItem15ProviderFailure:
         def _boom_429(prompt):
             raise urllib.error.HTTPError("http://x", 429,
                                          "Too Many Requests", {}, None)
-        first = _FakeProvider("gemini-live", "gemini-2.5-flash-lite",
+        first = _FakeProvider("gemini-live", "gemini-3.5-flash-lite",
                               _boom_429)
-        second = _FakeProvider("gemini-live", "gemini-2.5-flash-lite",
+        second = _FakeProvider("gemini-live", "gemini-3.5-flash-lite",
                                lambda p: "second answer")
         adapter = LiveBrainAdapter(
             _FakeMockBrain(), live_providers=[first, second],
@@ -701,9 +705,9 @@ class TestItem15ProviderFailure:
     def test_dev_brain_timeout_falls_through_to_next_provider(self):
         def _boom_timeout(prompt):
             raise TimeoutError("timed out")
-        first = _FakeProvider("gemini-live", "gemini-2.5-flash-lite",
+        first = _FakeProvider("gemini-live", "gemini-3.5-flash-lite",
                               _boom_timeout)
-        second = _FakeProvider("gemini-live", "gemini-2.5-flash-lite",
+        second = _FakeProvider("gemini-live", "gemini-3.5-flash-lite",
                                lambda p: "second answer")
         adapter = LiveBrainAdapter(
             _FakeMockBrain(), live_providers=[first, second],
@@ -717,9 +721,9 @@ class TestItem15ProviderFailure:
         def _boom_401(prompt):
             raise RuntimeError(
                 "live brain call failed: HTTP 401: bad API key")
-        bad = _FakeProvider("gemini-live", "gemini-2.5-flash-lite",
+        bad = _FakeProvider("gemini-live", "gemini-3.5-flash-lite",
                             _boom_401)
-        good = _FakeProvider("gemini-live", "gemini-2.5-flash-lite",
+        good = _FakeProvider("gemini-live", "gemini-3.5-flash-lite",
                              lambda p: "good answer")
         adapter = LiveBrainAdapter(
             _FakeMockBrain(), live_providers=[bad, good],
@@ -733,7 +737,7 @@ class TestItem15ProviderFailure:
     def test_dev_brain_all_providers_fail_is_loud_fallback(self):
         def _boom(prompt):
             raise RuntimeError("connection refused")
-        only = _FakeProvider("gemini-live", "gemini-2.5-flash-lite",
+        only = _FakeProvider("gemini-live", "gemini-3.5-flash-lite",
                              _boom)
         adapter = LiveBrainAdapter(_FakeMockBrain(),
                                    live_provider=only, mode="development")
@@ -747,7 +751,7 @@ class TestItem15ProviderFailure:
     def test_log_call_never_writes_keys_or_tokens(self, tmp_path):
         log_path = tmp_path / "dev_brain_calls.jsonl"
         log_call({"provider": "gemini",
-                  "model": "gemini-2.5-flash-lite", "status": "error",
+                  "model": "gemini-3.5-flash-lite", "status": "error",
                   "error": "boom", "usage": None,
                   "api_key": "sk-secret-value",
                   "token": "tok-secret-value"})
