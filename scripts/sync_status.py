@@ -759,7 +759,7 @@ def render_html(s):
       <tr><td><strong>Unified OS</strong> — CENTRAL-HQ (one brain + 3 Chiefs)</td><td>{phase_badge(ph.get("unified_os", UNKNOWN))}</td></tr>
       <tr><td><strong>Phase 9</strong> — taskboard + MCP stdio + live-ready tool code</td><td>{phase_badge(ph.get("phase_9_connections", UNKNOWN))}</td></tr>
       <tr><td><strong>Phase 10</strong> — live brain probe (NOT PROVEN LIVE — brain mock)</td><td>{phase_badge(ph.get("phase_10_live_brain", UNKNOWN))}</td></tr>
-      <tr><td><strong>Phase 11</strong> — 7 LLM providers + fallback chain (brain still mock)</td><td>{phase_badge(ph.get("phase_11_providers", UNKNOWN))}</td></tr>
+      <tr><td><strong>Phase 11</strong> — 8 LLM providers + fallback chain (brain still mock)</td><td>{phase_badge(ph.get("phase_11_providers", UNKNOWN))}</td></tr>
       <tr><td><strong>Improvement P1</strong> — trust gate as code</td><td>{phase_badge(ph.get("improvement_p1_gate", UNKNOWN))}</td></tr>
       <tr><td><strong>Improvement P2</strong> — owner memory + usage ledger ($0)</td><td>{phase_badge(ph.get("improvement_p2_memory_ledger", UNKNOWN))}</td></tr>
       <tr><td><strong>Improvement P3</strong> — quiet schedules (change-only watches)</td><td>{phase_badge(ph.get("improvement_p3_quiet_schedules", UNKNOWN))}</td></tr>

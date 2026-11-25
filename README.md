@@ -1,4 +1,4 @@
-# Talvenor Master OS — the real system (Phase 11 + Improvements 1–3 COMPLETE: Live Brain adapter + 7 LLM providers + Trust Gate + Memory/Ledger + Quiet Schedules — brain still mock)
+# Talvenor Master OS — the real system (Phase 11 + Improvements 1–3 COMPLETE: Live Brain adapter + 8 LLM providers + Trust Gate + Memory/Ledger + Quiet Schedules — brain still mock)
 
 **What this is:** the folder of Boss's 3 businesses' real operating system. It is
 not a picture or a mock — Phase 0's skeleton + CEO Core + approval
@@ -67,11 +67,11 @@ talvenor-master-os/
 │   ├── agent-tool-assignments-DRAFT.md  # DRAFT policy (Boss's review remaining)
 │   ├── agent-skill-audit-2026-11-21.md # skill audit (81-file scope; 113 */skills/*.md in total in the repo)
 │   ├── MEMORY-STRUCTURE-DECISION-2026-11-21.md  # memory structure decided on merit (central store + box)
-│   ├── PROVIDERS-SETUP.md  # Phase 11 — 7 providers' keys + env var guide (a key never goes in a file)
+│   ├── PROVIDERS-SETUP.md  # Phase 11 — 8 providers' keys + env var guide (a key never goes in a file)
 │   ├── jarvis_voice.py         # REAL (2026-11-17 — Piper+Vosk/sherpa, offline, $0; same 3 functions)
 │   ├── voice/                  # REAL (2026-11-17) — speak.py (Piper TTS), listen.py (Vosk en + sherpa-onnx bn), loop.py (listen → brain → speak + gate); models/ + output/ do not go to git
 │   ├── VOICE-SETUP.md          # Windows setup guide (Bengali)
-│   ├── config.json             # REAL (locked facts; brain: mock, phase 11, v0.9.0, built 2026-11-21 + voice block + providers section: 7 LLM provider + fallback_chain)
+│   ├── config.json             # REAL (locked facts; brain: mock, phase 11, v0.9.0, built 2026-11-21 + voice block + providers section: 8 LLM provider + fallback_chain)
 │   └── CEO-README.md
 ├── 01-Agency-Department/   # REAL (Phase 1 + Agentic 1–3) — Chief calls 15 workers + 8 department managers + 47 specialists, draft-only; workers are now vendored inside (Phase 6)
 │   ├── chief_of_staff_agency.py  # REAL — ROUTING (15) + SECTION_ROUTING (6) + DEPARTMENT_ROUTING (8)
@@ -116,7 +116,7 @@ If all PASS, Phase 0 is fine.
 | Item | State |
 |---|---|
 | Approval gateway (approve/reject) | **REAL** — really records, no auto-approve |
-| BrainFactory (`brain.py`) | **REAL (Phase 6 + Phase 10 + Phase 11)** — config flag `brain: mock` (default, $0, draft-only) / `live` (via `live_brain.py` LiveBrainAdapter, loud mock fallback; provider chain from `fallback_chain`: openrouter → meta → mock; 7 providers: meta/openai/anthropic/gemini/kimi/grok/openrouter, models from config; live verification 2026-11-06 TIMEOUT + 2026-11-20 tunnel-403, key path UNPROVEN, no live call made yet) |
+| BrainFactory (`brain.py`) | **REAL (Phase 6 + Phase 10 + Phase 11)** — config flag `brain: mock` (default, $0, draft-only) / `live` (via `live_brain.py` LiveBrainAdapter, loud mock fallback; provider chain from `fallback_chain`: openrouter → meta → mock; 8 providers: meta/openai/anthropic/gemini/kimi/grok/openrouter/ollama, models from config; live verification 2026-11-06 TIMEOUT + 2026-11-20 tunnel-403, key path UNPROVEN, no live call made yet) |
 | Runner (`scripts/run_office.py`) | **REAL (Phase 6)** — runs the office in one command (Main CEO Bot → Chief → worker); gated work gets stuck in PENDING; `--drain-queue --max 2` |
 | Shared tool-calling core (`tool_calling.py`) | **REAL (Phase 5)** — registry + dispatcher; mock tools return DRAFT, gated tools get stuck in PENDING, all calls are logged |
 | Agency Engine (15 staff, 8 tool, 15 skill) | **REAL (Phase 5)** — draft-only, email PAUSED; send/publish/spend gated |

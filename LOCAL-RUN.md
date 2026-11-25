@@ -65,6 +65,24 @@ python scripts\setup_brain.py
 python scripts\check_live_brain.py --live
 ```
 
+**Dev brain (FREE, $0) — local Ollama, NO key at all (Gemma 4):**
+
+```bat
+ollama pull gemma4:12b
+python scripts\setup_brain.py
+python scripts\check_live_brain.py --live
+```
+
+- Install Ollama from https://ollama.com first. There is no
+  separate "Gemma 4 adapter" — Ollama IS the adapter, Gemma 4 is
+  the model name. `setup_brain.py` checks the local server FIRST
+  (before any cloud key) and saves the first working local model.
+  Honest limit: gemma4:12b needs ~9.5 GB of memory on an 8 GB PC —
+  close other apps first; if it is too slow, pull the small one
+  (`ollama pull qwen2.5-coder:1.5b`) and run setup again. Either
+  way the dev brain stays local, $0, and test-data-only — the
+  production brain is never touched.
+
 - Key from: https://aistudio.google.com/apikey (no card, no billing).
   An OpenRouter key works too: https://openrouter.ai/keys
   (`setx OPENROUTER_API_KEY "paste-key-here"`).
@@ -160,3 +178,37 @@ dashboards\status.json  ← numbers come here (not hand-written)
 - `dashboards\taskboard.html` + `dashboards\TASKBOARD-README.md` — taskboard page + instructions
 - `scripts\jarvis_voice_loop.py` — Jarvis voice loop
 - `00-CEO-Core\VOICE-SETUP.md` — voice setup in detail
+- `CLAUDE.md` — instructions for Claude Code on this PC (it reads this
+  file by itself). `.claude/commands/` — slash commands: `/office-run`,
+  `/live-check`, `/verify`.
+
+## Step 6 — Claude Code (local coding worker, Ollama)
+
+Claude Code runs on this PC with a local Ollama model and works on this
+repo when you command it in its terminal. It follows `CLAUDE.md`: $0,
+no send/publish/spend/delete without your exact gate word, keys only in
+environment variables, verify with the check scripts before claiming
+anything is done.
+
+**First fix the model.** `gemma4:12b` exists in the Ollama library, but
+it needs ~9.5 GB of memory — this PC has 8 GB total (~1.4 GB free), so
+it cannot run here even after downloading. Use the small coder model:
+
+```powershell
+ollama list                       # see what is actually installed
+ollama pull qwen2.5-coder:1.5b    # ~1 GB download, ~2.5 GB memory — fits
+```
+
+Then inside Claude Code, run `/model` and pick
+`qwen2.5-coder:1.5b`. Honest note: a 1.5B model is weak — good for
+small edits, wrong on big tasks. Keep each request small, one thing at
+a time, and always run `/verify` after a change.
+
+**Things to say to Claude Code** (in its terminal, in Bengali):
+
+- `/office-run agency caption_write {"title": "Caption for Monday reel"}`
+- `/live-check` — prove the dev brain is live
+- `/verify` — run all check suites and report the numbers
+- Anything else: describe the task in one line, e.g. "fix the clients
+  number on the dashboard" — it implements, shows the check results,
+  and stops for your word when a decision is needed.

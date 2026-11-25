@@ -632,6 +632,14 @@ class TestItem15ProviderFailure:
         assert is_free_model("anthropic", "claude-sonnet-4-5") is False
         assert is_free_model("gemini", "gemini-1.5-pro") is False
         assert is_free_model("unknown-provider", "free-model") is False
+        # Ollama: local server — any installed model is free-only,
+        # but an empty model id is not a model at all.
+        assert is_free_model("ollama", "gemma4:12b") is True
+        assert is_free_model("ollama-live", "qwen2.5-coder:1.5b") is True
+        assert is_free_model("ollama", "") is False
+        assert check_call("ollama", "gemma4:12b") is True
+        with pytest.raises(FreeOnlyViolation):
+            check_call("ollama", "")
         # Model ids are case-sensitive.
         assert is_free_model("gemini", "GEMINI-2.5-FLASH-LITE") is False
         assert check_call("gemini", "gemini-3.5-flash-lite") is True

@@ -51,7 +51,7 @@ meta_provider — stdlib urllib, env-var auth, unwired by default):
 | `src/live/grok_provider.py` | Grok (grok-4) | 4044 |
 | `src/live/openrouter_provider.py` | OpenRouter (`openrouter/free`) | 4648 |
 
-So `src/live/` now holds 7 providers (meta + these 6). The table above
+So `src/live/` now holds 8 providers (meta + these 7). The table above
 still describes the 2026-11-16 vendoring exactly; this section is the
 Phase 2 (2026-11-23) update, not a re-verification of the original copy.
 
