@@ -96,7 +96,7 @@ DEFAULT_MODELS = {
     "meta": "muse-spark-1.3",
     "openai": "gpt-4o",
     "anthropic": "claude-sonnet-4-5",
-    "gemini": "gemini-2.5-flash-lite",
+    "gemini": "gemini-3.5-flash-lite",
     "kimi": "kimi-k2.5",
     "grok": "grok-4",
     "openrouter": "openrouter/free",
@@ -401,5 +401,5 @@ if __name__ == "__main__":
     assert health["fallback_calls"] == 0
     assert health["last_failure"] is None
     assert "guard" not in health
-    assert DEFAULT_MODELS["gemini"] == "gemini-2.5-flash-lite"
+    assert DEFAULT_MODELS["gemini"] == "gemini-3.5-flash-lite"
     print("live_brain: OK (adapter constructs, 0 calls, no network)")

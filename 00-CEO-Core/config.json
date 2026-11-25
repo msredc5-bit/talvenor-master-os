@@ -5,11 +5,11 @@
   "development_brain": {
     "enabled": false,
     "provider": "gemini",
-    "model": "gemini-2.5-flash-lite",
+    "model": "gemini-3.5-flash-lite",
     "free_only": true,
     "test_data_only": true,
     "fallback_chain": [
-      "gemini:gemini-2.5-flash-lite",
+      "gemini:gemini-3.5-flash-lite",
       "openrouter:openrouter/free"
     ],
     "note": "Local development brain ONLY: free-tier models, test data only. Never production. Enable on Boss's PC only when testing with his own free-tier key."
@@ -162,14 +162,13 @@
     "gemini": {
       "enabled": false,
       "models": [
-        "gemini-2.5-flash-lite",
         "gemini-3.5-flash-lite"
       ],
       "env_var": "GEMINI_API_KEY",
       "endpoint": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
       "key_from": "https://aistudio.google.com/apikey",
       "free_tier": true,
-      "note": "gemini-2.5-flash removed as deprecated by Google (auto-routes to gemini-3.5-flash-lite from Dec 1, 2026); use gemini-2.5-flash-lite / gemini-3.5-flash-lite."
+      "note": "gemini-2.5-flash-lite removed Nov 2026 — Google returns 404 for new API keys; use gemini-3.5-flash-lite."
     },
     "kimi": {
       "enabled": false,

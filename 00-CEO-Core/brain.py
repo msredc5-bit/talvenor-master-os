@@ -59,6 +59,8 @@ DEV / PROD BRAIN SEPARATION — local-first Phase 1 (2026-11-24):
   - "development" reads ONLY config.json "development_brain"
     (free_only, test_data_only, its own fallback_chain of free-tier
     models) and builds the adapter with mode="development".
+    BRAIN_PROVIDER / BRAIN_MODEL env vars override the dev
+    provider/model without editing config (still free-only gated).
   - "live" reads ONLY config.json "production_brain" and is LOCKED
     unless "production_brain.unlocked" is explicitly true — a Boss
     decision, never a dev change. With the lock in place, asking for
@@ -88,6 +90,12 @@ CONTENT_WORKERS_DIR = os.path.join(
 
 BRAIN_MODES = ("mock", "development", "live")
 DEFAULT_BRAIN = "mock"
+
+# Free default model per dev provider — used only when BRAIN_PROVIDER
+# switches provider without BRAIN_MODEL. Only gemini/openrouter can
+# ever pass the free-only guard, so this map is complete for dev mode.
+_DEV_DEFAULT_MODELS = {"gemini": "gemini-3.5-flash-lite",
+                       "openrouter": "openrouter/free"}
 
 # The seed each department's mock has always used — kept so flipping
 # the flag back to mock reproduces exactly the old drafts.
@@ -218,6 +226,14 @@ class BrainFactory:
         (env var only — never a file). A dev brain can never become
         the production brain: different config block, different mode
         string, and production requires the explicit unlocked flag.
+
+        Env override (no JSON edit needed): BRAIN_PROVIDER and
+        BRAIN_MODEL win over config's provider/model — the override
+        becomes the first chain entry, the config chain stays as
+        fallback. The free-only guard still applies
+        (build_provider_chain validates every entry), so a paid
+        provider or a non-free model here raises FreeOnlyViolation
+        instead of being called.
         """
         if department == "agency":
             mod = _load_module(AGENCY_WORKERS_DIR, "src.mock.provider")
@@ -248,8 +264,35 @@ class BrainFactory:
                     "Development brain is not configured: "
                     "\"development_brain\" is missing from "
                     f"{config_path}.")
+            # Env override: BRAIN_PROVIDER / BRAIN_MODEL win over
+            # config — no JSON edit needed to switch the dev brain.
+            # The free-only guard still gates every entry (a paid
+            # provider or non-free model raises FreeOnlyViolation).
+            env_provider = os.environ.get(
+                "BRAIN_PROVIDER", "").strip().lower()
+            env_model = os.environ.get("BRAIN_MODEL", "").strip()
+            config_provider = str(
+                dev.get("provider", "gemini")).strip().lower()
+            config_model = str(dev.get("model", "")).strip()
+            if env_provider and env_provider != config_provider:
+                # The config model belongs to the config provider —
+                # it must not be carried across to another provider
+                # (openrouter:gemini-3.5-flash-lite would be rejected
+                # by the free-only guard). Use the provider's free
+                # default instead.
+                provider = env_provider
+                model = env_model or _DEV_DEFAULT_MODELS.get(provider, "")
+            else:
+                provider = env_provider or config_provider
+                model = env_model or config_model
+            chain_entries = [str(e) for e in
+                             (dev.get("fallback_chain") or [])]
+            if env_provider or env_model:
+                primary = f"{provider}:{model}" if model else provider
+                chain_entries = [primary] + [
+                    e for e in chain_entries if e != primary]
             chain = build_provider_chain(
-                {"fallback_chain": dev["fallback_chain"],
+                {"fallback_chain": chain_entries,
                  "providers": cfg.get("providers", {})},
                 mode="development")
             return LiveBrainAdapter(

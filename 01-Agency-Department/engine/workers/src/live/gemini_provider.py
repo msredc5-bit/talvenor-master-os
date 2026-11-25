@@ -33,7 +33,7 @@ SYSTEM_PROMPT = (
 
 ENV_VAR = "GEMINI_API_KEY"
 ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
-DEFAULT_MODEL = "gemini-2.5-flash-lite"
+DEFAULT_MODEL = "gemini-3.5-flash-lite"
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):

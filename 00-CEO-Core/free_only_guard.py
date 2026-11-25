@@ -3,8 +3,8 @@
 Rules enforced here (and ONLY here — this module is the single source of
 truth for what "free-only" means in development mode):
 
-* Allowlist: Gemini free-tier models only — gemini-2.5-flash-lite,
-  gemini-3.5-flash-lite, gemini-2.0-flash — and OpenRouter models that are
+* Allowlist: Gemini free-tier models only — gemini-3.5-flash-lite,
+  gemini-2.0-flash — and OpenRouter models that are
   free: any model id ending in ":free", or exactly "openrouter/free"
   (the auto-router). Nothing else is free-only.
 * Meta / OpenAI / Anthropic / Kimi / Grok are NEVER free-only: any model
@@ -40,7 +40,6 @@ FREE_ONLY_GUARD_VERSION = "1.0"
 # is_free_model() because free OpenRouter ids cannot be enumerated.
 FREE_ONLY_MODELS = {
     "gemini": frozenset({
-        "gemini-2.5-flash-lite",
         "gemini-3.5-flash-lite",
         "gemini-2.0-flash",
     }),
@@ -111,9 +110,9 @@ def check_call(provider, model):
         raise FreeOnlyViolation(
             f"provider {provider!r} model {model!r} is not free-only: "
             "paid models are never allowed in development mode "
-            "(free-only allowlist: Gemini gemini-2.5-flash-lite / "
-            "gemini-3.5-flash-lite / gemini-2.0-flash, OpenRouter "
-            "models ending in ':free' or 'openrouter/free').")
+            "(free-only allowlist: Gemini gemini-3.5-flash-lite / "
+            "gemini-2.0-flash, OpenRouter models ending in ':free' or "
+            "'openrouter/free').")
     return True
 
 

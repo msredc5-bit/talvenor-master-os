@@ -34,8 +34,8 @@ What it checks (mock mode ONLY — no live call, ever):
      resolve (known provider or "mock"), no duplicates; brain_provider
      known; brain stays "mock"; phase 11 + v0.9.0. Phase 1 (local dev):
      development_brain present (free_only + test_data_only true,
-     model gemini-2.5-flash-lite, fallback_chain all allowlisted);
-     gemini models contain gemini-2.5-flash-lite and NOT the deprecated
+     model gemini-3.5-flash-lite, fallback_chain all allowlisted);
+     gemini models contain gemini-3.5-flash-lite and NOT the deprecated
      gemini-2.5-flash; openrouter models all :free / openrouter/free
      and free_only true; production_brain.unlocked is false.
  10. No secrets in the new/changed files (real key patterns only —
@@ -98,7 +98,7 @@ PROVIDERS = [
     ("src.live.anthropic_provider", "AnthropicProvider", "ANTHROPIC_API_KEY",
      "claude-sonnet-4-5"),
     ("src.live.gemini_provider", "GeminiProvider", "GEMINI_API_KEY",
-     "gemini-2.5-flash-lite"),
+     "gemini-3.5-flash-lite"),
     ("src.live.kimi_provider", "KimiProvider", "MOONSHOT_API_KEY", "kimi-k2.5"),
     ("src.live.grok_provider", "GrokProvider", "XAI_API_KEY", "grok-4"),
     ("src.live.openrouter_provider", "OpenRouterProvider",
@@ -457,7 +457,7 @@ def main():
                 {"brain": "development",
                  "development_brain": {
                      "enabled": True,
-                     "fallback_chain": ["gemini:gemini-2.5-flash-lite",
+                     "fallback_chain": ["gemini:gemini-3.5-flash-lite",
                                         "openrouter:openrouter/free"],
                      "free_only": True,
                      "test_data_only": True}})
@@ -469,7 +469,7 @@ def main():
                   and h.get("brain_kind") == "development"
                   and h.get("guard") == "free-only"
                   and h["providers"] == ["gemini-live", "openrouter-live"]
-                  and h["models"] == ["gemini-2.5-flash-lite",
+                  and h["models"] == ["gemini-3.5-flash-lite",
                                       "openrouter/free"]
                   and h["calls"] == 0,
                   f"brain_kind={h.get('brain_kind')}, "
@@ -626,16 +626,15 @@ def main():
             if dev.get("test_data_only") is not True:
                 problems.append(
                     "development_brain.test_data_only is not true")
-            if dev.get("model") != "gemini-2.5-flash-lite":
+            if dev.get("model") != "gemini-3.5-flash-lite":
                 problems.append(
-                    "development_brain.model is not gemini-2.5-flash-lite")
+                    "development_brain.model is not gemini-3.5-flash-lite")
             for entry in dev.get("fallback_chain", []):
                 name, _sep, model = str(entry).partition(":")
                 name = name.strip().lower()
                 model = model.strip()
                 if name == "gemini":
-                    if model not in ("gemini-2.5-flash-lite",
-                                     "gemini-3.5-flash-lite",
+                    if model not in ("gemini-3.5-flash-lite",
                                      "gemini-2.0-flash"):
                         problems.append(
                             f"dev chain: non-allowlisted gemini {model!r}")
@@ -653,9 +652,12 @@ def main():
         elif prod.get("unlocked") is not False:
             problems.append("production_brain.unlocked is not false")
         gemini_models = providers.get("gemini", {}).get("models", [])
-        if "gemini-2.5-flash-lite" not in gemini_models:
+        if "gemini-3.5-flash-lite" not in gemini_models:
             problems.append(
-                "gemini models lack gemini-2.5-flash-lite")
+                "gemini models lack gemini-3.5-flash-lite")
+        if "gemini-2.5-flash-lite" in gemini_models:
+            problems.append(
+                "gemini models still list removed gemini-2.5-flash-lite")
         if "gemini-2.5-flash" in gemini_models:
             problems.append(
                 "gemini models still contain deprecated gemini-2.5-flash")

@@ -6,10 +6,11 @@ providers only, fake key "test-fake-key" is never needed here because
 no real provider is constructed):
   1. free_only_guard.py exists, version 1.0, allowlist holds the free
      models (FREE_ONLY_MODELS).
-  2. Allowlist: check_call allows gemini-2.5-flash-lite,
-     gemini-3.5-flash-lite, gemini-2.0-flash, openrouter/free,
+  2. Allowlist: check_call allows gemini-3.5-flash-lite,
+     gemini-2.0-flash, openrouter/free,
      deepseek/deepseek-r1-0528:free, moonshotai/kimi-k2:free; rejects
-     gpt-4o, claude-sonnet-4-5, gemini-2.5-flash, muse-spark-1.3,
+     gpt-4o, claude-sonnet-4-5, gemini-2.5-flash, gemini-2.5-flash-lite
+     (Google 404s it for new keys, Nov 2026), muse-spark-1.3,
      kimi-k2.5, grok-4, nvidia/nemotron-3-ultra-550b-a55b (paid
      openrouter id, no :free suffix), and unknown provider "nope".
   3. is_rate_limit_error: True for HTTP 429, RuntimeError("...429..."),
@@ -131,7 +132,6 @@ def _run_allowlist_and_rate_checks(guard, FreeOnlyViolation):
     """Sections 2-3: guard allowlist + is_rate_limit_error."""
     # 2. Allowlist.
     allowed = [
-        ("gemini", "gemini-2.5-flash-lite"),
         ("gemini", "gemini-3.5-flash-lite"),
         ("gemini", "gemini-2.0-flash"),
         ("openrouter", "openrouter/free"),
@@ -142,6 +142,7 @@ def _run_allowlist_and_rate_checks(guard, FreeOnlyViolation):
         ("openai", "gpt-4o"),
         ("anthropic", "claude-sonnet-4-5"),
         ("gemini", "gemini-2.5-flash"),
+        ("gemini", "gemini-2.5-flash-lite"),
         ("meta", "muse-spark-1.3"),
         ("kimi", "kimi-k2.5"),
         ("grok", "grok-4"),
@@ -228,7 +229,7 @@ def main():
         version_ok = getattr(guard, "FREE_ONLY_GUARD_VERSION", None) == "1.0"
         models = getattr(guard, "FREE_ONLY_MODELS", None)
         models_ok = (models is not None
-                     and "gemini-2.5-flash-lite" in str(models)
+                     and "gemini-2.5-flash-lite" not in str(models)
                      and "gemini-3.5-flash-lite" in str(models)
                      and "gemini-2.0-flash" in str(models))
         check("free_only_guard.py imports, version 1.0, allowlist holds "
@@ -304,7 +305,7 @@ def main():
 
         # 5. 429 hard stop: second provider never tried.
         try:
-            stub_429 = _StubDev("gemini-live", "gemini-2.5-flash-lite",
+            stub_429 = _StubDev("gemini-live", "gemini-3.5-flash-lite",
                                 "rate-limit")
             stub_ok = _StubDev("openrouter-live", "openrouter/free", "ok",
                                payload="LIVE-REPLY: should never appear.")
@@ -328,12 +329,12 @@ def main():
 
         # 6. Bad key + timeout: mock fallback, at most 1 call each.
         try:
-            stub_key = _StubDev("gemini-live", "gemini-2.5-flash-lite",
+            stub_key = _StubDev("gemini-live", "gemini-3.5-flash-lite",
                                 "bad-key")
             adapter_k = _dev_adapter([stub_key])
             text_k = adapter_k.complete("smoke")
             h_k = adapter_k.health()
-            stub_to = _StubDev("gemini-live", "gemini-2.5-flash-lite",
+            stub_to = _StubDev("gemini-live", "gemini-3.5-flash-lite",
                                "timeout")
             adapter_t = _dev_adapter([stub_to])
             text_t = adapter_t.complete("smoke")
@@ -356,7 +357,7 @@ def main():
         # 7. Structured output returned unchanged, parses as JSON.
         try:
             payload = '{"answer": "ok", "confidence": 0.9}'
-            stub = _StubDev("gemini-live", "gemini-2.5-flash-lite",
+            stub = _StubDev("gemini-live", "gemini-3.5-flash-lite",
                             "ok", payload=payload)
             adapter = _dev_adapter([stub])
             text = adapter.complete("smoke", max_tokens=30)
@@ -375,7 +376,7 @@ def main():
             payload = ("Talvenor Master OS routes a task from the Main CEO "
                        "Bot to the right Chief, the Chief drafts the work, "
                        "and nothing goes out until Boss approves it.")
-            stub = _StubDev("gemini-live", "gemini-2.5-flash-lite",
+            stub = _StubDev("gemini-live", "gemini-3.5-flash-lite",
                             "ok", payload=payload)
             adapter = _dev_adapter([stub])
             text = adapter.complete("smoke", max_tokens=100)
@@ -390,7 +391,7 @@ def main():
             tool_stub = _ToolStub()
             payload = ('{"tool": "gmail_send", "args": '
                        '{"to": "x@example.com"}}')
-            stub = _StubDev("gemini-live", "gemini-2.5-flash-lite",
+            stub = _StubDev("gemini-live", "gemini-3.5-flash-lite",
                             "ok", payload=payload)
             adapter = _dev_adapter([stub])
             text = adapter.complete("smoke", max_tokens=30)

@@ -31,24 +31,29 @@ so the free-only guard does not apply there — guard enforcement is
 covered by scripts/check_dev_brain.py.
 
 LIVE PROBE (OFF by default — run only with --live, on Boss's PC):
-  One tiny real call through the DEV brain path: the Gemini free tier
-  (model gemini-2.5-flash-lite, max 30 completion tokens) via
+  One tiny real call through the DEV brain path: the free tier
+  (Gemini gemini-3.5-flash-lite, or whichever free model
+  scripts/setup_brain.py saved — max 30 completion tokens) via
   BrainFactory.get_brain("agency") with a temp config mirroring the
   real config's development_brain block — the real config's brain
   flag is never flipped. Exactly one request, never retries. Prints
-  reply, latency, tokens, mode, brain_kind. Exit 0 + PASS only if
-  health mode is "live" AND brain_kind is "development"; otherwise
-  FAILED with the exact reason and the brain stays mock.
-  If GEMINI_API_KEY is not set, the probe prints the exact setup
-  steps and exits non-zero WITHOUT attempting any call.
+  reply, latency, tokens, mode, brain_kind, and the exact model
+  tried. Exit 0 + PASS only if health mode is "live" AND brain_kind
+  is "development"; otherwise FAILED with the exact reason and the
+  brain stays mock.
+  If no key for the dev chain is set (GEMINI_API_KEY /
+  OPENROUTER_API_KEY), the probe prints the exact setup steps and
+  exits non-zero WITHOUT attempting any call.
 
 Boss PC steps (Windows):
   1. Get a free key (no card, no billing): aistudio.google.com/apikey
   2. Set it (then open a NEW terminal):
      setx GEMINI_API_KEY "paste-key-here"
-  3. Direct curl test first:
-     curl.exe -s https://generativelanguage.googleapis.com/v1beta/openai/chat/completions -H "Authorization: Bearer $env:GEMINI_API_KEY" -H "Content-Type: application/json" -d '{"model":"gemini-2.5-flash-lite","messages":[{"role":"user","content":"Reply with the single word: ok"}]}'
-  4. Then run: python scripts\\check_live_brain.py --live
+  3. Find a working free model (no JSON editing):
+     python scripts\\setup_brain.py
+  4. Direct curl test first (optional):
+     curl.exe -s https://generativelanguage.googleapis.com/v1beta/openai/chat/completions -H "Authorization: Bearer $env:GEMINI_API_KEY" -H "Content-Type: application/json" -d '{"model":"gemini-3.5-flash-lite","messages":[{"role":"user","content":"Reply with the single word: ok"}]}'
+  5. Then run: python scripts\\check_live_brain.py --live
 
 Stdlib only. Run: python3 scripts/check_live_brain.py [--live]
 """
@@ -127,7 +132,7 @@ def _dev_extra():
     """The development_brain block a dev temp config needs."""
     return {"development_brain": {
         "enabled": True,
-        "fallback_chain": ["gemini:gemini-2.5-flash-lite",
+        "fallback_chain": ["gemini:gemini-3.5-flash-lite",
                            "openrouter:openrouter/free"],
         "free_only": True,
         "test_data_only": True}}
@@ -381,41 +386,57 @@ def main():
     return 0
 
 
+# Env var holding each free dev provider's key (names only — a key
+# value is never read here except by the provider at call time).
+_DEV_KEY_VARS = {"gemini": "GEMINI_API_KEY",
+                 "openrouter": "OPENROUTER_API_KEY"}
+
+
 def live_probe():
     """The ONE sanctioned live probe — only with --live, on Boss's PC.
 
-    Dev-brain path: Gemini free tier (gemini-2.5-flash-lite) through
+    Dev-brain path: the free tier (Gemini gemini-3.5-flash-lite, or
+    the model scripts/setup_brain.py saved) through
     BrainFactory.get_brain("agency") with a temp config mirroring the
     REAL config's development_brain block. The real config's brain
     flag is never flipped. One tiny call (max 30 tokens), never
     retries. PASS (exit 0) only if health mode is "live" AND
-    brain_kind is "development".
+    brain_kind is "development". The key gate is derived from the dev
+    chain itself: the probe runs when a key is set for any provider
+    in the chain, so an OpenRouter-only setup is provable too.
     """
     from brain import BrainFactory  # noqa: PLC0415
-
-    if not os.environ.get("GEMINI_API_KEY"):
-        print("[live-probe] GEMINI_API_KEY is not set — no call attempted.")
-        print("[live-probe] Setup steps (Boss's PC, Windows):")
-        print("[live-probe] 1. Get a free key (no card, no billing): "
-              "https://aistudio.google.com/apikey")
-        print('[live-probe] 2. Set it, then open a NEW terminal: '
-              'setx GEMINI_API_KEY "paste-key-here"')
-        print("[live-probe] 3. Direct curl test first:")
-        print("[live-probe]    curl.exe -s "
-              "https://generativelanguage.googleapis.com/v1beta/openai/"
-              "chat/completions -H \"Authorization: Bearer "
-              "$env:GEMINI_API_KEY\" -H \"Content-Type: application/json\" "
-              "-d '{\"model\":\"gemini-2.5-flash-lite\",\"messages\":"
-              "[{\"role\":\"user\",\"content\":\"Reply with the single "
-              "word: ok\"}]}'")
-        print("[live-probe] 4. Then run: "
-              "python scripts\\check_live_brain.py --live")
-        return 1
 
     with open(os.path.join(CEO_CORE_DIR, "config.json"),
               encoding="utf-8") as f:
         real_cfg = json.load(f)
     dev_block = real_cfg.get("development_brain") or {}
+    chain = [str(e) for e in dev_block.get("fallback_chain") or []]
+    needed = {}
+    for entry in chain:
+        name = entry.partition(":")[0].strip().lower()
+        var = _DEV_KEY_VARS.get(name)
+        if var:
+            needed[name] = var
+    if needed and not any(os.environ.get(var) for var in needed.values()):
+        print("[live-probe] No key is set for the dev chain "
+              f"({', '.join(sorted(set(needed.values())))}) — "
+              "no call attempted.")
+        print("[live-probe] Setup steps (Boss's PC, Windows):")
+        print("[live-probe] 1. Get a free key (no card, no billing): "
+              "https://aistudio.google.com/apikey")
+        print('[live-probe] 2. Set it, then open a NEW terminal: '
+              'setx GEMINI_API_KEY "paste-key-here"')
+        print("[live-probe]    (or an OpenRouter key: "
+              "https://openrouter.ai/keys -> "
+              'setx OPENROUTER_API_KEY "paste-key-here")')
+        print("[live-probe] 3. Find a working free model (no JSON editing): "
+              "python scripts\\setup_brain.py")
+        print("[live-probe] 4. Then run: "
+              "python scripts\\check_live_brain.py --live")
+        return 1
+
+    print(f"[live-probe] dev chain: {chain}")
     temp_cfg = _temp_config("development",
                             {"development_brain": dev_block})
     adapter = BrainFactory.get_brain("agency", config_path=temp_cfg)
@@ -435,12 +456,14 @@ def live_probe():
           f"total={tokens.get('total_tokens')}")
     print(f"[live-probe] mode: {health['mode']}")
     print(f"[live-probe] brain_kind: {health.get('brain_kind')}")
+    print(f"[live-probe] tried models: {health.get('models')}")
     if health["mode"] == "live" and health.get("brain_kind") == "development":
-        print("[live-probe] PASS: Gemini free-tier dev brain works via "
-              "the adapter.")
+        print("[live-probe] PASS: free-tier dev brain works via "
+              f"the adapter (live model: {health.get('model')}).")
         return 0
     print(f"[live-probe] FAILED: mode={health['mode']}, "
           f"brain_kind={health.get('brain_kind')}, "
+          f"tried={health.get('models')}, "
           f"last_failure={health['last_failure']}")
     return 1
 

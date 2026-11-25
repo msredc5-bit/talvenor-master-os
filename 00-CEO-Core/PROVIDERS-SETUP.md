@@ -11,7 +11,7 @@ a key in any file — only in an environment variable.
 | Meta (Muse Spark) | dev.meta.ai — your Muse Spark API key (the same key already registered in the Meta connector on the Muse VM; the connector cannot read it back, so take it from your Meta account) | META_API_KEY | muse-spark-1.3 |
 | OpenAI (ChatGPT) | https://platform.openai.com/api-keys | OPENAI_API_KEY | gpt-4o |
 | Claude (Anthropic) | https://console.anthropic.com/settings/keys | ANTHROPIC_API_KEY | claude-sonnet-4-5 |
-| Gemini (Google) | https://aistudio.google.com/apikey | GEMINI_API_KEY | gemini-2.5-flash-lite |
+| Gemini (Google) | https://aistudio.google.com/apikey | GEMINI_API_KEY | gemini-3.5-flash-lite |
 | Kimi (Moonshot) | https://platform.moonshot.ai | MOONSHOT_API_KEY | kimi-k2.5 |
 | Grok (xAI) | https://console.x.ai | XAI_API_KEY | grok-4 |
 | OpenRouter (auto-router) | https://openrouter.ai/keys | OPENROUTER_API_KEY | openrouter/free |
@@ -113,10 +113,19 @@ unlocked adapter run is the proof.
 ## 5. Going live with the brain — the last step (only on Boss's word)
 
 1. Put the key in an env var as above.
-2. In `00-CEO-Core/config.json`, set `"brain": "live"` and arrange your
-   chosen providers in `"fallback_chain"`.
+2. Find a working free model automatically (no JSON editing):
+   `python scripts\setup_brain.py` — it asks the provider which free
+   models exist, tests each one with a single tiny call, and saves the
+   first working one into `00-CEO-Core/config.json`
+   (development_brain only). Any free key works (Gemini or OpenRouter);
+   paid keys are never picked for the dev brain.
 3. In the terminal, run one small live probe with
-   `python3 scripts/check_live_brain.py --live` — only if it succeeds is the brain live.
+   `python scripts\check_live_brain.py --live` — only if it succeeds is the brain live.
+4. To switch the dev brain later without editing JSON, set
+   `BRAIN_PROVIDER` / `BRAIN_MODEL` env vars (e.g.
+   `setx BRAIN_PROVIDER openrouter`) and run the probe again. The
+   free-only guard still applies: a paid provider or model is refused,
+   never called.
 
 ## 6. True status (now)
 
@@ -125,5 +134,9 @@ unlocked adapter run is the proof.
   now exists (`META_API_KEY` env var, added 2026-11-25), but no key
   value is on record anywhere, and no live call has been made from it.
 - The brain is still mock, phase 11 / v0.9.0. No live call has happened, $0 spent.
+- `scripts\setup_brain.py` (2026-11-25) finds a working free model
+  automatically and saves it — no more hand-editing config.json for
+  the dev brain. Google stopped serving gemini-2.5-flash-lite to new
+  keys (HTTP 404); the current free default is gemini-3.5-flash-lite.
 - If the brain is started without a key, the adapter does not silently pretend
   to be live — it writes the reason and gives a mock draft.
