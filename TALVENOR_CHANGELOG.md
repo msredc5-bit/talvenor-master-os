@@ -1534,3 +1534,74 @@ BLOCKED — untouched.
 - Verification: check suite + pytest re-run (see the F1 completion
   report for totals). Nothing in F1 sends, publishes, spends, or
   deploys.
+
+## FOUNDER OS F2 batch 1 — Founder Command Center, first live modules (2026-11-26)
+
+- Founder approved F2 ("F2 shuru koro", 2026-11-26 18:47 Dhaka).
+  Batch 1 builds Command Center modules 1, 5, 6, 7, 11 only — the
+  other 14 modules are batch 2+ and were NOT built.
+- **New page:** `dashboards/command-center.html` (static HTML + JS,
+  no framework). Sidebar lists all 19 modules (audit §11): the 5
+  live ones link to their sections, the other 14 are marked with
+  their planned batch (batch 2 / batch 3 / F7 / F8). Open at
+  http://localhost:8765/command-center.html (run_local.bat).
+  1. Founder Overview — phase, paying clients, first mails, email,
+     Gate 0, spend, tasks done, voice, approvals pending.
+  5. Agent Team Roster — all 69 registry agents with worker state
+     (draft/coded/unknown from the [MOCK DRAFT] marker) and last
+     skill-load time from logs/skill_executions.jsonl; search +
+     department/worker filters. Roster cross-check: 53 draft /
+     16 coded matches the audit's 53/69 [MOCK DRAFT] count.
+  6. Main CEO Dashboard — the generated weekly CEO report, shown
+     as generated (executive summary, tasks, approvals, next
+     actions, risks/blocked).
+  7. Agency Dashboard — the 8 departments: workflow present,
+     report compiles, last execution.
+  11. Approval Center — pending approval cards with the 20-minute
+      TTL countdown. Allow needs the exact gate word typed by Boss;
+      there is no auto-approve and no "always allow". Decisions go
+      through the EXISTING gateway only (ApprovalCentre.decide);
+      no new approval path was invented.
+- **Data contract (no fake data):** every card reads only
+  `dashboards/status.json` and/or `dashboards/ceo-report.json` —
+  the same files the check suite verifies. No card reads a store
+  file directly. A missing source shows "unknown", never a guessed
+  number. New keys in status.json (additive only):
+  `founder_os` (phase F2, batch 1, source audit §14) and `roster`
+  (69 entries + counts), published by `scripts/sync_status.py`,
+  which also copies the latest CEO report JSON byte-for-byte to
+  `dashboards/ceo-report.json` (a stale copy is removed when no
+  report is available).
+- **Approval server (actionable, not display-only):**
+  `scripts/taskboard_server.py` (port 8766) gained
+  `GET /api/approvals` and `POST /api/approvals/decide`, both
+  straight through ApprovalCentre (list_pending / decide). The
+  gateway's own errors (wrong gate word, expired, already
+  decided, unknown id) surface unchanged as HTTP 400. CORS is
+  allowed ONLY for the Command Center origin
+  (http://localhost:8765). If the server is not running, the
+  Approval Center shows display-only cards with the terminal CLI
+  command instead. The task POST body parsing was factored into
+  `_read_json_body()` (shared by both POST routes).
+- **3D dashboard honesty fixes (`dashboards/dashboard-3d.html`):**
+  the dated fallback snapshot is now labelled with a visible
+  banner ("Last known snapshot, 2026-11-20 — status.json could not
+  be read") whenever it is in use, and the detail-panel numbers
+  (first mails, PA list, approvals pending, paying clients,
+  email) are placeholders filled from the live status file — the
+  hardcoded 162 / 39/100 / 374 literals are gone (the FALLBACK
+  object keeps 162 as the dated snapshot value). A Command Center
+  link was added to the sidebar. The static 3D dashboard stays
+  until the Command Center is verified — nothing was deleted.
+- **Checks:** `scripts/check_command_center.py` (per-module checks
+  + no-fake-data test) and `tests/test_command_center.py`
+  (server approvals flow on TEMP store paths). See the F2 batch 1
+  completion report for totals.
+- **PENDING (not done in batch 1):** batch 2 modules (Task Center,
+  Reports Center, Financial Dashboard, System Health, Settings &
+  Permissions) — need their own Founder ask. `store/leads.json`
+  untouched. `voice/loop.py` untouched. Nothing pushed to GitHub.
+  Nothing sends, publishes, spends, or deploys.
+- Note: F1's M2 push DID complete 2026-11-26 18:41–18:47 (heads
+  894c7065 + bf9d2eab); the F1 entry above still lists it as
+  pending — that line is stale, the push is done.

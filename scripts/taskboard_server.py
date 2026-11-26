@@ -33,6 +33,24 @@ Endpoints (localhost only — no auth, never expose publicly):
   DELETE /api/tasks/<id> -> cancel one QUEUED task only (done/failed
       tasks cannot be deleted — history stays); missing id -> 404,
       non-queued -> 409.
+  GET  /api/approvals    -> {"pending": [...]} via the REAL approval
+      gateway (ApprovalCentre) — enriched records with allowed gate
+      words, age and TTL expiry (same as the CLI's list command).
+  POST /api/approvals/decide -> {"id": "...", "decision": "approve" |
+      "reject", "gate_word": "..."} — approve REQUIRES the exact gate
+      word; reject needs none. Both go straight through
+      ApprovalCentre.decide -> the gateway (approve/reject). Wrong
+      gate word, expired record, already-decided or unknown id ->
+      400 with the gateway's own message. -> 200 with the decided
+      record + the fresh pending list. CORS is allowed ONLY for the
+      Command Center origin (http://localhost:8765); no other origin.
+
+Environment (optional — defaults are the real repo paths, like the
+MCP server's TALVENOR_MCP_* vars):
+  TALVENOR_TASKBOARD_TASKS  — tasks JSON path
+  TALVENOR_TASKBOARD_STATUS — status JSON path (/api/status)
+  TALVENOR_TASKBOARD_PAGE   — board HTML path (/)
+  TALVENOR_TASKBOARD_APPROVALS — approvals JSON path (/api/approvals)
 
 Environment (optional — defaults are the real repo paths, like the
 MCP server's TALVENOR_MCP_* vars):
@@ -71,6 +89,12 @@ STATUS_PATH = os.environ.get(
     "TALVENOR_TASKBOARD_STATUS", os.path.join(DASHBOARDS_DIR, "status.json"))
 BOARDPAGE_PATH = os.environ.get(
     "TALVENOR_TASKBOARD_PAGE", os.path.join(DASHBOARDS_DIR, "taskboard.html"))
+APPROVALS_PATH = os.environ.get(
+    "TALVENOR_TASKBOARD_APPROVALS",
+    os.path.join(BASE, "store", "approvals.json"))
+# F2 batch 1 — the ONLY cross-origin caller allowed: the Command
+# Center served by run_local.bat on localhost:8765. Never broaden.
+COMMAND_CENTER_ORIGIN = "http://localhost:8765"
 
 BUSINESSES = ("agency", "digital-product", "content")
 TYPE_RE = re.compile(r"^[a-z][a-z0-9_]{0,63}$")
@@ -100,6 +124,15 @@ def _write_tasks(records):
     # stays (same-process threads); store_io adds the cross-process
     # file lock.
     write_json_atomic(TASKS_PATH, {"schema": "tasks-v1", "records": records})
+
+
+def _approval_centre():
+    """The REAL approval centre (F2 batch 1) — imported lazily so a
+    broken gateway only fails the approvals endpoints, never the
+    task board. All reads/writes go through the gateway; this
+    server never touches approvals.json itself."""
+    from approval_centre import ApprovalCentre  # noqa: PLC0415
+    return ApprovalCentre(approvals_path=APPROVALS_PATH)
 
 
 def validate_task_body(body):
@@ -170,10 +203,20 @@ class TaskboardHandler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):  # keep stdout quiet
         pass
 
-    def _send_json(self, status, obj):
+    def _cors_headers(self):
+        # F2 batch 1 — Command Center only (localhost:8765). The
+        # task board's own endpoints stay same-origin (no CORS).
+        self.send_header("Access-Control-Allow-Origin",
+                         COMMAND_CENTER_ORIGIN)
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+
+    def _send_json(self, status, obj, cors=False):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
+        if cors:
+            self._cors_headers()
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
@@ -200,25 +243,106 @@ class TaskboardHandler(BaseHTTPRequestHandler):
             with _store_lock:
                 records = _read_tasks()
             self._send_json(200, {"records": records})
+        elif self.path == "/api/approvals":
+            # F2 batch 1 — pending approvals via the REAL gateway.
+            try:
+                with _store_lock:
+                    pending = _approval_centre().list_pending()
+            except Exception as exc:  # gateway/file error — 500, not a crash
+                self._send_json(500, {"error": str(exc)}, cors=True)
+                return
+            self._send_json(200, {"pending": pending}, cors=True)
         else:
             self._send_json(404, {"error": f"Unknown path: {self.path}"})
 
-    def do_POST(self):
-        if self.path != "/api/tasks":
+    def do_OPTIONS(self):
+        # F2 batch 1 — preflight for the Command Center's JSON POSTs.
+        if self.path.startswith("/api/approvals"):
+            self.send_response(204)
+            self._cors_headers()
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+        else:
             self._send_json(404, {"error": f"Unknown path: {self.path}"})
-            return
+
+    def _read_json_body(self):
+        """POST body -> (parsed dict, None) or (None, error string)."""
         try:
             length = int(self.headers.get("Content-Length") or 0)
         except ValueError:
-            self._send_json(400, {"error": "Invalid Content-Length."})
-            return
+            return None, "Invalid Content-Length."
         if length <= 0 or length > 65536:
-            self._send_json(400, {"error": "Body is empty or too large."})
-            return
+            return None, "Body is empty or too large."
         try:
             body = json.loads(self.rfile.read(length).decode("utf-8"))
         except (ValueError, UnicodeDecodeError):
-            self._send_json(400, {"error": "Body is not valid JSON."})
+            return None, "Body is not valid JSON."
+        if not isinstance(body, dict):
+            return None, "Body must be a JSON object."
+        return body, None
+
+    def _handle_approve_decide(self):
+        # F2 batch 1 — POST /api/approvals/decide, straight through
+        # ApprovalCentre.decide -> the gateway. No new approval path.
+        body, error = self._read_json_body()
+        if error is not None:
+            self._send_json(400, {"error": error}, cors=True)
+            return
+        approval_id = body.get("id")
+        if not isinstance(approval_id, str) or not approval_id.strip():
+            self._send_json(400, {"error": "Field 'id' is required."},
+                            cors=True)
+            return
+        decision = body.get("decision")
+        if decision not in ("approve", "reject"):
+            self._send_json(400, {
+                "error": "Field 'decision' must be 'approve' or 'reject'."},
+                cors=True)
+            return
+        gate_word = body.get("gate_word")
+        if decision == "approve":
+            if not isinstance(gate_word, str) or not gate_word:
+                self._send_json(400, {
+                    "error": "Field 'gate_word' is required to approve."},
+                    cors=True)
+                return
+        try:
+            with _store_lock:
+                centre = _approval_centre()
+                record = centre.decide(approval_id, decision,
+                                       gate_word=gate_word)
+                pending = centre.list_pending()
+        except ValueError as exc:
+            # Gateway's own errors: wrong gate word, expired record,
+            # already decided — surfaced unchanged.
+            self._send_json(400, {"error": str(exc)}, cors=True)
+            return
+        except KeyError as exc:
+            # Gateway's _find: unknown id is a client error, not a
+            # server error.
+            self._send_json(400, {"error": str(exc)}, cors=True)
+            return
+        except Exception as exc:  # gateway/file error — 500, not a crash
+            self._send_json(500, {"error": str(exc)}, cors=True)
+            return
+        audit_log("approval_decided", {
+            "approval_id": approval_id, "decision": decision,
+            "status": record.get("status"),
+        }, audit_path=os.path.join(os.path.dirname(APPROVALS_PATH),
+                                   "audit.log"))
+        self._send_json(200, {"record": record, "pending": pending},
+                        cors=True)
+
+    def do_POST(self):
+        if self.path == "/api/approvals/decide":
+            self._handle_approve_decide()
+            return
+        if self.path != "/api/tasks":
+            self._send_json(404, {"error": f"Unknown path: {self.path}"})
+            return
+        body, error = self._read_json_body()
+        if error is not None:
+            self._send_json(400, {"error": error})
             return
         record, error = validate_task_body(body)
         if error is not None:

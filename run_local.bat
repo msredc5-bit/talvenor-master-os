@@ -8,6 +8,11 @@ REM      VALUES are never printed here.
 REM   1) Runs sync_status.py - refreshes dashboards\status.json from the real files
 REM   2) Runs a local server in the dashboards folder (http://localhost:8765)
 REM   3) Opens the 3D dashboard in the browser
+REM   F2 batch 1 — the Founder Command Center is at
+REM   http://localhost:8765/command-center.html (5 live modules:
+REM   Overview, Roster, CEO, Agency, Approvals). Its Allow/Reject
+REM   buttons need the approval server too (see below); without it
+REM   the Approval Center is display-only.
 REM What it does NOT do:
 REM   Does not run the taskboard - run it with a separate command:
 REM   python scripts\taskboard_server.py  (http://localhost:8766/)

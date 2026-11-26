@@ -72,6 +72,8 @@
   .pill.warn b { color: #f87171; }
   .pill.hold b { color: #fbbf24; }
   .honest { font-size: 13px; color: #f0b429; margin: 0 0 14px; }
+  .snap-banner { display: block; margin: 14px 0 0; padding: 12px 16px; background: #450a0a; border: 1px solid #7f1d1d; border-radius: 10px; font-size: 14px; color: #fecaca; }
+  a.nav-item { text-decoration: none; }
   /* ---------- JARVIS CORE panel ---------- */
   #core-panel { background: #101013; border: 1px solid #232328; border-radius: 16px; overflow: hidden; margin-bottom: 18px; }
   body.light #core-panel { background: #111827; border-color: #111827; }
@@ -132,6 +134,7 @@
   <button class="nav-item" data-key="goals"><span class="ic">◉</span> Goals</button>
   <button class="nav-item" data-key="ai_chat"><span class="ic">💬</span> AI Chat</button>
   <button class="nav-item" data-key="team"><span class="ic">∴</span> AI Team</button>
+  <a class="nav-item" href="command-center.html"><span class="ic">⌘</span> Command Center <span class="nav-badge">F2 · live</span></a>
   <div class="nav-sec">Content</div>
   <button class="nav-item" data-key="content"><span class="ic">▦</span> Content</button>
   <button class="nav-item" data-key="research"><span class="ic">🔍</span> Research</button>
@@ -157,6 +160,8 @@
     <span class="top-chip">Brain: <b>mock</b></span>
     <span class="top-chip">Gates: <b>ON</b></span>
   </div>
+
+  <div id="snapshot-banner" class="snap-banner" hidden>⚠️ <b>Last known snapshot, 2026-11-20</b> — status.json could not be read, so every number on this page is from the dated snapshot, NOT live. Open with run_local.bat, or run <code>python scripts\sync_status.py</code> and refresh.</div>
 
   <div id="content">
     <h1 id="greet">Good evening, Boss.</h1>
@@ -219,28 +224,28 @@ const DETAILS = {
   gate: { title: "🛡️ Approval Gate — ON", tag: "gated: send · publish · spend · delete",
     body: "<p><b>Gate words:</b> <code>ok</code> = plan/asset approval · <code>go</code> = move a build phase forward · <code>post it</code> = publish · <code>send</code> = send · <code>upload it</code> = video upload.</p><p>There is no auto-approve path. Gated work without a gate word gets stuck in <b>PENDING</b> — it never runs by itself.</p><p>Spend cap: <b>$0</b>.</p>" },
   agency: { title: "🏢 Agency — Talvenor AI Receptionist", tag: "MAIN · 5 section · 15 worker + 6 agent",
-    body: "<p><b>5 sections:</b> receive · sell · delivery · marketing · ops.</p><p><b>15 workers:</b> ProspectResearcher, OutreachDrafter, ReplyHandler, NegotiationCoach, RetellBuilder, QAEngineer, OnboardingAgent, ContentPlanner, VideoProducer, CaptionWriter, PublishPrep, ObjectionSimulator, InboxTriager, ReportCompiler, SchedulerAssistant.</p><p><b>6 section agents:</b> ClientIntakeReceiver, SalesCloser, FollowUpAgent, ServiceDeliveryManager, ClientSuccessAgent, BillingInvoiceAgent.</p><p>The Chief really calls workers — mock brain, DRAFT ONLY. First mail <b>162</b> · paying clients <b>0</b> · Email <b>PAUSED</b>.</p><p>Niche: US home-service (plumbing, HVAC, roofing…) · dental/medical excluded.</p>" },
+    body: "<p><b>5 sections:</b> receive · sell · delivery · marketing · ops.</p><p><b>15 workers:</b> ProspectResearcher, OutreachDrafter, ReplyHandler, NegotiationCoach, RetellBuilder, QAEngineer, OnboardingAgent, ContentPlanner, VideoProducer, CaptionWriter, PublishPrep, ObjectionSimulator, InboxTriager, ReportCompiler, SchedulerAssistant.</p><p><b>6 section agents:</b> ClientIntakeReceiver, SalesCloser, FollowUpAgent, ServiceDeliveryManager, ClientSuccessAgent, BillingInvoiceAgent.</p><p>The Chief really calls workers — mock brain, DRAFT ONLY. First mail <b>{first_mails}</b> · paying clients <b>{paying_clients}</b> · Email <b>{email}</b>.</p><p>Niche: US home-service (plumbing, HVAC, roofing…) · dental/medical excluded.</p>" },
   products: { title: "📦 Digital Product — Vet No-Show Recovery Kit", tag: "Gate 0 NOT PASSED · 6 section · 7 agent",
-    body: "<p><b>6 sections:</b> product · research · launch · sales · support · finance.</p><p><b>7 agents:</b> KitBuilder, KitQA, ClinicResearcher, LaunchManager, KitSales, SupportDrafter, PaymentRailsChecker.</p><p>The kit's blueprint exists — not the kit itself. <b>Gate 0 NOT PASSED</b> — Lemon Squeezy signup test (~15 minutes) is Boss's step. If it does not pass, the kit cannot be built/sold — code fail-closed.</p><p>PA vet list <b>39/100</b> (verified) · price $49 one-time · sales 0.</p>" },
+    body: "<p><b>6 sections:</b> product · research · launch · sales · support · finance.</p><p><b>7 agents:</b> KitBuilder, KitQA, ClinicResearcher, LaunchManager, KitSales, SupportDrafter, PaymentRailsChecker.</p><p>The kit's blueprint exists — not the kit itself. <b>Gate 0 NOT PASSED</b> — Lemon Squeezy signup test (~15 minutes) is Boss's step. If it does not pass, the kit cannot be built/sold — code fail-closed.</p><p>PA vet list <b>{pa_list}/100</b> (verified) · price $49 one-time · sales 0.</p>" },
   content: { title: "🎬 Content Engine — Creator OS / ToolPilot", tag: "13 stage: REAL 0 · MOCK 10 · BLOCKED 3",
     body: "<p><b>5 sections:</b> plan · produce · publish · analyze · growth.</p><p><b>6 workers:</b> TopicResearcher, ScriptWriter, VisualProducer, CaptionWriter, PublishPrep, PerformanceTracker.</p><p><b>10 section agents:</b> ContentPlanner, PerformanceAnalyst, Growth, Repurpose + 6 wrappers (TopicResearcher, ScriptWriter, VisualProducer, CaptionWriter, PublishPrep, PerformanceTracker).</p><p>Upload <b>OFF</b> (stage 9) — needs Boss's 'upload it' + credential. Makes no video files — no footage/GPU.</p><p>ToolPilot: videos 0 · subs 0 · VOICE.md DRAFT · GPU AMD Radeon integrated 496 MB VRAM (FramePack/WanGP will not run).</p>" },
   team: { title: "∴ AI Team — 3 Chiefs, 31 workers/agents", tag: "full roster · brain mock · DRAFT ONLY",
     body: "<p><b>Agency Chief:</b> 15 workers — ProspectResearcher, OutreachDrafter, ReplyHandler, NegotiationCoach, RetellBuilder, QAEngineer, OnboardingAgent, ContentPlanner, VideoProducer, CaptionWriter, PublishPrep, ObjectionSimulator, InboxTriager, ReportCompiler, SchedulerAssistant — + 6 section agents — ClientIntakeReceiver, SalesCloser, FollowUpAgent, ServiceDeliveryManager, ClientSuccessAgent, BillingInvoiceAgent.</p><p><b>Products Chief:</b> 7 agents — KitBuilder, KitQA, ClinicResearcher, LaunchManager, KitSales, SupportDrafter, PaymentRailsChecker.</p><p><b>Content Chief:</b> 6 workers — TopicResearcher, ScriptWriter, VisualProducer, CaptionWriter, PublishPrep, PerformanceTracker — + 10 section agents — ContentPlanner, PerformanceAnalyst, Growth, Repurpose + 6 wrappers.</p><p>All output comes with a DRAFT label — because the brain is mock.</p>" },
-  leads: { title: "🎯 Leads — first mail 162", tag: "replies 0 · remaining 374",
-    body: "<p>First mail <b>162</b> sent, replies <b>0</b>. <b>374</b> more not-emailed rows remain in the pool. Replies to hello@ go to Zoho — Boss checks them himself.</p><p>Follow-up rule: no follow-up in a state until 100 first mails in that state. No state is at 100.</p>" },
+  leads: { title: "🎯 Leads — first mail {first_mails}", tag: "replies 0",
+    body: "<p>First mail <b>{first_mails}</b> sent, replies <b>0</b>. More not-emailed rows remain in the pool. Replies to hello@ go to Zoho — Boss checks them himself.</p><p>Follow-up rule: no follow-up in a state until 100 first mails in that state. No state is at 100.</p>" },
   calls: { title: "📞 Calls — Sophia", tag: "+1 (947) 223-0244",
     body: "<p>Sophia (AI receptionist) answers on this number: <b>+1 (947) 223-0244</b>. There is a 60-second live demo. Booking: a 15-minute demo call — <code>https://calendar.app.google/WLoxBfnLGTdjK3LB8</code></p><p>Cold calling is fully stopped — it cannot be done without a US number.</p>" },
   emails: { title: "✉️ Emails — PAUSED", tag: "stopped since 2026-11-14",
     body: "<p>Sending email is <b>PAUSED</b> — Boss's order. Reason: SPF has no Gmail include, no DMARC record, DKIM not aligned. Bounce 6/186 ≈ 3.2%.</p><p>The DNS fix is still in Boss's hands — once the 2 records are set, say 'check koro' to verify, then a seed test, then restart.</p>" },
-  approvals: { title: "✓ Approvals — pending 0", tag: "Gate ON · no auto-approve",
-    body: "<p>Pending approvals: <b>0</b>. Gate words: <code>ok</code> / <code>go</code> / <code>post it</code> / <code>send</code> / <code>upload it</code> — without your exact word, nothing is sent/published/spent/deleted.</p>" },
+  approvals: { title: "✓ Approvals — pending {approvals_pending}", tag: "Gate ON · no auto-approve",
+    body: "<p>Pending approvals: <b>{approvals_pending}</b>. Gate words: <code>ok</code> / <code>go</code> / <code>post it</code> / <code>send</code> / <code>upload it</code> — without your exact word, nothing is sent/published/spent/deleted.</p>" },
   revenue: { title: "💰 Revenue — $0", tag: "paying clients 0",
-    body: "<p>Paying clients: <b>0</b>. Revenue <b>$0</b>. Kit sales 0 (Gate 0).</p><p>Pricing LOCKED: Starter $547 / Growth $1,109 / Scale $1,672 per month — prices are never told to a prospect without Boss's word.</p>" },
+    body: "<p>Paying clients: <b>{paying_clients}</b>. Revenue <b>$0</b>. Kit sales 0 (Gate 0).</p><p>Pricing LOCKED: Starter $547 / Growth $1,109 / Scale $1,672 per month — prices are never told to a prospect without Boss's word.</p>" },
   gate0: { title: "🚩 Gate 0 — NOT PASSED", tag: "Vet Kit is stuck",
-    body: "<p><b>Gate 0 NOT PASSED</b> — Lemon Squeezy signup test (~15 minutes) is Boss's step. If it does not pass, the kit cannot be built/sold — code fail-closed.</p><p>PA vet list <b>39/100</b> (verified). If it fails, Polar, then Gumroad — that is the next step.</p>" },
+    body: "<p><b>Gate 0 NOT PASSED</b> — Lemon Squeezy signup test (~15 minutes) is Boss's step. If it does not pass, the kit cannot be built/sold — code fail-closed.</p><p>PA vet list <b>{pa_list}/100</b> (verified). If it fails, Polar, then Gumroad — that is the next step.</p>" },
   goals: { title: "🎯 Goals — three tracks together", tag: "2026-11-12 FINAL",
     body: "<p>(1) <b>Receptionist agency — MAIN</b> · (2) <b>Digital product</b> — Vet Kit $49 · (3) <b>YouTube channel</b> — ToolPilot (@ToolPilotai69, ready, OBS recording remaining) or a new channel — your answer is still pending.</p>" },
-  research: { title: "🔍 Research — PA vet list 39/100", tag: "verified",
+  research: { title: "🔍 Research — PA vet list {pa_list}/100", tag: "verified",
     body: "<p>39 independent PA vet clinics verified — public emails found for 8, the other 31 are 'Not publicly listed'. Chains (Banfield, VCA) excluded.</p><p>Prospect research rule: look at the website + need signals; email/phone/address are never written by guessing.</p>" },
   posts: { title: "🗎 Posts — this week (Nov 16–22)", tag: "Mon ✅ Thu ✅",
     body: "<p>Mon Reel <b>POSTED</b> (FB+IG) · Thu carousel <b>POSTED</b> (FB+IG) · Tue/Wed ready, not posted · Fri LinkedIn — Boss posts himself (text given).</p><p>Rule: nothing posts without 'post it'.</p>" },
@@ -256,6 +261,7 @@ const DETAILS = {
 
 let S = FALLBACK;
 let graphApi = null;
+let currentDetail = null; // open detail node, re-rendered after each status load
 
 function pill(label, val, cls) {
   return `<span class="pill ${cls || ""}">${label}: <b>${val}</b></span>`;
@@ -296,7 +302,17 @@ function renderAll() {
 function showDetail(key) {
   const o = DETAILS[key];
   if (!o) return;
-  document.getElementById("detail").innerHTML = "<h2>" + o.title + "</h2><p><span class='tag'>" + o.tag + "</span></p>" + o.body;
+  currentDetail = key;
+  // F2 batch 1 — detail numbers are placeholders filled from the live
+  // status file (S); the FALLBACK snapshot values render only when
+  // status.json could not be read (banner labels that state).
+  const sub = (t) => t
+    .replaceAll("{first_mails}", String(S.first_mails))
+    .replaceAll("{pa_list}", String(S.pa_list))
+    .replaceAll("{approvals_pending}", S.approvals_pending == null ? "?" : String(S.approvals_pending))
+    .replaceAll("{paying_clients}", String(S.paying_clients))
+    .replaceAll("{email}", String(S.email));
+  document.getElementById("detail").innerHTML = "<h2>" + sub(o.title) + "</h2><p><span class='tag'>" + sub(o.tag) + "</span></p>" + sub(o.body);
   document.querySelectorAll(".chip").forEach(c => c.classList.toggle("sel", c.dataset.key === key));
   document.querySelectorAll(".nav-item").forEach(n => n.classList.toggle("active", n.dataset.key === key));
   if (graphApi) graphApi.select(key);
@@ -308,11 +324,14 @@ async function loadStatus() {
     const j = await r.json();
     S = Object.assign({}, FALLBACK, j);
     window.__statusSource = "status.json (live, " + new Date().toLocaleString("bn-BD") + ")";
+    document.getElementById("snapshot-banner").hidden = true;
   } catch (e) {
     S = FALLBACK;
     window.__statusSource = "fallback snapshot 2026-11-20 — status.json could not be read (open with run_local.bat, or run python scripts\\sync_status.py)";
+    document.getElementById("snapshot-banner").hidden = false;
   }
   renderAll();
+  if (currentDetail) showDetail(currentDetail);
 }
 
 // ---------- Node chips ----------
@@ -525,7 +544,7 @@ function initGraph() {
     const p = d.multiplyScalar(10.6).add(CENTER);
     return node(key, name, color, r, p.x, p.y, p.z, label, labelColor);
   }
-  const leads = satellite("leads", "Leads", 0xeab308, 55, 18, 0.5, "Leads · 162", "#fde047"); edge(agency.chief, leads);
+  const leads = satellite("leads", "Leads", 0xeab308, 55, 18, 0.5, "Leads", "#fde047"); edge(agency.chief, leads);
   const calls = satellite("calls", "Calls", 0x34d399, 310, 20, 0.5, "Calls · Sophia", "#6ee7b7"); edge(agency.chief, calls);
   const emails = satellite("emails", "Emails", 0xe5e7eb, 175, -14, 0.45, "Emails · PAUSED", "#f3f4f6"); edge(agency.chief, emails);
   const approvals = satellite("approvals", "Approvals", 0xec4899, 205, -10, 0.45, "Approvals · 0", "#f9a8d4"); edge(gate, approvals);
