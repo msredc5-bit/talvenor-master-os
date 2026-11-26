@@ -1,7 +1,7 @@
-# TALVENOR MASTER OS — UNIFIED BUSINESS OPERATING SYSTEM
+# FOUNDER OS — UNIFIED BUSINESS OPERATING SYSTEM
 # MASTER ARCHITECTURE
 
-**Version:** 1.0 — Phase 0 deliverable
+**Version:** 1.0 — FOUNDER OS Phase F0 deliverable (renamed in F1, 2026-11-26: Talvenor Master OS → FOUNDER OS; phases F0–F10 are the only numbering from here)
 **Date:** 2026-11-22
 **Source brief:** `~/workspace/unified-business-os/brief-2026-11-22.md` (saved as-is)
 **Audit basis:** Full repository audit run 2026-11-22 (read-only inspection + 21 check scripts, 380/381 passing). The audit report was delivered to the Founder in chat on 2026-11-22; this document is the architecture + gap analysis + plan that follows from it.

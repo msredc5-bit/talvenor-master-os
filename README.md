@@ -1,4 +1,6 @@
-# Talvenor Master OS — the real system (Phase 11 + Improvements 1–3 COMPLETE: Live Brain adapter + 8 LLM providers + Trust Gate + Memory/Ledger + Quiet Schedules — brain still mock)
+# FOUNDER OS — the real system (formerly Talvenor Master OS; Phases F0–F10 are the only numbering — old Phase 0–11 labels are historical)
+
+**FOUNDER OS numbering (F1, 2026-11-26):** the Founder approved the FOUNDER OS audit ("ok"). From here, phases are F0–F10 only. The work already built under local-first Phases 0–9 is preserved and mapped in the audit (§14). This repo's name on disk stays `talvenor-master-os` — no files were renamed or moved.
 
 **What this is:** the folder of Boss's 3 businesses' real operating system. It is
 not a picture or a mock — Phase 0's skeleton + CEO Core + approval

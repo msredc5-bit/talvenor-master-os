@@ -1485,3 +1485,52 @@ BLOCKED — untouched.
   (META_API_KEY + curl test, then his production-unlock word).
   No live API call was made anywhere in Part 1. STOP — no push,
   no ZIP from this worker.
+
+## FOUNDER OS F1 — Agency Core and Brain Preservation (2026-11-26)
+
+- Founder approved the FOUNDER OS Phase 0 audit ("ok", 2026-11-26 17:55
+  Dhaka). FOUNDER OS Phases F0–F10 are now the only numbering (M0):
+  `README.md` + `TALVENOR_MASTER_ARCHITECTURE.md` headers updated to
+  FOUNDER OS (docs only, no code, no renames).
+- **Live-brain proof recorded as a FACT (M1), not a file:** Boss's PC,
+  2026-11-26 04:13 Dhaka — `setup_brain.py` saved the dev brain as
+  `ollama:qwen2.5-coder:1.5b`, chain
+  [ollama:qwen2.5-coder:1.5b, ollama:gemma4:12b,
+  gemini:gemini-3.5-flash-lite, openrouter:openrouter/free];
+  `check_live_brain.py --live` PASS in 1.9s, tokens 83/23/106
+  ("Talvenor Master OS is a personal CEO agent designed to assist
+  solo founders in managing their businesses effectively.");
+  second probe PASS 2.7s at 06:03. Source: Boss's screenshots.
+  This snapshot's brain stays `mock` — the PC config was NOT copied
+  here. Full note: `docs/live-brain-proof-2026-11-26.md` + the
+  `development_brain.note` in `00-CEO-Core/config.json`.
+- **gemma4:12b removed from the dev fallback chain (F1):** it cannot
+  run on an 8 GB PC (llama-server OOM crash, verified twice
+  2026-11-26) and keeping it wasted a 5-minute timeout on every
+  cold start. New chain: [ollama:qwen2.5-coder:1.5b,
+  gemini:gemini-3.5-flash-lite, openrouter:openrouter/free].
+  Changed: `config.json` fallback_chain + note, `live_brain.py`
+  DEFAULT_MODELS, `brain.py` _DEV_DEFAULT_MODELS,
+  `ollama_provider.py` DEFAULT_MODEL, `setup_brain.py`
+  OLLAMA_PREFERENCE, `check_providers.py` fixture, setup-step help
+  text in `check_live_brain.py`, `PROVIDERS-SETUP.md`, `LOCAL-RUN.md`,
+  `CLAUDE-CODE-PROMPT.md` (Claude Code now runs on
+  qwen2.5-coder:1.5b — gemma4:12b crashed it). NOT changed: the
+  Ollama adapter itself; gemma4:12b stays listed as an available
+  model (`providers.ollama.models`) and in the free-only guard tests
+  (any Ollama model is free-only). This change stays LOCAL — no push.
+- **Environment checker (C1–C5) built:** `check_pc_env.bat` (repo
+  root, double-click, CRLF) + `scripts/check_pc_env.py` — checks only,
+  installs nothing, writes `pc-env-check.txt` and opens it in
+  Notepad. C1 Git, C2 Node.js, C3 Antigravity, C4 n8n, C5 voice
+  models. ZIP delivered to Boss separately (see the F1 completion
+  report, `~/workspace/unified-business-os/f1-completion-report-2026-11-26.md`).
+- **PENDING (not done in F1):** M2 — push the 3 Ollama-timeout files
+  to GitHub; needs Boss's separate "push" word. The gemma4-removal
+  change also stays local until that push. Bengali voice-prompt
+  decision (restore Bengali prompts/triggers in `voice/loop.py` or
+  keep English) — prepared as a question for Boss, `voice/loop.py`
+  untouched.
+- Verification: check suite + pytest re-run (see the F1 completion
+  report for totals). Nothing in F1 sends, publishes, spends, or
+  deploys.
