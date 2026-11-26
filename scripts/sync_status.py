@@ -24,6 +24,16 @@ Sources:
     exists + whether Piper exists)
   - n8n workflow JSON (2, outside folder) — reads the "active" flag
     (false = NOT LIVE, true = LIVE — whatever is true is what is written)
+  - FOUNDER OS phase (F2 batch 1) — a constant in this file, sourced
+    from founder-os-audit-2026-11-26.md §14; config.json's "phase"
+    is old numbering, kept as history, never the phase display
+  - Agent Team Roster — 01-Agency-Department/agents/agent-registry/
+    registry.json (69 entries) + logs/skill_executions.jsonl (latest
+    skill-load timestamp per skill file) + the worker file's
+    [MOCK DRAFT] marker (draft / coded / unknown)
+  - Latest CEO report — copied byte-for-byte to dashboards/
+    ceo-report.json so the Command Center (same origin) can fetch it;
+    a stale copy is removed when no report is available
 
 Run:  python3 scripts/sync_status.py
 """
@@ -510,6 +520,94 @@ def read_ceo_report():
     return result
 
 
+# F2 batch 1 — FOUNDER OS phase. The audit (§14) is the source:
+# F0–F10 is the only numbering from the audit's approval onward.
+# Update this constant when a phase's exit gate passes. Never derive
+# the phase from config.json — its "phase": 11 is old numbering.
+FOUNDER_OS_PHASE = {
+    "phase": "F2",
+    "batch": 1,
+    "label": "Founder Command Center — batch 1",
+    "source": "founder-os-audit-2026-11-26.md §14 (F2)",
+}
+
+
+def read_founder_os():
+    """Current FOUNDER OS phase (F2 batch 1)."""
+    return dict(FOUNDER_OS_PHASE)
+
+
+def read_roster():
+    """Agent Team Roster (F2 batch 1): one row per registry.json entry.
+
+    worker: "draft" when the worker file contains the [MOCK DRAFT]
+    marker, "coded" when it does not, "unknown" when the file cannot
+    be read. last_skill_load: latest timestamp in
+    logs/skill_executions.jsonl whose result is this entry's
+    skill_file, else "unknown" — a skill load is activity evidence,
+    not proof the agent executed a task; the card labels it as such.
+    """
+    reg_path = os.path.join(BASE, "01-Agency-Department", "agents",
+                            "agent-registry", "registry.json")
+    reg = _read_json(reg_path)
+    if not isinstance(reg, list):
+        return {"total": UNKNOWN, "entries": [], "with_activity": UNKNOWN,
+                "draft": UNKNOWN, "coded": UNKNOWN}
+    last_load = {}
+    log_path = os.path.join(BASE, "logs", "skill_executions.jsonl")
+    try:
+        with open(log_path, encoding="utf-8") as f:
+            for line in f:
+                try:
+                    ev = json.loads(line)
+                except ValueError:
+                    continue
+                if not isinstance(ev, dict):
+                    continue
+                result = ev.get("result")
+                ts = ev.get("timestamp")
+                if isinstance(result, str) and isinstance(ts, str):
+                    if result not in last_load or ts > last_load[result]:
+                        last_load[result] = ts
+    except OSError:
+        pass
+    entries = []
+    draft = coded = with_activity = 0
+    for e in reg:
+        if not isinstance(e, dict):
+            continue
+        worker_file = e.get("worker_file") or UNKNOWN
+        worker = UNKNOWN
+        if isinstance(worker_file, str) and worker_file != UNKNOWN:
+            try:
+                with open(os.path.join(BASE, worker_file),
+                          encoding="utf-8", errors="ignore") as f:
+                    head = f.read(65536)
+                worker = "draft" if "MOCK DRAFT" in head else "coded"
+            except OSError:
+                worker = UNKNOWN
+        if worker == "draft":
+            draft += 1
+        elif worker == "coded":
+            coded += 1
+        skill_file = e.get("skill_file") or UNKNOWN
+        last = (last_load.get(skill_file, UNKNOWN)
+                if isinstance(skill_file, str) else UNKNOWN)
+        if last != UNKNOWN:
+            with_activity += 1
+        entries.append({
+            "role": e.get("role", UNKNOWN),
+            "department": e.get("department", UNKNOWN),
+            "skill_file": skill_file,
+            "worker_file": worker_file,
+            "status": e.get("status", UNKNOWN),
+            "worker": worker,
+            "last_skill_load": last,
+        })
+    return {"total": len(entries), "entries": entries,
+            "with_activity": with_activity, "draft": draft, "coded": coded}
+
+
 def collect_status():
     """Gathers the true state from all sources in one place. Unknown if a value is missing."""
     cfg = _read_json(os.path.join(BASE, "00-CEO-Core", "config.json")) or {}
@@ -562,6 +660,9 @@ def collect_status():
         "approvals": read_approvals_detail(appr_records),
         "control": read_control(),
         "ceo_report": read_ceo_report(),
+        # F2 batch 1 — additive keys only; existing keys never renamed.
+        "founder_os": read_founder_os(),
+        "roster": read_roster(),
     }
 
 
@@ -827,6 +928,31 @@ def write_status_json(status):
     return out
 
 
+def write_ceo_report_json(status):
+    """Publishes the latest CEO report JSON into dashboards/ so the
+    Command Center (same origin) can fetch it. Copies the file
+    status["ceo_report"]["path"] byte-for-byte when it is a .json
+    report; removes a stale dashboards/ceo-report.json when no report
+    is available, so the UI never shows an old report as live.
+    Never raises — a missing report is "unknown", not a crash."""
+    out = os.path.join(BASE, "dashboards", "ceo-report.json")
+    ceo = status.get("ceo_report") or {}
+    src_rel = ceo.get("path") if ceo.get("available") else None
+    try:
+        if isinstance(src_rel, str) and src_rel.endswith(".json"):
+            src = os.path.join(BASE, src_rel)
+            with open(src, "rb") as f:
+                data = f.read()
+            with open(out, "wb") as f:
+                f.write(data)
+            return out
+        if os.path.exists(out):
+            os.remove(out)
+    except OSError:
+        pass
+    return None
+
+
 def main():
     status = collect_status()
     html = render_html(status)
@@ -834,8 +960,10 @@ def main():
     with open(out, "w", encoding="utf-8") as f:
         f.write(html)
     json_out = write_status_json(status)
+    ceo_json_out = write_ceo_report_json(status)
     print("sync done ->", out)
     print("sync done ->", json_out)
+    print("sync done ->", ceo_json_out or "ceo-report.json not published")
     bo = status["business_os"]
     print(f"phase={status['phase']} clients={status['paying_clients']} "
           f"first_mails={status['first_mails']} email={status['email']} "
@@ -858,6 +986,12 @@ def main():
           f"approvals_pending={status['approvals']['pending_count']} · "
           f"control={status['control']} · "
           f"ceo_report_available={status['ceo_report']['available']}")
+    fo = status["founder_os"]
+    ro = status["roster"]
+    print(f"founder_os={fo['phase']} batch {fo['batch']} · "
+          f"roster={ro['total']} agents "
+          f"({ro['with_activity']} with activity, "
+          f"{ro['draft']} draft, {ro['coded']} coded)")
     return 0
 
 

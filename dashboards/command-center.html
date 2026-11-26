@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOUNDER OS — Command Center (F2 batch 1)</title>
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --bg: #07090D; --panel: #0B1D33; --panel2: #0e2547; --line: #1e3a5f;
+    --text: #e8ecf1; --muted: #8fa3bd; --teal: #14B8A6; --cyan: #22D3EE;
+    --blue: #3B82F6; --purple: #8B5CF6; --amber: #f0b429; --red: #f87171;
+    --green: #34d399;
+  }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+  a { color: var(--cyan); }
+  /* ---------- Sidebar ---------- */
+  #sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 248px; background: #05080f; border-right: 1px solid var(--line); padding: 18px 14px; display: flex; flex-direction: column; z-index: 10; overflow-y: auto; }
+  #logo { font-size: 20px; font-weight: 800; padding: 2px 8px 4px; letter-spacing: .2px; }
+  #logo span { color: var(--teal); }
+  #logo-sub { font-size: 11px; color: var(--muted); padding: 0 8px 12px; }
+  .nav-sec { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 14px 10px 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: 0; color: #cbd5e1; font-size: 14px; padding: 8px 10px; border-radius: 8px; cursor: pointer; text-decoration: none; }
+  .nav-item:hover { background: #101c33; }
+  .nav-item.active { background: var(--panel2); color: #fff; font-weight: 600; }
+  .nav-item.planned { color: #5b6b82; cursor: default; }
+  .nav-item.planned:hover { background: none; }
+  .nav-item .ic { width: 18px; text-align: center; }
+  .nav-badge { margin-left: auto; background: #16294a; color: #9db4d6; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+  .nav-badge.live { background: var(--teal); color: #042f2e; }
+  #side-foot { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  /* ---------- Main ---------- */
+  #main { margin-left: 248px; min-height: 100vh; }
+  #topbar { display: flex; align-items: center; gap: 12px; padding: 14px 22px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); z-index: 5; flex-wrap: wrap; }
+  #topbar h1 { font-size: 18px; margin: 0; }
+  .src-line { font-size: 12px; color: var(--muted); }
+  .pill { font-size: 12px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; white-space: nowrap; }
+  .pill.ok { color: var(--green); border-color: #14532d; }
+  .pill.warn { color: var(--amber); border-color: #713f12; }
+  .pill.bad { color: var(--red); border-color: #7f1d1d; }
+  #content { padding: 22px 26px 30px; max-width: 1180px; }
+  .banner { border: 1px solid #713f12; background: #2a1c05; color: #fcd34d; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 14px; }
+  .banner.bad { border-color: #7f1d1d; background: #2a0a0a; color: #fca5a5; }
+  section.mod { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.mod h2 { margin: 0 0 4px; font-size: 18px; }
+  section.mod h2 .mnum { color: var(--teal); }
+  .mod-sub { font-size: 13px; color: var(--muted); margin: 0 0 14px; }
+  .cards { display: flex; flex-wrap: wrap; gap: 10px; }
+  .card { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; min-width: 150px; flex: 1 1 160px; }
+  .card .k { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .card .v { font-size: 22px; font-weight: 800; margin-top: 4px; }
+  .card .v.small { font-size: 16px; }
+  .card .s { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .src { font-size: 11px; color: var(--muted); margin-top: 12px; }
+  .dept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+  .dept { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .dept h3 { margin: 0 0 6px; font-size: 15px; }
+  .dept .row { font-size: 13px; color: var(--muted); margin: 3px 0; }
+  .dept .row b { color: var(--text); }
+  .tag { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 8px; }
+  .tag.ok { background: #14532d; color: #86efac; }
+  .tag.warn { background: #713f12; color: #fcd34d; }
+  .tag.bad { background: #7f1d1d; color: #fca5a5; }
+  .tag.info { background: #1e3a8a; color: #bfdbfe; }
+  .tag.mut { background: #1f2937; color: #9ca3af; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .filters input, .filters select { background: #0e2547; border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 8px 10px; font-size: 13px; }
+  .filters input { flex: 1; min-width: 200px; }
+  ul.tight { margin: 6px 0; padding-left: 20px; }
+  ul.tight li { margin: 4px 0; font-size: 14px; }
+  .appr { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+  .appr.decided { opacity: .75; }
+  .appr h3 { margin: 0 0 4px; font-size: 15px; }
+  .appr .meta { font-size: 12px; color: var(--muted); margin: 2px 0; }
+  .appr .gate { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; align-items: center; }
+  .appr input { background: #0e2547; border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 8px 10px; font-size: 13px; min-width: 180px; }
+  .btn { border: 1px solid var(--line); background: #16294a; color: #fff; border-radius: 8px; padding: 8px 16px; font-size: 13px; cursor: pointer; }
+  .btn:hover:not(:disabled) { background: #1e3a5f; }
+  .btn.allow { background: var(--teal); border-color: var(--teal); color: #042f2e; font-weight: 700; }
+  .btn.reject { background: transparent; color: var(--red); border-color: #7f1d1d; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .err { color: var(--red); font-size: 13px; margin-top: 8px; }
+  .ok-msg { color: var(--green); font-size: 13px; margin-top: 8px; }
+  code { background: #0e2547; padding: 1px 6px; border-radius: 6px; font-size: 12px; }
+  .mono { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12px; }
+  @media (max-width: 900px) {
+    #sidebar { position: static; width: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+    #main { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+<nav id="sidebar">
+  <div id="logo">✦ FOUNDER <span>OS</span></div>
+  <div id="logo-sub">Command Center · F2 batch 1 · localhost only</div>
+  <div class="nav-sec">Live — batch 1</div>
+  <a class="nav-item active" href="#m1"><span class="ic">◉</span> Founder Overview <span class="nav-badge live">live</span></a>
+  <a class="nav-item" href="#m5"><span class="ic">∴</span> Agent Team Roster <span class="nav-badge live">live</span></a>
+  <a class="nav-item" href="#m6"><span class="ic">🧠</span> Main CEO Dashboard <span class="nav-badge live">live</span></a>
+  <a class="nav-item" href="#m7"><span class="ic">🏢</span> Agency Dashboard <span class="nav-badge live">live</span></a>
+  <a class="nav-item" href="#m11"><span class="ic">✓</span> Approval Center <span class="nav-badge live">live</span></a>
+  <div class="nav-sec">Planned — later batches</div>
+  <span class="nav-item planned"><span class="ic">📋</span> Task Center <span class="nav-badge">batch 2</span></span>
+  <span class="nav-item planned"><span class="ic">🗎</span> Reports Center <span class="nav-badge">batch 2</span></span>
+  <span class="nav-item planned"><span class="ic">💰</span> Financial Dashboard <span class="nav-badge">batch 2</span></span>
+  <span class="nav-item planned"><span class="ic">♥</span> System Health <span class="nav-badge">batch 2</span></span>
+  <span class="nav-item planned"><span class="ic">⚙</span> Settings &amp; Permissions <span class="nav-badge">batch 2</span></span>
+  <span class="nav-item planned"><span class="ic">💬</span> Unified AI Chat <span class="nav-badge">batch 3</span></span>
+  <span class="nav-item planned"><span class="ic">🎙️</span> Voice Command <span class="nav-badge">batch 3</span></span>
+  <span class="nav-item planned"><span class="ic">🎭</span> Personality Switcher <span class="nav-badge">batch 3</span></span>
+  <span class="nav-item planned"><span class="ic">▶</span> Live Execution Monitor <span class="nav-badge">batch 3</span></span>
+  <span class="nav-item planned"><span class="ic">🧠</span> Knowledge &amp; Memory <span class="nav-badge">batch 3</span></span>
+  <span class="nav-item planned"><span class="ic">📚</span> Library <span class="nav-badge">batch 3</span></span>
+  <span class="nav-item planned"><span class="ic">🔌</span> Integration Center <span class="nav-badge">batch 3</span></span>
+  <span class="nav-item planned"><span class="ic">📦</span> Digital Business <span class="nav-badge">F7</span></span>
+  <span class="nav-item planned"><span class="ic">🎬</span> Content Factory <span class="nav-badge">F8</span></span>
+  <div id="side-foot">
+    <a href="dashboard-3d.html">← 3D Dashboard (static)</a><br><br>
+    Localhost only. No fake data — a missing source shows "unknown".
+  </div>
+</nav>
+
+<div id="main">
+  <div id="topbar">
+    <h1>Founder Command Center</h1>
+    <span class="src-line" id="src-line">Loading data…</span>
+    <span class="pill warn" id="server-pill">Approval server: checking…</span>
+  </div>
+
+  <div id="content">
+    <div class="banner bad" id="data-banner" hidden></div>
+
+    <section class="mod" id="m1">
+      <h2><span class="mnum">1.</span> Founder Overview</h2>
+      <p class="mod-sub">The whole system at a glance. Every number comes from the live status file.</p>
+      <div class="cards" id="overview-cards"></div>
+      <p class="src">Source: dashboards/status.json (founder_os, first_mails, paying_clients, email, gate0, usage_ledger, task_counts, voice).</p>
+    </section>
+
+    <section class="mod" id="m5">
+      <h2><span class="mnum">5.</span> Agent Team Roster</h2>
+      <p class="mod-sub">Every agent in the registry. "Worker" is the worker file's own marker: <b>draft</b> means the file returns [MOCK DRAFT], <b>coded</b> means it does not. "Last skill load" is the latest time the skill finder loaded that agent's skill file — activity evidence, not proof the agent ran a task. "unknown" means no record exists.</p>
+      <div class="filters">
+        <input id="roster-search" type="search" placeholder="Search role, department, skill…" autocomplete="off">
+        <select id="roster-dept"><option value="">All departments</option></select>
+        <select id="roster-worker">
+          <option value="">All workers</option>
+          <option value="draft">draft</option>
+          <option value="coded">coded</option>
+          <option value="unknown">unknown</option>
+        </select>
+      </div>
+      <div id="roster-summary" class="mod-sub"></div>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Role</th><th>Department</th><th>Worker</th><th>Last skill load</th><th>Skill file</th></tr></thead>
+        <tbody id="roster-body"></tbody>
+      </table>
+      </div>
+      <p class="src">Source: dashboards/status.json (roster) — registry.json + logs/skill_executions.jsonl + worker-file marker, via scripts/sync_status.py.</p>
+    </section>
+
+    <section class="mod" id="m6">
+      <h2><span class="mnum">6.</span> Main CEO Dashboard</h2>
+      <p class="mod-sub">The CEO's own weekly report, as generated — not re-typed.</p>
+      <div id="ceo-body"></div>
+      <p class="src">Source: dashboards/ceo-report.json (copy of the latest CEO report in reports/ceo/, published by scripts/sync_status.py).</p>
+    </section>
+
+    <section class="mod" id="m7">
+      <h2><span class="mnum">7.</span> Agency Dashboard</h2>
+      <p class="mod-sub">The 8 Agency departments: workflow present, report compiles, last execution.</p>
+      <div class="dept-grid" id="dept-grid"></div>
+      <p class="src">Source: dashboards/status.json (departments, business_os.agency).</p>
+    </section>
+
+    <section class="mod" id="m11">
+      <h2><span class="mnum">11.</span> Approval Center</h2>
+      <p class="mod-sub">Pending approvals, with the 20-minute TTL countdown. <b>Allow</b> needs the exact gate word, typed by Boss — there is no auto-approve and no "always allow". A decision goes through the existing approval gateway only (ApprovalCentre / gateway methods); the gateway is the only writer of approvals.json. Reject needs no gate word.</p>
+      <div class="banner" id="appr-banner" hidden></div>
+      <div id="appr-list"></div>
+      <p class="src">Source: dashboards/status.json (approvals); live refresh from the approval server at http://localhost:8766/api/approvals when it is running.</p>
+    </section>
+
+    <footer class="src" style="margin-top: 8px">
+      FOUNDER OS · Command Center F2 batch 1 · localhost only (never exposed publicly) ·
+      data: dashboards/status.json + dashboards/ceo-report.json, both published by scripts/sync_status.py ·
+      approvals: 00-CEO-Core/approval_centre.py + the approval gateway — no new approval path.
+    </footer>
+  </div>
+</div>
+<script>
+(function () {
+  "use strict";
+  var TASKBOARD = "http://localhost:8766";
+  var state = { status: null, ceo: null, liveApprovals: null, serverLive: false };
+  var loadTime = new Date();
+
+  function $(id) { return document.getElementById(id); }
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function fmt(v) {
+    if (v === undefined || v === null || v === "unknown" || v === "") return "unknown";
+    return String(v);
+  }
+  function isKnown(v) { return v !== undefined && v !== null && v !== "unknown" && v !== ""; }
+
+  /* ---------- Overview (module 1) ---------- */
+  function renderOverview(s) {
+    var wrap = $("overview-cards");
+    wrap.innerHTML = "";
+    var fo = s.founder_os || {};
+    var u = s.usage_ledger || {};
+    var t = s.task_counts || {};
+    var ap = s.approvals || {};
+    var cards = [
+      { k: "Founder OS phase", v: fmt(fo.phase) + " · batch " + fmt(fo.batch), s: fmt(fo.label) },
+      { k: "Paying clients", v: fmt(s.paying_clients), s: "status.json · paying_clients" },
+      { k: "First mails", v: fmt(s.first_mails), s: "status.json · first_mails" },
+      { k: "Email", v: fmt(s.email), s: "status.json · email" },
+      { k: "Gate 0", v: fmt(s.gate0), s: "status.json · gate0" },
+      { k: "Spend (month)", v: isKnown(u.total_usd) ? "$" + u.total_usd : "unknown", s: "status.json · usage_ledger · hard cap $0 (standing rule)" },
+      { k: "Tasks done", v: fmt(t.done) + " / " + fmt(t.total), s: "status.json · task_counts" },
+      { k: "Voice", v: fmt(s.voice), s: "status.json · voice" },
+      { k: "Approvals pending", v: fmt(ap.pending_count), s: "status.json · approvals", id: "ov-pending" }
+    ];
+    cards.forEach(function (c) {
+      var d = el("div", "card");
+      if (c.id) d.id = c.id;
+      d.appendChild(el("div", "k", c.k));
+      var vv = el("div", "v" + (String(c.v).length > 14 ? " small" : ""), c.v);
+      d.appendChild(vv);
+      d.appendChild(el("div", "s", c.s));
+      wrap.appendChild(d);
+    });
+  }
+
+  /* ---------- Roster (module 5) ---------- */
+  var rosterData = [];
+  function rosterRow(e) {
+    var tr = document.createElement("tr");
+    tr.appendChild(el("td", null, fmt(e.role)));
+    tr.appendChild(el("td", null, fmt(e.department)));
+    var w = el("td");
+    var tag = el("span", "tag " + (e.worker === "coded" ? "ok" : e.worker === "draft" ? "warn" : "mut"), e.worker);
+    w.appendChild(tag);
+    tr.appendChild(w);
+    var last = e.last_skill_load;
+    var lastTxt = "unknown";
+    if (isKnown(last)) {
+      var d = new Date(last);
+      lastTxt = isNaN(d.getTime()) ? fmt(last) : d.toLocaleString();
+    }
+    tr.appendChild(el("td", null, lastTxt));
+    var sf = el("td", "mono", null);
+    sf.textContent = isKnown(e.skill_file) ? e.skill_file.split("/").pop() : "unknown";
+    sf.title = fmt(e.skill_file);
+    tr.appendChild(sf);
+    return tr;
+  }
+  function renderRoster() {
+    var q = ($("roster-search").value || "").toLowerCase();
+    var dept = $("roster-dept").value;
+    var worker = $("roster-worker").value;
+    var body = $("roster-body");
+    body.innerHTML = "";
+    var shown = 0;
+    rosterData.forEach(function (e) {
+      var hay = (fmt(e.role) + " " + fmt(e.department) + " " + fmt(e.skill_file)).toLowerCase();
+      if (q && hay.indexOf(q) === -1) return;
+      if (dept && e.department !== dept) return;
+      if (worker && e.worker !== worker) return;
+      body.appendChild(rosterRow(e));
+      shown += 1;
+    });
+    var r = state.status.roster;
+    $("roster-summary").textContent =
+      fmt(r.total) + " agents · " + fmt(r.with_activity) + " with activity · " +
+      fmt(r.draft) + " draft · " + fmt(r.coded) + " coded · showing " + shown;
+  }
+  function renderRosterInit(roster) {
+    rosterData = roster.entries || [];
+    var sel = $("roster-dept");
+    var depts = [];
+    rosterData.forEach(function (e) {
+      if (isKnown(e.department) && depts.indexOf(e.department) === -1) depts.push(e.department);
+    });
+    depts.sort().forEach(function (d) {
+      var o = document.createElement("option");
+      o.value = d; o.textContent = d;
+      sel.appendChild(o);
+    });
+    ["roster-search", "roster-dept", "roster-worker"].forEach(function (id) {
+      $(id).addEventListener("input", renderRoster);
+      $(id).addEventListener("change", renderRoster);
+    });
+    renderRoster();
+  }
+
+  /* ---------- CEO (module 6) ---------- */
+  function renderCeo(ceo) {
+    var box = $("ceo-body");
+    box.innerHTML = "";
+    if (!ceo) {
+      box.appendChild(el("p", null, "unknown — no CEO report published. Run the CEO report generator, then re-run sync_status.py."));
+      return;
+    }
+    var head = el("p", "mod-sub", null);
+    head.textContent = "Period: " + fmt(ceo.period) + " · generated: " + fmt(ceo.generated_at) + " · " + fmt(ceo.generator);
+    box.appendChild(head);
+    if (Array.isArray(ceo.executive_summary)) {
+      box.appendChild(el("h3", null, "Executive summary"));
+      var ul = el("ul", "tight");
+      ceo.executive_summary.forEach(function (s) { ul.appendChild(el("li", null, s)); });
+      box.appendChild(ul);
+    }
+    if (ceo.tasks && typeof ceo.tasks === "object") {
+      box.appendChild(el("h3", null, "Tasks"));
+      var cards = el("div", "cards");
+      Object.keys(ceo.tasks).forEach(function (k) {
+        var c = el("div", "card");
+        c.appendChild(el("div", "k", k));
+        c.appendChild(el("div", "v", String(ceo.tasks[k])));
+        cards.appendChild(c);
+      });
+      box.appendChild(cards);
+    }
+    if (ceo.approvals && typeof ceo.approvals === "object") {
+      box.appendChild(el("h3", null, "Approvals"));
+      box.appendChild(el("p", null, "Pending: " + fmt(ceo.approvals.pending) + " · decided: " + fmt(ceo.approvals.decided)));
+    }
+    if (Array.isArray(ceo.next_actions)) {
+      box.appendChild(el("h3", null, "Next actions"));
+      var ul2 = el("ul", "tight");
+      ceo.next_actions.forEach(function (s) { ul2.appendChild(el("li", null, s)); });
+      box.appendChild(ul2);
+    }
+    if (Array.isArray(ceo.risks_blocked) && ceo.risks_blocked.length) {
+      box.appendChild(el("h3", null, "Risks / blocked"));
+      var tbl = el("table");
+      var thead = el("thead");
+      var trh = el("tr");
+      ["Item", "Status", "Source"].forEach(function (h) { trh.appendChild(el("th", null, h)); });
+      thead.appendChild(trh); tbl.appendChild(thead);
+      var tb = el("tbody");
+      ceo.risks_blocked.forEach(function (r) {
+        var tr = el("tr");
+        tr.appendChild(el("td", null, fmt(r.item)));
+        tr.appendChild(el("td", null, fmt(r.status)));
+        tr.appendChild(el("td", null, fmt(r.source)));
+        tb.appendChild(tr);
+      });
+      tbl.appendChild(tb);
+      box.appendChild(tbl);
+    }
+  }
+
+  /* ---------- Agency (module 7) ---------- */
+  function renderAgency(s) {
+    var grid = $("dept-grid");
+    grid.innerHTML = "";
+    var depts = s.departments || {};
+    Object.keys(depts).forEach(function (name) {
+      var d = depts[name];
+      var box = el("div", "dept");
+      box.appendChild(el("h3", null, name));
+      var wf = el("div", "row");
+      wf.innerHTML = "Workflow: <b>" + (d.workflow ? "yes" : "no") + "</b>" + (isKnown(d.workflow_file) ? " · " + d.workflow_file.split("/").pop() : "");
+      box.appendChild(wf);
+      var rp = el("div", "row");
+      rp.innerHTML = "Report compiles: <b>" + (d.report ? "yes" : "no") + "</b>";
+      box.appendChild(rp);
+      var le = el("div", "row");
+      le.innerHTML = "Last execution: <b>" + fmt(d.last_execution) + "</b>";
+      box.appendChild(le);
+      grid.appendChild(box);
+    });
+    var ag = (s.business_os && s.business_os.agency) || {};
+    var note = el("p", "src", null);
+    note.textContent = "Agency: " + fmt(ag.managers) + " managers · registry " + fmt(ag.registry) +
+      " · departments " + fmt(ag.departments) + " · ceo_report " + fmt(ag.ceo_report) + ".";
+    grid.appendChild(note);
+  }
+
+  /* ---------- Approvals (module 11) ---------- */
+  function fetchWithTimeout(url, ms, opts) {
+    var ctrl = new AbortController();
+    var t = setTimeout(function () { ctrl.abort(); }, ms);
+    return fetch(url, Object.assign({ signal: ctrl.signal }, opts || {}))
+      .finally(function () { clearTimeout(t); });
+  }
+  function expiryLabel(rec, loadedAt) {
+    var mins = rec.expires_in_minutes;
+    if (mins === undefined || mins === null) return "TTL unknown";
+    var left = mins - (Date.now() - loadedAt) / 60000;
+    if (left <= 0) return "EXPIRED";
+    return "expires in " + Math.ceil(left) + " min";
+  }
+  function approvalCard(rec, loadedAt) {
+    var box = el("div", "appr");
+    var h = el("h3", null, fmt(rec.action));
+    box.appendChild(h);
+    if (isKnown(rec.detail)) box.appendChild(el("p", "meta", fmt(rec.detail)));
+    var meta = el("p", "meta", null);
+    meta.textContent = "requested by " + fmt(rec.requested_by) + " · " + fmt(rec.requested_at) +
+      " · " + expiryLabel(rec, loadedAt);
+    box.appendChild(meta);
+    if (rec.status && rec.status !== "PENDING") {
+      box.classList.add("decided");
+      box.appendChild(el("p", "meta", "status: " + fmt(rec.status)));
+      return box;
+    }
+    var expired = rec.expires_in_minutes !== undefined && rec.expires_in_minutes !== null && rec.expires_in_minutes <= 0;
+    if (state.serverLive) {
+      var gate = el("div", "gate");
+      var input = el("input");
+      input.type = "text";
+      input.placeholder = Array.isArray(rec.allowed_gate_words) && rec.allowed_gate_words.length
+        ? "gate word: " + rec.allowed_gate_words.join(" / ")
+        : "gate word";
+      input.disabled = expired;
+      var allow = el("button", "btn allow", "Allow");
+      var reject = el("button", "btn reject", "Reject");
+      allow.disabled = expired;
+      reject.disabled = expired;
+      var msg = el("div");
+      allow.addEventListener("click", function () {
+        decide(rec, "approve", input.value, box, msg, allow, reject, input);
+      });
+      reject.addEventListener("click", function () {
+        decide(rec, "reject", "", box, msg, allow, reject, input);
+      });
+      gate.appendChild(input);
+      gate.appendChild(allow);
+      gate.appendChild(reject);
+      box.appendChild(gate);
+      box.appendChild(msg);
+      if (expired) box.appendChild(el("p", "err", "Expired — ask for a fresh approval. The gateway will not decide an expired record."));
+    } else {
+      var cli = el("p", "meta", null);
+      cli.textContent = "Display only — the approval server is not running. Decide from the terminal instead:";
+      box.appendChild(cli);
+      var cmd = el("p", "mono", null);
+      cmd.textContent = "python3 00-CEO-Core/approval_centre.py decide " + rec.id +
+        " approve --gate-word <word>   (or: reject)";
+      box.appendChild(cmd);
+    }
+    return box;
+  }
+  function renderApprovals(records, loadedAt) {
+    var list = $("appr-list");
+    list.innerHTML = "";
+    if (!records || !records.length) {
+      list.appendChild(el("p", null, "No pending approvals."));
+      return;
+    }
+    records.forEach(function (rec) { list.appendChild(approvalCard(rec, loadedAt)); });
+  }
+  function decide(rec, decision, gateWord, box, msg, allow, reject, input) {
+    allow.disabled = true; reject.disabled = true; input.disabled = true;
+    msg.textContent = "";
+    fetchWithTimeout(TASKBOARD + "/api/approvals/decide", 10000, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: rec.id, decision: decision, gate_word: gateWord })
+    }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+    .then(function (res) {
+      if (!res.ok) {
+        msg.className = "err";
+        msg.textContent = "Not decided: " + (res.j.error || ("HTTP " + res.ok));
+        allow.disabled = false; reject.disabled = false; input.disabled = false;
+        return;
+      }
+      msg.className = "ok-msg";
+      msg.textContent = "Decided: " + fmt(rec.action) + " → " + fmt(res.j.record.status) + " (gateway).";
+      state.liveApprovals = res.j.pending;
+      renderApprovals(res.j.pending, Date.now());
+      var ov = $("ov-pending");
+      if (ov) {
+        var v = ov.querySelector(".v");
+        if (v) v.textContent = String(res.j.pending.length);
+      }
+    })
+    .catch(function (err) {
+      msg.className = "err";
+      msg.textContent = "Server error: " + err.message + ". The decision did NOT go through — check the server and retry.";
+      allow.disabled = false; reject.disabled = false; input.disabled = false;
+    });
+  }
+  function checkApprovalServer() {
+    var pill = $("server-pill");
+    var banner = $("appr-banner");
+    fetchWithTimeout(TASKBOARD + "/api/approvals", 2500)
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        if (!res.ok) throw new Error("HTTP " + res.ok);
+        state.serverLive = true;
+        state.liveApprovals = res.j.pending || [];
+        pill.className = "pill ok";
+        pill.textContent = "Approval server: LIVE — allow / reject works";
+        banner.hidden = true;
+        renderApprovals(state.liveApprovals, Date.now());
+      })
+      .catch(function () {
+        state.serverLive = false;
+        pill.className = "pill warn";
+        pill.textContent = "Approval server: not running — display only";
+        banner.hidden = false;
+        banner.textContent = "Display only: the approval server (taskboard, port 8766) is not running, so Allow / Reject buttons are off. Start it with run_local.bat, or decide from the terminal with approval_centre.py. Nothing is auto-approved.";
+        var ap = state.status && state.status.approvals;
+        renderApprovals(ap && ap.pending ? ap.pending : [], loadTime.getTime());
+      });
+  }
+  setInterval(function () {
+    if (!state.serverLive) return;
+    if (state.liveApprovals) renderApprovals(state.liveApprovals, Date.now());
+  }, 60000);
+
+  /* ---------- Boot ---------- */
+  fetch("status.json", { cache: "no-store" })
+    .then(function (r) {
+      if (!r.ok) throw new Error("status.json HTTP " + r.status);
+      return r.json();
+    })
+    .then(function (s) {
+      state.status = s;
+      $("src-line").textContent = "status.json loaded " + loadTime.toLocaleString() + " · ceo-report.json loading…";
+      renderOverview(s);
+      renderRosterInit(s.roster || { entries: [] });
+      renderAgency(s);
+      return fetch("ceo-report.json", { cache: "no-store" })
+        .then(function (r) {
+          if (!r.ok) throw new Error("ceo-report.json HTTP " + r.status);
+          return r.json();
+        })
+        .then(function (c) {
+          state.ceo = c;
+          renderCeo(c);
+          $("src-line").textContent = "status.json loaded " + loadTime.toLocaleString() +
+            " · CEO report: " + fmt(c.period) + " (" + fmt(c.generated_at) + ")";
+        })
+        .catch(function () {
+          renderCeo(null);
+          $("src-line").textContent = "status.json loaded " + loadTime.toLocaleString() +
+            " · CEO report: unknown (no report published)";
+        });
+    })
+    .catch(function (err) {
+      var b = $("data-banner");
+      b.hidden = false;
+      b.textContent = "status.json could not be read (" + err.message + ") — this page shows NO live data. Run run_local.bat (it runs sync_status.py) and refresh. Any numbers below are placeholders, not live.";
+      $("src-line").textContent = "status.json: could not be read";
+      renderCeo(null);
+    })
+    .finally(function () { checkApprovalServer(); });
+})();
+</script>
+</body>
+</html>

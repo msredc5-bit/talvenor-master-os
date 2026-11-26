@@ -127,6 +127,12 @@
   },
   "email": "PAUSED",
   "first_mails": 163,
+  "founder_os": {
+    "batch": 1,
+    "label": "Founder Command Center — batch 1",
+    "phase": "F2",
+    "source": "founder-os-audit-2026-11-26.md §14 (F2)"
+  },
   "gate0": "NOT PASSED",
   "gates_enabled": true,
   "pa_list": 39,
@@ -158,6 +164,635 @@
     "mock": 10,
     "real": 0,
     "stub": 0
+  },
+  "roster": {
+    "coded": 16,
+    "draft": 53,
+    "entries": [
+      {
+        "department": "01 Sales & Growth",
+        "last_skill_load": "2026-11-26T13:11:03.393280+00:00",
+        "role": "Lead Research Agent",
+        "skill_file": "01-Agency-Department/engine/skills/prospect-researcher.md",
+        "status": "EXISTING",
+        "worker": "coded",
+        "worker_file": "01-Agency-Department/engine/workers/src/workers/acquisition.py"
+      },
+      {
+        "department": "01 Sales & Growth",
+        "last_skill_load": "unknown",
+        "role": "Google Maps Prospect Finder",
+        "skill_file": "01-Agency-Department/departments/01-sales-growth/skills/google-maps-prospect-finder.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/01-sales-growth/specialists/google_maps_prospect_finder.py"
+      },
+      {
+        "department": "01 Sales & Growth",
+        "last_skill_load": "2026-11-26T13:11:01.378071+00:00",
+        "role": "Business Verification Agent",
+        "skill_file": "01-Agency-Department/departments/01-sales-growth/skills/business-verification-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/01-sales-growth/specialists/business_verification_agent.py"
+      },
+      {
+        "department": "01 Sales & Growth",
+        "last_skill_load": "unknown",
+        "role": "Lead Scoring Agent",
+        "skill_file": "01-Agency-Department/departments/01-sales-growth/skills/lead-scoring-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/01-sales-growth/specialists/lead_scoring_agent.py"
+      },
+      {
+        "department": "01 Sales & Growth",
+        "last_skill_load": "unknown",
+        "role": "Email Outreach Agent",
+        "skill_file": "01-Agency-Department/engine/skills/outreach-drafter.md",
+        "status": "EXISTING",
+        "worker": "coded",
+        "worker_file": "01-Agency-Department/engine/workers/src/workers/acquisition.py"
+      },
+      {
+        "department": "01 Sales & Growth",
+        "last_skill_load": "unknown",
+        "role": "Follow-up Agent",
+        "skill_file": "01-Agency-Department/sections/sell/skills/followup-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/sections/sell/agents/followup_agent.py"
+      },
+      {
+        "department": "01 Sales & Growth",
+        "last_skill_load": "unknown",
+        "role": "CRM Manager Agent",
+        "skill_file": "01-Agency-Department/departments/01-sales-growth/skills/crm-manager-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/01-sales-growth/specialists/crm_manager_agent.py"
+      },
+      {
+        "department": "01 Sales & Growth",
+        "last_skill_load": "unknown",
+        "role": "Sales Intelligence Agent",
+        "skill_file": "01-Agency-Department/departments/01-sales-growth/skills/sales-intelligence-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/01-sales-growth/specialists/sales_intelligence_agent.py"
+      },
+      {
+        "department": "01 Sales & Growth",
+        "last_skill_load": "2026-11-26T13:11:03.890072+00:00",
+        "role": "ReplyHandler",
+        "skill_file": "01-Agency-Department/engine/skills/reply-triager.md",
+        "status": "EXISTING",
+        "worker": "coded",
+        "worker_file": "01-Agency-Department/engine/workers/src/workers/acquisition.py"
+      },
+      {
+        "department": "01 Sales & Growth",
+        "last_skill_load": "unknown",
+        "role": "NegotiationCoach",
+        "skill_file": "01-Agency-Department/engine/skills/negotiation-coach.md",
+        "status": "EXISTING",
+        "worker": "coded",
+        "worker_file": "01-Agency-Department/engine/workers/src/workers/acquisition.py"
+      },
+      {
+        "department": "01 Sales & Growth",
+        "last_skill_load": "2026-11-26T13:11:03.024388+00:00",
+        "role": "ObjectionSimulator",
+        "skill_file": "01-Agency-Department/engine/skills/objection-simulator.md",
+        "status": "EXISTING",
+        "worker": "coded",
+        "worker_file": "01-Agency-Department/engine/workers/src/workers/marketing.py"
+      },
+      {
+        "department": "01 Sales & Growth",
+        "last_skill_load": "2026-11-26T13:09:51.850016+00:00",
+        "role": "SalesCloser",
+        "skill_file": "01-Agency-Department/sections/sell/skills/sales-closer.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/sections/sell/agents/sales_closer.py"
+      },
+      {
+        "department": "01 Sales & Growth",
+        "last_skill_load": "unknown",
+        "role": "SchedulerAssistant",
+        "skill_file": "01-Agency-Department/engine/skills/scheduler.md",
+        "status": "EXISTING",
+        "worker": "coded",
+        "worker_file": "01-Agency-Department/engine/workers/src/workers/admin.py"
+      },
+      {
+        "department": "02 Marketing",
+        "last_skill_load": "unknown",
+        "role": "Market Positioning Agent",
+        "skill_file": "01-Agency-Department/departments/02-marketing/skills/market-positioning-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/02-marketing/specialists/market_positioning_agent.py"
+      },
+      {
+        "department": "02 Marketing",
+        "last_skill_load": "2026-11-26T13:11:02.663044+00:00",
+        "role": "Content Strategy Agent",
+        "skill_file": "01-Agency-Department/engine/skills/content-planner.md",
+        "status": "EXISTING",
+        "worker": "coded",
+        "worker_file": "01-Agency-Department/engine/workers/src/workers/marketing.py"
+      },
+      {
+        "department": "02 Marketing",
+        "last_skill_load": "unknown",
+        "role": "Social Media Agent",
+        "skill_file": "01-Agency-Department/departments/02-marketing/skills/social-media-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/02-marketing/specialists/social_media_agent.py"
+      },
+      {
+        "department": "02 Marketing",
+        "last_skill_load": "2026-11-26T13:08:39.676404+00:00",
+        "role": "Ad Campaign Agent",
+        "skill_file": "01-Agency-Department/departments/02-marketing/skills/ad-campaign-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/02-marketing/specialists/ad_campaign_agent.py"
+      },
+      {
+        "department": "02 Marketing",
+        "last_skill_load": "2026-11-26T13:11:02.538583+00:00",
+        "role": "Copywriting Agent",
+        "skill_file": "01-Agency-Department/engine/skills/caption-writer.md",
+        "status": "EXISTING",
+        "worker": "coded",
+        "worker_file": "01-Agency-Department/engine/workers/src/workers/marketing.py"
+      },
+      {
+        "department": "02 Marketing",
+        "last_skill_load": "unknown",
+        "role": "Video Creative Agent",
+        "skill_file": "01-Agency-Department/engine/skills/video-producer.md",
+        "status": "EXISTING",
+        "worker": "coded",
+        "worker_file": "01-Agency-Department/engine/workers/src/workers/marketing.py"
+      },
+      {
+        "department": "02 Marketing",
+        "last_skill_load": "unknown",
+        "role": "SEO Agent",
+        "skill_file": "01-Agency-Department/departments/02-marketing/skills/seo-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/02-marketing/specialists/seo_agent.py"
+      },
+      {
+        "department": "02 Marketing",
+        "last_skill_load": "unknown",
+        "role": "Analytics Agent",
+        "skill_file": "01-Agency-Department/departments/02-marketing/skills/analytics-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/02-marketing/specialists/analytics_agent.py"
+      },
+      {
+        "department": "02 Marketing",
+        "last_skill_load": "2026-11-26T13:11:03.513252+00:00",
+        "role": "PublishPrep",
+        "skill_file": "01-Agency-Department/engine/skills/publish-prep.md",
+        "status": "EXISTING",
+        "worker": "coded",
+        "worker_file": "01-Agency-Department/engine/workers/src/workers/marketing.py"
+      },
+      {
+        "department": "03 AI Engineering",
+        "last_skill_load": "unknown",
+        "role": "AI Solution Architect",
+        "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/ai-solution-architect.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/03-ai-engineering/specialists/ai_solution_architect.py"
+      },
+      {
+        "department": "03 AI Engineering",
+        "last_skill_load": "2026-11-26T13:11:03.642418+00:00",
+        "role": "Voice Agent Builder",
+        "skill_file": "01-Agency-Department/engine/skills/receptionist-builder.md",
+        "status": "EXISTING",
+        "worker": "coded",
+        "worker_file": "01-Agency-Department/engine/workers/src/workers/delivery.py"
+      },
+      {
+        "department": "03 AI Engineering",
+        "last_skill_load": "2026-11-26T13:09:51.083971+00:00",
+        "role": "Conversation Designer",
+        "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/conversation-designer.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/03-ai-engineering/specialists/conversation_designer.py"
+      },
+      {
+        "department": "03 AI Engineering",
+        "last_skill_load": "unknown",
+        "role": "Prompt Engineering Agent",
+        "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/prompt-engineering-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/03-ai-engineering/specialists/prompt_engineering_agent.py"
+      },
+      {
+        "department": "03 AI Engineering",
+        "last_skill_load": "unknown",
+        "role": "Vapi Integration Agent",
+        "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/vapi-integration-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/03-ai-engineering/specialists/vapi_integration_agent.py"
+      },
+      {
+        "department": "03 AI Engineering",
+        "last_skill_load": "unknown",
+        "role": "CRM Integration Agent",
+        "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/crm-integration-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/03-ai-engineering/specialists/crm_integration_agent.py"
+      },
+      {
+        "department": "03 AI Engineering",
+        "last_skill_load": "2026-11-26T13:08:39.890216+00:00",
+        "role": "Calendar Integration Agent",
+        "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/calendar-integration-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/03-ai-engineering/specialists/calendar_integration_agent.py"
+      },
+      {
+        "department": "03 AI Engineering",
+        "last_skill_load": "unknown",
+        "role": "n8n Automation Engineer",
+        "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/n8n-automation-engineer.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/03-ai-engineering/specialists/n8n_automation_engineer.py"
+      },
+      {
+        "department": "03 AI Engineering",
+        "last_skill_load": "unknown",
+        "role": "Testing & Debugging Agent",
+        "skill_file": "01-Agency-Department/engine/skills/qa-engineer.md",
+        "status": "EXISTING",
+        "worker": "coded",
+        "worker_file": "01-Agency-Department/engine/workers/src/workers/delivery.py"
+      },
+      {
+        "department": "03 AI Engineering",
+        "last_skill_load": "unknown",
+        "role": "Deployment Agent",
+        "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/deployment-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/03-ai-engineering/specialists/deployment_agent.py"
+      },
+      {
+        "department": "04 Client Operations",
+        "last_skill_load": "unknown",
+        "role": "Client Onboarding Agent",
+        "skill_file": "01-Agency-Department/engine/skills/onboarding-agent.md",
+        "status": "EXISTING",
+        "worker": "coded",
+        "worker_file": "01-Agency-Department/engine/workers/src/workers/delivery.py"
+      },
+      {
+        "department": "04 Client Operations",
+        "last_skill_load": "2026-11-26T13:10:26.782717+00:00",
+        "role": "Business Requirement Analyst",
+        "skill_file": "01-Agency-Department/sections/receive/skills/client-intake-receiver.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/sections/receive/agents/client_intake_receiver.py"
+      },
+      {
+        "department": "04 Client Operations",
+        "last_skill_load": "unknown",
+        "role": "Client Configuration Agent",
+        "skill_file": "01-Agency-Department/sections/delivery/skills/service-delivery-manager.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/sections/delivery/agents/service_delivery_manager.py"
+      },
+      {
+        "department": "04 Client Operations",
+        "last_skill_load": "2026-11-26T13:08:40.102932+00:00",
+        "role": "Call Monitoring Agent",
+        "skill_file": "01-Agency-Department/departments/04-client-operations/skills/call_monitoring.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/04-client-operations/specialists/call_monitoring.py"
+      },
+      {
+        "department": "04 Client Operations",
+        "last_skill_load": "unknown",
+        "role": "Client Reporting Agent",
+        "skill_file": "01-Agency-Department/departments/04-client-operations/skills/client_reporting.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/04-client-operations/specialists/client_reporting.py"
+      },
+      {
+        "department": "04 Client Operations",
+        "last_skill_load": "unknown",
+        "role": "Support Agent",
+        "skill_file": "01-Agency-Department/sections/delivery/skills/client-success-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/sections/delivery/agents/client_success_agent.py"
+      },
+      {
+        "department": "04 Client Operations",
+        "last_skill_load": "unknown",
+        "role": "Retention Agent",
+        "skill_file": "01-Agency-Department/departments/04-client-operations/skills/retention.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/04-client-operations/specialists/retention.py"
+      },
+      {
+        "department": "04 Client Operations",
+        "last_skill_load": "unknown",
+        "role": "Renewal & Upsell Agent",
+        "skill_file": "01-Agency-Department/departments/04-client-operations/skills/renewal_upsell.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/04-client-operations/specialists/renewal_upsell.py"
+      },
+      {
+        "department": "04 Client Operations",
+        "last_skill_load": "2026-11-26T13:11:02.783568+00:00",
+        "role": "InboxTriager",
+        "skill_file": "01-Agency-Department/engine/skills/inbox-triager.md",
+        "status": "EXISTING",
+        "worker": "coded",
+        "worker_file": "01-Agency-Department/engine/workers/src/workers/admin.py"
+      },
+      {
+        "department": "05 Research & Strategy",
+        "last_skill_load": "2026-11-26T13:09:51.335068+00:00",
+        "role": "Competitor Research Agent",
+        "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/competitor-research-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/05-research-strategy/specialists/competitor_research_agent.py"
+      },
+      {
+        "department": "05 Research & Strategy",
+        "last_skill_load": "unknown",
+        "role": "Industry Research Agent",
+        "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/industry-research-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/05-research-strategy/specialists/industry_research_agent.py"
+      },
+      {
+        "department": "05 Research & Strategy",
+        "last_skill_load": "unknown",
+        "role": "Pricing Research Agent",
+        "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/pricing-research-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/05-research-strategy/specialists/pricing_research_agent.py"
+      },
+      {
+        "department": "05 Research & Strategy",
+        "last_skill_load": "unknown",
+        "role": "Niche Selection Agent",
+        "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/niche-selection-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/05-research-strategy/specialists/niche_selection_agent.py"
+      },
+      {
+        "department": "05 Research & Strategy",
+        "last_skill_load": "unknown",
+        "role": "Offer Development Agent",
+        "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/offer-development-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/05-research-strategy/specialists/offer_development_agent.py"
+      },
+      {
+        "department": "05 Research & Strategy",
+        "last_skill_load": "unknown",
+        "role": "Market Opportunity Agent",
+        "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/market-opportunity-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/05-research-strategy/specialists/market_opportunity_agent.py"
+      },
+      {
+        "department": "05 Research & Strategy",
+        "last_skill_load": "2026-11-26T13:08:40.313499+00:00",
+        "role": "Business Intelligence Agent",
+        "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/business-intelligence-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/05-research-strategy/specialists/business_intelligence_agent.py"
+      },
+      {
+        "department": "06 Finance & Admin",
+        "last_skill_load": "unknown",
+        "role": "Revenue Tracking Agent",
+        "skill_file": "01-Agency-Department/departments/06-finance-admin/skills/revenue-tracking-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/06-finance-admin/specialists/revenue_tracking_agent.py"
+      },
+      {
+        "department": "06 Finance & Admin",
+        "last_skill_load": "unknown",
+        "role": "Expense Tracking Agent",
+        "skill_file": "01-Agency-Department/departments/06-finance-admin/skills/expense-tracking-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/06-finance-admin/specialists/expense_tracking_agent.py"
+      },
+      {
+        "department": "06 Finance & Admin",
+        "last_skill_load": "2026-11-26T13:11:04.129449+00:00",
+        "role": "Invoice Management Agent",
+        "skill_file": "01-Agency-Department/sections/ops/skills/billing-invoice-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/sections/ops/agents/billing_invoice_agent.py"
+      },
+      {
+        "department": "06 Finance & Admin",
+        "last_skill_load": "unknown",
+        "role": "Subscription Tracking Agent",
+        "skill_file": "01-Agency-Department/departments/06-finance-admin/skills/subscription-tracking-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/06-finance-admin/specialists/subscription_tracking_agent.py"
+      },
+      {
+        "department": "06 Finance & Admin",
+        "last_skill_load": "2026-11-26T13:11:04.009626+00:00",
+        "role": "Financial Reporting Agent",
+        "skill_file": "01-Agency-Department/engine/skills/report-compiler.md",
+        "status": "EXISTING",
+        "worker": "coded",
+        "worker_file": "01-Agency-Department/engine/workers/src/workers/admin.py"
+      },
+      {
+        "department": "06 Finance & Admin",
+        "last_skill_load": "unknown",
+        "role": "Document Management Agent",
+        "skill_file": "01-Agency-Department/departments/06-finance-admin/skills/document-management-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/06-finance-admin/specialists/document_management_agent.py"
+      },
+      {
+        "department": "06 Finance & Admin",
+        "last_skill_load": "2026-11-26T13:08:40.530567+00:00",
+        "role": "Compliance Calendar Agent",
+        "skill_file": "01-Agency-Department/departments/06-finance-admin/skills/compliance-calendar-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/06-finance-admin/specialists/compliance_calendar_agent.py"
+      },
+      {
+        "department": "07 Quality & Security",
+        "last_skill_load": "unknown",
+        "role": "Voice Quality Testing Agent",
+        "skill_file": "01-Agency-Department/engine/skills/qa-engineer.md",
+        "status": "EXISTING",
+        "worker": "coded",
+        "worker_file": "01-Agency-Department/engine/workers/src/workers/delivery.py"
+      },
+      {
+        "department": "07 Quality & Security",
+        "last_skill_load": "unknown",
+        "role": "Call Scenario Testing Agent",
+        "skill_file": "01-Agency-Department/departments/07-quality-security/skills/call-scenario-testing-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/07-quality-security/specialists/call_scenario_testing_agent.py"
+      },
+      {
+        "department": "07 Quality & Security",
+        "last_skill_load": "unknown",
+        "role": "Workflow Testing Agent",
+        "skill_file": "01-Agency-Department/departments/07-quality-security/skills/workflow-testing-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/07-quality-security/specialists/workflow_testing_agent.py"
+      },
+      {
+        "department": "07 Quality & Security",
+        "last_skill_load": "unknown",
+        "role": "Data Validation Agent",
+        "skill_file": "01-Agency-Department/departments/07-quality-security/skills/data-validation-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/07-quality-security/specialists/data_validation_agent.py"
+      },
+      {
+        "department": "07 Quality & Security",
+        "last_skill_load": "unknown",
+        "role": "Security Monitoring Agent",
+        "skill_file": "01-Agency-Department/departments/07-quality-security/skills/security-monitoring-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/07-quality-security/specialists/security_monitoring_agent.py"
+      },
+      {
+        "department": "07 Quality & Security",
+        "last_skill_load": "2026-11-26T13:08:40.740643+00:00",
+        "role": "Access Control Agent",
+        "skill_file": "01-Agency-Department/departments/07-quality-security/skills/access-control-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/07-quality-security/specialists/access_control_agent.py"
+      },
+      {
+        "department": "07 Quality & Security",
+        "last_skill_load": "2026-11-26T13:09:51.588081+00:00",
+        "role": "Backup & Recovery Agent",
+        "skill_file": "01-Agency-Department/departments/07-quality-security/skills/backup-recovery-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/07-quality-security/specialists/backup_recovery_agent.py"
+      },
+      {
+        "department": "07 Quality & Security",
+        "last_skill_load": "unknown",
+        "role": "Compliance Review Agent",
+        "skill_file": "01-Agency-Department/departments/07-quality-security/skills/compliance-review-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/07-quality-security/specialists/compliance_review_agent.py"
+      },
+      {
+        "department": "08 Product & Innovation",
+        "last_skill_load": "2026-11-26T13:09:51.713408+00:00",
+        "role": "New AI Product Research Agent",
+        "skill_file": "01-Agency-Department/departments/08-product-innovation/skills/new-ai-product-research-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/08-product-innovation/specialists/new_ai_product_research.py"
+      },
+      {
+        "department": "08 Product & Innovation",
+        "last_skill_load": "unknown",
+        "role": "New Feature Research Agent",
+        "skill_file": "01-Agency-Department/departments/08-product-innovation/skills/new-feature-research-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/08-product-innovation/specialists/new_feature_research.py"
+      },
+      {
+        "department": "08 Product & Innovation",
+        "last_skill_load": "2026-11-26T13:08:40.951090+00:00",
+        "role": "Automation R&D Agent",
+        "skill_file": "01-Agency-Department/departments/08-product-innovation/skills/automation-rd-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/08-product-innovation/specialists/automation_rd.py"
+      },
+      {
+        "department": "08 Product & Innovation",
+        "last_skill_load": "unknown",
+        "role": "Technology Evaluation Agent",
+        "skill_file": "01-Agency-Department/departments/08-product-innovation/skills/technology-evaluation-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/08-product-innovation/specialists/technology_evaluation.py"
+      },
+      {
+        "department": "08 Product & Innovation",
+        "last_skill_load": "unknown",
+        "role": "Product Improvement Agent",
+        "skill_file": "01-Agency-Department/departments/08-product-innovation/skills/product-improvement-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/08-product-innovation/specialists/product_improvement.py"
+      },
+      {
+        "department": "08 Product & Innovation",
+        "last_skill_load": "unknown",
+        "role": "Prototype Builder Agent",
+        "skill_file": "01-Agency-Department/departments/08-product-innovation/skills/prototype-builder-agent.md",
+        "status": "EXISTING",
+        "worker": "draft",
+        "worker_file": "01-Agency-Department/departments/08-product-innovation/specialists/prototype_builder.py"
+      }
+    ],
+    "total": 69,
+    "with_activity": 24
   },
   "spend_cap_usd": 0,
   "task_counts": {
