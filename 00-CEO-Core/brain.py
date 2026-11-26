@@ -97,7 +97,7 @@ DEFAULT_BRAIN = "mock"
 # can ever pass the free-only guard, so this map is complete for dev mode.
 _DEV_DEFAULT_MODELS = {"gemini": "gemini-3.5-flash-lite",
                        "openrouter": "openrouter/free",
-                       "ollama": "gemma4:12b"}
+                       "ollama": "qwen2.5-coder:1.5b"}  # F1: gemma4:12b removed — cannot run on an 8 GB PC (OOM, verified twice).
 
 # The seed each department's mock has always used — kept so flipping
 # the flag back to mock reproduces exactly the old drafts.

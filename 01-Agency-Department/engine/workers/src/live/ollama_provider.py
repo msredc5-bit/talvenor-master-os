@@ -10,12 +10,12 @@ Ollama serves works — Gemma 4, Qwen, ... — just by naming it; there
 is no separate "Gemma 4 adapter", Ollama IS the adapter and the model
 is the name. The model must be pulled first:
 
-    ollama pull gemma4:12b
+    ollama pull qwen2.5-coder:1.5b
 
-Honest limit: gemma4:12b needs ~9.5 GB of memory; Boss's PC has 8 GB
-total, so it runs slow and needs other apps closed. The small coder
-model fits easily: ollama pull qwen2.5-coder:1.5b (~1 GB, ~2.5 GB
-memory). The provider never picks a model by itself — the name comes
+Honest limit (verified 2026-11-26): gemma4:12b does NOT run on an
+8 GB PC — llama-server fails to initialize (out of memory) and
+Claude Code reports the model "not changed". The small coder model
+fits easily: ollama pull qwen2.5-coder:1.5b (~1 GB, ~2.5 GB memory). The provider never picks a model by itself — the name comes
 from config (development_brain.model / fallback_chain entry
 "ollama:<model>") or the BRAIN_MODEL env var.
 
@@ -45,7 +45,8 @@ SYSTEM_PROMPT = (
 
 ENV_VAR = "OLLAMA_HOST"
 DEFAULT_HOST = "http://localhost:11434"
-DEFAULT_MODEL = "gemma4:12b"
+# F1: was gemma4:12b — cannot run on an 8 GB PC (OOM, verified twice).
+DEFAULT_MODEL = "qwen2.5-coder:1.5b"
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -79,7 +80,11 @@ def list_local_models(host=None):
 class OllamaProvider(LLMProvider):
     name = "ollama-live"
 
-    def __init__(self, model: str = DEFAULT_MODEL, timeout: int = 90):
+    # timeout is 300s (5 min): a cold local model load on an 8 GB PC
+    # can take minutes. It does NOT make gemma4:12b run — verified
+    # 2026-11-26 it cannot start at all on 8 GB (llama-server init
+    # crash, out of memory). It gives loadable models a fair chance.
+    def __init__(self, model: str = DEFAULT_MODEL, timeout: int = 300):
         self.model = model
         self.timeout = timeout
         self.calls = 0

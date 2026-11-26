@@ -9,11 +9,11 @@
     "free_only": true,
     "test_data_only": true,
     "fallback_chain": [
-      "ollama:gemma4:12b",
+      "ollama:qwen2.5-coder:1.5b",
       "gemini:gemini-3.5-flash-lite",
       "openrouter:openrouter/free"
     ],
-    "note": "Local development brain ONLY: free-tier models, test data only. Never production. Enable on Boss's PC only when testing with his own free-tier key. Ollama (local Gemma 4) is tried first when the server runs; without it, the chain falls back to Gemini/OpenRouter."
+    "note": "Local development brain ONLY: free-tier models, test data only. Never production. Enable on Boss's PC only when testing with his own free-tier key. Ollama (local qwen2.5-coder:1.5b) is tried first when the server runs; without it, the chain falls back to Gemini/OpenRouter. LIVE PROOF (Boss's PC, 2026-11-26 04:13 Dhaka, screenshots): chain [ollama:qwen2.5-coder:1.5b, ollama:gemma4:12b, gemini:gemini-3.5-flash-lite, openrouter:openrouter/free] probed live — reply in 1.9s, tokens 83/23/106; second probe 2.7s at 06:03. This snapshot's brain stays mock; the proof is recorded here as a fact, not copied as config. gemma4:12b was removed from the chain in F1 (cannot run on an 8 GB PC — llama-server OOM crash, verified twice)."
   },
   "production_brain": {
     "mode": "mock",
@@ -215,7 +215,7 @@
       "endpoint": "http://localhost:11434/api/chat",
       "key_from": "none — local server, no key, no account, no billing",
       "free_only": true,
-      "note": "Local Ollama server on Boss's PC ($0, data stays on the PC). Model must be pulled first: ollama pull gemma4:12b. gemma4:12b needs ~9.5 GB memory (8 GB PC: slow, close other apps); qwen2.5-coder:1.5b fits easily. OLLAMA_HOST only changes the server address (default localhost)."
+      "note": "Local Ollama server on Boss's PC ($0, data stays on the PC). Model must be pulled first: ollama pull qwen2.5-coder:1.5b. gemma4:12b is listed as an available model but CANNOT run on an 8 GB PC (needs ~9.5 GB memory — llama-server OOM crash, verified twice 2026-11-26; do not pull it). qwen2.5-coder:1.5b fits easily. OLLAMA_HOST only changes the server address (default localhost)."
     }
   },
   "reused_systems": {

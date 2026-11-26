@@ -49,8 +49,8 @@ LIVE PROBE (OFF by default — run only with --live, on Boss's PC):
 
 Boss PC steps (Windows):
   1. Local (no key): install Ollama (https://ollama.com), pull a model:
-     ollama pull gemma4:12b
-     (small fallback: ollama pull qwen2.5-coder:1.5b)
+     ollama pull qwen2.5-coder:1.5b
+     (do NOT pull gemma4:12b — it cannot run on an 8 GB PC, verified twice)
   2. Or a free key (no card, no billing): aistudio.google.com/apikey
   3. Set it (then open a NEW terminal):
      setx GEMINI_API_KEY "paste-key-here"
@@ -436,7 +436,7 @@ def live_probe():
               "no call attempted.")
         print("[live-probe] Setup steps (Boss's PC, Windows):")
         print("[live-probe] LOCAL (no key): install Ollama "
-              "https://ollama.com, then: ollama pull gemma4:12b")
+              "https://ollama.com, then: ollama pull qwen2.5-coder:1.5b")
         print("[live-probe] 1. Get a free key (no card, no billing): "
               "https://aistudio.google.com/apikey")
         print('[live-probe] 2. Set it, then open a NEW terminal: '

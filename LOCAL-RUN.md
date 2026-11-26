@@ -65,22 +65,23 @@ python scripts\setup_brain.py
 python scripts\check_live_brain.py --live
 ```
 
-**Dev brain (FREE, $0) — local Ollama, NO key at all (Gemma 4):**
+**Dev brain (FREE, $0) — local Ollama, NO key at all (qwen2.5-coder:1.5b):**
 
 ```bat
-ollama pull gemma4:12b
+ollama pull qwen2.5-coder:1.5b
 python scripts\setup_brain.py
 python scripts\check_live_brain.py --live
 ```
 
 - Install Ollama from https://ollama.com first. There is no
-  separate "Gemma 4 adapter" — Ollama IS the adapter, Gemma 4 is
-  the model name. `setup_brain.py` checks the local server FIRST
+  separate model adapter — Ollama IS the adapter, the model is the
+  name. `setup_brain.py` checks the local server FIRST
   (before any cloud key) and saves the first working local model.
-  Honest limit: gemma4:12b needs ~9.5 GB of memory on an 8 GB PC —
-  close other apps first; if it is too slow, pull the small one
-  (`ollama pull qwen2.5-coder:1.5b`) and run setup again. Either
-  way the dev brain stays local, $0, and test-data-only — the
+  Honest limit (verified 2026-11-26): gemma4:12b needs ~9.5 GB of
+  memory on an 8 GB PC — it does NOT run at all (llama-server
+  crashes, out of memory, verified twice). Do not pull it; pull the
+  proven model (`ollama pull qwen2.5-coder:1.5b`) and run setup again.
+  Either way the dev brain stays local, $0, and test-data-only — the
   production brain is never touched.
 
 - Key from: https://aistudio.google.com/apikey (no card, no billing).

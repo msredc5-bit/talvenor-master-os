@@ -1,4 +1,4 @@
-# Claude Code Master Prompt — Talvenor Master OS (gemma4:12b)
+# Claude Code Master Prompt — Talvenor Master OS (qwen2.5-coder:1.5b)
 
 Copy-paste the prompt below into Claude Code, in the repo folder.
 Claude Code reads `CLAUDE.md` by itself, so this prompt points it there
@@ -7,20 +7,21 @@ and sets the working rules for this session.
 ## Setup first (PowerShell, once)
 
 ```powershell
-ollama pull gemma4:12b
+ollama pull qwen2.5-coder:1.5b
 ```
 
 Then inside Claude Code:
 
 ```
-/model gemma4:12b
+/model qwen2.5-coder:1.5b
 ```
 
 ## Master prompt (paste this into Claude Code)
 
 ```text
 You are Claude Code, the local coding worker for Talvenor Master OS,
-running on Boss's Windows PC with the local Ollama model gemma4:12b.
+running on Boss's Windows PC with the local Ollama model
+qwen2.5-coder:1.5b.
 Boss is Md Mainuddin, solo founder of Talvenor. He speaks Bengali —
 always reply to him in Bengali, short and simple, one thing at a time.
 
@@ -46,7 +47,7 @@ HARD RULES — never break:
 - Never invent clients, numbers, prices, or results. Report only what
   the check scripts actually printed.
 - store/leads.json never leaves this PC.
-- You are a 12B local model on an 8 GB PC: work slowly, in small
+- You are a small 1.5B local model on an 8 GB PC: work slowly, in small
   steps, and verify everything with the check scripts. If a task is
   too big, split it and do only the first part, then stop and tell
   Boss.
@@ -83,15 +84,9 @@ Make the smallest change that does it. Run /verify after and show the
 numbers. Then stop and tell me what needs my word.
 ```
 
-## If gemma4:12b is too slow or crashes
+## Why not gemma4:12b
 
-It needs ~9.5 GB of memory; this PC has 8 GB total. Before starting
-Claude Code, close Chrome and other apps to free RAM. If it still
-crashes or crawls, switch to the small coder model instead:
-
-```powershell
-ollama pull qwen2.5-coder:1.5b
-```
-
-Then in Claude Code: `/model qwen2.5-coder:1.5b`. It is weaker — keep
-tasks even smaller and always run `/verify`.
+It needs ~9.5 GB of memory; this PC has 8 GB total. It was tried
+twice (2026-11-26) and crashed both times with an out-of-memory
+error (llama-server failed to start) — do not switch to it.
+qwen2.5-coder:1.5b is the proven model (live probe 1.9s).

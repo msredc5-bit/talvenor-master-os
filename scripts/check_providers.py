@@ -110,7 +110,7 @@ PROVIDERS = [
     ("src.live.openrouter_provider", "OpenRouterProvider",
      "OPENROUTER_API_KEY", "openrouter/free"),
     ("src.live.ollama_provider", "OllamaProvider", "OLLAMA_HOST",
-     "gemma4:12b"),
+     "qwen2.5-coder:1.5b"),  # F1: was gemma4:12b — cannot run on an 8 GB PC (OOM, verified twice).
 ]
 
 OPENAI_OK = {

@@ -15,7 +15,7 @@ a key in any file — only in an environment variable.
 | Kimi (Moonshot) | https://platform.moonshot.ai | MOONSHOT_API_KEY | kimi-k2.5 |
 | Grok (xAI) | https://console.x.ai | XAI_API_KEY | grok-4 |
 | OpenRouter (auto-router) | https://openrouter.ai/keys | OPENROUTER_API_KEY | openrouter/free |
-| Ollama (local, no key) | No key — install Ollama on your PC, pull a model | OLLAMA_HOST (server address, default localhost) | gemma4:12b |
+| Ollama (local, no key) | No key — install Ollama on your PC, pull a model | OLLAMA_HOST (server address, default localhost) | qwen2.5-coder:1.5b |
 
 ## 2. Changing the model — one line in config
 
@@ -111,14 +111,15 @@ Note: `python scripts\check_live_brain.py --live` proves the
 one-command Muse Spark probe; the curl test above plus an
 unlocked adapter run is the proof.
 
-## 5. Ollama — the local brain (Gemma 4 on your PC, $0, no key)
+## 5. Ollama — the local brain (qwen2.5-coder:1.5b on your PC, $0, no key)
 
-Ollama is the local model server. There is no separate "Gemma 4
-adapter" — Ollama IS the adapter, and Gemma 4 is the model name.
+Ollama is the local model server. There is no separate "model
+adapter" — Ollama IS the adapter, and the model is the name.
 Once the Ollama adapter is in, ANY model Ollama serves works the
-same way — `gemma4:12b`, `qwen2.5-coder:1.5b`, or any other — just
+same way — `qwen2.5-coder:1.5b`, `gemma4:12b`, or any other — just
 by naming it. No key, no account, no billing; data never leaves
-your PC.
+your PC. (gemma4:12b cannot run on an 8 GB PC — see the honest
+limit below; it is not in the dev chain.)
 
 **Step 1 — Install Ollama:** download from https://ollama.com and
 install. Ollama starts by itself after install (or run
@@ -127,16 +128,13 @@ install. Ollama starts by itself after install (or run
 **Step 2 — Download the model:** in PowerShell:
 
 ```
-ollama pull gemma4:12b
-```
-
-That is ~8 GB. Honest limit: gemma4:12b needs ~9.5 GB of memory
-and this PC has 8 GB total — it runs slow, so close Chrome and
-other apps first. The small fallback fits easily:
-
-```
 ollama pull qwen2.5-coder:1.5b
 ```
+
+That is ~1 GB and fits easily. Honest limit (verified 2026-11-26):
+gemma4:12b needs ~9.5 GB of memory and this PC has 8 GB total — it
+does NOT run at all (llama-server crashes, out of memory, verified
+twice). Do not pull gemma4:12b.
 
 **Step 3 — Let setup find it:** no JSON editing, no key:
 
@@ -147,7 +145,7 @@ python scripts\setup_brain.py
 It checks the local Ollama server FIRST (before any cloud key),
 lists the installed models, tests each one with a single tiny
 call, and saves the first working one as the dev brain
-(`ollama:gemma4:12b`).
+(`ollama:qwen2.5-coder:1.5b`).
 
 **Step 4 — Prove it live:**
 
@@ -195,11 +193,13 @@ is set) and then to a loud mock draft — never a silent fake.
   (the 2026-11-20 probe got stuck on a tunnel 403). The Meta key slot
   now exists (`META_API_KEY` env var, added 2026-11-25), but no key
   value is on record anywhere, and no live call has been made from it.
-- Ollama (local Gemma 4) was added 2026-11-26 as the 8th provider:
+- Ollama (local model) was added 2026-11-26 as the 8th provider:
   no key needed, adapter verified against a mock server on this VM
-  (7/7) — the real proof still has to happen on your PC
-  (`ollama pull gemma4:12b` → `setup_brain.py` →
-  `check_live_brain.py --live`).
+  (7/7) — the real proof happened on your PC 2026-11-26 04:13 Dhaka
+  (qwen2.5-coder:1.5b, 1.9s; `ollama pull qwen2.5-coder:1.5b` →
+  `setup_brain.py` → `check_live_brain.py --live`). gemma4:12b cannot
+  run on this PC (OOM, verified twice) and was removed from the dev
+  chain in F1.
 - The brain is still mock, phase 11 / v0.9.0. No live call has happened, $0 spent.
 - `scripts\setup_brain.py` (2026-11-25) finds a working free model
   automatically and saves it — no more hand-editing config.json for

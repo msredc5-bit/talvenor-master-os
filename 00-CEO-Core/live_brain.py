@@ -101,28 +101,36 @@ DEFAULT_MODELS = {
     "kimi": "kimi-k2.5",
     "grok": "grok-4",
     "openrouter": "openrouter/free",
-    "ollama": "gemma4:12b",
+    "ollama": "qwen2.5-coder:1.5b",  # F1: gemma4:12b cannot run on an 8 GB PC (OOM, verified twice) — removed from the dev chain.
 }
 
 
-def load_provider(name, model=None, timeout=90):
+def load_provider(name, model=None, timeout=None):
     """Construct one provider — no network I/O.
 
     name: registry key ("meta" | "openai" | ... ). model: if None,
     DEFAULT_MODELS[name]. Unknown name -> ValueError.
+    timeout: seconds for one live call. None means the per-provider
+    default — 300s (5 min) for Ollama (a cold local model load on an
+    8 GB PC can take minutes), 90s for every cloud provider.
     """
     key = str(name).strip().lower()
     if key not in PROVIDER_MODULES:
         raise ValueError(
             f"Unknown provider {name!r}. Known: {sorted(PROVIDER_MODULES)}")
+    if timeout is None:
+        timeout = 300 if key == "ollama" else 90
     module_name, class_name = PROVIDER_MODULES[key]
     mod = _load_module(AGENCY_WORKERS_DIR, module_name)
     cls = getattr(mod, class_name)
     return cls(model=model or DEFAULT_MODELS[key], timeout=timeout)
 
 
-def build_provider_chain(cfg, timeout=90, mode="live"):
+def build_provider_chain(cfg, timeout=None, mode="live"):
     """Build the live provider chain from config — no network I/O.
+
+    timeout: seconds for one live call; None means the per-provider
+    default (300s Ollama, 90s cloud) — see load_provider.
 
     cfg: config.json's dict (or {} — then the default ["meta"]).
     Each fallback_chain entry is "provider" or "provider:model"

@@ -12,9 +12,9 @@ This script removes the hand-editing. Run it after setting a key:
     python scripts\\setup_brain.py
     python scripts\\check_live_brain.py --live
 
-Or with NO key at all — a local Ollama model (Gemma 4 on Boss's PC):
+Or with NO key at all — a local Ollama model (qwen2.5-coder:1.5b on Boss's PC):
 
-    ollama pull gemma4:12b
+    ollama pull qwen2.5-coder:1.5b
     python scripts\\setup_brain.py
     python scripts\\check_live_brain.py --live
 
@@ -73,13 +73,22 @@ OPENROUTER_CHAT_URL = "https://openrouter.ai/api/v1/chat/completions"
 # OLLAMA_HOST only changes the server address (default localhost).
 OLLAMA_DEFAULT_HOST = "http://localhost:11434"
 
-# Preferred local models, in order. gemma4:12b is the one Boss
-# downloads; qwen2.5-coder:1.5b is the small fallback that fits
-# easily on an 8 GB PC.
-OLLAMA_PREFERENCE = ("gemma4:12b", "qwen2.5-coder:1.5b")
+# Preferred local models, in order. F1: gemma4:12b was removed — it
+# cannot run on an 8 GB PC (llama-server OOM crash, verified twice
+# 2026-11-26), so the chain no longer tries it and no longer wastes
+# a 5-minute timeout on it. qwen2.5-coder:1.5b is the proven model
+# (live probe 1.9s, 2026-11-26).
+OLLAMA_PREFERENCE = ("qwen2.5-coder:1.5b",)
 
 PROMPT = "Reply with the single word: ok"
 TIMEOUT = 30
+# Ollama gets 5 minutes, not 30 seconds: a cold local model load on
+# an 8 GB PC can take minutes (first load reads gigabytes off disk).
+# Honest limit (verified 2026-11-26): this does NOT make gemma4:12b
+# run — it cannot start at all on 8 GB (llama-server init crashes,
+# out of memory). It gives LOADABLE models (qwen2.5-coder:1.5b) a fair
+# chance on a cold start instead of timing out mid-load.
+OLLAMA_TIMEOUT = 300
 MAX_OPENROUTER_CANDIDATES = 5
 
 # Preferred Gemini free models, in order. gemini-2.5-flash-lite is
@@ -261,7 +270,7 @@ def probe_ollama(model, key=None):
         data=json.dumps(body).encode(),
         headers={"Content-Type": "application/json"}, method="POST")
     with urllib.request.build_opener(_NoRedirect()).open(
-            req, timeout=TIMEOUT) as resp:
+            req, timeout=OLLAMA_TIMEOUT) as resp:
         payload = json.loads(resp.read().decode("utf-8"))
     if isinstance(payload, dict) and "error" in payload:
         raise RuntimeError(f"API error: {payload['error']}")
@@ -393,9 +402,9 @@ def print_no_key_steps(found):
           "no billing):")
     print("[setup-brain] LOCAL (no key at all): install Ollama from "
           "https://ollama.com, then pull a model and run again:")
-    print("[setup-brain]   ollama pull gemma4:12b")
-    print("[setup-brain]   (small fallback that fits easily: "
-          "ollama pull qwen2.5-coder:1.5b)")
+    print("[setup-brain]   ollama pull qwen2.5-coder:1.5b")
+    print("[setup-brain]   (do NOT pull gemma4:12b — it cannot run on "
+          "an 8 GB PC, verified twice)")
     print("[setup-brain] CLOUD (free key): get a free Gemini key: "
           "https://aistudio.google.com/apikey")
     print('[setup-brain] 2. Set it, then open a NEW terminal: '
