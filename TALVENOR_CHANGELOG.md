@@ -1605,3 +1605,64 @@ BLOCKED — untouched.
 - Note: F1's M2 push DID complete 2026-11-26 18:41–18:47 (heads
   894c7065 + bf9d2eab); the F1 entry above still lists it as
   pending — that line is stale, the push is done.
+
+## FOUNDER OS F2 batch 2 — Founder Command Center, second live modules (2026-11-27)
+
+- Founder approved batch 2 ("F2 batch 2 shuru koro", 2026-11-27
+  05:48 Dhaka). Batch 2 builds Command Center modules 10, 15, 17,
+  18, 19 only — the other 9 modules stay greyed with their planned
+  batch (batch 3 / F7 / F8). Nothing pushed to GitHub, no ZIP.
+  10. Task Center — the live task queue: 1 task (done, booking-link
+      verification, 2026-11-20). Live refresh from the taskboard API
+      (GET /api/tasks) when the server runs, snapshot otherwise;
+      queue-watch status (taskboard-queue-watch, paused, 10-minute
+      interval, 0 runs) and the manual drain CLI.
+  15. Reports Center — all 6 generated reports in reports/ceo/
+      (daily/monthly/weekly JSON + MD, all 2026-11-24; latest weekly
+      JSON, 2 days old — shown honestly). Performance and leads
+      reports do not exist yet and are shown as "none".
+  17. Financial Dashboard — the spend ledger (64 records, $0.00,
+      all provider "mock"), per-provider cost view (all $0.00),
+      pricing tiers (LOCKED 2026-11-12, internal display only),
+      Gate 0 economics (kit $49 one-time, launch $39 for the first
+      30 buyers, 0 sales, NOT PASSED; wedge 1 in 20 -> $1,109/mo
+      receptionist, UNTESTED). Revenue $0.00 with 0 paying clients
+      — shown, never invented.
+  18. System Health — check-suite and pytest totals with run dates
+      from dashboards/health-record.json (written by the
+      verification run; "unknown" when no record exists): suite
+      865/871 (6 pre-existing voice-environment failures), pytest
+      249 passed / 2 skipped / 1 xfailed. Plus Python, disk, voice
+      models (piper/sherpa-bn/vosk present, 371.2 MB voice dir),
+      provider enablement (configured, never "connected" without a
+      live probe), check-script and test-file counts, brain mode.
+  19. Settings & Permissions — READ-ONLY view of the approval
+      policy: gate words, 20-minute TTL, $0 cap, gated actions,
+      production brain locked, free-only guard present, email
+      PAUSED, and the full 33-row permission matrix. No edit
+      controls of any kind.
+- **Data contract (additive only):** five new status.json keys
+  published by `scripts/sync_status.py` — `task_queue`,
+  `reports`, `finance`, `health`, `policy`. New source file
+  `00-CEO-Core/pricing.json` (the LOCKED 2026-11-12 tiers).
+  `GET /api/tasks` now sends CORS for the Command Center origin
+  only. The page still reads only status.json + ceo-report.json
+  (plus the taskboard API when it runs); no card reads a store
+  file directly. No hardcoded metric literal in the page — the
+  no-fake-data test now also bans the pricing literals, 524, and
+  the overage rates.
+- **Checks:** `scripts/check_command_center.py` 48/48 PASS
+  (per-module + batch-2 data-contract checks against the real
+  sources + no-fake-data + the server flow on TEMP store);
+  `tests/test_command_center.py` 19/19 passed. Full suite
+  865/871 (6 failures, the same pre-existing voice-environment
+  gaps as the batch 1 baseline — see the F2 batch 2 completion
+  report for the baseline-arithmetic note); full pytest 249
+  passed / 2 skipped / 1 xfailed, 0 failed. Live render verified
+  by serving (HTTP 200s on 8765 + 8766, CORS, node --check
+  clean). `store/leads.json` untouched. `voice/loop.py`
+  untouched. Nothing sends, publishes, spends, or deploys.
+- **PENDING (not done in batch 2):** batch 3 modules (2, 3, 4,
+  12, 13, 14, 16) and F7/F8 (8, 9) — each needs its own Founder
+  ask. Taskboard auto-start in run_local.bat and CEO report
+  regeneration stay UNDECIDED from batch 1.
