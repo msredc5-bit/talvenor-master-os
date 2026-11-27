@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FOUNDER OS — Command Center (F2 batch 2)</title>
+<title>FOUNDER OS — Command Center (F2 batch 3)</title>
 <style>
   * { box-sizing: border-box; }
   :root {
@@ -85,6 +85,8 @@
   .err { color: var(--red); font-size: 13px; margin-top: 8px; }
   .ok-msg { color: var(--green); font-size: 13px; margin-top: 8px; }
   code { background: #0e2547; padding: 1px 6px; border-radius: 6px; font-size: 12px; }
+  .chat-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  .chat-row input { flex: 1; min-width: 200px; background: #0e2547; border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 8px 10px; font-size: 13px; }
   .mono { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12px; }
   @media (max-width: 900px) {
     #sidebar { position: static; width: auto; border-right: 0; border-bottom: 1px solid var(--line); }
@@ -95,7 +97,7 @@
 <body>
 <nav id="sidebar">
   <div id="logo">✦ FOUNDER <span>OS</span></div>
-  <div id="logo-sub">Command Center · F2 batch 2 · localhost only</div>
+  <div id="logo-sub">Command Center · F2 batch 3 · localhost only</div>
   <div class="nav-sec">Live — batch 1</div>
   <a class="nav-item active" href="#m1"><span class="ic">◉</span> Founder Overview <span class="nav-badge live">live</span></a>
   <a class="nav-item" href="#m5"><span class="ic">∴</span> Agent Team Roster <span class="nav-badge live">live</span></a>
@@ -108,14 +110,15 @@
   <a class="nav-item" href="#m17"><span class="ic">💰</span> Financial Dashboard <span class="nav-badge live">live</span></a>
   <a class="nav-item" href="#m18"><span class="ic">♥</span> System Health <span class="nav-badge live">live</span></a>
   <a class="nav-item" href="#m19"><span class="ic">⚙</span> Settings &amp; Permissions <span class="nav-badge live">live</span></a>
+  <div class="nav-sec">Live — batch 3</div>
+  <a class="nav-item" href="#m2"><span class="ic">💬</span> Unified AI Chat <span class="nav-badge live">live</span></a>
+  <a class="nav-item" href="#m3"><span class="ic">🎙️</span> Voice Command <span class="nav-badge live">live</span></a>
+  <a class="nav-item" href="#m4"><span class="ic">🎭</span> Personality Switcher <span class="nav-badge live">live</span></a>
+  <a class="nav-item" href="#m12"><span class="ic">▶</span> Live Execution Monitor <span class="nav-badge live">live</span></a>
+  <a class="nav-item" href="#m13"><span class="ic">🧠</span> Knowledge &amp; Memory <span class="nav-badge live">live</span></a>
+  <a class="nav-item" href="#m14"><span class="ic">📚</span> Library <span class="nav-badge live">live</span></a>
+  <a class="nav-item" href="#m16"><span class="ic">🔌</span> Integration Center <span class="nav-badge live">live</span></a>
   <div class="nav-sec">Planned — later batches</div>
-  <span class="nav-item planned"><span class="ic">💬</span> Unified AI Chat <span class="nav-badge">batch 3</span></span>
-  <span class="nav-item planned"><span class="ic">🎙️</span> Voice Command <span class="nav-badge">batch 3</span></span>
-  <span class="nav-item planned"><span class="ic">🎭</span> Personality Switcher <span class="nav-badge">batch 3</span></span>
-  <span class="nav-item planned"><span class="ic">▶</span> Live Execution Monitor <span class="nav-badge">batch 3</span></span>
-  <span class="nav-item planned"><span class="ic">🧠</span> Knowledge &amp; Memory <span class="nav-badge">batch 3</span></span>
-  <span class="nav-item planned"><span class="ic">📚</span> Library <span class="nav-badge">batch 3</span></span>
-  <span class="nav-item planned"><span class="ic">🔌</span> Integration Center <span class="nav-badge">batch 3</span></span>
   <span class="nav-item planned"><span class="ic">📦</span> Digital Business <span class="nav-badge">F7</span></span>
   <span class="nav-item planned"><span class="ic">🎬</span> Content Factory <span class="nav-badge">F8</span></span>
   <div id="side-foot">
@@ -275,8 +278,117 @@
       <p class="src">Source: dashboards/status.json (policy) — 00-CEO-Core/config.json + the approval gateway + TALVENOR_PERMISSION_MATRIX.md, via scripts/sync_status.py.</p>
     </section>
 
+    <section class="mod" id="m2">
+      <h2><span class="mnum">2.</span> Unified AI Chat</h2>
+      <p class="mod-sub">One in-app chat surface for Boss ↔ Mira. <b>SHELL — not a live chat:</b> this snapshot's brain is mock, the live dev brain runs on Boss's PC only, and no chat transcript or send path exists in this repo. Nothing below is a conversation — no fake replies are shown.</p>
+      <div class="cards" id="chat-cards"></div>
+      <p class="mod-sub" id="chat-persona-line"></p>
+      <div id="chat-transcript"></div>
+      <div class="chat-row">
+        <input id="chat-input" type="text" placeholder="Type a message — send is disabled in this snapshot" disabled>
+        <button class="btn" id="chat-send" disabled>Send</button>
+      </div>
+      <p class="src">Source: dashboards/status.json (chat) — config.json (brain + chain) + the memory store's assistant-name entry, via scripts/sync_status.py.</p>
+    </section>
+
+    <section class="mod" id="m3">
+      <h2><span class="mnum">3.</span> Voice Command</h2>
+      <p class="mod-sub">Voice input to the Command Center. <b>SHELL — the mic is off:</b> the voice loop is a PC-side Python process (needs a mic + local models); this browser page cannot reach it. What follows is the loop's real state, not a live microphone.</p>
+      <div class="cards" id="voice-cards"></div>
+      <h3>Voice gate phrases (from the loop itself)</h3>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Heard phrase</th><th>Approves</th></tr></thead>
+        <tbody id="voice-gate-body"></tbody>
+      </table>
+      </div>
+      <div style="margin-top:10px;">
+        <button class="btn" id="voice-mic" disabled>Mic — off (not live in this snapshot)</button>
+      </div>
+      <p class="src">Source: dashboards/status.json (voice_command) — voice/loop.py + the voice detail, via scripts/sync_status.py.</p>
+    </section>
+
+    <section class="mod" id="m4">
+      <h2><span class="mnum">4.</span> Personality Switcher</h2>
+      <p class="mod-sub">Switchable assistant personas. <b>DISPLAY ONLY:</b> switching changes the shown persona in module 2 — the underlying brain does not switch on this snapshot. Each profile is a real role in this repo, cited by its source file.</p>
+      <div class="dept-grid" id="persona-grid"></div>
+      <p class="src">Source: dashboards/status.json (personas) — 00-CEO-Core/personas.json, via scripts/sync_status.py.</p>
+    </section>
+
+    <section class="mod" id="m12">
+      <h2><span class="mnum">12.</span> Live Execution Monitor</h2>
+      <p class="mod-sub">The most recent execution records. <b>NOT a live stream:</b> there is no event bus until F4, so this shows records, not a live feed — nothing here proves a job is running right now.</p>
+      <div class="cards" id="exec-cards"></div>
+      <p class="mod-sub" id="exec-server-line"></p>
+      <h3>Recent skill executions</h3>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Time</th><th>Event</th><th>Skill</th><th>Result file</th><th>Error</th></tr></thead>
+        <tbody id="exec-recent-body"></tbody>
+      </table>
+      </div>
+      <h3>Dev brain calls</h3>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Time</th><th>Provider</th><th>Model</th><th>Status</th><th>Tokens</th></tr></thead>
+        <tbody id="exec-calls-body"></tbody>
+      </table>
+      </div>
+      <p class="src">Source: dashboards/status.json (execution) — logs/skill_executions.jsonl + logs/dev_brain_calls.jsonl + the task store (see module 10), via scripts/sync_status.py.</p>
+    </section>
+
+    <section class="mod" id="m13">
+      <h2><span class="mnum">13.</span> Knowledge &amp; Memory</h2>
+      <p class="mod-sub">The memory store, browsable by structure. <b>Content is not shown here:</b> the verbatim quotes stay in the file — this panel lists what is remembered (area, slug, box, status, dates), not the words themselves.</p>
+      <div class="cards" id="memory-cards"></div>
+      <h3>Entries (metadata only — no quote text)</h3>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Area</th><th>Slug</th><th>Box</th><th>Status</th><th>Learned</th><th>Updated</th></tr></thead>
+        <tbody id="memory-entry-body"></tbody>
+      </table>
+      </div>
+      <h3>Boxes</h3>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Box</th><th>Entries</th></tr></thead>
+        <tbody id="memory-box-body"></tbody>
+      </table>
+      </div>
+      <p class="src">Source: dashboards/status.json (memory) — memory.json + the MEMORY.md export + owner_memory.py, via scripts/sync_status.py. Rule: memory learns only from Boss's own messages; memory is context, NOT permission.</p>
+    </section>
+
+    <section class="mod" id="m14">
+      <h2><span class="mnum">14.</span> Library</h2>
+      <p class="mod-sub">Saved reports, decks, and documents — every file listed here really exists, with its path, size, and date. CEO reports are listed in module 15; this panel lists the repo's documents.</p>
+      <div class="cards" id="library-cards"></div>
+      <div id="library-groups"></div>
+      <p class="src">Source: dashboards/status.json (library) — docs/ + top-level + 00-CEO-Core/*.md + unified-business-os (VM only), via scripts/sync_status.py. Decks live outside the repo — not listed here.</p>
+    </section>
+
+    <section class="mod" id="m16">
+      <h2><span class="mnum">16.</span> Integration Center</h2>
+      <p class="mod-sub">Connected services and their state. A service is called "connected" only after a dated probe proves it — anything unprobed reads "unknown" or "not connected", never "connected".</p>
+      <div class="cards" id="integ-cards"></div>
+      <h3>Services</h3>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Service</th><th>State</th><th>Verified</th><th>Evidence</th><th>Source</th></tr></thead>
+        <tbody id="integ-body"></tbody>
+      </table>
+      </div>
+      <h3>n8n workflows</h3>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Workflow</th><th>Name</th><th>Nodes</th><th>Status</th></tr></thead>
+        <tbody id="integ-wf-body"></tbody>
+      </table>
+      </div>
+      <p class="src">Source: dashboards/status.json (integrations) — config.json + the n8n MCP verified record + the n8n wiring doc, via scripts/sync_status.py.</p>
+    </section>
+
     <footer class="src" style="margin-top: 8px">
-      FOUNDER OS · Command Center F2 batch 2 · localhost only (never exposed publicly) ·
+      FOUNDER OS · Command Center F2 batch 3 · localhost only (never exposed publicly) ·
       data: dashboards/status.json + dashboards/ceo-report.json, both published by scripts/sync_status.py ·
       approvals: 00-CEO-Core/approval_centre.py + the approval gateway — no new approval path.
     </footer>
@@ -286,7 +398,7 @@
 (function () {
   "use strict";
   var TASKBOARD = "http://localhost:8766";
-  var state = { status: null, ceo: null, liveApprovals: null, serverLive: false };
+  var state = { status: null, ceo: null, liveApprovals: null, serverLive: false, serverChecked: false };
   var loadTime = new Date();
 
   function $(id) { return document.getElementById(id); }
@@ -772,6 +884,327 @@
     $("policy-matrix").textContent = fmt(pm.text);
   }
 
+  /* ---------- Chat (module 2) — SHELL, not a live chat ---------- */
+  var selectedPersona = null; // in-memory only; a reload resets to the default
+  function renderChat(s) {
+    var c = s.chat || {};
+    var send = c.send || {};
+    var wrap = $("chat-cards");
+    wrap.innerHTML = "";
+    var chain = Array.isArray(c.brain_chain) ? c.brain_chain.join(" -> ") : fmt(c.brain_chain);
+    [
+      { k: "Brain (this snapshot)", v: fmt(c.brain), s: "status.json · chat.brain" },
+      { k: "Dev brain chain", v: chain, s: "config.json · development_brain.fallback_chain" },
+      { k: "Assistant", v: fmt(c.assistant), s: "the memory store's assistant-name entry" },
+      { k: "Chat surface", v: fmt(c.surface), s: "status.json · chat.surface" },
+      { k: "Connected", v: c.connected === true ? "yes" : c.connected === false ? "no" : "unknown", s: "status.json · chat.connected" },
+      { k: "Transcript in repo", v: fmt(c.transcript), s: "status.json · chat.transcript" },
+      { k: "Send", v: send.enabled === true ? "enabled" : "disabled", s: fmt(send.reason) }
+    ].forEach(function (c2) {
+      var d = el("div", "card");
+      d.appendChild(el("div", "k", c2.k));
+      d.appendChild(el("div", "v" + (String(c2.v).length > 14 ? " small" : ""), c2.v));
+      d.appendChild(el("div", "s", c2.s));
+      wrap.appendChild(d);
+    });
+    var tr = $("chat-transcript");
+    tr.innerHTML = "";
+    tr.appendChild(el("p", "mod-sub", "No transcript — no chat has happened in this repo. Chat with Mira happens in the Muse chat, outside this page."));
+    renderChatPersona();
+  }
+  function renderChatPersona() {
+    var line = $("chat-persona-line");
+    if (!line) return;
+    var p = selectedPersona;
+    if (p) {
+      line.textContent = "Speaking as: " + fmt(p.name) + " — " + fmt(p.role) + " (display only; the brain does not switch.)";
+    } else {
+      line.textContent = "Speaking as: " + fmt((state.status.chat || {}).assistant) + " (default persona; change it in module 4 — display only.)";
+    }
+  }
+
+  /* ---------- Voice (module 3) — SHELL, the mic is off ---------- */
+  function renderVoiceCmd(s) {
+    var v = s.voice_command || {};
+    var wrap = $("voice-cards");
+    wrap.innerHTML = "";
+    [
+      { k: "Voice loop", v: v.loop_exists === true ? "present" : v.loop_exists === false ? "missing" : "unknown", s: fmt(v.loop_file) },
+      { k: "Engines", v: fmt(v.engines), s: "status.json · voice_command.engines" },
+      { k: "Brain", v: fmt(v.brain), s: "status.json · voice_command.brain" },
+      { k: "Bengali prompts", v: fmt(v.bengali_prompts), s: fmt(v.bengali_note) },
+      { k: "Live in browser", v: v.live_in_browser === true ? "yes" : v.live_in_browser === false ? "no" : "unknown", s: fmt(v.reason) }
+    ].forEach(function (c2) {
+      var d = el("div", "card");
+      d.appendChild(el("div", "k", c2.k));
+      d.appendChild(el("div", "v" + (String(c2.v).length > 14 ? " small" : ""), c2.v));
+      d.appendChild(el("div", "s", c2.s));
+      wrap.appendChild(d);
+    });
+    var gb = $("voice-gate-body");
+    gb.innerHTML = "";
+    var gp = v.gate_phrases || {};
+    Object.keys(gp).forEach(function (phrase) {
+      var tr = document.createElement("tr");
+      tr.appendChild(el("td", null, phrase));
+      tr.appendChild(el("td", null, fmt(gp[phrase])));
+      gb.appendChild(tr);
+    });
+    if (!Object.keys(gp).length) {
+      var tr0 = el("tr");
+      tr0.appendChild(el("td", null, "unknown"));
+      gb.appendChild(tr0);
+    }
+  }
+
+  /* ---------- Personas (module 4) — DISPLAY ONLY ---------- */
+  function renderPersonas(s) {
+    var ps = s.personas || {};
+    var grid = $("persona-grid");
+    grid.innerHTML = "";
+    (ps.profiles || []).forEach(function (p) {
+      var box = el("div", "dept");
+      box.appendChild(el("h3", null, fmt(p.name)));
+      box.appendChild(el("div", "row", fmt(p.role)));
+      box.appendChild(el("div", "row", fmt(p.description)));
+      box.appendChild(el("div", "row", "Source: " + fmt(p.source) + " · memory box: " + fmt(p.memory_box)));
+      if (p.id === ps.default) {
+        box.appendChild(el("div", "row", "Default persona"));
+      }
+      var isSel = selectedPersona && selectedPersona.id === p.id;
+      var btn = el("button", "btn", isSel ? "Selected" : "Select");
+      btn.disabled = !!isSel;
+      btn.addEventListener("click", function () {
+        selectedPersona = p;
+        renderPersonas(state.status);
+        renderChatPersona();
+      });
+      box.appendChild(btn);
+      grid.appendChild(box);
+    });
+    if (!(ps.profiles || []).length) {
+      grid.appendChild(el("p", null, "unknown — no personas defined."));
+    }
+  }
+
+  /* ---------- Execution (module 12) — records, not a live stream ---------- */
+  function renderExecServerLine() {
+    var line = $("exec-server-line");
+    if (!line) return;
+    if (!state.serverChecked) {
+      line.textContent = "Approval/taskboard server: checking…";
+    } else if (state.serverLive) {
+      line.textContent = "Approval/taskboard server: LIVE — allow / reject works";
+    } else {
+      line.textContent = "Approval/taskboard server: not running — display only";
+    }
+  }
+  function renderExecution(s) {
+    var ex = s.execution || {};
+    var se = ex.skill_executions || {};
+    var dc = ex.dev_brain_calls || {};
+    var br = ex.bridge || {};
+    var tk = ex.tasks || {};
+    var wrap = $("exec-cards");
+    wrap.innerHTML = "";
+    [
+      { k: "Tasks total", v: fmt(tk.total), s: "status.json · execution.tasks" },
+      { k: "Tasks done", v: fmt(tk.done), s: "status.json · execution.tasks" },
+      { k: "Skill executions", v: fmt(se.total_lines), s: "logs/skill_executions.jsonl · lines" },
+      { k: "Skill log errors", v: fmt(se.errors), s: "logs/skill_executions.jsonl · error != null" },
+      { k: "Dev brain calls", v: fmt(dc.total), s: "logs/dev_brain_calls.jsonl" },
+      { k: "Bridge cron", v: fmt(br.state), s: "status.json · execution.bridge" },
+      { k: "Live stream", v: fmt(ex.stream), s: fmt(ex.stream_note) }
+    ].forEach(function (c2) {
+      var d = el("div", "card");
+      d.appendChild(el("div", "k", c2.k));
+      d.appendChild(el("div", "v" + (String(c2.v).length > 14 ? " small" : ""), c2.v));
+      d.appendChild(el("div", "s", c2.s));
+      wrap.appendChild(d);
+    });
+    renderExecServerLine();
+    var rb = $("exec-recent-body");
+    rb.innerHTML = "";
+    (se.recent || []).forEach(function (r) {
+      var tr = document.createElement("tr");
+      tr.appendChild(el("td", null, taskDate(r.timestamp)));
+      tr.appendChild(el("td", null, fmt(r.event)));
+      tr.appendChild(el("td", null, fmt(r.skill)));
+      tr.appendChild(el("td", null, fmt(r.result_file)));
+      tr.appendChild(el("td", null, (r.error === null || r.error === undefined) ? "none" : fmt(r.error)));
+      rb.appendChild(tr);
+    });
+    var cb = $("exec-calls-body");
+    cb.innerHTML = "";
+    (dc.records || []).forEach(function (r) {
+      var tr = document.createElement("tr");
+      tr.appendChild(el("td", null, taskDate(r.ts)));
+      tr.appendChild(el("td", null, fmt(r.provider)));
+      tr.appendChild(el("td", null, fmt(r.model)));
+      tr.appendChild(el("td", null, fmt(r.status)));
+      tr.appendChild(el("td", null, fmt(r.total_tokens)));
+      cb.appendChild(tr);
+    });
+  }
+
+  /* ---------- Memory (module 13) — structure only, no quote text ---------- */
+  function renderMemory(s) {
+    var m = s.memory || {};
+    var wrap = $("memory-cards");
+    wrap.innerHTML = "";
+    [
+      { k: "Memory store", v: fmt(m.store_file), s: "status.json · memory.store_file" },
+      { k: "Schema", v: fmt(m.schema), s: "status.json · memory.schema" },
+      { k: "Entries", v: fmt(m.entries), s: "status.json · memory.entries" },
+      { k: "Boxes", v: Array.isArray(m.boxes) ? String(m.boxes.length) : fmt(m.boxes), s: "status.json · memory.boxes" },
+      { k: "Verbatim quotes", v: fmt(m.verbatim_quotes), s: "in memory.json — text not shown here" },
+      { k: "Export", v: fmt(m.export_file), s: fmt(m.export_size_bytes) + " B" },
+      { k: "Engine", v: fmt(m.engine_file), s: (m.engine_methods || []).length + " methods" }
+    ].forEach(function (c2) {
+      var d = el("div", "card");
+      d.appendChild(el("div", "k", c2.k));
+      d.appendChild(el("div", "v" + (String(c2.v).length > 14 ? " small" : ""), c2.v));
+      d.appendChild(el("div", "s", c2.s));
+      wrap.appendChild(d);
+    });
+    var eb = $("memory-entry-body");
+    eb.innerHTML = "";
+    (m.entries_meta || []).forEach(function (e) {
+      var tr = document.createElement("tr");
+      tr.appendChild(el("td", null, fmt(e.area)));
+      tr.appendChild(el("td", null, fmt(e.slug)));
+      tr.appendChild(el("td", null, fmt(e.box)));
+      tr.appendChild(el("td", null, fmt(e.status)));
+      tr.appendChild(el("td", null, taskDate(e.learned_at)));
+      tr.appendChild(el("td", null, taskDate(e.updated_at)));
+      eb.appendChild(tr);
+    });
+    var bb = $("memory-box-body");
+    bb.innerHTML = "";
+    (m.boxes || []).forEach(function (b) {
+      var tr = document.createElement("tr");
+      tr.appendChild(el("td", null, fmt(b)));
+      tr.appendChild(el("td", null, fmt((m.per_box || {})[b] || 0)));
+      bb.appendChild(tr);
+    });
+  }
+
+  /* ---------- Library (module 14) — only files that really exist ---------- */
+  function renderLibrary(s) {
+    var lb = s.library || {};
+    var groups = [
+      { key: "docs", title: "docs/" },
+      { key: "top_level", title: "Top-level documents" },
+      { key: "ceo_core", title: "00-CEO-Core/" },
+      { key: "unified_business_os", title: "unified-business-os/ (VM only — outside the repo)" }
+    ];
+    var total = 0;
+    groups.forEach(function (g) {
+      if (Array.isArray(lb[g.key])) total += lb[g.key].length;
+    });
+    var wrap = $("library-cards");
+    wrap.innerHTML = "";
+    [
+      { k: "Documents listed", v: fmt(total), s: "status.json · library" },
+      { k: "docs/", v: Array.isArray(lb.docs) ? String(lb.docs.length) : fmt(lb.docs), s: "status.json · library.docs" },
+      { k: "Top-level", v: Array.isArray(lb.top_level) ? String(lb.top_level.length) : fmt(lb.top_level), s: "status.json · library.top_level" },
+      { k: "00-CEO-Core/", v: Array.isArray(lb.ceo_core) ? String(lb.ceo_core.length) : fmt(lb.ceo_core), s: "status.json · library.ceo_core" },
+      { k: "CEO reports", v: fmt((lb.ceo_reports || {}).total), s: "file list in module 15" }
+    ].forEach(function (c2) {
+      var d = el("div", "card");
+      d.appendChild(el("div", "k", c2.k));
+      d.appendChild(el("div", "v" + (String(c2.v).length > 14 ? " small" : ""), c2.v));
+      d.appendChild(el("div", "s", c2.s));
+      wrap.appendChild(d);
+    });
+    var host = $("library-groups");
+    host.innerHTML = "";
+    groups.forEach(function (g) {
+      host.appendChild(el("h3", null, g.title));
+      var files = lb[g.key];
+      if (!Array.isArray(files)) {
+        host.appendChild(el("p", "mod-sub", "unknown — this directory is not on this machine."));
+        return;
+      }
+      if (!files.length) {
+        host.appendChild(el("p", "mod-sub", "No files."));
+        return;
+      }
+      var tbl = el("table");
+      var thead = el("thead");
+      var trh = el("tr");
+      ["File", "Path", "Size", "Modified"].forEach(function (h) { trh.appendChild(el("th", null, h)); });
+      thead.appendChild(trh); tbl.appendChild(thead);
+      var tb = el("tbody");
+      files.forEach(function (f) {
+        var tr = document.createElement("tr");
+        tr.appendChild(el("td", null, fmt(f.name)));
+        tr.appendChild(el("td", "mono", fmt(f.path)));
+        tr.appendChild(el("td", null, isKnown(f.size_bytes) ? fmt(f.size_bytes) + " B" : "unknown"));
+        tr.appendChild(el("td", null, taskDate(f.modified_at)));
+        tb.appendChild(tr);
+      });
+      tbl.appendChild(tb);
+      host.appendChild(tbl);
+    });
+    host.appendChild(el("p", "src", fmt(lb.decks_note)));
+  }
+
+  /* ---------- Integrations (module 16) — connected only with a probe ---------- */
+  function renderIntegrations(s) {
+    var ig = s.integrations || {};
+    var mcp = ig.n8n_mcp || {};
+    var rows = [];
+    var connected = 0;
+    function addRow(name, st) {
+      rows.push({ name: name, state: fmt(st.state), verified: fmt(st.verified), evidence: fmt(st.evidence), source: fmt(st.source) });
+      if (st.state === "connected") connected += 1;
+    }
+    addRow(fmt(mcp.service) + " (" + fmt(mcp.instance) + ")", mcp);
+    addRow(fmt((ig.n8n_adapter || {}).service), ig.n8n_adapter || {});
+    var prov = ig.providers || {};
+    Object.keys(prov).forEach(function (name) {
+      addRow("Provider: " + name, prov[name]);
+    });
+    addRow(fmt((ig.vapi || {}).service), ig.vapi || {});
+    addRow(fmt((ig.gmail_calendar || {}).service), ig.gmail_calendar || {});
+    var wrap = $("integ-cards");
+    wrap.innerHTML = "";
+    [
+      { k: "Connected services", v: fmt(connected), s: "only with a dated probe record" },
+      { k: "n8n MCP tools", v: fmt(mcp.tools), s: "verified " + fmt(mcp.verified) },
+      { k: "n8n MCP workflows", v: fmt(mcp.workflows), s: "verified " + fmt(mcp.verified) },
+      { k: "n8n REST API", v: fmt(mcp.rest_api), s: "status.json · integrations.n8n_mcp" }
+    ].forEach(function (c2) {
+      var d = el("div", "card");
+      d.appendChild(el("div", "k", c2.k));
+      d.appendChild(el("div", "v" + (String(c2.v).length > 14 ? " small" : ""), c2.v));
+      d.appendChild(el("div", "s", c2.s));
+      wrap.appendChild(d);
+    });
+    var body = $("integ-body");
+    body.innerHTML = "";
+    rows.forEach(function (r) {
+      var tr = document.createElement("tr");
+      tr.appendChild(el("td", null, r.name));
+      tr.appendChild(el("td", null, r.state));
+      tr.appendChild(el("td", null, r.verified));
+      tr.appendChild(el("td", null, r.evidence));
+      tr.appendChild(el("td", null, r.source));
+      body.appendChild(tr);
+    });
+    var wb = $("integ-wf-body");
+    wb.innerHTML = "";
+    (ig.n8n_workflows || []).forEach(function (w) {
+      var tr = document.createElement("tr");
+      tr.appendChild(el("td", null, fmt(w.label)));
+      tr.appendChild(el("td", null, fmt(w.name)));
+      tr.appendChild(el("td", null, fmt(w.nodes)));
+      tr.appendChild(el("td", null, fmt(w.status)));
+      wb.appendChild(tr);
+    });
+  }
+
   /* ---------- Approvals (module 11) ---------- */
   function fetchWithTimeout(url, ms, opts) {
     var ctrl = new AbortController();
@@ -885,6 +1318,8 @@
       .then(function (res) {
         if (!res.ok) throw new Error("HTTP " + res.ok);
         state.serverLive = true;
+        state.serverChecked = true;
+        renderExecServerLine();
         state.liveApprovals = res.j.pending || [];
         pill.className = "pill ok";
         pill.textContent = "Approval server: LIVE — allow / reject works";
@@ -894,6 +1329,8 @@
       })
       .catch(function () {
         state.serverLive = false;
+        state.serverChecked = true;
+        renderExecServerLine();
         pill.className = "pill warn";
         pill.textContent = "Approval server: not running — display only";
         banner.hidden = false;
@@ -924,6 +1361,13 @@
       renderFinance(s);
       renderHealth(s);
       renderPolicy(s);
+      renderChat(s);
+      renderVoiceCmd(s);
+      renderPersonas(s);
+      renderExecution(s);
+      renderMemory(s);
+      renderLibrary(s);
+      renderIntegrations(s);
       return fetch("ceo-report.json", { cache: "no-store" })
         .then(function (r) {
           if (!r.ok) throw new Error("ceo-report.json HTTP " + r.status);

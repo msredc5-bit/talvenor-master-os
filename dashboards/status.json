@@ -62,6 +62,23 @@
       "done": 1
     }
   },
+  "chat": {
+    "assistant": "Mira",
+    "brain": "mock",
+    "brain_chain": [
+      "ollama:qwen2.5-coder:1.5b",
+      "gemini:gemini-3.5-flash-lite",
+      "openrouter:openrouter/free"
+    ],
+    "connected": false,
+    "note": "No chat transcript is stored in this repo. No fake replies are shown — the panel is a connection-state surface until a real chat path exists.",
+    "send": {
+      "enabled": false,
+      "reason": "The brain on this snapshot is mock, and the live dev brain runs on Boss's PC only. Send would need a live brain + a send path — neither exists here."
+    },
+    "surface": "Muse chat with Mira (outside this repo)",
+    "transcript": "none"
+  },
   "control": {
     "emergency_stop": false,
     "paused": false,
@@ -126,6 +143,114 @@
     }
   },
   "email": "PAUSED",
+  "execution": {
+    "bridge": {
+      "name": "master-os-3d-bridge",
+      "note": "No run record in this repo — the bridge regenerates dashboards/status.* every 10 minutes; its last run is not recorded as a file.",
+      "state": "unknown"
+    },
+    "dev_brain_calls": {
+      "records": [
+        {
+          "error": null,
+          "model": "gemma4:12b",
+          "provider": "ollama",
+          "status": "ok",
+          "total_tokens": 5,
+          "ts": "2026-11-25T19:08:50.970618Z"
+        },
+        {
+          "error": null,
+          "model": "gemma4:12b",
+          "provider": "ollama",
+          "status": "ok",
+          "total_tokens": 5,
+          "ts": "2026-11-25T19:10:32.873808Z"
+        },
+        {
+          "error": null,
+          "model": "gemma4:12b",
+          "provider": "ollama",
+          "status": "ok",
+          "total_tokens": 5,
+          "ts": "2026-11-25T19:11:46.368582Z"
+        }
+      ],
+      "total": 3
+    },
+    "skill_executions": {
+      "errors": 0,
+      "first_at": "2026-11-24T18:17:26.232731+00:00",
+      "last_at": "2026-11-27T09:48:28.712336+00:00",
+      "parsed": 116465,
+      "recent": [
+        {
+          "error": null,
+          "event": "load_skill_for_task",
+          "result_file": "report-compiler.md",
+          "skill": "report-compiler",
+          "timestamp": "2026-11-27T09:48:27.301113+00:00"
+        },
+        {
+          "error": null,
+          "event": "load_skill",
+          "result_file": "billing-invoice-agent.md",
+          "skill": "billing-invoice-agent",
+          "timestamp": "2026-11-27T09:48:27.422704+00:00"
+        },
+        {
+          "error": null,
+          "event": "load_skill_for_task",
+          "result_file": "billing-invoice-agent.md",
+          "skill": "billing-invoice-agent",
+          "timestamp": "2026-11-27T09:48:27.422904+00:00"
+        },
+        {
+          "error": null,
+          "event": "ambiguous_bare_name",
+          "result_file": "unknown",
+          "skill": "visual-producer",
+          "timestamp": "2026-11-27T09:48:27.541144+00:00"
+        },
+        {
+          "error": null,
+          "event": "load_skill",
+          "result_file": "visual-producer.md",
+          "skill": "visual-producer",
+          "timestamp": "2026-11-27T09:48:27.541440+00:00"
+        },
+        {
+          "error": null,
+          "event": "load_skill_for_task",
+          "result_file": "visual-producer.md",
+          "skill": "visual-producer",
+          "timestamp": "2026-11-27T09:48:27.541526+00:00"
+        },
+        {
+          "error": null,
+          "event": "load_skill",
+          "result_file": "kit-qa.md",
+          "skill": "kit-qa",
+          "timestamp": "2026-11-27T09:48:28.712166+00:00"
+        },
+        {
+          "error": null,
+          "event": "load_skill_for_task",
+          "result_file": "kit-qa.md",
+          "skill": "kit-qa",
+          "timestamp": "2026-11-27T09:48:28.712336+00:00"
+        }
+      ],
+      "total_lines": 116465
+    },
+    "stream": "none",
+    "stream_note": "No live stream: there is no event bus until F4. This monitor shows records, not a live feed — nothing here proves a job is running right now.",
+    "tasks": {
+      "done": 1,
+      "queued": 0,
+      "total": 1
+    }
+  },
   "finance": {
     "gate0": {
       "kit_launch_price_usd": 39,
@@ -197,8 +322,8 @@
   },
   "first_mails": 163,
   "founder_os": {
-    "batch": 2,
-    "label": "Founder Command Center — batch 2",
+    "batch": 3,
+    "label": "Founder Command Center — batch 3",
     "phase": "F2",
     "source": "founder-os-audit-2026-11-26.md §14 (F2)"
   },
@@ -239,10 +364,10 @@
       }
     },
     "pytest": {
-      "collected": 252,
+      "collected": 261,
       "failed": 0,
-      "generated_at": "2026-11-27T00:36:34Z",
-      "passed": 249,
+      "generated_at": "2026-11-27T05:24:43Z",
+      "passed": 258,
       "skipped": 2,
       "xfailed": 1
     },
@@ -258,10 +383,10 @@
         "check_voice.py: gate test (TEMP) voice send -> PENDING",
         "check_voice.py: voice_test.py PASS (real synth + transcribe)"
       ],
-      "generated_at": "2026-11-27T00:36:34Z",
-      "note": "6 pre-existing voice-environment failures — the voice packages (piper-tts, vosk, sherpa-onnx, sounddevice) are not installed on this VM. Same 6 as the F2 batch 2 baseline. Not a regression. Total rose 871 -> 874: the 3 new regression checks for the 2026-11-27 Voice/CEO-tasks render fix (check_command_center.py 48 -> 51). check_phase7.py passed 18/18 in this run (no flaky failure this time).",
-      "passed": 868,
-      "total": 874
+      "generated_at": "2026-11-27T05:24:43Z",
+      "note": "6 pre-existing voice-environment failures — the voice packages (piper-tts, vosk, sherpa-onnx, sounddevice) are not installed on this VM. Same 6 as the F2 batch 2 baseline. Not a regression. Total rose 874 -> 884: the 10 new checks for F2 batch 3 (check_command_center.py 51 -> 61). check_phase6.py passed 14/14 in this run (the library-mtime false positive from the first batch-3 suite run was fixed: library mtimes are now second-precision, and the fix comment in sync_status.py no longer names the guarded digit sequence). check_phase7.py passed 18/18 in this run.",
+      "passed": 878,
+      "total": 884
     },
     "test_files": 12,
     "voice_models": {
@@ -280,8 +405,560 @@
       }
     }
   },
+  "integrations": {
+    "gmail_calendar": {
+      "evidence": "Connector-level (Muse connectors), not repo-level",
+      "service": "Gmail / Calendar / Drive",
+      "source": "none in repo",
+      "state": "unknown"
+    },
+    "n8n_adapter": {
+      "evidence": "localhost-only adapter; no n8n instance runs on this machine (self-hosted not installed); Cloud is reached via MCP, not this adapter",
+      "file": "00-CEO-Core/workflow_engine/n8n_adapter.py",
+      "file_exists": true,
+      "service": "n8n adapter (repo)",
+      "source": "dashboards/n8n-wiring.md",
+      "state": "not connected"
+    },
+    "n8n_mcp": {
+      "allowed_read_only": 41,
+      "instance": "talvenorai.app.n8n.cloud",
+      "rest_api": "blocked on free trial (404)",
+      "service": "n8n Cloud MCP",
+      "source": "custom.n8n-mcp/CONNECTOR.md (verified 2026-11-25)",
+      "state": "connected",
+      "tools": 75,
+      "verified": "2026-11-25",
+      "workflows": 0,
+      "write_blocked": 34
+    },
+    "n8n_workflows": [
+      {
+        "label": "Tier 2 auto-send",
+        "name": "Talvenor Tier 2 — Daily auto-send 18:00 Dhaka",
+        "nodes": 8,
+        "status": "NOT LIVE"
+      },
+      {
+        "label": "Callback",
+        "name": "Talvenor Callback - Website form to Vapi",
+        "nodes": 3,
+        "status": "NOT LIVE"
+      }
+    ],
+    "providers": {
+      "anthropic": {
+        "enabled": false,
+        "evidence": "not enabled; no probe",
+        "source": "00-CEO-Core/config.json",
+        "state": "disabled in config",
+        "verified": null
+      },
+      "gemini": {
+        "enabled": false,
+        "evidence": "not enabled; no probe",
+        "source": "00-CEO-Core/config.json",
+        "state": "disabled in config",
+        "verified": null
+      },
+      "grok": {
+        "enabled": false,
+        "evidence": "not enabled; no probe",
+        "source": "00-CEO-Core/config.json",
+        "state": "disabled in config",
+        "verified": null
+      },
+      "kimi": {
+        "enabled": false,
+        "evidence": "not enabled; no probe",
+        "source": "00-CEO-Core/config.json",
+        "state": "disabled in config",
+        "verified": null
+      },
+      "meta": {
+        "enabled": true,
+        "evidence": "tunnel 403; key validity unproven",
+        "source": "founder-os-audit-2026-11-26.md §5.2",
+        "state": "unreachable from this VM",
+        "verified": "2026-11-20"
+      },
+      "ollama": {
+        "enabled": true,
+        "evidence": "proven on Boss's PC (qwen2.5-coder:1.5b, 1.9s)",
+        "source": "docs/live-brain-proof-2026-11-26.md",
+        "state": "local — not present in this VM",
+        "verified": "2026-11-26"
+      },
+      "openai": {
+        "enabled": false,
+        "evidence": "not enabled; no probe",
+        "source": "00-CEO-Core/config.json",
+        "state": "disabled in config",
+        "verified": null
+      },
+      "openrouter": {
+        "enabled": false,
+        "evidence": "not enabled; no probe",
+        "source": "00-CEO-Core/config.json",
+        "state": "disabled in config",
+        "verified": null
+      }
+    },
+    "vapi": {
+      "evidence": "No Vapi config in this repo — the Vapi connector lives outside the repo",
+      "service": "Vapi",
+      "source": "none in repo",
+      "state": "unknown"
+    }
+  },
+  "library": {
+    "ceo_core": [
+      {
+        "modified_at": "2026-11-24T20:31:20+00:00",
+        "name": "CEO-README.md",
+        "path": "00-CEO-Core/CEO-README.md",
+        "size_bytes": 2770
+      },
+      {
+        "modified_at": "2026-11-21T05:29:39+00:00",
+        "name": "COMPLETION-SWEEP-AUDIT-2026-11-21.md",
+        "path": "00-CEO-Core/COMPLETION-SWEEP-AUDIT-2026-11-21.md",
+        "size_bytes": 26515
+      },
+      {
+        "modified_at": "2026-11-21T05:03:55+00:00",
+        "name": "MEMORY-STRUCTURE-DECISION-2026-11-21.md",
+        "path": "00-CEO-Core/MEMORY-STRUCTURE-DECISION-2026-11-21.md",
+        "size_bytes": 8684
+      },
+      {
+        "modified_at": "2026-11-26T12:01:12+00:00",
+        "name": "PROVIDERS-SETUP.md",
+        "path": "00-CEO-Core/PROVIDERS-SETUP.md",
+        "size_bytes": 9877
+      },
+      {
+        "modified_at": "2026-11-21T05:03:01+00:00",
+        "name": "VOICE-SETUP.md",
+        "path": "00-CEO-Core/VOICE-SETUP.md",
+        "size_bytes": 5943
+      },
+      {
+        "modified_at": "2026-11-21T05:38:09+00:00",
+        "name": "agent-skill-audit-2026-11-21.md",
+        "path": "00-CEO-Core/agent-skill-audit-2026-11-21.md",
+        "size_bytes": 16598
+      },
+      {
+        "modified_at": "2026-11-22T19:44:48+00:00",
+        "name": "agent-tool-assignments-DRAFT.md",
+        "path": "00-CEO-Core/agent-tool-assignments-DRAFT.md",
+        "size_bytes": 10658
+      },
+      {
+        "modified_at": "2026-11-21T05:29:38+00:00",
+        "name": "sweep-audit-agency.md",
+        "path": "00-CEO-Core/sweep-audit-agency.md",
+        "size_bytes": 17179
+      },
+      {
+        "modified_at": "2026-11-21T05:29:38+00:00",
+        "name": "sweep-audit-ceocore.md",
+        "path": "00-CEO-Core/sweep-audit-ceocore.md",
+        "size_bytes": 24463
+      },
+      {
+        "modified_at": "2026-11-21T05:30:03+00:00",
+        "name": "sweep-audit-docs.md",
+        "path": "00-CEO-Core/sweep-audit-docs.md",
+        "size_bytes": 24234
+      },
+      {
+        "modified_at": "2026-11-21T05:29:39+00:00",
+        "name": "sweep-audit-product-content.md",
+        "path": "00-CEO-Core/sweep-audit-product-content.md",
+        "size_bytes": 21811
+      },
+      {
+        "modified_at": "2026-11-22T21:15:29+00:00",
+        "name": "tenant-acceptance.md",
+        "path": "00-CEO-Core/tenant-acceptance.md",
+        "size_bytes": 2740
+      }
+    ],
+    "ceo_reports": {
+      "latest": "weekly-2026-11-24.json",
+      "note": "File list in module 15 (Reports Center).",
+      "total": 6
+    },
+    "decks_note": "Decks live outside the repo — not listed here.",
+    "docs": [
+      {
+        "modified_at": "2026-11-26T12:01:58+00:00",
+        "name": "live-brain-proof-2026-11-26.md",
+        "path": "docs/live-brain-proof-2026-11-26.md",
+        "size_bytes": 1870
+      }
+    ],
+    "top_level": [
+      {
+        "modified_at": "2026-11-21T05:25:30+00:00",
+        "name": "BUILD-LOG.md",
+        "path": "BUILD-LOG.md",
+        "size_bytes": 103166
+      },
+      {
+        "modified_at": "2026-11-26T12:01:21+00:00",
+        "name": "CLAUDE-CODE-PROMPT.md",
+        "path": "CLAUDE-CODE-PROMPT.md",
+        "size_bytes": 3061
+      },
+      {
+        "modified_at": "2026-11-25T19:11:12+00:00",
+        "name": "CLAUDE.md",
+        "path": "CLAUDE.md",
+        "size_bytes": 5598
+      },
+      {
+        "modified_at": "2026-11-26T12:01:41+00:00",
+        "name": "LOCAL-RUN.md",
+        "path": "LOCAL-RUN.md",
+        "size_bytes": 10607
+      },
+      {
+        "modified_at": "2026-11-21T05:21:50+00:00",
+        "name": "PUSH-PLAN-Phase-11-Improvements.md",
+        "path": "PUSH-PLAN-Phase-11-Improvements.md",
+        "size_bytes": 8488
+      },
+      {
+        "modified_at": "2026-11-21T05:21:17+00:00",
+        "name": "PUSH-PLAN-Phase-9-10.md",
+        "path": "PUSH-PLAN-Phase-9-10.md",
+        "size_bytes": 3806
+      },
+      {
+        "modified_at": "2026-11-26T12:00:28+00:00",
+        "name": "README.md",
+        "path": "README.md",
+        "size_bytes": 32759
+      },
+      {
+        "modified_at": "2026-11-27T05:27:25+00:00",
+        "name": "TALVENOR_CHANGELOG.md",
+        "path": "TALVENOR_CHANGELOG.md",
+        "size_bytes": 104906
+      },
+      {
+        "modified_at": "2026-11-26T12:00:28+00:00",
+        "name": "TALVENOR_MASTER_ARCHITECTURE.md",
+        "path": "TALVENOR_MASTER_ARCHITECTURE.md",
+        "size_bytes": 29865
+      },
+      {
+        "modified_at": "2026-11-21T20:44:42+00:00",
+        "name": "TALVENOR_PERMISSION_MATRIX.md",
+        "path": "TALVENOR_PERMISSION_MATRIX.md",
+        "size_bytes": 6030
+      }
+    ],
+    "unified_business_os": [
+      {
+        "modified_at": "2026-11-24T16:53:35+00:00",
+        "name": "audit-phase0-2026-11-24.md",
+        "path": "unified-business-os/audit-phase0-2026-11-24.md",
+        "size_bytes": 57772
+      },
+      {
+        "modified_at": "2026-11-21T20:17:48+00:00",
+        "name": "brief-2026-11-22.md",
+        "path": "unified-business-os/brief-2026-11-22.md",
+        "size_bytes": 38778
+      },
+      {
+        "modified_at": "2026-11-24T16:43:56+00:00",
+        "name": "brief-2026-11-24-autonomous-agency-os.md",
+        "path": "unified-business-os/brief-2026-11-24-autonomous-agency-os.md",
+        "size_bytes": 36299
+      },
+      {
+        "modified_at": "2026-11-26T08:08:27+00:00",
+        "name": "brief-2026-11-26-bot-hq-audit.md",
+        "path": "unified-business-os/brief-2026-11-26-bot-hq-audit.md",
+        "size_bytes": 3268
+      },
+      {
+        "modified_at": "2026-11-26T11:43:36+00:00",
+        "name": "brief-2026-11-26-founder-os.md",
+        "path": "unified-business-os/brief-2026-11-26-founder-os.md",
+        "size_bytes": 13183
+      },
+      {
+        "modified_at": "2026-11-27T09:38:35+00:00",
+        "name": "brief-2026-11-27-founder-os-coding-agent-role.md",
+        "path": "unified-business-os/brief-2026-11-27-founder-os-coding-agent-role.md",
+        "size_bytes": 3902
+      },
+      {
+        "modified_at": "2026-11-27T09:39:59+00:00",
+        "name": "brief-2026-11-27-founder-os-phase0-audit.md",
+        "path": "unified-business-os/brief-2026-11-27-founder-os-phase0-audit.md",
+        "size_bytes": 1234
+      },
+      {
+        "modified_at": "2026-11-27T09:55:53+00:00",
+        "name": "brief-2026-11-27-founder-os-phase1-env-runtime.md",
+        "path": "unified-business-os/brief-2026-11-27-founder-os-phase1-env-runtime.md",
+        "size_bytes": 1101
+      },
+      {
+        "modified_at": "2026-11-27T10:00:15+00:00",
+        "name": "brief-2026-11-27-founder-os-phase2-launch.md",
+        "path": "unified-business-os/brief-2026-11-27-founder-os-phase2-launch.md",
+        "size_bytes": 923
+      },
+      {
+        "modified_at": "2026-11-27T10:02:32+00:00",
+        "name": "brief-2026-11-27-founder-os-phase3-command-center.md",
+        "path": "unified-business-os/brief-2026-11-27-founder-os-phase3-command-center.md",
+        "size_bytes": 1378
+      },
+      {
+        "modified_at": "2026-11-26T12:21:07+00:00",
+        "name": "f1-completion-report-2026-11-26.md",
+        "path": "unified-business-os/f1-completion-report-2026-11-26.md",
+        "size_bytes": 10194
+      },
+      {
+        "modified_at": "2026-11-26T13:12:04+00:00",
+        "name": "f2-batch1-completion-report-2026-11-26.md",
+        "path": "unified-business-os/f2-batch1-completion-report-2026-11-26.md",
+        "size_bytes": 16362
+      },
+      {
+        "modified_at": "2026-11-27T00:37:51+00:00",
+        "name": "f2-batch2-completion-report-2026-11-27.md",
+        "path": "unified-business-os/f2-batch2-completion-report-2026-11-27.md",
+        "size_bytes": 26351
+      },
+      {
+        "modified_at": "2026-11-27T05:28:02+00:00",
+        "name": "f2-batch3-completion-report-2026-11-27.md",
+        "path": "unified-business-os/f2-batch3-completion-report-2026-11-27.md",
+        "size_bytes": 29312
+      },
+      {
+        "modified_at": "2026-11-26T11:52:35+00:00",
+        "name": "founder-os-audit-2026-11-26.md",
+        "path": "unified-business-os/founder-os-audit-2026-11-26.md",
+        "size_bytes": 107560
+      },
+      {
+        "modified_at": "2026-11-27T09:51:24+00:00",
+        "name": "founder-os-audit-delta-2026-11-27.md",
+        "path": "unified-business-os/founder-os-audit-delta-2026-11-27.md",
+        "size_bytes": 43943
+      },
+      {
+        "modified_at": "2026-11-24T17:23:22+00:00",
+        "name": "local-development-strategy-2026-11-24.md",
+        "path": "unified-business-os/local-development-strategy-2026-11-24.md",
+        "size_bytes": 28936
+      },
+      {
+        "modified_at": "2026-11-24T18:08:17+00:00",
+        "name": "phase1-completion-report-2026-11-25.md",
+        "path": "unified-business-os/phase1-completion-report-2026-11-25.md",
+        "size_bytes": 13939
+      },
+      {
+        "modified_at": "2026-11-27T09:58:34+00:00",
+        "name": "phase1-env-runtime-report-2026-11-27.md",
+        "path": "unified-business-os/phase1-env-runtime-report-2026-11-27.md",
+        "size_bytes": 26366
+      },
+      {
+        "modified_at": "2026-11-24T18:37:38+00:00",
+        "name": "phase2-completion-report-2026-11-25.md",
+        "path": "unified-business-os/phase2-completion-report-2026-11-25.md",
+        "size_bytes": 12528
+      },
+      {
+        "modified_at": "2026-11-27T10:01:23+00:00",
+        "name": "phase2-launch-report-2026-11-27.md",
+        "path": "unified-business-os/phase2-launch-report-2026-11-27.md",
+        "size_bytes": 11571
+      },
+      {
+        "modified_at": "2026-11-24T18:55:21+00:00",
+        "name": "phase3-completion-report-2026-11-25.md",
+        "path": "unified-business-os/phase3-completion-report-2026-11-25.md",
+        "size_bytes": 19202
+      },
+      {
+        "modified_at": "2026-11-24T19:18:03+00:00",
+        "name": "phase4-completion-report-2026-11-25.md",
+        "path": "unified-business-os/phase4-completion-report-2026-11-25.md",
+        "size_bytes": 26933
+      },
+      {
+        "modified_at": "2026-11-24T20:09:34+00:00",
+        "name": "phase5-completion-report-2026-11-25.md",
+        "path": "unified-business-os/phase5-completion-report-2026-11-25.md",
+        "size_bytes": 24318
+      },
+      {
+        "modified_at": "2026-11-24T20:26:54+00:00",
+        "name": "phase6-completion-report-2026-11-25.md",
+        "path": "unified-business-os/phase6-completion-report-2026-11-25.md",
+        "size_bytes": 24390
+      },
+      {
+        "modified_at": "2026-11-24T20:45:35+00:00",
+        "name": "phase7-completion-report-2026-11-25.md",
+        "path": "unified-business-os/phase7-completion-report-2026-11-25.md",
+        "size_bytes": 19904
+      },
+      {
+        "modified_at": "2026-11-24T21:01:16+00:00",
+        "name": "phase8-completion-report-2026-11-25.md",
+        "path": "unified-business-os/phase8-completion-report-2026-11-25.md",
+        "size_bytes": 24737
+      },
+      {
+        "modified_at": "2026-11-24T21:10:43+00:00",
+        "name": "phase9-completion-report-2026-11-25.md",
+        "path": "unified-business-os/phase9-completion-report-2026-11-25.md",
+        "size_bytes": 12314
+      },
+      {
+        "modified_at": "2026-11-24T21:09:57+00:00",
+        "name": "phase9-migration-plan-2026-11-25.md",
+        "path": "unified-business-os/phase9-migration-plan-2026-11-25.md",
+        "size_bytes": 146516
+      },
+      {
+        "modified_at": "2026-11-24T21:01:43+00:00",
+        "name": "production-readiness-report-2026-11-25.md",
+        "path": "unified-business-os/production-readiness-report-2026-11-25.md",
+        "size_bytes": 10028
+      },
+      {
+        "modified_at": "2026-11-24T23:17:20+00:00",
+        "name": "push-2026-11-25-report.md",
+        "path": "unified-business-os/push-2026-11-25-report.md",
+        "size_bytes": 10125
+      }
+    ]
+  },
+  "memory": {
+    "boxes": [
+      "shared",
+      "main_ceo_bot",
+      "chief_of_staff_agency",
+      "dept_sales",
+      "dept_marketing",
+      "dept_engineering",
+      "dept_operations",
+      "dept_strategy",
+      "dept_finance",
+      "dept_quality",
+      "dept_innovation",
+      "products",
+      "content"
+    ],
+    "engine_file": "00-CEO-Core/owner_memory.py",
+    "engine_methods": [
+      "archive",
+      "context_for",
+      "edit",
+      "export_markdown",
+      "forget",
+      "get",
+      "learn",
+      "list_entries",
+      "list_own",
+      "maintenance_repair",
+      "migrate_legacy",
+      "note_work",
+      "read_box",
+      "search",
+      "seed_defaults",
+      "size_bytes",
+      "validate_proposals",
+      "verify",
+      "verify_all"
+    ],
+    "entries": 3,
+    "entries_meta": [
+      {
+        "area": "about",
+        "box": "shared",
+        "learned_at": "2026-11-21T02:59:08.102348+00:00",
+        "slug": "assistant-name",
+        "status": "stated",
+        "updated_at": "2026-11-21T02:59:08.102381+00:00"
+      },
+      {
+        "area": "preferences",
+        "box": "shared",
+        "learned_at": "2026-11-21T02:59:08.102920+00:00",
+        "slug": "reply-language",
+        "status": "stated",
+        "updated_at": "2026-11-21T02:59:08.102930+00:00"
+      },
+      {
+        "area": "routines",
+        "box": "shared",
+        "learned_at": "2026-11-21T02:59:08.103248+00:00",
+        "slug": "gate-words",
+        "status": "stated",
+        "updated_at": "2026-11-21T02:59:08.103254+00:00"
+      }
+    ],
+    "export_file": "store/MEMORY.md",
+    "export_size_bytes": 1067,
+    "per_box": {
+      "shared": 3
+    },
+    "rule": "Memory learns ONLY from Boss's own messages. Memory is context, NOT permission.",
+    "schema": "owner-memory-v1",
+    "size_bytes": 2515,
+    "store_file": "store/memory.json",
+    "verbatim_quotes": 3
+  },
   "pa_list": 39,
   "paying_clients": 0,
+  "personas": {
+    "default": "mira",
+    "note": "Switching changes the displayed persona in module 2 (Unified AI Chat) only. The underlying brain does not switch on this snapshot.",
+    "profiles": [
+      {
+        "description": "The assistant's name is Mira — Boss changed it permanently on 2026-11-21. Answers Boss in Bengali; client-facing copy in US English.",
+        "id": "mira",
+        "memory_box": "shared",
+        "name": "Mira",
+        "role": "Boss's assistant — the voice Boss talks to",
+        "source": "store/MEMORY.md"
+      },
+      {
+        "description": "Reads the task Boss gives and routes it to the right Chief of Staff; gated work is held by the ApprovalGateway.",
+        "id": "main_ceo_bot",
+        "memory_box": "main_ceo_bot",
+        "name": "Main CEO Bot",
+        "role": "Thin brain / router",
+        "source": "00-CEO-Core/main_ceo_bot.py"
+      },
+      {
+        "description": "Reads the task from the Main CEO Bot and sends it to the real worker of the vendored engine; returns a DRAFT and holds gated work.",
+        "id": "chief_of_staff_agency",
+        "memory_box": "chief_of_staff_agency",
+        "name": "Chief of Staff (Agency)",
+        "role": "Agency department chief",
+        "source": "01-Agency-Department/chief_of_staff_agency.py"
+      }
+    ]
+  },
   "phase": 11,
   "phase_status": {
     "agentic_phase_1": "BUILT 2026-11-19 - 8 departments inside 01-Agency-Department (governance/ 4 files, departments/ 24 files, agents/agent-registry/ 2 files, workflows/ 5 files); 21 existing staff mapped, 62 specialists: 15 EXISTING-mapped, 43 ROLE-ONLY, 4 GAP",
@@ -428,7 +1105,7 @@
     "entries": [
       {
         "department": "01 Sales & Growth",
-        "last_skill_load": "2026-11-27T00:36:13.173171+00:00",
+        "last_skill_load": "2026-11-27T09:48:26.676820+00:00",
         "role": "Lead Research Agent",
         "skill_file": "01-Agency-Department/engine/skills/prospect-researcher.md",
         "status": "EXISTING",
@@ -446,7 +1123,7 @@
       },
       {
         "department": "01 Sales & Growth",
-        "last_skill_load": "2026-11-27T00:36:10.866852+00:00",
+        "last_skill_load": "2026-11-27T09:48:24.490632+00:00",
         "role": "Business Verification Agent",
         "skill_file": "01-Agency-Department/departments/01-sales-growth/skills/business-verification-agent.md",
         "status": "EXISTING",
@@ -500,7 +1177,7 @@
       },
       {
         "department": "01 Sales & Growth",
-        "last_skill_load": "2026-11-27T00:36:13.683245+00:00",
+        "last_skill_load": "2026-11-27T09:48:27.178190+00:00",
         "role": "ReplyHandler",
         "skill_file": "01-Agency-Department/engine/skills/reply-triager.md",
         "status": "EXISTING",
@@ -518,7 +1195,7 @@
       },
       {
         "department": "01 Sales & Growth",
-        "last_skill_load": "2026-11-27T00:36:12.751439+00:00",
+        "last_skill_load": "2026-11-27T09:48:26.313892+00:00",
         "role": "ObjectionSimulator",
         "skill_file": "01-Agency-Department/engine/skills/objection-simulator.md",
         "status": "EXISTING",
@@ -527,7 +1204,7 @@
       },
       {
         "department": "01 Sales & Growth",
-        "last_skill_load": "2026-11-27T00:34:55.023934+00:00",
+        "last_skill_load": "2026-11-27T09:46:52.225342+00:00",
         "role": "SalesCloser",
         "skill_file": "01-Agency-Department/sections/sell/skills/sales-closer.md",
         "status": "EXISTING",
@@ -554,7 +1231,7 @@
       },
       {
         "department": "02 Marketing",
-        "last_skill_load": "2026-11-27T00:36:12.351456+00:00",
+        "last_skill_load": "2026-11-27T09:48:25.931600+00:00",
         "role": "Content Strategy Agent",
         "skill_file": "01-Agency-Department/engine/skills/content-planner.md",
         "status": "EXISTING",
@@ -572,7 +1249,7 @@
       },
       {
         "department": "02 Marketing",
-        "last_skill_load": "2026-11-27T00:33:37.496657+00:00",
+        "last_skill_load": "2026-11-27T09:45:18.008810+00:00",
         "role": "Ad Campaign Agent",
         "skill_file": "01-Agency-Department/departments/02-marketing/skills/ad-campaign-agent.md",
         "status": "EXISTING",
@@ -581,7 +1258,7 @@
       },
       {
         "department": "02 Marketing",
-        "last_skill_load": "2026-11-27T00:36:12.220356+00:00",
+        "last_skill_load": "2026-11-27T09:48:25.782735+00:00",
         "role": "Copywriting Agent",
         "skill_file": "01-Agency-Department/engine/skills/caption-writer.md",
         "status": "EXISTING",
@@ -617,7 +1294,7 @@
       },
       {
         "department": "02 Marketing",
-        "last_skill_load": "2026-11-27T00:36:13.298417+00:00",
+        "last_skill_load": "2026-11-27T09:48:26.821336+00:00",
         "role": "PublishPrep",
         "skill_file": "01-Agency-Department/engine/skills/publish-prep.md",
         "status": "EXISTING",
@@ -635,7 +1312,7 @@
       },
       {
         "department": "03 AI Engineering",
-        "last_skill_load": "2026-11-27T00:36:13.429506+00:00",
+        "last_skill_load": "2026-11-27T09:48:26.939316+00:00",
         "role": "Voice Agent Builder",
         "skill_file": "01-Agency-Department/engine/skills/receptionist-builder.md",
         "status": "EXISTING",
@@ -644,7 +1321,7 @@
       },
       {
         "department": "03 AI Engineering",
-        "last_skill_load": "2026-11-27T00:34:54.280253+00:00",
+        "last_skill_load": "2026-11-27T09:46:51.480739+00:00",
         "role": "Conversation Designer",
         "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/conversation-designer.md",
         "status": "EXISTING",
@@ -680,7 +1357,7 @@
       },
       {
         "department": "03 AI Engineering",
-        "last_skill_load": "2026-11-27T00:33:37.743189+00:00",
+        "last_skill_load": "2026-11-27T09:45:18.225385+00:00",
         "role": "Calendar Integration Agent",
         "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/calendar-integration-agent.md",
         "status": "EXISTING",
@@ -725,7 +1402,7 @@
       },
       {
         "department": "04 Client Operations",
-        "last_skill_load": "2026-11-27T00:35:32.773114+00:00",
+        "last_skill_load": "2026-11-27T09:47:38.670620+00:00",
         "role": "Business Requirement Analyst",
         "skill_file": "01-Agency-Department/sections/receive/skills/client-intake-receiver.md",
         "status": "EXISTING",
@@ -743,7 +1420,7 @@
       },
       {
         "department": "04 Client Operations",
-        "last_skill_load": "2026-11-27T00:33:37.976127+00:00",
+        "last_skill_load": "2026-11-27T09:45:18.452132+00:00",
         "role": "Call Monitoring Agent",
         "skill_file": "01-Agency-Department/departments/04-client-operations/skills/call_monitoring.md",
         "status": "EXISTING",
@@ -788,7 +1465,7 @@
       },
       {
         "department": "04 Client Operations",
-        "last_skill_load": "2026-11-27T00:36:12.486449+00:00",
+        "last_skill_load": "2026-11-27T09:48:26.053529+00:00",
         "role": "InboxTriager",
         "skill_file": "01-Agency-Department/engine/skills/inbox-triager.md",
         "status": "EXISTING",
@@ -797,7 +1474,7 @@
       },
       {
         "department": "05 Research & Strategy",
-        "last_skill_load": "2026-11-27T00:34:54.523678+00:00",
+        "last_skill_load": "2026-11-27T09:46:51.719956+00:00",
         "role": "Competitor Research Agent",
         "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/competitor-research-agent.md",
         "status": "EXISTING",
@@ -851,7 +1528,7 @@
       },
       {
         "department": "05 Research & Strategy",
-        "last_skill_load": "2026-11-27T00:33:38.220323+00:00",
+        "last_skill_load": "2026-11-27T09:45:18.670789+00:00",
         "role": "Business Intelligence Agent",
         "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/business-intelligence-agent.md",
         "status": "EXISTING",
@@ -878,7 +1555,7 @@
       },
       {
         "department": "06 Finance & Admin",
-        "last_skill_load": "2026-11-27T00:36:13.935678+00:00",
+        "last_skill_load": "2026-11-27T09:48:27.422904+00:00",
         "role": "Invoice Management Agent",
         "skill_file": "01-Agency-Department/sections/ops/skills/billing-invoice-agent.md",
         "status": "EXISTING",
@@ -896,7 +1573,7 @@
       },
       {
         "department": "06 Finance & Admin",
-        "last_skill_load": "2026-11-27T00:36:13.809648+00:00",
+        "last_skill_load": "2026-11-27T09:48:27.301113+00:00",
         "role": "Financial Reporting Agent",
         "skill_file": "01-Agency-Department/engine/skills/report-compiler.md",
         "status": "EXISTING",
@@ -914,7 +1591,7 @@
       },
       {
         "department": "06 Finance & Admin",
-        "last_skill_load": "2026-11-27T00:33:38.438125+00:00",
+        "last_skill_load": "2026-11-27T09:45:18.878858+00:00",
         "role": "Compliance Calendar Agent",
         "skill_file": "01-Agency-Department/departments/06-finance-admin/skills/compliance-calendar-agent.md",
         "status": "EXISTING",
@@ -968,7 +1645,7 @@
       },
       {
         "department": "07 Quality & Security",
-        "last_skill_load": "2026-11-27T00:33:38.648342+00:00",
+        "last_skill_load": "2026-11-27T09:45:19.088683+00:00",
         "role": "Access Control Agent",
         "skill_file": "01-Agency-Department/departments/07-quality-security/skills/access-control-agent.md",
         "status": "EXISTING",
@@ -977,7 +1654,7 @@
       },
       {
         "department": "07 Quality & Security",
-        "last_skill_load": "2026-11-27T00:34:54.780592+00:00",
+        "last_skill_load": "2026-11-27T09:46:51.967255+00:00",
         "role": "Backup & Recovery Agent",
         "skill_file": "01-Agency-Department/departments/07-quality-security/skills/backup-recovery-agent.md",
         "status": "EXISTING",
@@ -995,7 +1672,7 @@
       },
       {
         "department": "08 Product & Innovation",
-        "last_skill_load": "2026-11-27T00:34:54.902643+00:00",
+        "last_skill_load": "2026-11-27T09:46:52.094480+00:00",
         "role": "New AI Product Research Agent",
         "skill_file": "01-Agency-Department/departments/08-product-innovation/skills/new-ai-product-research-agent.md",
         "status": "EXISTING",
@@ -1013,7 +1690,7 @@
       },
       {
         "department": "08 Product & Innovation",
-        "last_skill_load": "2026-11-27T00:33:38.869828+00:00",
+        "last_skill_load": "2026-11-27T09:45:19.297368+00:00",
         "role": "Automation R&D Agent",
         "skill_file": "01-Agency-Department/departments/08-product-innovation/skills/automation-rd-agent.md",
         "status": "EXISTING",
@@ -1116,6 +1793,23 @@
   "voice": {
     "detail": "Jarvis voice — Piper TTS + Vosk/sherpa STT, offline, $0 (mic test still pending on Boss's PC)",
     "label": "REAL"
+  },
+  "voice_command": {
+    "bengali_note": "Bengali spoken prompts were replaced with English in the 2026-11-21 full-English conversion; Boss's decision is pending (F1). One Bengali trigger mapping remains: 'পাঠাও' -> send.",
+    "bengali_prompts": "regressed",
+    "brain": "mock",
+    "brain_note": "The loop speaks the brain's answer; with a mock brain the answer is a draft (voice/loop.py docstring).",
+    "engines": "Jarvis voice — Piper TTS + Vosk/sherpa STT, offline, $0 (mic test still pending on Boss's PC)",
+    "gate_phrases": {
+      "post all": "publish",
+      "post it": "publish",
+      "send": "send",
+      "পাঠাও": "send"
+    },
+    "live_in_browser": false,
+    "loop_exists": true,
+    "loop_file": "00-CEO-Core/voice/loop.py",
+    "reason": "The voice loop is a PC-side Python process (needs a mic + local models); this browser page cannot reach it."
   },
   "workflow_auto_send": {
     "name": "Talvenor Tier 2 — Daily auto-send 18:00 Dhaka",

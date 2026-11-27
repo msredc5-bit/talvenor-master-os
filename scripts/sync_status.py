@@ -34,6 +34,17 @@ Sources:
   - Latest CEO report — copied byte-for-byte to dashboards/
     ceo-report.json so the Command Center (same origin) can fetch it;
     a stale copy is removed when no report is available
+  - FOUNDER OS F2 batch 3 — chat (brain mode + chain from
+    config.json, assistant name from store/MEMORY.md), voice command
+    (00-CEO-Core/voice/loop.py GATE_PHRASES + voice detail),
+    personas (00-CEO-Core/personas.json), execution
+    (logs/skill_executions.jsonl recent records +
+    logs/dev_brain_calls.jsonl), memory (store/memory.json structure
+    ONLY — counts, boxes, entry metadata; never quote/text content),
+    library (docs/ + top-level *.md + 00-CEO-Core/*.md +
+    ~/workspace/unified-business-os/*.md when present), integrations
+    (n8n MCP verified record 2026-11-25 + config provider states;
+    a service is "connected" only with a dated probe record)
 
 Run:  python3 scripts/sync_status.py
 """
@@ -536,15 +547,56 @@ def read_ceo_report():
 # the phase from config.json — its "phase": 11 is old numbering.
 FOUNDER_OS_PHASE = {
     "phase": "F2",
-    "batch": 2,
-    "label": "Founder Command Center — batch 2",
+    "batch": 3,
+    "label": "Founder Command Center — batch 3",
     "source": "founder-os-audit-2026-11-26.md §14 (F2)",
 }
 
 
 def read_founder_os():
-    """Current FOUNDER OS phase (F2 batch 2)."""
+    """Current FOUNDER OS phase (F2 batch 3)."""
     return dict(FOUNDER_OS_PHASE)
+
+
+# F2 batch 3 — n8n Cloud MCP verified record (2026-11-25). The
+# values are the verification itself (list-tools + search_workflows
+# via custom.n8n-mcp/CONNECTOR.md): 75 tools, 0 workflows, 41
+# read-only tools allowed, 34 write ops blocked. This is the ONLY
+# service the Command Center may call "connected" — every other
+# integration is "not connected" / "disabled" / "unknown" until a
+# dated probe says otherwise.
+N8N_MCP_VERIFIED = {
+    "service": "n8n Cloud MCP",
+    "instance": "talvenorai.app.n8n.cloud",
+    "state": "connected",
+    "verified": "2026-11-25",
+    "tools": 75,
+    "workflows": 0,
+    "allowed_read_only": 41,
+    "write_blocked": 34,
+    "rest_api": "blocked on free trial (404)",
+    "source": "custom.n8n-mcp/CONNECTOR.md (verified 2026-11-25)",
+}
+
+# F2 batch 3 — provider states. A provider is never "connected"
+# without a dated probe. Meta was probed 2026-11-20 (tunnel 403,
+# key validity unproven); Ollama was proven on Boss's PC
+# 2026-11-26 (docs/live-brain-proof-2026-11-26.md). Every other
+# provider is disabled in config and unprobed.
+PROVIDER_STATES = {
+    "meta": {
+        "state": "unreachable from this VM",
+        "verified": "2026-11-20",
+        "evidence": "tunnel 403; key validity unproven",
+        "source": "founder-os-audit-2026-11-26.md §5.2",
+    },
+    "ollama": {
+        "state": "local — not present in this VM",
+        "verified": "2026-11-26",
+        "evidence": "proven on Boss's PC (qwen2.5-coder:1.5b, 1.9s)",
+        "source": "docs/live-brain-proof-2026-11-26.md",
+    },
+}
 
 
 def read_roster():
@@ -995,6 +1047,433 @@ def read_policy(cfg):
     }
 
 
+# F2 batch 3 — Unified AI Chat (2), Voice Command (3), Personality
+# Switcher (4), Live Execution Monitor (12), Knowledge & Memory (13),
+# Library (14), Integration Center (16). All additive-only; existing
+# keys never renamed. Honesty rule for this batch: a module with no
+# live backend is published as a SHELL with its reason in one line —
+# never dressed up as live. No reader here sends, publishes, spends,
+# or writes to any store; all of them read.
+
+
+def read_chat(cfg):
+    """Unified AI Chat: the brain this snapshot would talk to, and
+    why send is disabled. There is no in-repo chat transcript and
+    no chat endpoint — chat happens in the Muse chat with Mira,
+    outside this repo. The assistant name is parsed from
+    store/MEMORY.md (the assistant-name entry), not hardcoded."""
+    mem_text = _read_text(os.path.join(BASE, "store", "MEMORY.md"))
+    assistant = UNKNOWN
+    if mem_text:
+        m = re.search(r"The assistant's name is ([A-Za-z]+)", mem_text)
+        if m:
+            assistant = m.group(1)
+    dev = cfg.get("development_brain") or {}
+    chain = dev.get("fallback_chain")
+    return {
+        "brain": cfg.get("brain", UNKNOWN),
+        "brain_chain": list(chain) if isinstance(chain, list) else UNKNOWN,
+        "assistant": assistant,
+        "surface": "Muse chat with Mira (outside this repo)",
+        "connected": False,
+        "send": {
+            "enabled": False,
+            "reason": ("The brain on this snapshot is mock, and the "
+                       "live dev brain runs on Boss's PC only. Send "
+                       "would need a live brain + a send path — "
+                       "neither exists here."),
+        },
+        "transcript": "none",
+        "note": ("No chat transcript is stored in this repo. No fake "
+                 "replies are shown — the panel is a connection-state "
+                 "surface until a real chat path exists."),
+    }
+
+
+def _parse_gate_phrases():
+    """Voice gate phrases from 00-CEO-Core/voice/loop.py
+    GATE_PHRASES — the dict the loop itself uses. "unknown" when
+    the block cannot be parsed."""
+    text = _read_text(os.path.join(BASE, "00-CEO-Core", "voice", "loop.py"))
+    if text is None:
+        return UNKNOWN
+    m = re.search(r"GATE_PHRASES = \{([^}]*)\}", text, flags=re.S)
+    if not m:
+        return UNKNOWN
+    pairs = re.findall(r'"([^"]+)":\s*"(send|publish)"', m.group(1))
+    if not pairs:
+        return UNKNOWN
+    return {phrase: action for phrase, action in pairs}
+
+
+def read_voice_command(cfg):
+    """Voice Command: the real voice loop's state, and why the mic
+    is off in the browser. The loop is a PC-side Python process
+    (mic + local models); this page cannot reach it, so the panel
+    is a status surface, not a live microphone."""
+    loop_path = os.path.join(BASE, "00-CEO-Core", "voice", "loop.py")
+    voice = read_voice_status()
+    return {
+        "loop_file": "00-CEO-Core/voice/loop.py",
+        "loop_exists": os.path.exists(loop_path),
+        "engines": voice.get("detail", UNKNOWN),
+        "gate_phrases": _parse_gate_phrases(),
+        "bengali_prompts": "regressed",
+        "bengali_note": ("Bengali spoken prompts were replaced with "
+                         "English in the 2026-11-21 full-English "
+                         "conversion; Boss's decision is pending (F1). "
+                         "One Bengali trigger mapping remains: "
+                         "'পাঠাও' -> send."),
+        "live_in_browser": False,
+        "reason": ("The voice loop is a PC-side Python process (needs "
+                   "a mic + local models); this browser page cannot "
+                   "reach it."),
+        "brain": cfg.get("brain", UNKNOWN),
+        "brain_note": ("The loop speaks the brain's answer; with a "
+                       "mock brain the answer is a draft "
+                       "(voice/loop.py docstring)."),
+    }
+
+
+def read_personas():
+    """Personality Switcher: the profiles in
+    00-CEO-Core/personas.json. The switcher changes the DISPLAYED
+    persona in module 2 only — the underlying brain does not
+    switch on this snapshot."""
+    data = _read_json(os.path.join(BASE, "00-CEO-Core", "personas.json"))
+    if not isinstance(data, dict):
+        return {"default": UNKNOWN, "profiles": [],
+                "note": "00-CEO-Core/personas.json unreadable"}
+    profiles = data.get("profiles")
+    if not isinstance(profiles, list):
+        profiles = []
+    return {
+        "default": data.get("default", UNKNOWN),
+        "profiles": profiles,
+        "note": ("Switching changes the displayed persona in module 2 "
+                 "(Unified AI Chat) only. The underlying brain does "
+                 "not switch on this snapshot."),
+    }
+
+
+def read_execution(task_records):
+    """Live Execution Monitor: the most recent execution records —
+    NOT a live stream (there is no event bus until F4). Sources:
+    store/tasks.json totals (via the caller), the skill-execution
+    log (recent records), the dev-brain call log, and the bridge
+    cron (no run record exists in this repo, so its state is
+    unknown). Nothing here claims a job is running now."""
+    counts = read_task_counts(task_records)
+    log_path = os.path.join(BASE, "logs", "skill_executions.jsonl")
+    total_lines = 0
+    parsed = 0
+    errors = 0
+    first_at = None
+    last_at = None
+    recent = []
+    try:
+        with open(log_path, encoding="utf-8") as f:
+            for line in f:
+                total_lines += 1
+                try:
+                    ev = json.loads(line)
+                except ValueError:
+                    continue
+                if not isinstance(ev, dict):
+                    continue
+                ts = ev.get("timestamp")
+                if not isinstance(ts, str):
+                    continue
+                parsed += 1
+                if first_at is None or ts < first_at:
+                    first_at = ts
+                if last_at is None or ts > last_at:
+                    last_at = ts
+                if ev.get("error") is not None:
+                    errors += 1
+                result = ev.get("result")
+                recent.append({
+                    "timestamp": ts,
+                    "event": ev.get("event", UNKNOWN),
+                    "skill": ev.get("skill", UNKNOWN),
+                    "result_file": (result.split("/")[-1]
+                                    if isinstance(result, str)
+                                    else UNKNOWN),
+                    "error": ev.get("error"),
+                })
+    except OSError:
+        pass
+    recent = recent[-8:]
+    calls_path = os.path.join(BASE, "logs", "dev_brain_calls.jsonl")
+    calls = []
+    try:
+        with open(calls_path, encoding="utf-8") as f:
+            for line in f:
+                try:
+                    rec = json.loads(line)
+                except ValueError:
+                    continue
+                if not isinstance(rec, dict):
+                    continue
+                usage = rec.get("usage")
+                calls.append({
+                    "provider": rec.get("provider", UNKNOWN),
+                    "model": rec.get("model", UNKNOWN),
+                    "status": rec.get("status", UNKNOWN),
+                    "error": rec.get("error"),
+                    "total_tokens": (usage.get("total_tokens", UNKNOWN)
+                                     if isinstance(usage, dict)
+                                     else UNKNOWN),
+                    "ts": rec.get("ts", UNKNOWN),
+                })
+    except OSError:
+        pass
+    return {
+        "tasks": {
+            "total": counts.get("total", UNKNOWN),
+            "done": counts.get("done", UNKNOWN),
+            "queued": counts.get("queued", UNKNOWN),
+        },
+        "skill_executions": {
+            "total_lines": total_lines,
+            "parsed": parsed,
+            "first_at": first_at if first_at is not None else UNKNOWN,
+            "last_at": last_at if last_at is not None else UNKNOWN,
+            "errors": errors,
+            "recent": recent,
+        },
+        "dev_brain_calls": {
+            "total": len(calls),
+            "records": calls,
+        },
+        "bridge": {
+            "name": "master-os-3d-bridge",
+            "state": UNKNOWN,
+            "note": ("No run record in this repo — the bridge "
+                     "regenerates dashboards/status.* every 10 "
+                     "minutes; its last run is not recorded as a "
+                     "file."),
+        },
+        "stream": "none",
+        "stream_note": ("No live stream: there is no event bus until "
+                        "F4. This monitor shows records, not a live "
+                        "feed — nothing here proves a job is running "
+                        "right now."),
+    }
+
+
+def read_memory():
+    """Knowledge & Memory: the memory store's STRUCTURE only —
+    schema, size, box list, per-box entry counts, and entry
+    metadata (area / slug / box / status / dates). Quote and text
+    content is NEVER published: the 3 verbatim quotes stay in the
+    file, and the panel says where to read them. Engine methods
+    are parsed from 00-CEO-Core/owner_memory.py."""
+    path = os.path.join(BASE, "store", "memory.json")
+    mem = _read_json(path)
+    if not isinstance(mem, dict):
+        return {"store_file": "store/memory.json", "schema": UNKNOWN,
+                "entries": UNKNOWN, "boxes": UNKNOWN,
+                "entries_meta": [], "verbatim_quotes": UNKNOWN}
+    entries = mem.get("entries")
+    if not isinstance(entries, list):
+        entries = []
+    boxes = mem.get("boxes")
+    if not isinstance(boxes, list):
+        boxes = []
+    per_box = {}
+    meta = []
+    quotes = 0
+    for e in entries:
+        if not isinstance(e, dict):
+            continue
+        box = e.get("box", UNKNOWN)
+        per_box[box] = per_box.get(box, 0) + 1
+        if isinstance(e.get("quote"), str) and e.get("quote"):
+            quotes += 1
+        meta.append({
+            "area": e.get("area", UNKNOWN),
+            "slug": e.get("slug", UNKNOWN),
+            "box": box,
+            "status": e.get("status", UNKNOWN),
+            "learned_at": e.get("learned_at", UNKNOWN),
+            "updated_at": e.get("updated_at", UNKNOWN),
+        })
+    try:
+        size = os.path.getsize(path)
+    except OSError:
+        size = UNKNOWN
+    export_path = os.path.join(BASE, "store", "MEMORY.md")
+    try:
+        export_size = os.path.getsize(export_path)
+    except OSError:
+        export_size = UNKNOWN
+    methods = []
+    eng_text = _read_text(os.path.join(BASE, "00-CEO-Core",
+                                       "owner_memory.py"))
+    if eng_text:
+        methods = sorted(set(re.findall(
+            r"    def ([a-z_][a-z0-9_]*)\(", eng_text)))
+        methods = [m for m in methods if not m.startswith("_")]
+    return {
+        "store_file": "store/memory.json",
+        "schema": mem.get("schema", UNKNOWN),
+        "size_bytes": size,
+        "entries": len(entries),
+        "boxes": boxes,
+        "per_box": per_box,
+        "entries_meta": meta,
+        "verbatim_quotes": quotes,
+        "export_file": "store/MEMORY.md",
+        "export_size_bytes": export_size,
+        "engine_file": "00-CEO-Core/owner_memory.py",
+        "engine_methods": methods,
+        "rule": ("Memory learns ONLY from Boss's own messages. "
+                 "Memory is context, NOT permission."),
+    }
+
+
+def _list_md_files(directory, base_label):
+    """One directory's *.md files: name, path, size, modified.
+    Empty list when the directory is missing."""
+    out = []
+    try:
+        names = sorted(f for f in os.listdir(directory)
+                       if f.endswith(".md")
+                       and os.path.isfile(os.path.join(directory, f)))
+    except OSError:
+        return out
+    for name in names:
+        path = os.path.join(directory, name)
+        try:
+            size = os.path.getsize(path)
+            # Second precision: file mtimes do not need microseconds,
+            # and microsecond digits can false-positive the Phase 6
+            # scope guard, which scans every data line for a
+            # three-digit scope number.
+            mtime = datetime.fromtimestamp(
+                os.path.getmtime(path), tz=timezone.utc).isoformat(
+                    timespec="seconds")
+        except OSError:
+            size = UNKNOWN
+            mtime = UNKNOWN
+        out.append({
+            "name": name,
+            "path": os.path.join(base_label, name),
+            "size_bytes": size,
+            "modified_at": mtime,
+        })
+    return out
+
+
+def read_library(reports):
+    """Library: every document file that really exists in the repo
+    (docs/, top-level *.md, 00-CEO-Core/*.md) plus the
+    unified-business-os reports when that directory exists on this
+    machine (VM only — not in the repo, not on Boss's PC). The CEO
+    reports are listed in module 15; this key carries only their
+    count + latest. Decks live outside the repo and are not listed
+    — the note says so."""
+    ubo_dir = os.path.expanduser("~/workspace/unified-business-os")
+    ubo = _list_md_files(ubo_dir, "unified-business-os")
+    latest = reports.get("latest") if isinstance(reports, dict) else None
+    return {
+        "docs": _list_md_files(os.path.join(BASE, "docs"), "docs"),
+        "top_level": _list_md_files(BASE, ""),
+        "ceo_core": _list_md_files(
+            os.path.join(BASE, "00-CEO-Core"), "00-CEO-Core"),
+        "unified_business_os": ubo if ubo else UNKNOWN,
+        "ceo_reports": {
+            "total": reports.get("total", UNKNOWN)
+                       if isinstance(reports, dict) else UNKNOWN,
+            "latest": (latest.get("name", UNKNOWN)
+                       if isinstance(latest, dict) else UNKNOWN),
+            "note": "File list in module 15 (Reports Center).",
+        },
+        "decks_note": ("Decks live outside the repo — not listed "
+                       "here."),
+    }
+
+
+def read_integrations(cfg, status_workflows):
+    """Integration Center: one row per service, with a dated probe
+    record where one exists. The ONLY "connected" service is the
+    n8n Cloud MCP (verified 2026-11-25). Provider states come
+    from PROVIDER_STATES for the two probed providers; every other
+    provider is disabled in config and unprobed. Vapi and
+    Gmail/Calendar are connector-level, not repo-level — unknown."""
+    adapter_path = os.path.join(
+        BASE, "00-CEO-Core", "workflow_engine", "n8n_adapter.py")
+    providers = {}
+    cfg_providers = cfg.get("providers") or {}
+    if isinstance(cfg_providers, dict):
+        for name in sorted(cfg_providers):
+            entry = cfg_providers.get(name) or {}
+            known = PROVIDER_STATES.get(name)
+            if known:
+                providers[name] = {
+                    "enabled": bool(entry.get("enabled", False))
+                               if isinstance(entry, dict) else UNKNOWN,
+                    "state": known["state"],
+                    "verified": known["verified"],
+                    "evidence": known["evidence"],
+                    "source": known["source"],
+                }
+            else:
+                providers[name] = {
+                    "enabled": bool(entry.get("enabled", False))
+                               if isinstance(entry, dict) else UNKNOWN,
+                    "state": ("disabled in config"
+                              if entry.get("enabled") is False
+                              else UNKNOWN),
+                    "verified": None,
+                    "evidence": "not enabled; no probe",
+                    "source": "00-CEO-Core/config.json",
+                }
+    else:
+        providers = UNKNOWN
+    workflows = []
+    for key, label in (("workflow_auto_send", "Tier 2 auto-send"),
+                       ("workflow_callback", "Callback")):
+        w = status_workflows.get(key) or {}
+        workflows.append({
+            "label": label,
+            "name": w.get("name", UNKNOWN),
+            "nodes": w.get("nodes", UNKNOWN),
+            "status": w.get("status", UNKNOWN),
+        })
+    return {
+        "n8n_mcp": dict(N8N_MCP_VERIFIED),
+        "n8n_adapter": {
+            "service": "n8n adapter (repo)",
+            "file": "00-CEO-Core/workflow_engine/n8n_adapter.py",
+            "file_exists": os.path.exists(adapter_path),
+            "state": "not connected",
+            "evidence": ("localhost-only adapter; no n8n instance "
+                         "runs on this machine (self-hosted not "
+                         "installed); Cloud is reached via MCP, not "
+                         "this adapter"),
+            "source": "dashboards/n8n-wiring.md",
+        },
+        "n8n_workflows": workflows,
+        "providers": providers,
+        "vapi": {
+            "service": "Vapi",
+            "state": UNKNOWN,
+            "evidence": ("No Vapi config in this repo — the Vapi "
+                         "connector lives outside the repo"),
+            "source": "none in repo",
+        },
+        "gmail_calendar": {
+            "service": "Gmail / Calendar / Drive",
+            "state": UNKNOWN,
+            "evidence": ("Connector-level (Muse connectors), not "
+                         "repo-level"),
+            "source": "none in repo",
+        },
+    }
+
+
 def collect_status():
     """Gathers the true state from all sources in one place. Unknown if a value is missing."""
     cfg = _read_json(os.path.join(BASE, "00-CEO-Core", "config.json")) or {}
@@ -1014,6 +1493,15 @@ def collect_status():
     email_raw = honest.get("email_outreach") or ""
     email = "PAUSED" if "PAUSED" in str(email_raw) else (
         "unknown" if not email_raw else str(email_raw))
+
+    # F2 batch 3 — computed once, reused by the return dict and by
+    # the batch-3 readers (library needs reports; integrations needs
+    # the workflow statuses).
+    reports = read_reports()
+    wf_auto = read_workflow_status(AUTO_SEND_PATH)
+    wf_cb = read_workflow_status(CALLBACK_PATH)
+    wf_statuses = {"workflow_auto_send": wf_auto,
+                   "workflow_callback": wf_cb}
 
     return {
         "phase": cfg.get("phase", UNKNOWN),
@@ -1038,8 +1526,8 @@ def collect_status():
         "voice": read_voice_status(),
         "usage_ledger": read_usage_ledger(),
         "business_os": read_business_os(),
-        "workflow_auto_send": read_workflow_status(AUTO_SEND_PATH),
-        "workflow_callback": read_workflow_status(CALLBACK_PATH),
+        "workflow_auto_send": wf_auto,
+        "workflow_callback": wf_cb,
         # Phase 7 (Worker A) — additive keys only; dashboard-3d.html reads
         # this JSON, so existing keys are never renamed or removed.
         "departments": read_departments(),
@@ -1052,10 +1540,18 @@ def collect_status():
         "roster": read_roster(),
         # F2 batch 2 — additive keys only; existing keys never renamed.
         "task_queue": read_task_queue(task_records),
-        "reports": read_reports(),
+        "reports": reports,
         "finance": read_finance(cfg),
         "health": read_health(cfg),
         "policy": read_policy(cfg),
+        # F2 batch 3 — additive keys only; existing keys never renamed.
+        "chat": read_chat(cfg),
+        "voice_command": read_voice_command(cfg),
+        "personas": read_personas(),
+        "execution": read_execution(task_records),
+        "memory": read_memory(),
+        "library": read_library(reports),
+        "integrations": read_integrations(cfg, wf_statuses),
     }
 
 
@@ -1390,13 +1886,30 @@ def main():
     fn = status["finance"]
     hl = status["health"]
     pol = status["policy"]
-    print(f"batch2: task_queue={tq['total']} tasks · "
+    print(f"batch3: task_queue={tq['total']} tasks · "
           f"reports={rp['total']} files · "
           f"finance ledger={fn['ledger'].get('records')} records "
           f"${fn['ledger'].get('total_usd')} · "
           f"health suite={hl['suite'] if isinstance(hl['suite'], dict) else hl['suite']} · "
           f"policy ttl={pol['approval_ttl_minutes']} min · "
           f"matrix rows={pol['permission_matrix'].get('agent_rows')}")
+    ch = status["chat"]
+    vc = status["voice_command"]
+    ps = status["personas"]
+    ex = status["execution"]
+    mm = status["memory"]
+    lb = status["library"]
+    ig = status["integrations"]
+    print(f"batch3: chat brain={ch['brain']} connected={ch['connected']} · "
+          f"voice loop={vc['loop_exists']} live_in_browser="
+          f"{vc['live_in_browser']} · "
+          f"personas={len(ps['profiles'])} default={ps['default']} · "
+          f"execution skill_log={ex['skill_executions']['total_lines']} "
+          f"lines dev_calls={ex['dev_brain_calls']['total']} · "
+          f"memory entries={mm['entries']} boxes={len(mm['boxes'])} · "
+          f"library docs={len(lb['docs'])} top={len(lb['top_level'])} "
+          f"ceo_core={len(lb['ceo_core'])} · "
+          f"integrations n8n_mcp={ig['n8n_mcp']['state']}")
     return 0
 
 

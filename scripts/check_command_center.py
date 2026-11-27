@@ -134,8 +134,8 @@ def main():
         status = None
         print(f"status.json unreadable: {exc}")
     fo = (status or {}).get("founder_os") or {}
-    check("status.json founder_os is F2 batch 2 (audit §14)",
-          fo.get("phase") == "F2" and fo.get("batch") == 2
+    check("status.json founder_os is F2 batch 3 (audit §14)",
+          fo.get("phase") == "F2" and fo.get("batch") == 3
           and "Command Center" in str(fo.get("label")),
           f"phase={fo.get('phase')} batch={fo.get('batch')}")
 
@@ -218,21 +218,22 @@ def main():
     cc = _read(os.path.join(DASH, "command-center.html"))
     cc_nostyle = _strip_style(cc)
     cc_ids = all(f'id="m{n}"' in cc for n in
-                 (1, 5, 6, 7, 10, 11, 15, 17, 18, 19))
-    check("command-center.html has all 10 live sections "
-          "(batch 1: m1/m5/m6/m7/m11; batch 2: m10/m15/m17/m18/m19)",
+                 (1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+                  19))
+    check("command-center.html has all 17 live sections "
+          "(batch 1: m1/m5/m6/m7/m11; batch 2: m10/m15/m17/m18/m19; "
+          "batch 3: m2/m3/m4/m12/m13/m14/m16)",
           cc_ids)
     nav = cc[cc.find('<nav id="sidebar">'):cc.find('</nav>')]
     live_nav = all(re.search(r'<a[^>]*class="nav-item[^"]*"[^>]*href="#m%d"' % n,
-                             nav) for n in (10, 15, 17, 18, 19))
-    check("batch-2 nav entries (m10 m15 m17 m18 m19) are LIVE links",
+                             nav) for n in (2, 3, 4, 10, 12, 13, 14, 15, 16,
+                                           17, 18, 19))
+    check("batch-3 nav entries (m2 m3 m4 m12 m13 m14 m16) are LIVE links",
           live_nav)
     hrefs = re.findall(r'href="#m(\d+)"', nav)
-    check("batch 3 (m2 m3 m4 m12 m13 m14 m16) and F7/F8 (m8 m9) "
-          "still greyed as planned",
-          nav.count("planned") >= 9
-          and not set(hrefs) & {"2", "3", "4", "8", "9", "12", "13",
-                                "14", "16"},
+    check("only F7/F8 (m8 m9) still greyed as planned",
+          nav.count("planned") >= 2
+          and not set(hrefs) & {"8", "9"},
           f"hrefs={hrefs}")
     fetches = re.findall(r'fetch\("([^"]+)"', cc)
     check("command-center.html fetches only status.json + ceo-report.json",
@@ -283,18 +284,19 @@ def main():
             proc = subprocess.run([node, render_js], capture_output=True,
                                   text=True, timeout=60)
             last = (proc.stdout.strip().splitlines() or [""])[-1]
-            check("render check (node DOM-stub): Voice + CEO Tasks render "
-                  "with no '[object Object]'",
+            check("render check (node DOM-stub): Voice + CEO Tasks + "
+                  "batch-3 modules render with no '[object Object]'",
                   proc.returncode == 0, last)
         except (OSError, subprocess.SubprocessError) as exc:
-            check("render check (node DOM-stub): Voice + CEO Tasks render "
-                  "with no '[object Object]'",
+            check("render check (node DOM-stub): Voice + CEO Tasks + "
+                  "batch-3 modules render with no '[object Object]'",
                   False, f"harness error: {exc}")
     else:
-        check("render check (node DOM-stub): Voice + CEO Tasks render "
-              "with no '[object Object]'",
+        check("render check (node DOM-stub): Voice + CEO Tasks + "
+              "batch-3 modules render with no '[object Object]'",
               False, "node or render_check_command_center.js missing")
-    m19 = cc[cc.find('id="m19"'):cc.find('<footer', cc.find('id="m19"'))]
+    m19_start = cc.find('id="m19"')
+    m19 = cc[m19_start:cc.find('</section>', m19_start)]
     m17 = cc[cc.find('id="m17"'):cc.find('id="m18"')]
     check("module 19 has no edit controls "
           "(no form/input/button/select/contenteditable)",
@@ -562,6 +564,320 @@ def main():
     check("policy permission matrix row count recounts (33 agent rows)",
           pm.get("agent_rows") == len(rows),
           f"rows={pm.get('agent_rows')} recount={len(rows)}")
+
+    # ---------- E. Batch 3 data contract ----------
+    # 14. chat vs config.json + the memory store.
+    ch = (status or {}).get("chat") or {}
+    mem_store = json.loads(_read(os.path.join(BASE, "store", "memory.json")))
+    name_entry = next(
+        (e for e in mem_store.get("entries", [])
+         if e.get("area") == "about"
+         and e.get("slug") == "assistant-name"), {})
+    chat_ok = (
+        ch.get("brain") == cfg.get("brain")
+        and ch.get("brain_chain")
+        == (cfg.get("development_brain") or {}).get("fallback_chain")
+        and isinstance(ch.get("assistant"), str)
+        and ch["assistant"] in str(name_entry.get("text", ""))
+        and ch.get("connected") is False
+        and ch.get("transcript") == "none"
+        and isinstance(ch.get("send"), dict)
+        and ch["send"].get("enabled") is False
+        and isinstance(ch["send"].get("reason"), str)
+        and len(ch["send"]["reason"]) > 20
+        and "Muse chat" in str(ch.get("surface")))
+    check("chat brain/chain/assistant match config + memory store; "
+          "send disabled, transcript none",
+          chat_ok, f"brain={ch.get('brain')} assistant={ch.get('assistant')}")
+
+    # 15. voice_command vs voice/loop.py.
+    vc = (status or {}).get("voice_command") or {}
+    loop_path = os.path.join(BASE, "00-CEO-Core", "voice", "loop.py")
+    loop_text = _read(loop_path) if os.path.exists(loop_path) else ""
+    gp = vc.get("gate_phrases") or {}
+    vc_ok = (
+        vc.get("loop_exists") is True
+        and vc.get("loop_file") == "00-CEO-Core/voice/loop.py"
+        and vc.get("brain") == "mock"
+        and vc.get("live_in_browser") is False
+        and vc.get("bengali_prompts") == "regressed"
+        and all(phrase in loop_text for phrase in gp)
+        and all(v in ("send", "publish") for v in gp.values())
+        and isinstance(vc.get("engines"), str)
+        and vc["engines"] == (status or {}).get("voice", {}).get("detail")
+        and "PC-side Python process" in str(vc.get("reason")))
+    check("voice_command loop/gate phrases/engines match voice/loop.py; "
+          "mic not live in browser",
+          vc_ok, f"gate_phrases={sorted(gp)}")
+
+    # 16. personas vs 00-CEO-Core/personas.json.
+    ps = (status or {}).get("personas") or {}
+    personas_file = json.loads(_read(os.path.join(
+        BASE, "00-CEO-Core", "personas.json")))
+    src_ok = all(
+        isinstance(p.get("source"), str)
+        and os.path.exists(os.path.join(BASE, p["source"]))
+        for p in ps.get("profiles", []))
+    check("personas profiles equal personas.json; default mira; "
+          "every profile source file exists",
+          ps.get("profiles") == personas_file.get("profiles")
+          and ps.get("default") == personas_file.get("default") == "mira"
+          and len(ps.get("profiles", [])) == 3 and src_ok,
+          f"profiles={len(ps.get('profiles', []))} "
+          f"default={ps.get('default')}")
+
+    # 17. execution vs logs/skill_executions.jsonl,
+    # logs/dev_brain_calls.jsonl, task_queue. The skill log is an
+    # append-only stream that grows while other work runs, so the
+    # published values are a SNAPSHOT: they must be genuine log data
+    # (a contiguous run of real records, in order), not necessarily
+    # equal to the live tail at check time. Counts may only grow
+    # since the snapshot; the first timestamp must be a real log
+    # timestamp; the dev-brain calls must be a prefix of the log.
+    # Replicates the reader's record shape exactly (result_file =
+    # basename of "result"; tokens from usage.total_tokens).
+    ex = (status or {}).get("execution") or {}
+    se = ex.get("skill_executions") or {}
+    dc = ex.get("dev_brain_calls") or {}
+    skill_lines = _read(os.path.join(BASE, "logs",
+                                     "skill_executions.jsonl")).splitlines()
+    parsed_recs = []
+    skill_errs = 0
+    first_ts = None
+    last_ts = None
+    for ln in skill_lines:
+        if not ln.strip():
+            continue
+        try:
+            ev = json.loads(ln)
+        except ValueError:
+            continue
+        if not isinstance(ev, dict):
+            continue
+        ts = ev.get("timestamp")
+        if not isinstance(ts, str):
+            continue
+        result = ev.get("result")
+        parsed_recs.append({
+            "timestamp": ts,
+            "event": ev.get("event", "unknown"),
+            "skill": ev.get("skill", "unknown"),
+            "result_file": (result.split("/")[-1]
+                            if isinstance(result, str) else "unknown"),
+            "error": ev.get("error"),
+        })
+        if first_ts is None or ts < first_ts:
+            first_ts = ts
+        if last_ts is None or ts > last_ts:
+            last_ts = ts
+        if ev.get("error") is not None:
+            skill_errs += 1
+    published_recent = se.get("recent") or []
+    run_found = False
+    if published_recent:
+        for start in range(0, len(parsed_recs) - len(published_recent) + 1):
+            if parsed_recs[start:start + len(published_recent)] \
+                    == published_recent:
+                run_found = True
+                break
+    call_lines = _read(os.path.join(BASE, "logs",
+                                    "dev_brain_calls.jsonl")).splitlines()
+    want_calls = []
+    for ln in call_lines:
+        if not ln.strip():
+            continue
+        try:
+            rec = json.loads(ln)
+        except ValueError:
+            continue
+        if not isinstance(rec, dict):
+            continue
+        usage = rec.get("usage")
+        want_calls.append({
+            "provider": rec.get("provider", "unknown"),
+            "model": rec.get("model", "unknown"),
+            "status": rec.get("status", "unknown"),
+            "error": rec.get("error"),
+            "total_tokens": (usage.get("total_tokens", "unknown")
+                             if isinstance(usage, dict) else "unknown"),
+            "ts": rec.get("ts", "unknown"),
+        })
+    tq2 = (status or {}).get("task_queue") or {}
+    tk = ex.get("tasks") or {}
+    br = ex.get("bridge") or {}
+    ex_ok = (
+        0 < se.get("total_lines", 0) <= len(skill_lines)
+        and 0 < se.get("parsed", 0) <= len(parsed_recs)
+        and 0 <= se.get("errors", -1) <= skill_errs
+        and any(r["timestamp"] == se.get("first_at")
+                for r in parsed_recs)
+        and se.get("last_at") is not None
+        and any(r["timestamp"] == se.get("last_at")
+                for r in parsed_recs)
+        and se.get("last_at") <= (last_ts or "")
+        and 0 < len(published_recent) <= 8
+        and run_found
+        and published_recent[-1].get("timestamp") == se.get("last_at")
+        and 0 <= dc.get("total", -1) <= len(want_calls)
+        and dc.get("records") == want_calls[:len(dc.get("records", []))]
+        and tk.get("total") == tq2.get("total")
+        and tk.get("done") == (tq2.get("by_status") or {}).get("done", 0)
+        and br.get("name") == "master-os-3d-bridge"
+        and br.get("state") == "unknown"
+        and ex.get("stream") == "none"
+        and "No live stream" in str(ex.get("stream_note")))
+    check("execution skill log / dev brain calls / tasks / bridge "
+          "recount from logs + task_queue",
+          ex_ok, f"skill_lines={se.get('total_lines')} "
+          f"errors={se.get('errors')} calls={dc.get('total')}")
+
+    # 18. memory vs store/memory.json (READ-ONLY: metadata only,
+    # never quote text).
+    mm = (status or {}).get("memory") or {}
+    store_entries = mem_store.get("entries", [])
+    per_box = {}
+    for e in store_entries:
+        per_box[e.get("box")] = per_box.get(e.get("box"), 0) + 1
+    meta_ok = all(
+        mm.get("entries_meta", [])[i].get(k) == store_entries[i].get(k)
+        for i in range(len(store_entries))
+        for k in ("area", "slug", "box", "status", "learned_at",
+                  "updated_at"))
+    mem_ok = (
+        mm.get("entries") == len(store_entries)
+        and len(mm.get("entries_meta", [])) == len(store_entries)
+        and meta_ok
+        and mm.get("boxes") == mem_store.get("boxes")
+        and mm.get("per_box") == per_box
+        and mm.get("verbatim_quotes")
+        == sum(1 for e in store_entries if e.get("quote"))
+        and mm.get("store_file") == "store/memory.json"
+        and mm.get("schema") == mem_store.get("schema"))
+    check("memory entries/boxes/per_box/verbatim-quote count match "
+          "store/memory.json (metadata only)",
+          mem_ok, f"entries={mm.get('entries')} "
+          f"boxes={len(mm.get('boxes', []))}")
+    check("memory verbatim quotes are NOT in command-center.html",
+          "Your name is Mira" not in cc
+          and "তুমি এখন থেকে বাংলায় কথা বলবা" not in cc)
+
+    # 19. library vs disk (docs/, top-level, 00-CEO-Core/,
+    # unified-business-os/).
+    lb = (status or {}).get("library") or {}
+    lib_ok = True
+    lib_detail = ""
+    groups = {
+        "docs": os.path.join(BASE, "docs"),
+        "top_level": BASE,
+        "ceo_core": os.path.join(BASE, "00-CEO-Core"),
+        "unified_business_os": os.path.join(BASE, "..",
+                                            "unified-business-os"),
+    }
+    for key, dpath in groups.items():
+        listed = lb.get(key)
+        if not isinstance(listed, list):
+            lib_ok = False
+            lib_detail = f"{key}: not a list"
+            break
+        # _list_md_files lists only top-level *.md files.
+        disk = sorted(f for f in os.listdir(dpath)
+                      if f.endswith(".md")
+                      and os.path.isfile(os.path.join(dpath, f)))
+        if sorted(f["name"] for f in listed) != disk:
+            lib_ok = False
+            lib_detail = f"{key}: listed {len(listed)} disk {len(disk)}"
+            break
+        for f in listed:
+            fp = os.path.join(dpath, f["name"])
+            if os.path.getsize(fp) != f.get("size_bytes"):
+                lib_ok = False
+                lib_detail = f"{key}/{f['name']}: size mismatch"
+                break
+            try:
+                datetime.fromisoformat(str(f.get("modified_at")))
+            except (ValueError, TypeError):
+                lib_ok = False
+                lib_detail = f"{key}/{f['name']}: bad modified_at"
+                break
+        if not lib_ok:
+            break
+    ceo_reports = (lb.get("ceo_reports") or {})
+    lib_ok = lib_ok and ceo_reports.get("total") == len(disk_files) \
+        and ceo_reports.get("note") == "File list in module 15 " \
+        "(Reports Center)."
+    check("library file lists/sizes match disk (docs, top-level, "
+          "00-CEO-Core, unified-business-os)",
+          lib_ok, lib_detail or f"groups={len(groups)}")
+
+    # 20. integrations vs sources (n8n MCP record, workflow files,
+    # config providers).
+    ig = (status or {}).get("integrations") or {}
+    mcp = ig.get("n8n_mcp") or {}
+    wf = ig.get("n8n_workflows") or []
+    tier2_path = os.path.join(BASE, "..", "talvenor-outreach",
+                              "n8n-workflow-tier2-auto-send.json")
+    cb_path = os.path.join(BASE, "..", "talvenor-callback",
+                           "n8n-workflow-talvenor-callback.json")
+    tier2 = json.loads(_read(tier2_path)) if os.path.exists(tier2_path) \
+        else {}
+    cbw = json.loads(_read(cb_path)) if os.path.exists(cb_path) else {}
+    wf_ok = (
+        len(wf) == 2
+        and wf[0].get("name") == tier2.get("name")
+        and wf[0].get("nodes") == len(tier2.get("nodes", [])) == 8
+        and wf[0].get("status") == "NOT LIVE"
+        and wf[1].get("name") == cbw.get("name")
+        and wf[1].get("nodes") == len(cbw.get("nodes", [])) == 3
+        and wf[1].get("status") == "NOT LIVE")
+    prov = ig.get("providers") or {}
+    ig_ok = (
+        mcp.get("service") == "n8n Cloud MCP"
+        and mcp.get("instance") == "talvenorai.app.n8n.cloud"
+        and mcp.get("state") == "connected"
+        and mcp.get("tools") == 75 and mcp.get("workflows") == 0
+        and mcp.get("allowed_read_only") == 41
+        and mcp.get("write_blocked") == 34
+        and mcp.get("rest_api") == "blocked on free trial (404)"
+        and mcp.get("verified") == "2026-11-25"
+        and (ig.get("n8n_adapter") or {}).get("state") == "not connected"
+        and wf_ok
+        and (prov.get("meta") or {}).get("state")
+        == "unreachable from this VM"
+        and (prov.get("ollama") or {}).get("state") \
+        == "local — not present in this VM"
+        and (ig.get("vapi") or {}).get("state") == "unknown"
+        and (ig.get("gmail_calendar") or {}).get("state") == "unknown")
+    check("integrations n8n MCP record + workflow node counts + "
+          "provider states match sources",
+          ig_ok, f"mcp_tools={mcp.get('tools')} wf={len(wf)}")
+
+    # 21. Honesty in the page itself: disabled controls, display-only
+    # labels, no fake chat.
+    m2 = cc[cc.find('id="m2"'):cc.find('id="m3"')]
+    m3 = cc[cc.find('id="m3"'):cc.find('id="m4"')]
+    m4 = cc[cc.find('id="m4"'):cc.find('id="m12"')]
+    honesty_ok = (
+        'id="chat-input"' in m2 and 'disabled' in m2
+        and "SHELL" in m2 and "not a live chat" in m2
+        and "no fake replies" in m2
+        and 'id="voice-mic"' in m3 and 'disabled' in m3
+        and "SHELL" in m3 and "the mic is off" in m3
+        and "DISPLAY ONLY" in m4
+        and "the underlying brain does not switch" in m4)
+    check("batch-3 honesty: chat send + voice mic disabled in the page; "
+          "personas labelled display-only",
+          honesty_ok)
+
+    # 22. No "[object Object]" literal in any data file (lesson from
+    # the 2026-11-27 fix).
+    data_files = [os.path.join(DASH, "status.json"),
+                  os.path.join(DASH, "ceo-report.json"),
+                  os.path.join(DASH, "health-record.json"),
+                  os.path.join(BASE, "00-CEO-Core", "personas.json")]
+    bad_data = [p for p in data_files
+                if os.path.exists(p) and "[object Object]" in _read(p)]
+    check("no '[object Object]' literal in any data file",
+          not bad_data, f"bad={bad_data}")
 
     # ---------- C. Approval server (TEMP store) ----------
     tmp_dir = tempfile.mkdtemp()

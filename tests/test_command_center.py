@@ -1,4 +1,4 @@
-"""FOUNDER OS F2 batch 2 — Command Center tests (2026-11-27).
+"""FOUNDER OS F2 batch 3 — Command Center tests (2026-11-27).
 
 Real code under test (stdlib only, temp stores for the server,
 read-only for the generated dashboard files — no network beyond
@@ -16,15 +16,20 @@ $0):
     contains no hardcoded metric literal (batch 1 + batch 2 sets).
     Module 19 has no edit controls; module 17 has no purchase
     action.
-  * dashboards/status.json (generated) — founder_os F2 batch 2,
+  * dashboards/status.json (generated) — founder_os F2 batch 3,
     roster counts consistent, draft count matches an independent
     recount of the [MOCK DRAFT] marker; batch-2 keys internally
     consistent and cross-checked against their NON-store sources
     (pricing.json, kit-outline.md, the Digital Product README,
     TALVENOR_PERMISSION_MATRIX.md, config.json, reports/ceo/,
     dashboards/health-record.json when present, the voice models
-    directory). The store cross-checks (tasks.json, usage_ledger
-    .json, schedules.json) live in scripts/check_command_center.py
+    directory); batch-3 keys (chat, voice_command, personas,
+    execution, memory, library, integrations) internally
+    consistent and cross-checked against their sources
+    (config.json, voice/loop.py, personas.json, the library
+    directories, the n8n workflow files). The store cross-checks
+    (tasks.json, usage_ledger.json, schedules.json, memory.json,
+    the execution logs) live in scripts/check_command_center.py
     — this file never reads the real store/ (conftest rule).
   * dashboards/ceo-report.json — byte-identical to the CEO report
     status.json points to.
@@ -190,10 +195,10 @@ def test_tasks_api_returns_record_and_cors(approvals_server):
 
 
 # ------------------------------------------------------- generated files
-def test_status_founder_os_is_f2_batch_2():
+def test_status_founder_os_is_f2_batch_3():
     status = _load_status()
     assert status["founder_os"]["phase"] == "F2"
-    assert status["founder_os"]["batch"] == 2
+    assert status["founder_os"]["batch"] == 3
 
 
 def test_status_roster_counts_are_consistent():
@@ -231,8 +236,8 @@ def test_ceo_report_copy_is_byte_identical():
 def test_command_center_no_fake_data():
     page = _read(DASH / "command-center.html")
     nostyle = re.sub(r"<style>.*?</style>", "", page, flags=re.S)
-    for section in ("m1", "m5", "m6", "m7", "m10", "m11", "m15", "m17",
-                    "m18", "m19"):
+    for section in ("m1", "m2", "m3", "m4", "m5", "m6", "m7", "m10", "m11",
+                    "m12", "m13", "m14", "m15", "m16", "m17", "m18", "m19"):
         assert f'id="{section}"' in page
     assert set(re.findall(r'fetch\("([^"]+)"', page)) == \
         {"status.json", "ceo-report.json"}
@@ -249,16 +254,16 @@ def test_command_center_no_fake_data():
         r"\s*:\s*\d", page)
     assert "no auto-approve" in page and "Always allow" not in page
     nav = page[page.find('<nav id="sidebar">'):page.find("</nav>")]
-    for n in (10, 15, 17, 18, 19):
+    for n in (2, 3, 4, 10, 12, 13, 14, 15, 16, 17, 18, 19):
         assert re.search(
             r'<a[^>]*class="nav-item[^"]*"[^>]*href="#m%d"' % n, nav)
-    assert not set(re.findall(r'href="#m(\d+)"', nav)) & {
-        "2", "3", "4", "8", "9", "12", "13", "14", "16"}
+    assert not set(re.findall(r'href="#m(\d+)"', nav)) & {"8", "9"}
 
 
 def test_module_19_read_only_and_module_17_no_purchase():
     page = _read(DASH / "command-center.html")
-    m19 = page[page.find('id="m19"'):page.find("<footer", page.find('id="m19"'))]
+    m19_start = page.find('id="m19"')
+    m19 = page[m19_start:page.find("</section>", m19_start)]
     assert "Read-only" in m19
     for tag in ("<form", "<input", "<button", "<select", "contenteditable"):
         assert tag not in m19
@@ -425,3 +430,176 @@ def test_3d_dashboard_snapshot_labelled_and_placeholders():
                "{paying_clients}", "{email}"):
         assert ph in page
     assert 'href="command-center.html"' in page
+
+
+# ---------------------------------------------------------- batch 3
+def test_status_chat_matches_config():
+    status = _load_status()
+    ch = status["chat"]
+    cfg = json.loads(_read(REPO_ROOT / "00-CEO-Core" / "config.json"))
+    assert ch["brain"] == cfg["brain"]
+    assert ch["brain_chain"] == \
+        cfg["development_brain"]["fallback_chain"]
+    assert isinstance(ch["assistant"], str) and ch["assistant"]
+    assert ch["connected"] is False
+    assert ch["transcript"] == "none"
+    assert ch["send"]["enabled"] is False
+    assert isinstance(ch["send"]["reason"], str)
+    assert len(ch["send"]["reason"]) > 20
+    assert "Muse chat" in ch["surface"]
+
+
+def test_status_voice_command_matches_loop():
+    status = _load_status()
+    vc = status["voice_command"]
+    loop_path = REPO_ROOT / "00-CEO-Core" / "voice" / "loop.py"
+    assert vc["loop_exists"] is True
+    assert loop_path.is_file()
+    loop_text = loop_path.read_text(encoding="utf-8")
+    assert vc["loop_file"] == "00-CEO-Core/voice/loop.py"
+    assert vc["brain"] == "mock"
+    assert vc["live_in_browser"] is False
+    assert vc["bengali_prompts"] == "regressed"
+    for phrase, action in vc["gate_phrases"].items():
+        assert phrase in loop_text
+        assert action in ("send", "publish")
+    # The engines line is the voice detail from status.json itself.
+    assert vc["engines"] == status["voice"]["detail"]
+    assert "PC-side Python process" in vc["reason"]
+
+
+def test_status_personas_match_file():
+    status = _load_status()
+    ps = status["personas"]
+    personas_file = json.loads(_read(
+        REPO_ROOT / "00-CEO-Core" / "personas.json"))
+    assert ps["profiles"] == personas_file["profiles"]
+    assert ps["default"] == personas_file["default"] == "mira"
+    assert len(ps["profiles"]) == 3
+    for p in ps["profiles"]:
+        for key in ("id", "name", "role", "description", "source",
+                    "memory_box"):
+            assert key in p
+        assert (REPO_ROOT / p["source"]).is_file()
+
+
+def test_status_execution_is_internally_consistent():
+    status = _load_status()
+    ex = status["execution"]
+    se = ex["skill_executions"]
+    assert se["total_lines"] >= se["parsed"] >= len(se["recent"])
+    assert len(se["recent"]) <= 8
+    assert se["first_at"] <= se["last_at"]
+    for r in se["recent"]:
+        for key in ("timestamp", "event", "skill", "result_file",
+                    "error"):
+            assert key in r
+    dc = ex["dev_brain_calls"]
+    assert dc["total"] == len(dc["records"])
+    for r in dc["records"]:
+        for key in ("provider", "model", "status", "total_tokens",
+                    "ts"):
+            assert key in r
+    tq = status["task_queue"]
+    assert ex["tasks"]["total"] == tq["total"]
+    assert ex["tasks"]["done"] == tq["by_status"].get("done", 0)
+    assert ex["bridge"]["name"] == "master-os-3d-bridge"
+    assert ex["bridge"]["state"] == "unknown"
+    assert ex["stream"] == "none"
+    assert "No live stream" in ex["stream_note"]
+
+
+def test_status_memory_is_structure_only():
+    mm = _load_status()["memory"]
+    assert mm["store_file"] == "store/memory.json"
+    assert mm["entries"] == len(mm["entries_meta"])
+    assert len(mm["boxes"]) == 13
+    assert sum(mm["per_box"].values()) == mm["entries"]
+    for e in mm["entries_meta"]:
+        for key in ("area", "slug", "box", "status", "learned_at",
+                    "updated_at"):
+            assert key in e
+    assert mm["verbatim_quotes"] == 3
+    # No quote text may leak into the published key.
+    blob = json.dumps(mm, ensure_ascii=False)
+    assert "Your name is Mira" not in blob
+    assert "তুমি এখন থেকে বাংলায় কথা বলবা" not in blob
+    assert "post it" not in blob
+
+
+def test_status_library_matches_disk():
+    lb = _load_status()["library"]
+    groups = {
+        "docs": REPO_ROOT / "docs",
+        "top_level": REPO_ROOT,
+        "ceo_core": REPO_ROOT / "00-CEO-Core",
+        "unified_business_os": REPO_ROOT.parent / "unified-business-os",
+    }
+    for key, dpath in groups.items():
+        listed = lb[key]
+        disk = sorted(p.name for p in dpath.iterdir()
+                      if p.name.endswith(".md") and p.is_file())
+        assert sorted(f["name"] for f in listed) == disk
+        for f in listed:
+            assert (dpath / f["name"]).stat().st_size == f["size_bytes"]
+            datetime.fromisoformat(f["modified_at"])
+    assert lb["ceo_reports"]["total"] == \
+        len(list((REPO_ROOT / "reports" / "ceo").iterdir()))
+    assert lb["ceo_reports"]["note"] == \
+        "File list in module 15 (Reports Center)."
+
+
+def test_status_integrations_only_n8n_connected():
+    ig = _load_status()["integrations"]
+    mcp = ig["n8n_mcp"]
+    assert mcp["service"] == "n8n Cloud MCP"
+    assert mcp["state"] == "connected"
+    assert mcp["tools"] == 75
+    assert mcp["workflows"] == 0
+    assert mcp["allowed_read_only"] == 41
+    assert mcp["write_blocked"] == 34
+    assert mcp["verified"] == "2026-11-25"
+    assert ig["n8n_adapter"]["state"] == "not connected"
+    assert ig["vapi"]["state"] == "unknown"
+    assert ig["gmail_calendar"]["state"] == "unknown"
+    # No other "connected" anywhere in the integrations tree.
+    def _walk(node):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                if k == "state":
+                    yield v
+                yield from _walk(v)
+        elif isinstance(node, list):
+            for item in node:
+                yield from _walk(item)
+    states = list(_walk(ig))
+    assert states.count("connected") == 1
+    for w in ig["n8n_workflows"]:
+        assert w["status"] == "NOT LIVE"
+        assert isinstance(w["nodes"], int) and w["nodes"] > 0
+
+
+def test_batch3_honesty_in_page():
+    page = _read(DASH / "command-center.html")
+    m2 = page[page.find('id="m2"'):page.find('id="m3"')]
+    assert "SHELL" in m2 and "not a live chat" in m2
+    assert "no fake replies" in m2
+    assert 'id="chat-input"' in m2 and "disabled" in m2
+    m3 = page[page.find('id="m3"'):page.find('id="m4"')]
+    assert "SHELL" in m3 and "the mic is off" in m3
+    assert 'id="voice-mic"' in m3 and "disabled" in m3
+    m4 = page[page.find('id="m4"'):page.find('id="m12"')]
+    assert "DISPLAY ONLY" in m4
+    assert "the underlying brain does not switch" in m4
+    for fn in ("renderChat", "renderVoiceCmd", "renderPersonas",
+               "renderExecution", "renderMemory", "renderLibrary",
+               "renderIntegrations"):
+        assert f"function {fn}(" in page
+        assert f"{fn}(s);" in page
+
+
+def test_no_object_object_in_data_files():
+    for rel in ("dashboards/status.json", "dashboards/ceo-report.json",
+                "dashboards/health-record.json",
+                "00-CEO-Core/personas.json"):
+        assert "[object Object]" not in _read(REPO_ROOT / rel)
