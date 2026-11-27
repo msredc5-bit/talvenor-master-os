@@ -42,6 +42,7 @@ import csv
 import json
 import os
 import re
+import shutil
 import sys
 from datetime import datetime, timezone
 
@@ -50,6 +51,15 @@ CEO_CORE_DIR = os.path.join(BASE, "00-CEO-Core")
 sys.path.insert(0, CEO_CORE_DIR)
 
 from usage_ledger import UsageLedger  # noqa: E402 — A6: ledger numbers on the dashboard
+
+# F2 batch 2 — approval TTL from the gateway itself (never a second
+# hardcoded copy that can drift). The gateway is stdlib-only, so this
+# import cannot fail on a missing package; the fallback is the same
+# mirrored constant the file already used, for safety only.
+try:
+    from human_approval_gateway import APPROVAL_TTL_MINUTES
+except Exception:  # noqa: BLE001 — gateway unreadable: mirror, do not crash sync
+    APPROVAL_TTL_MINUTES = 20
 
 AUTO_SEND_PATH = os.path.expanduser(
     "~/workspace/talvenor-outreach/n8n-workflow-tier2-auto-send.json")
@@ -526,14 +536,14 @@ def read_ceo_report():
 # the phase from config.json — its "phase": 11 is old numbering.
 FOUNDER_OS_PHASE = {
     "phase": "F2",
-    "batch": 1,
-    "label": "Founder Command Center — batch 1",
+    "batch": 2,
+    "label": "Founder Command Center — batch 2",
     "source": "founder-os-audit-2026-11-26.md §14 (F2)",
 }
 
 
 def read_founder_os():
-    """Current FOUNDER OS phase (F2 batch 1)."""
+    """Current FOUNDER OS phase (F2 batch 2)."""
     return dict(FOUNDER_OS_PHASE)
 
 
@@ -608,6 +618,383 @@ def read_roster():
             "with_activity": with_activity, "draft": draft, "coded": coded}
 
 
+# F2 batch 2 — Task Center (module 10), Reports Center (15),
+# Financial Dashboard (17), System Health (18), Settings &
+# Permissions (19). All additive-only; existing keys never renamed.
+# Every value comes from a real repo file; a missing source is
+# "unknown", never a guessed number.
+
+def read_task_queue(task_records):
+    """Task Center: the task queue itself (records, not just counts),
+    the queue-watch schedule, and how a drain happens.
+
+    Records come from store/tasks.json via the caller (collect_status
+    already read it). The watch comes from store/schedules.json.
+    Drain is manual CLI — the schedules note says no runner is
+    attached yet (bridge adoption needs Boss's word)."""
+    counts = read_task_counts(task_records)
+    records = []
+    if isinstance(task_records, list):
+        for rec in task_records:
+            if not isinstance(rec, dict):
+                continue
+            records.append({
+                "id": rec.get("id", UNKNOWN),
+                "status": rec.get("status", UNKNOWN),
+                "business": rec.get("business", UNKNOWN),
+                "type": rec.get("type", UNKNOWN),
+                "title": rec.get("title", UNKNOWN),
+                "queued_at": rec.get("queued_at", UNKNOWN),
+                "completed_at": rec.get("completed_at", UNKNOWN),
+                "result": rec.get("result", UNKNOWN),
+            })
+    sched = _read_json(os.path.join(BASE, "store", "schedules.json")) or {}
+    watch = {"name": UNKNOWN, "interval_minutes": UNKNOWN,
+             "status": UNKNOWN, "runs": UNKNOWN,
+             "last_run_at": UNKNOWN, "note": UNKNOWN}
+    sched_records = sched.get("records") if isinstance(sched, dict) else None
+    if isinstance(sched_records, list):
+        for rec in sched_records:
+            if isinstance(rec, dict) and rec.get("source") == "store/tasks.json":
+                watch = {
+                    "name": rec.get("name", UNKNOWN),
+                    "interval_minutes": rec.get("interval_minutes", UNKNOWN),
+                    "status": rec.get("status", UNKNOWN),
+                    "runs": rec.get("runs", UNKNOWN),
+                    "last_run_at": rec.get("last_run_at", UNKNOWN),
+                    "note": rec.get("note", UNKNOWN),
+                }
+                break
+    return {
+        "total": counts.get("total", UNKNOWN),
+        "by_status": counts,
+        "records": records,
+        "queue_watch": watch,
+        "drain": {
+            "method": "manual CLI",
+            "command": "python scripts/run_office.py --drain-queue --max 2",
+            "runner": "none attached",
+            "source": "CLAUDE.md + store/schedules.json note",
+        },
+    }
+
+
+def _report_generated_at(path, name):
+    """Generated time of one report file: the JSON's own field for
+    .json, a Generated line for .md, else the file mtime. Never
+    raises — "unknown" when nothing can be read."""
+    if name.endswith(".json"):
+        data = _read_json(path)
+        if isinstance(data, dict) and isinstance(
+                data.get("generated_at"), str):
+            return data["generated_at"]
+    else:
+        text = _read_text(path)
+        if text:
+            m = re.search(r"[Gg]enerated(?:_at)?:\s*(.+)", text)
+            if m:
+                return m.group(1).strip()
+    try:
+        return datetime.fromtimestamp(
+            os.path.getmtime(path), tz=timezone.utc).isoformat()
+    except OSError:
+        return UNKNOWN
+
+
+def read_reports():
+    """Reports Center: every generated report in reports/ceo/ with
+    kind, format, size, generated time and age in days. Performance
+    and leads reports do not exist in this repo — that is shown as
+    "none", not invented."""
+    ceo_dir = os.path.join(BASE, "reports", "ceo")
+    try:
+        names = sorted(f for f in os.listdir(ceo_dir)
+                       if os.path.isfile(os.path.join(ceo_dir, f)))
+    except OSError:
+        return {"total": UNKNOWN, "files": [], "latest": UNKNOWN,
+                "performance": "none", "leads": "none"}
+    now = datetime.now(timezone.utc)
+    files = []
+    for name in names:
+        path = os.path.join(ceo_dir, name)
+        kind = name.split("-")[0] if "-" in name else UNKNOWN
+        fmt = "json" if name.endswith(".json") else (
+            "md" if name.endswith(".md") else UNKNOWN)
+        try:
+            size = os.path.getsize(path)
+        except OSError:
+            size = UNKNOWN
+        gen = _report_generated_at(path, name)
+        age = UNKNOWN
+        parsed = _parse_iso(gen) if isinstance(gen, str) else None
+        if parsed is not None:
+            age = max(0, int((now - parsed).total_seconds() // 86400))
+        files.append({
+            "name": name,
+            "kind": kind,
+            "format": fmt,
+            "path": os.path.join("reports", "ceo", name),
+            "size_bytes": size,
+            "generated_at": gen,
+            "age_days": age,
+        })
+    latest = None
+    if files:
+        dated = [f for f in files
+                 if isinstance(f.get("generated_at"), str)
+                 and _parse_iso(f["generated_at"]) is not None]
+        if dated:
+            latest = max(dated,
+                         key=lambda f: _parse_iso(f["generated_at"]))
+        else:
+            latest = files[-1]
+    return {
+        "total": len(files),
+        "files": files,
+        "latest": latest if latest is not None else UNKNOWN,
+        "performance": "none",
+        "leads": "none",
+    }
+
+
+def _read_kit_prices():
+    """Kit prices from the kit blueprint's Price line:
+    "$49 one-time (launch price $39 for the first 30 buyers, then
+    $49)". Both numbers parsed; "unknown" when the line is gone."""
+    text = _read_text(os.path.join(
+        BASE, "02-Digital-Product-Department", "kit-outline.md"))
+    if text is None:
+        return UNKNOWN, UNKNOWN
+    m = re.search(r"\*\*Price:\*\*\s*\$(\d+)\s+one-time\s*\(launch price "
+                  r"\$(\d+) for the first 30 buyers", text)
+    if not m:
+        return UNKNOWN, UNKNOWN
+    return int(m.group(1)), int(m.group(2))
+
+
+def read_finance(cfg):
+    """Financial Dashboard: the spend ledger (real records), the
+    LOCKED 2026-11-12 pricing tiers, Gate 0 economics, and revenue.
+
+    Revenue is $0.00 only because paying clients is 0 — entailed,
+    not invented. The wedge (1 in 20 kit buyers → $1,109/mo) is a
+    durable policy fact from 02-Digital-Product-Department/README.md
+    and MEMORY.md, labelled UNTESTED there and here."""
+    ledger = read_usage_ledger()
+    raw = _read_json(os.path.join(BASE, "store", "usage_ledger.json"))
+    by_provider = {}
+    by_kind = {}
+    first_at = last_at = UNKNOWN
+    prompt_tokens = completion_tokens = 0
+    records = []
+    if isinstance(raw, dict) and isinstance(raw.get("records"), list):
+        records = [r for r in raw["records"] if isinstance(r, dict)]
+        for r in records:
+            prov = r.get("provider", UNKNOWN)
+            by_provider.setdefault(prov, {"records": 0, "cost_usd": 0.0})
+            by_provider[prov]["records"] += 1
+            by_provider[prov]["cost_usd"] += float(
+                r.get("cost_usd", 0) or 0)
+            kind = r.get("kind", UNKNOWN)
+            by_kind[kind] = by_kind.get(kind, 0) + 1
+            prompt_tokens += int(r.get("prompt_tokens", 0) or 0)
+            completion_tokens += int(r.get("completion_tokens", 0) or 0)
+        if records:
+            first_at = records[0].get("at", UNKNOWN)
+            last_at = records[-1].get("at", UNKNOWN)
+    ledger_detail = dict(ledger)
+    ledger_detail["records"] = len(records) if records else (
+        ledger.get("total_calls", UNKNOWN))
+    ledger_detail["by_provider"] = by_provider or UNKNOWN
+    ledger_detail["by_kind"] = by_kind or UNKNOWN
+    ledger_detail["first_at"] = first_at
+    ledger_detail["last_at"] = last_at
+    ledger_detail["total_prompt_tokens"] = prompt_tokens
+    ledger_detail["total_completion_tokens"] = completion_tokens
+
+    pricing = _read_json(os.path.join(BASE, "00-CEO-Core", "pricing.json"))
+    if not isinstance(pricing, dict):
+        pricing = UNKNOWN
+
+    honest = cfg.get("honest_status") or {}
+    clients = honest.get("paying_clients", UNKNOWN)
+    revenue = {
+        "paying_clients": clients,
+        "revenue_usd": 0.0 if clients == 0 else UNKNOWN,
+        "note": ("0 clients — no revenue data exists"
+                 if clients == 0 else UNKNOWN),
+    }
+
+    gate0 = read_gate0_status()
+    kit_price, kit_launch = _read_kit_prices()
+    gate0_econ = {
+        "status": gate0,
+        "kit_price_usd": kit_price,
+        "kit_launch_price_usd": kit_launch,
+        "kit_sales": 0 if gate0 == "NOT PASSED" else UNKNOWN,
+        "wedge": "1 in 20 kit buyers takes the $1,109/mo receptionist "
+                 "(UNTESTED — an estimate, not a fact)",
+    }
+    return {
+        "ledger": ledger_detail,
+        "pricing": pricing,
+        "revenue": revenue,
+        "gate0": gate0_econ,
+    }
+
+
+def _count_onnx(root):
+    """Count of *.onnx files under root (recursive), 0 when absent."""
+    total = 0
+    try:
+        for _dir, _sub, files in os.walk(root):
+            total += sum(1 for f in files if f.endswith(".onnx"))
+    except OSError:
+        pass
+    return total
+
+
+def _dir_size_mb(root):
+    """Total size of root in MB (1 decimal), "unknown" when absent."""
+    total = 0
+    try:
+        for _dir, _sub, files in os.walk(root):
+            for f in files:
+                try:
+                    total += os.path.getsize(os.path.join(_dir, f))
+                except OSError:
+                    pass
+    except OSError:
+        return UNKNOWN
+    return round(total / (1024 * 1024), 1)
+
+
+def read_health(cfg):
+    """System Health: check-suite + pytest totals with run dates
+    (from dashboards/health-record.json — written by the verification
+    run; "unknown" when no record exists), plus cheap live facts:
+    Python, disk, voice-model files, provider enablement from
+    config (enabled/disabled — never "connected", no live probe),
+    check-script and test-file counts, brain mode."""
+    record = _read_json(os.path.join(BASE, "dashboards",
+                                     "health-record.json"))
+    suite = UNKNOWN
+    pytest = UNKNOWN
+    if isinstance(record, dict):
+        if isinstance(record.get("suite"), dict):
+            suite = record["suite"]
+        if isinstance(record.get("pytest"), dict):
+            pytest = record["pytest"]
+    voice_root = os.path.join(BASE, "00-CEO-Core", "voice", "models")
+    voice_models = {}
+    for name in ("piper", "sherpa-bn", "vosk"):
+        sub = os.path.join(voice_root, name)
+        voice_models[name] = {
+            "present": os.path.isdir(sub),
+            "onnx_files": _count_onnx(sub),
+        }
+    voice_models["total_size_mb"] = _dir_size_mb(
+        os.path.join(BASE, "00-CEO-Core", "voice"))
+    providers = {}
+    cfg_providers = cfg.get("providers") or {}
+    if isinstance(cfg_providers, dict):
+        for name in sorted(cfg_providers):
+            entry = cfg_providers.get(name) or {}
+            providers[name] = {
+                "enabled": bool(entry.get("enabled", False))
+                if isinstance(entry, dict) else UNKNOWN,
+            }
+    else:
+        providers = UNKNOWN
+    try:
+        check_scripts = len([f for f in os.listdir(
+            os.path.join(BASE, "scripts")) if f.startswith("check_")
+            and f.endswith(".py")])
+    except OSError:
+        check_scripts = UNKNOWN
+    try:
+        test_files = len([f for f in os.listdir(
+            os.path.join(BASE, "tests")) if f.startswith("test_")
+            and f.endswith(".py")])
+    except OSError:
+        test_files = UNKNOWN
+    try:
+        disk = shutil.disk_usage(BASE)
+        disk_info = {
+            "path": BASE,
+            "total_gb": round(disk.total / (1024 ** 3), 1),
+            "free_gb": round(disk.free / (1024 ** 3), 1),
+        }
+    except OSError:
+        disk_info = UNKNOWN
+    return {
+        "suite": suite,
+        "pytest": pytest,
+        "python": sys.version.split()[0],
+        "disk": disk_info,
+        "voice_models": voice_models,
+        "providers": providers,
+        "check_scripts": check_scripts,
+        "test_files": test_files,
+        "brain": cfg.get("brain", UNKNOWN),
+        "record_source": ("dashboards/health-record.json"
+                          if isinstance(record, dict) else UNKNOWN),
+    }
+
+
+def read_policy(cfg):
+    """Settings & Permissions (READ-ONLY view): the approval policy
+    as enforced in code — gate words, gated actions, TTL from the
+    gateway itself, $0 cap, brain + production lock, free-only
+    guard, email state, and the full permission matrix text
+    (generated from 00-CEO-Core/permissions.py — never hand-edited).
+    Nothing here is editable from the dashboard."""
+    gates = cfg.get("gates") or {}
+    honest = cfg.get("honest_status") or {}
+    email_raw = honest.get("email_outreach") or ""
+    email = "PAUSED" if "PAUSED" in str(email_raw) else (
+        "unknown" if not email_raw else str(email_raw))
+    matrix_path = os.path.join(BASE, "TALVENOR_PERMISSION_MATRIX.md")
+    matrix_text = _read_text(matrix_path)
+    agent_rows = 0
+    tools = UNKNOWN
+    if matrix_text is not None:
+        for line in matrix_text.splitlines():
+            if line.startswith("| `"):
+                agent_rows += 1
+        header = re.search(r"\| Agent \|([^\n]+)", matrix_text)
+        if header:
+            tools = sorted(set(re.findall(r"`([a-z0-9_]+)`",
+                                          header.group(1))))
+    prod = cfg.get("production_brain") or {}
+    return {
+        "gate_words": (dict(gates.get("words"))
+                       if isinstance(gates.get("words"), dict) else UNKNOWN),
+        "gated_actions": (list(gates.get("gated_actions"))
+                          if isinstance(gates.get("gated_actions"), list)
+                          else UNKNOWN),
+        "gate_rule": gates.get("rule", UNKNOWN),
+        "approval_ttl_minutes": APPROVAL_TTL_MINUTES,
+        "spend_cap_usd": cfg.get("spend_cap_usd", UNKNOWN),
+        "brain": cfg.get("brain", UNKNOWN),
+        "production_brain": {
+            "mode": prod.get("mode", UNKNOWN),
+            "unlocked": prod.get("unlocked", UNKNOWN),
+        } if isinstance(prod, dict) else UNKNOWN,
+        "free_only_guard": os.path.exists(os.path.join(
+            BASE, "00-CEO-Core", "free_only_guard.py")),
+        "email": email,
+        "permission_matrix": {
+            "source": ("TALVENOR_PERMISSION_MATRIX.md — generated from "
+                       "00-CEO-Core/permissions.py by "
+                       "scripts/generate_permission_matrix.py"),
+            "text": matrix_text if matrix_text is not None else UNKNOWN,
+            "tools": tools,
+            "agent_rows": agent_rows,
+        },
+    }
+
+
 def collect_status():
     """Gathers the true state from all sources in one place. Unknown if a value is missing."""
     cfg = _read_json(os.path.join(BASE, "00-CEO-Core", "config.json")) or {}
@@ -663,6 +1050,12 @@ def collect_status():
         # F2 batch 1 — additive keys only; existing keys never renamed.
         "founder_os": read_founder_os(),
         "roster": read_roster(),
+        # F2 batch 2 — additive keys only; existing keys never renamed.
+        "task_queue": read_task_queue(task_records),
+        "reports": read_reports(),
+        "finance": read_finance(cfg),
+        "health": read_health(cfg),
+        "policy": read_policy(cfg),
     }
 
 
@@ -992,6 +1385,18 @@ def main():
           f"roster={ro['total']} agents "
           f"({ro['with_activity']} with activity, "
           f"{ro['draft']} draft, {ro['coded']} coded)")
+    tq = status["task_queue"]
+    rp = status["reports"]
+    fn = status["finance"]
+    hl = status["health"]
+    pol = status["policy"]
+    print(f"batch2: task_queue={tq['total']} tasks · "
+          f"reports={rp['total']} files · "
+          f"finance ledger={fn['ledger'].get('records')} records "
+          f"${fn['ledger'].get('total_usd')} · "
+          f"health suite={hl['suite'] if isinstance(hl['suite'], dict) else hl['suite']} · "
+          f"policy ttl={pol['approval_ttl_minutes']} min · "
+          f"matrix rows={pol['permission_matrix'].get('agent_rows')}")
     return 0
 
 

@@ -205,7 +205,9 @@ class TaskboardHandler(BaseHTTPRequestHandler):
 
     def _cors_headers(self):
         # F2 batch 1 — Command Center only (localhost:8765). The
-        # task board's own endpoints stay same-origin (no CORS).
+        # task board's other endpoints stay same-origin (no CORS).
+        # F2 batch 2 — GET /api/tasks also sends these headers so
+        # the Command Center's Task Center can live-read the queue.
         self.send_header("Access-Control-Allow-Origin",
                          COMMAND_CENTER_ORIGIN)
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
@@ -240,9 +242,12 @@ class TaskboardHandler(BaseHTTPRequestHandler):
         elif self.path == "/api/status":
             self._send_file(STATUS_PATH, "application/json; charset=utf-8")
         elif self.path == "/api/tasks":
+            # F2 batch 2 — CORS for the Command Center's Task Center
+            # (same origin restriction as /api/approvals: localhost:8765
+            # only). Read-only list; the page never queues from here.
             with _store_lock:
                 records = _read_tasks()
-            self._send_json(200, {"records": records})
+            self._send_json(200, {"records": records}, cors=True)
         elif self.path == "/api/approvals":
             # F2 batch 1 — pending approvals via the REAL gateway.
             try:

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FOUNDER OS — Command Center (F2 batch 1)</title>
+<title>FOUNDER OS — Command Center (F2 batch 2)</title>
 <style>
   * { box-sizing: border-box; }
   :root {
@@ -95,19 +95,20 @@
 <body>
 <nav id="sidebar">
   <div id="logo">✦ FOUNDER <span>OS</span></div>
-  <div id="logo-sub">Command Center · F2 batch 1 · localhost only</div>
+  <div id="logo-sub">Command Center · F2 batch 2 · localhost only</div>
   <div class="nav-sec">Live — batch 1</div>
   <a class="nav-item active" href="#m1"><span class="ic">◉</span> Founder Overview <span class="nav-badge live">live</span></a>
   <a class="nav-item" href="#m5"><span class="ic">∴</span> Agent Team Roster <span class="nav-badge live">live</span></a>
   <a class="nav-item" href="#m6"><span class="ic">🧠</span> Main CEO Dashboard <span class="nav-badge live">live</span></a>
   <a class="nav-item" href="#m7"><span class="ic">🏢</span> Agency Dashboard <span class="nav-badge live">live</span></a>
   <a class="nav-item" href="#m11"><span class="ic">✓</span> Approval Center <span class="nav-badge live">live</span></a>
+  <div class="nav-sec">Live — batch 2</div>
+  <a class="nav-item" href="#m10"><span class="ic">📋</span> Task Center <span class="nav-badge live">live</span></a>
+  <a class="nav-item" href="#m15"><span class="ic">🗎</span> Reports Center <span class="nav-badge live">live</span></a>
+  <a class="nav-item" href="#m17"><span class="ic">💰</span> Financial Dashboard <span class="nav-badge live">live</span></a>
+  <a class="nav-item" href="#m18"><span class="ic">♥</span> System Health <span class="nav-badge live">live</span></a>
+  <a class="nav-item" href="#m19"><span class="ic">⚙</span> Settings &amp; Permissions <span class="nav-badge live">live</span></a>
   <div class="nav-sec">Planned — later batches</div>
-  <span class="nav-item planned"><span class="ic">📋</span> Task Center <span class="nav-badge">batch 2</span></span>
-  <span class="nav-item planned"><span class="ic">🗎</span> Reports Center <span class="nav-badge">batch 2</span></span>
-  <span class="nav-item planned"><span class="ic">💰</span> Financial Dashboard <span class="nav-badge">batch 2</span></span>
-  <span class="nav-item planned"><span class="ic">♥</span> System Health <span class="nav-badge">batch 2</span></span>
-  <span class="nav-item planned"><span class="ic">⚙</span> Settings &amp; Permissions <span class="nav-badge">batch 2</span></span>
   <span class="nav-item planned"><span class="ic">💬</span> Unified AI Chat <span class="nav-badge">batch 3</span></span>
   <span class="nav-item planned"><span class="ic">🎙️</span> Voice Command <span class="nav-badge">batch 3</span></span>
   <span class="nav-item planned"><span class="ic">🎭</span> Personality Switcher <span class="nav-badge">batch 3</span></span>
@@ -185,8 +186,97 @@
       <p class="src">Source: dashboards/status.json (approvals); live refresh from the approval server at http://localhost:8766/api/approvals when it is running.</p>
     </section>
 
+    <section class="mod" id="m10">
+      <h2><span class="mnum">10.</span> Task Center</h2>
+      <p class="mod-sub">The live task queue. When the taskboard server is running, the list refreshes from its API; otherwise this is the snapshot from the status file. Queueing and draining happen through run_office.py and the taskboard — this page never queues a task.</p>
+      <div class="cards" id="task-cards"></div>
+      <p class="mod-sub" id="task-live-note"></p>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Status</th><th>Business</th><th>Type</th><th>Title</th><th>Queued</th><th>Completed</th></tr></thead>
+        <tbody id="task-body"></tbody>
+      </table>
+      </div>
+      <div id="task-results"></div>
+      <p class="src">Source: dashboards/status.json (task_queue) — published from the task store by scripts/sync_status.py; live refresh from the taskboard API (http://localhost:8766/api/tasks) when it is running.</p>
+    </section>
+
+    <section class="mod" id="m15">
+      <h2><span class="mnum">15.</span> Reports Center</h2>
+      <p class="mod-sub">Every generated report in this repo, with its date and age. The latest CEO report is also shown in module 6. Performance and leads reports do not exist yet — they are shown as none, not invented.</p>
+      <div class="cards" id="report-cards"></div>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Report</th><th>Kind</th><th>Format</th><th>Generated</th><th>Age</th><th>Size</th></tr></thead>
+        <tbody id="report-body"></tbody>
+      </table>
+      </div>
+      <p class="src">Source: dashboards/status.json (reports) — the reports/ceo/ directory listing, via scripts/sync_status.py.</p>
+    </section>
+
+    <section class="mod" id="m17">
+      <h2><span class="mnum">17.</span> Financial Dashboard</h2>
+      <p class="mod-sub">Spend, pricing, and Gate 0 economics. All spend is zero today because every recorded call is a mock call — the ledger says so, and the zero cap is enforced in code. Pricing is shown for internal reference only and is never quoted to a prospect without Boss's word.</p>
+      <div class="cards" id="finance-cards"></div>
+      <h3>Per-provider spend</h3>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Provider</th><th>Calls</th><th>Cost</th></tr></thead>
+        <tbody id="finance-provider-body"></tbody>
+      </table>
+      </div>
+      <h3>Pricing tiers</h3>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Tier</th><th>Monthly</th><th>Build fee</th><th>Included minutes</th><th>Overage / min</th></tr></thead>
+        <tbody id="finance-tier-body"></tbody>
+      </table>
+      </div>
+      <div id="finance-gate0"></div>
+      <p class="src">Source: dashboards/status.json (finance) — the usage ledger + 00-CEO-Core/pricing.json + Gate 0 status, via scripts/sync_status.py.</p>
+    </section>
+
+    <section class="mod" id="m18">
+      <h2><span class="mnum">18.</span> System Health</h2>
+      <p class="mod-sub">Check-suite and pytest totals with their run dates, plus the environment this snapshot runs on. A total without a run date is shown as unknown — a number from an old run is labelled with its date, never presented as fresh.</p>
+      <div class="cards" id="health-cards"></div>
+      <h3>Providers (configured — never "connected" without a live probe)</h3>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Provider</th><th>Enabled</th></tr></thead>
+        <tbody id="health-provider-body"></tbody>
+      </table>
+      </div>
+      <h3>Voice models (files in this snapshot — local only, not in the ZIP)</h3>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Model set</th><th>Present</th><th>ONNX files</th></tr></thead>
+        <tbody id="health-voice-body"></tbody>
+      </table>
+      </div>
+      <div id="health-failing"></div>
+      <p class="src">Source: dashboards/status.json (health) — dashboards/health-record.json (suite + pytest runs) + config + filesystem, via scripts/sync_status.py.</p>
+    </section>
+
+    <section class="mod" id="m19">
+      <h2><span class="mnum">19.</span> Settings &amp; Permissions</h2>
+      <p class="mod-sub">Read-only view of the approval policy as enforced in code. Nothing on this page can change a setting — changes stay Founder-approved and are made in the repo, not here.</p>
+      <div class="cards" id="policy-cards"></div>
+      <h3>Gate words</h3>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Word</th><th>Approves</th></tr></thead>
+        <tbody id="policy-gate-body"></tbody>
+      </table>
+      </div>
+      <h3>Permission matrix</h3>
+      <p class="mod-sub" id="policy-matrix-src"></p>
+      <pre class="mono" id="policy-matrix" style="white-space: pre-wrap; word-wrap: break-word; background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; overflow-x: auto;"></pre>
+      <p class="src">Source: dashboards/status.json (policy) — 00-CEO-Core/config.json + the approval gateway + TALVENOR_PERMISSION_MATRIX.md, via scripts/sync_status.py.</p>
+    </section>
+
     <footer class="src" style="margin-top: 8px">
-      FOUNDER OS · Command Center F2 batch 1 · localhost only (never exposed publicly) ·
+      FOUNDER OS · Command Center F2 batch 2 · localhost only (never exposed publicly) ·
       data: dashboards/status.json + dashboards/ceo-report.json, both published by scripts/sync_status.py ·
       approvals: 00-CEO-Core/approval_centre.py + the approval gateway — no new approval path.
     </footer>
@@ -220,6 +310,9 @@
     var u = s.usage_ledger || {};
     var t = s.task_counts || {};
     var ap = s.approvals || {};
+    var voice = s.voice || {};
+    var voiceLabel = (voice && typeof voice === "object") ? fmt(voice.label) : fmt(s.voice);
+    var voiceDetail = (voice && typeof voice === "object" && isKnown(voice.detail)) ? voice.detail : "status.json · voice";
     var cards = [
       { k: "Founder OS phase", v: fmt(fo.phase) + " · batch " + fmt(fo.batch), s: fmt(fo.label) },
       { k: "Paying clients", v: fmt(s.paying_clients), s: "status.json · paying_clients" },
@@ -228,7 +321,7 @@
       { k: "Gate 0", v: fmt(s.gate0), s: "status.json · gate0" },
       { k: "Spend (month)", v: isKnown(u.total_usd) ? "$" + u.total_usd : "unknown", s: "status.json · usage_ledger · hard cap $0 (standing rule)" },
       { k: "Tasks done", v: fmt(t.done) + " / " + fmt(t.total), s: "status.json · task_counts" },
-      { k: "Voice", v: fmt(s.voice), s: "status.json · voice" },
+      { k: "Voice", v: voiceLabel, s: voiceDetail },
       { k: "Approvals pending", v: fmt(ap.pending_count), s: "status.json · approvals", id: "ov-pending" }
     ];
     cards.forEach(function (c) {
@@ -325,9 +418,18 @@
       box.appendChild(el("h3", null, "Tasks"));
       var cards = el("div", "cards");
       Object.keys(ceo.tasks).forEach(function (k) {
+        var val = ceo.tasks[k];
         var c = el("div", "card");
         c.appendChild(el("div", "k", k));
-        c.appendChild(el("div", "v", String(ceo.tasks[k])));
+        if (val && typeof val === "object" && !Array.isArray(val)) {
+          var ul = el("ul", "tight");
+          Object.keys(val).forEach(function (sub) {
+            ul.appendChild(el("li", null, sub + ": " + fmt(val[sub])));
+          });
+          c.appendChild(ul);
+        } else {
+          c.appendChild(el("div", "v", fmt(val)));
+        }
         cards.appendChild(c);
       });
       box.appendChild(cards);
@@ -387,6 +489,287 @@
     note.textContent = "Agency: " + fmt(ag.managers) + " managers · registry " + fmt(ag.registry) +
       " · departments " + fmt(ag.departments) + " · ceo_report " + fmt(ag.ceo_report) + ".";
     grid.appendChild(note);
+  }
+
+  /* ---------- Tasks (module 10) ---------- */
+  function taskDate(v) {
+    if (!isKnown(v)) return "unknown";
+    var d = new Date(v);
+    return isNaN(d.getTime()) ? fmt(v) : d.toLocaleString();
+  }
+  function countStatuses(records) {
+    var by = { queued: 0, done: 0, other: 0 };
+    (records || []).forEach(function (r) {
+      if (r.status === "queued") by.queued += 1;
+      else if (r.status === "done") by.done += 1;
+      else by.other += 1;
+    });
+    by.total = (records || []).length;
+    return by;
+  }
+  function renderTasks(tq, note) {
+    var by = tq.by_status || countStatuses(tq.records || []);
+    var total = isKnown(tq.total) ? tq.total : by.total;
+    var other = total - (by.queued || 0) - (by.done || 0);
+    var w = tq.queue_watch || {};
+    var dr = tq.drain || {};
+    var watchV = fmt(w.status);
+    if (isKnown(w.interval_minutes)) watchV += " · every " + fmt(w.interval_minutes) + " min";
+    if (isKnown(w.runs)) watchV += " · " + fmt(w.runs) + " runs";
+    var wrap = $("task-cards");
+    wrap.innerHTML = "";
+    [
+      { k: "Total tasks", v: fmt(total), s: "status.json · task_queue.total" },
+      { k: "Queued", v: fmt(by.queued), s: "status.json · task_queue.by_status" },
+      { k: "Done", v: fmt(by.done), s: "status.json · task_queue.by_status" },
+      { k: "Other statuses", v: fmt(other), s: "queued + done subtracted from total" },
+      { k: "Queue watch", v: watchV, s: "status.json · task_queue.queue_watch" },
+      { k: "Drain", v: fmt(dr.method) + " · " + fmt(dr.runner), s: "status.json · task_queue.drain" }
+    ].forEach(function (c) {
+      var d = el("div", "card");
+      d.appendChild(el("div", "k", c.k));
+      d.appendChild(el("div", "v" + (String(c.v).length > 14 ? " small" : ""), c.v));
+      d.appendChild(el("div", "s", c.s));
+      wrap.appendChild(d);
+    });
+    $("task-live-note").textContent = note;
+    var body = $("task-body");
+    body.innerHTML = "";
+    var res = $("task-results");
+    res.innerHTML = "";
+    var records = tq.records || [];
+    if (!records.length) {
+      var tr0 = el("tr");
+      tr0.appendChild(el("td", null, "No tasks."));
+      body.appendChild(tr0);
+      return;
+    }
+    records.forEach(function (r) {
+      var tr = document.createElement("tr");
+      tr.appendChild(el("td", null, fmt(r.status)));
+      tr.appendChild(el("td", null, fmt(r.business)));
+      tr.appendChild(el("td", null, fmt(r.type)));
+      tr.appendChild(el("td", null, fmt(r.title)));
+      tr.appendChild(el("td", null, taskDate(r.queued_at)));
+      tr.appendChild(el("td", null, taskDate(r.completed_at)));
+      body.appendChild(tr);
+      if (isKnown(r.result)) {
+        var det = el("details");
+        det.appendChild(el("summary", null, fmt(r.id) + " — result"));
+        det.appendChild(el("p", "mono", fmt(r.result)));
+        res.appendChild(det);
+      }
+    });
+  }
+  function renderTasksSnapshot(s) {
+    renderTasks(s.task_queue || {},
+      "Snapshot from status.json — taskboard server not running, or live refresh not done yet.");
+  }
+  function fetchTasksLive() {
+    fetchWithTimeout(TASKBOARD + "/api/tasks", 2500)
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        renderTasks({ records: j.records || [] },
+          "Live from the taskboard API — refreshed just now.");
+      })
+      .catch(function () {
+        $("task-live-note").textContent =
+          "Snapshot from status.json — live refresh failed; the taskboard server may not be running.";
+      });
+  }
+
+  /* ---------- Reports (module 15) ---------- */
+  function ageLabel(age) {
+    if (age === undefined || age === null || age === "unknown") return "unknown";
+    if (age === 0) return "today";
+    return age + " days old";
+  }
+  function renderReports(s) {
+    var rp = s.reports || {};
+    var latest = rp.latest || {};
+    var wrap = $("report-cards");
+    wrap.innerHTML = "";
+    [
+      { k: "Reports", v: fmt(rp.total), s: "status.json · reports.total" },
+      { k: "Latest", v: fmt(latest.kind) + " · " + fmt(latest.format), s: "status.json · reports.latest" },
+      { k: "Latest age", v: ageLabel(latest.age_days), s: "generated " + fmt(latest.generated_at) },
+      { k: "Performance reports", v: fmt(rp.performance), s: "none generated in this repo" },
+      { k: "Leads reports", v: fmt(rp.leads), s: "none generated in this repo" }
+    ].forEach(function (c) {
+      var d = el("div", "card");
+      d.appendChild(el("div", "k", c.k));
+      d.appendChild(el("div", "v" + (String(c.v).length > 14 ? " small" : ""), c.v));
+      d.appendChild(el("div", "s", c.s));
+      wrap.appendChild(d);
+    });
+    var body = $("report-body");
+    body.innerHTML = "";
+    (rp.files || []).forEach(function (f) {
+      var tr = document.createElement("tr");
+      tr.appendChild(el("td", null, fmt(f.name)));
+      tr.appendChild(el("td", null, fmt(f.kind)));
+      tr.appendChild(el("td", null, fmt(f.format)));
+      tr.appendChild(el("td", null, taskDate(f.generated_at)));
+      tr.appendChild(el("td", null, ageLabel(f.age_days)));
+      tr.appendChild(el("td", null, isKnown(f.size_bytes) ? fmt(f.size_bytes) + " B" : "unknown"));
+      body.appendChild(tr);
+    });
+  }
+
+  /* ---------- Finance (module 17) ---------- */
+  function money(v) { return isKnown(v) ? "$" + v : "unknown"; }
+  function renderFinance(s) {
+    var fn = s.finance || {};
+    var led = fn.ledger || {};
+    var rev = fn.revenue || {};
+    var g0 = fn.gate0 || {};
+    var pr = fn.pricing || {};
+    var wrap = $("finance-cards");
+    wrap.innerHTML = "";
+    [
+      { k: "Total spent", v: money(led.total_usd), s: "status.json · finance.ledger.total_usd" },
+      { k: "Spent this month", v: money(led.monthly_total_usd), s: "cap " + money(led.monthly_cap_usd) },
+      { k: "Ledger calls", v: fmt(led.records), s: "status.json · finance.ledger.records" },
+      { k: "Revenue", v: money(rev.revenue_usd), s: fmt(rev.paying_clients) + " paying clients" },
+      { k: "Kit sales", v: fmt(g0.kit_sales), s: "Gate 0: " + fmt(g0.status) }
+    ].forEach(function (c) {
+      var d = el("div", "card");
+      d.appendChild(el("div", "k", c.k));
+      d.appendChild(el("div", "v" + (String(c.v).length > 14 ? " small" : ""), c.v));
+      d.appendChild(el("div", "s", c.s));
+      wrap.appendChild(d);
+    });
+    var pb = $("finance-provider-body");
+    pb.innerHTML = "";
+    var byp = led.by_provider || {};
+    Object.keys(byp).forEach(function (p) {
+      var tr = document.createElement("tr");
+      tr.appendChild(el("td", null, p));
+      tr.appendChild(el("td", null, fmt(byp[p].records)));
+      tr.appendChild(el("td", null, money(byp[p].cost_usd)));
+      pb.appendChild(tr);
+    });
+    if (!Object.keys(byp).length) {
+      var tr0 = el("tr");
+      tr0.appendChild(el("td", null, "unknown"));
+      pb.appendChild(tr0);
+    }
+    var tb = $("finance-tier-body");
+    tb.innerHTML = "";
+    (pr.tiers || []).forEach(function (t) {
+      var tr = document.createElement("tr");
+      tr.appendChild(el("td", null, fmt(t.name)));
+      tr.appendChild(el("td", null, money(t.monthly_usd)));
+      tr.appendChild(el("td", null, money(t.build_usd)));
+      tr.appendChild(el("td", null, fmt(t.included_minutes)));
+      tr.appendChild(el("td", null, money(t.overage_per_min_usd)));
+      tb.appendChild(tr);
+    });
+    var g0box = $("finance-gate0");
+    g0box.innerHTML = "";
+    g0box.appendChild(el("h3", null, "Gate 0 economics"));
+    var ul = el("ul", "tight");
+    ul.appendChild(el("li", null, "Gate 0: " + fmt(g0.status)));
+    ul.appendChild(el("li", null, "Kit price: " + money(g0.kit_price_usd) +
+      " one-time (launch " + money(g0.kit_launch_price_usd) + " for the first 30 buyers)"));
+    ul.appendChild(el("li", null, "Kit sales: " + fmt(g0.kit_sales)));
+    ul.appendChild(el("li", null, "Wedge: " + fmt(g0.wedge)));
+    g0box.appendChild(ul);
+    var terms = el("p", "src", null);
+    terms.textContent = "Pricing locked " + fmt(pr.locked) + " · " + fmt(pr.terms);
+    g0box.appendChild(terms);
+  }
+
+  /* ---------- Health (module 18) ---------- */
+  function renderHealth(s) {
+    var hl = s.health || {};
+    var suite = hl.suite || {};
+    var pt = hl.pytest || {};
+    var disk = hl.disk || {};
+    var vm = hl.voice_models || {};
+    var wrap = $("health-cards");
+    wrap.innerHTML = "";
+    [
+      { k: "Check suite", v: isKnown(suite.passed) ? fmt(suite.passed) + " / " + fmt(suite.total) : "unknown", s: "run " + fmt(suite.generated_at) },
+      { k: "Pytest", v: isKnown(pt.passed) ? fmt(pt.passed) + " passed" : "unknown", s: "run " + fmt(pt.generated_at) + " · skipped " + fmt(pt.skipped) + " · xfailed " + fmt(pt.xfailed) },
+      { k: "Python", v: fmt(hl.python), s: "status.json · health.python" },
+      { k: "Disk free", v: isKnown(disk.free_gb) ? fmt(disk.free_gb) + " GB free" : "unknown", s: "of " + fmt(disk.total_gb) + " GB · " + fmt(disk.path) },
+      { k: "Check scripts", v: fmt(hl.check_scripts), s: "status.json · health.check_scripts" },
+      { k: "Test files", v: fmt(hl.test_files), s: "status.json · health.test_files" },
+      { k: "Brain", v: fmt(hl.brain), s: "status.json · health.brain" },
+      { k: "Voice dir size", v: isKnown(vm.total_size_mb) ? fmt(vm.total_size_mb) + " MB" : "unknown", s: "status.json · health.voice_models" }
+    ].forEach(function (c) {
+      var d = el("div", "card");
+      d.appendChild(el("div", "k", c.k));
+      d.appendChild(el("div", "v" + (String(c.v).length > 14 ? " small" : ""), c.v));
+      d.appendChild(el("div", "s", c.s));
+      wrap.appendChild(d);
+    });
+    var pb = $("health-provider-body");
+    pb.innerHTML = "";
+    var prov = hl.providers || {};
+    Object.keys(prov).forEach(function (p) {
+      var tr = document.createElement("tr");
+      tr.appendChild(el("td", null, p));
+      var en = prov[p].enabled;
+      tr.appendChild(el("td", null, en === true ? "yes" : en === false ? "no" : "unknown"));
+      pb.appendChild(tr);
+    });
+    var vb = $("health-voice-body");
+    vb.innerHTML = "";
+    ["piper", "sherpa-bn", "vosk"].forEach(function (name) {
+      var m = vm[name] || {};
+      var tr = document.createElement("tr");
+      tr.appendChild(el("td", null, name));
+      tr.appendChild(el("td", null, m.present === true ? "yes" : m.present === false ? "no" : "unknown"));
+      tr.appendChild(el("td", null, fmt(m.onnx_files)));
+      vb.appendChild(tr);
+    });
+    var fb = $("health-failing");
+    fb.innerHTML = "";
+    if (Array.isArray(suite.failing) && suite.failing.length) {
+      fb.appendChild(el("h3", null, "Failing checks"));
+      var ul = el("ul", "tight");
+      suite.failing.forEach(function (f) { ul.appendChild(el("li", null, f)); });
+      fb.appendChild(ul);
+      if (isKnown(suite.note)) fb.appendChild(el("p", "src", fmt(suite.note)));
+    }
+  }
+
+  /* ---------- Policy (module 19) ---------- */
+  function renderPolicy(s) {
+    var pol = s.policy || {};
+    var prod = pol.production_brain || {};
+    var pm = pol.permission_matrix || {};
+    var wrap = $("policy-cards");
+    wrap.innerHTML = "";
+    [
+      { k: "Spend cap", v: money(pol.spend_cap_usd), s: "status.json · policy.spend_cap_usd" },
+      { k: "Approval TTL", v: fmt(pol.approval_ttl_minutes) + " min", s: "status.json · policy.approval_ttl_minutes" },
+      { k: "Brain", v: fmt(pol.brain), s: "status.json · policy.brain" },
+      { k: "Production brain", v: fmt(prod.mode) + " · " + (prod.unlocked === true ? "unlocked" : prod.unlocked === false ? "locked" : "unknown"), s: "status.json · policy.production_brain" },
+      { k: "Free-only guard", v: pol.free_only_guard === true ? "present" : "unknown", s: "00-CEO-Core/free_only_guard.py" },
+      { k: "Email", v: fmt(pol.email), s: "status.json · policy.email" },
+      { k: "Gated actions", v: Array.isArray(pol.gated_actions) ? String(pol.gated_actions.length) : "unknown", s: "status.json · policy.gated_actions" },
+      { k: "Matrix agent rows", v: fmt(pm.agent_rows), s: "status.json · policy.permission_matrix" }
+    ].forEach(function (c) {
+      var d = el("div", "card");
+      d.appendChild(el("div", "k", c.k));
+      d.appendChild(el("div", "v" + (String(c.v).length > 14 ? " small" : ""), c.v));
+      d.appendChild(el("div", "s", c.s));
+      wrap.appendChild(d);
+    });
+    var gb = $("policy-gate-body");
+    gb.innerHTML = "";
+    var gw = pol.gate_words || {};
+    Object.keys(gw).forEach(function (w) {
+      var tr = document.createElement("tr");
+      tr.appendChild(el("td", null, w));
+      tr.appendChild(el("td", null, fmt(gw[w])));
+      gb.appendChild(tr);
+    });
+    $("policy-matrix-src").textContent = fmt(pm.source);
+    $("policy-matrix").textContent = fmt(pm.text);
   }
 
   /* ---------- Approvals (module 11) ---------- */
@@ -507,6 +890,7 @@
         pill.textContent = "Approval server: LIVE — allow / reject works";
         banner.hidden = true;
         renderApprovals(state.liveApprovals, Date.now());
+        fetchTasksLive();
       })
       .catch(function () {
         state.serverLive = false;
@@ -535,6 +919,11 @@
       renderOverview(s);
       renderRosterInit(s.roster || { entries: [] });
       renderAgency(s);
+      renderTasksSnapshot(s);
+      renderReports(s);
+      renderFinance(s);
+      renderHealth(s);
+      renderPolicy(s);
       return fetch("ceo-report.json", { cache: "no-store" })
         .then(function (r) {
           if (!r.ok) throw new Error("ceo-report.json HTTP " + r.status);

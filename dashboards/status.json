@@ -126,15 +126,160 @@
     }
   },
   "email": "PAUSED",
+  "finance": {
+    "gate0": {
+      "kit_launch_price_usd": 39,
+      "kit_price_usd": 49,
+      "kit_sales": 0,
+      "status": "NOT PASSED",
+      "wedge": "1 in 20 kit buyers takes the $1,109/mo receptionist (UNTESTED — an estimate, not a fact)"
+    },
+    "ledger": {
+      "by_kind": {
+        "error": 22,
+        "gate": 21,
+        "mock": 21
+      },
+      "by_provider": {
+        "mock": {
+          "cost_usd": 0.0,
+          "records": 64
+        }
+      },
+      "first_at": "2026-11-21T04:44:32.377594+00:00",
+      "last_at": "2026-11-21T04:45:07.671564+00:00",
+      "monthly_cap_usd": 0.0,
+      "monthly_total_usd": 0.0,
+      "over_monthly_cap": false,
+      "records": 64,
+      "total_calls": 64,
+      "total_completion_tokens": 0,
+      "total_prompt_tokens": 0,
+      "total_usd": 0.0
+    },
+    "pricing": {
+      "currency": "USD",
+      "locked": "2026-11-12",
+      "minute_value_usd": 0.85,
+      "note": "Internal display only — never quoted to a prospect without Boss's case-specific word.",
+      "schema": "pricing-v1",
+      "source": "pricing LOCKED 2026-11-12 (Boss decision 'lock Kore'); 13-FINANCE-OS.md §1; pricing-structure-2026-11-12-DRAFT.md marked LOCKED",
+      "terms": "Live in 7 days of completed onboarding or build fee refunded; 30-day free tuning; 3-month minimum then month-to-month, 30 days notice.",
+      "tiers": [
+        {
+          "build_usd": 597,
+          "included_minutes": 250,
+          "monthly_usd": 547,
+          "name": "Starter",
+          "overage_per_min_usd": 2.19
+        },
+        {
+          "build_usd": 1297,
+          "included_minutes": 600,
+          "monthly_usd": 1109,
+          "name": "Growth",
+          "overage_per_min_usd": 1.85
+        },
+        {
+          "build_usd": 1997,
+          "included_minutes": 1000,
+          "monthly_usd": 1672,
+          "name": "Scale",
+          "overage_per_min_usd": 1.67
+        }
+      ]
+    },
+    "revenue": {
+      "note": "0 clients — no revenue data exists",
+      "paying_clients": 0,
+      "revenue_usd": 0.0
+    }
+  },
   "first_mails": 163,
   "founder_os": {
-    "batch": 1,
-    "label": "Founder Command Center — batch 1",
+    "batch": 2,
+    "label": "Founder Command Center — batch 2",
     "phase": "F2",
     "source": "founder-os-audit-2026-11-26.md §14 (F2)"
   },
   "gate0": "NOT PASSED",
   "gates_enabled": true,
+  "health": {
+    "brain": "mock",
+    "check_scripts": 31,
+    "disk": {
+      "free_gb": 134.0,
+      "path": "/home/hatch/workspace/talvenor-master-os",
+      "total_gb": 150.0
+    },
+    "providers": {
+      "anthropic": {
+        "enabled": false
+      },
+      "gemini": {
+        "enabled": false
+      },
+      "grok": {
+        "enabled": false
+      },
+      "kimi": {
+        "enabled": false
+      },
+      "meta": {
+        "enabled": true
+      },
+      "ollama": {
+        "enabled": true
+      },
+      "openai": {
+        "enabled": false
+      },
+      "openrouter": {
+        "enabled": false
+      }
+    },
+    "pytest": {
+      "collected": 252,
+      "failed": 0,
+      "generated_at": "2026-11-27T00:36:34Z",
+      "passed": 249,
+      "skipped": 2,
+      "xfailed": 1
+    },
+    "python": "3.12.3",
+    "record_source": "dashboards/health-record.json",
+    "suite": {
+      "failed": 6,
+      "failing": [
+        "check_voice.py: piper-tts importable",
+        "check_voice.py: vosk importable",
+        "check_voice.py: sherpa-onnx importable",
+        "check_voice.py: sounddevice importable (mic path)",
+        "check_voice.py: gate test (TEMP) voice send -> PENDING",
+        "check_voice.py: voice_test.py PASS (real synth + transcribe)"
+      ],
+      "generated_at": "2026-11-27T00:36:34Z",
+      "note": "6 pre-existing voice-environment failures — the voice packages (piper-tts, vosk, sherpa-onnx, sounddevice) are not installed on this VM. Same 6 as the F2 batch 2 baseline. Not a regression. Total rose 871 -> 874: the 3 new regression checks for the 2026-11-27 Voice/CEO-tasks render fix (check_command_center.py 48 -> 51). check_phase7.py passed 18/18 in this run (no flaky failure this time).",
+      "passed": 868,
+      "total": 874
+    },
+    "test_files": 12,
+    "voice_models": {
+      "piper": {
+        "onnx_files": 2,
+        "present": true
+      },
+      "sherpa-bn": {
+        "onnx_files": 3,
+        "present": true
+      },
+      "total_size_mb": 371.2,
+      "vosk": {
+        "onnx_files": 0,
+        "present": true
+      }
+    }
+  },
   "pa_list": 39,
   "paying_clients": 0,
   "phase": 11,
@@ -165,13 +310,125 @@
     "real": 0,
     "stub": 0
   },
+  "policy": {
+    "approval_ttl_minutes": 20,
+    "brain": "mock",
+    "email": "PAUSED",
+    "free_only_guard": true,
+    "gate_rule": "No gated action moves without Boss's exact gate word. No auto-approve path exists.",
+    "gate_words": {
+      "go": "advance a build phase",
+      "ok": "plan / finished asset approval",
+      "post it": "publish",
+      "send": "send a message or email",
+      "upload it": "upload a video"
+    },
+    "gated_actions": [
+      "send",
+      "publish",
+      "spend",
+      "delete",
+      "upload"
+    ],
+    "permission_matrix": {
+      "agent_rows": 33,
+      "source": "TALVENOR_PERMISSION_MATRIX.md — generated from 00-CEO-Core/permissions.py by scripts/generate_permission_matrix.py",
+      "text": "# Talvenor Permission Matrix — agent to allowed tools\n\n**Generated** from the enforced table in `00-CEO-Core/permissions.py` by `scripts/generate_permission_matrix.py` — do not edit by hand; edit the table and re-run the generator.\n\nEnforced in `tool_calling.call_tool()`: a call that names an agent is denied with status `denied-permission` when the agent may not use the tool. A call with NO identified agent follows the legacy dispatcher path (the MCP server, engine wrappers, and older check scripts call without an agent).\n\nLegend: `✓` = allowed. `✓*` = gate-request only — the agent may only REQUEST the gated tool via the ApprovalGateway (trust_check + gateway); it never executes. `—` = not allowed. An agent not listed here has **NO tools**.\n\nSource of the assignments: `00-CEO-Core/agent-tool-assignments-DRAFT.md` (2026-11-21). The table governs only the 9 core tools in `tools.json`; engine wrappers' own tools (`send_email` / `publish_post` / `spend`) are governed by their own registries and gates.\n\n## Main CEO Bot\n\n| Agent | `booking_reply` | `draft_caption` | `draft_email` | `draft_script` | `gmail_send` | `kit_outline_read` | `n8n_trigger` | `research_notes` | `status_read` |\n|---|---|---|---|---|---|---|---|---|---|---|\n| `main_ceo_bot` | — | — | — | — | — | — | — | — | ✓ |\n\n## Chiefs of Staff\n\n| Agent | `booking_reply` | `draft_caption` | `draft_email` | `draft_script` | `gmail_send` | `kit_outline_read` | `n8n_trigger` | `research_notes` | `status_read` |\n|---|---|---|---|---|---|---|---|---|---|---|\n| `chief_of_staff_agency` | — | — | — | — | ✓* | — | ✓* | — | ✓ |\n\n## Department managers\n\n| Agent | `booking_reply` | `draft_caption` | `draft_email` | `draft_script` | `gmail_send` | `kit_outline_read` | `n8n_trigger` | `research_notes` | `status_read` |\n|---|---|---|---|---|---|---|---|---|---|---|\n| `dept_sales` | — | — | — | — | — | — | — | — | ✓ |\n| `dept_marketing` | — | — | — | — | — | — | — | — | ✓ |\n| `dept_engineering` | — | — | — | — | — | — | — | — | ✓ |\n| `dept_operations` | — | — | — | — | — | — | — | — | ✓ |\n| `dept_strategy` | — | — | — | — | — | — | — | — | ✓ |\n| `dept_finance` | — | — | — | — | — | — | — | — | ✓ |\n| `dept_quality` | — | — | — | — | — | — | — | — | ✓ |\n| `dept_innovation` | — | — | — | — | — | ✓ | — | — | ✓ |\n\n## Workers — draft_email\n\n| Agent | `booking_reply` | `draft_caption` | `draft_email` | `draft_script` | `gmail_send` | `kit_outline_read` | `n8n_trigger` | `research_notes` | `status_read` |\n|---|---|---|---|---|---|---|---|---|---|---|\n| `OutreachDrafter` | — | — | ✓ | — | — | — | — | — | — |\n| `FollowUpAgent` | — | — | ✓ | — | — | — | — | — | — |\n\n## Workers — research_notes\n\n| Agent | `booking_reply` | `draft_caption` | `draft_email` | `draft_script` | `gmail_send` | `kit_outline_read` | `n8n_trigger` | `research_notes` | `status_read` |\n|---|---|---|---|---|---|---|---|---|---|---|\n| `ProspectResearcher` | — | — | — | — | — | — | — | ✓ | — |\n| `BusinessVerificationAgent` | — | — | — | — | — | — | — | ✓ | — |\n| `LeadScoringAgent` | — | — | — | — | — | — | — | ✓ | — |\n| `SalesIntelligenceAgent` | — | — | — | — | — | — | — | ✓ | — |\n| `GoogleMapsProspectFinder` | — | — | — | — | — | — | — | ✓ | — |\n| `CompetitorResearchAgent` | — | — | — | — | — | — | — | ✓ | — |\n| `IndustryResearchAgent` | — | — | — | — | — | — | — | ✓ | — |\n| `PricingResearchAgent` | — | — | — | — | — | — | — | ✓ | — |\n| `NicheSelectionAgent` | — | — | — | — | — | — | — | ✓ | — |\n| `OfferDevelopmentAgent` | — | — | — | — | — | — | — | ✓ | — |\n| `MarketOpportunityAgent` | — | — | — | — | — | — | — | ✓ | — |\n| `BusinessIntelligenceAgent` | — | — | — | — | — | — | — | ✓ | — |\n\n## Workers — draft_caption\n\n| Agent | `booking_reply` | `draft_caption` | `draft_email` | `draft_script` | `gmail_send` | `kit_outline_read` | `n8n_trigger` | `research_notes` | `status_read` |\n|---|---|---|---|---|---|---|---|---|---|---|\n| `CaptionWriter` | — | ✓ | — | — | — | — | — | — | — |\n| `SocialMediaAgent` | — | ✓ | — | — | — | — | — | — | — |\n\n## Workers — draft_script\n\n| Agent | `booking_reply` | `draft_caption` | `draft_email` | `draft_script` | `gmail_send` | `kit_outline_read` | `n8n_trigger` | `research_notes` | `status_read` |\n|---|---|---|---|---|---|---|---|---|---|---|\n| `VideoProducer` | — | — | — | ✓ | — | — | — | — | — |\n\n## Workers — status_read\n\n| Agent | `booking_reply` | `draft_caption` | `draft_email` | `draft_script` | `gmail_send` | `kit_outline_read` | `n8n_trigger` | `research_notes` | `status_read` |\n|---|---|---|---|---|---|---|---|---|---|---|\n| `ReportCompiler` | — | — | — | — | — | — | — | — | ✓ |\n| `SchedulerAssistant` | — | — | — | — | — | — | — | — | ✓ |\n| `ClientReportingAgent` | — | — | — | — | — | — | — | — | ✓ |\n| `AnalyticsAgent` | — | — | — | — | — | — | — | — | ✓ |\n| `RevenueTrackingAgent` | — | — | — | — | — | — | — | — | ✓ |\n\n## Workers — booking_reply\n\n| Agent | `booking_reply` | `draft_caption` | `draft_email` | `draft_script` | `gmail_send` | `kit_outline_read` | `n8n_trigger` | `research_notes` | `status_read` |\n|---|---|---|---|---|---|---|---|---|---|---|\n| `ReplyHandler` | ✓ | — | — | — | — | — | — | — | — |\n\n## Unlisted agents\n\nAny agent not in the table above — including any new worker, manager, or chief added later — has **NO tools**: every core-tool call from it is denied. To grant a tool, add the agent to `AGENT_TOOLS` in `permissions.py` and regenerate this matrix.\n",
+      "tools": [
+        "booking_reply",
+        "draft_caption",
+        "draft_email",
+        "draft_script",
+        "gmail_send",
+        "kit_outline_read",
+        "n8n_trigger",
+        "research_notes",
+        "status_read"
+      ]
+    },
+    "production_brain": {
+      "mode": "mock",
+      "unlocked": false
+    },
+    "spend_cap_usd": 0
+  },
+  "reports": {
+    "files": [
+      {
+        "age_days": 2,
+        "format": "json",
+        "generated_at": "2026-11-24T20:31:02.075891+00:00",
+        "kind": "daily",
+        "name": "daily-2026-11-24.json",
+        "path": "reports/ceo/daily-2026-11-24.json",
+        "size_bytes": 5870
+      },
+      {
+        "age_days": 2,
+        "format": "md",
+        "generated_at": "2026-11-24T20:31:02.075891+00:00",
+        "kind": "daily",
+        "name": "daily-2026-11-24.md",
+        "path": "reports/ceo/daily-2026-11-24.md",
+        "size_bytes": 3787
+      },
+      {
+        "age_days": 2,
+        "format": "json",
+        "generated_at": "2026-11-24T20:31:02.235535+00:00",
+        "kind": "monthly",
+        "name": "monthly-2026-11-24.json",
+        "path": "reports/ceo/monthly-2026-11-24.json",
+        "size_bytes": 5912
+      },
+      {
+        "age_days": 2,
+        "format": "md",
+        "generated_at": "2026-11-24T20:31:02.235535+00:00",
+        "kind": "monthly",
+        "name": "monthly-2026-11-24.md",
+        "path": "reports/ceo/monthly-2026-11-24.md",
+        "size_bytes": 3828
+      },
+      {
+        "age_days": 2,
+        "format": "json",
+        "generated_at": "2026-11-24T20:57:25.435880+00:00",
+        "kind": "weekly",
+        "name": "weekly-2026-11-24.json",
+        "path": "reports/ceo/weekly-2026-11-24.json",
+        "size_bytes": 5871
+      },
+      {
+        "age_days": 2,
+        "format": "md",
+        "generated_at": "2026-11-24T20:57:25.435880+00:00",
+        "kind": "weekly",
+        "name": "weekly-2026-11-24.md",
+        "path": "reports/ceo/weekly-2026-11-24.md",
+        "size_bytes": 3788
+      }
+    ],
+    "latest": {
+      "age_days": 2,
+      "format": "json",
+      "generated_at": "2026-11-24T20:57:25.435880+00:00",
+      "kind": "weekly",
+      "name": "weekly-2026-11-24.json",
+      "path": "reports/ceo/weekly-2026-11-24.json",
+      "size_bytes": 5871
+    },
+    "leads": "none",
+    "performance": "none",
+    "total": 6
+  },
   "roster": {
     "coded": 16,
     "draft": 53,
     "entries": [
       {
         "department": "01 Sales & Growth",
-        "last_skill_load": "2026-11-26T13:11:03.393280+00:00",
+        "last_skill_load": "2026-11-27T00:36:13.173171+00:00",
         "role": "Lead Research Agent",
         "skill_file": "01-Agency-Department/engine/skills/prospect-researcher.md",
         "status": "EXISTING",
@@ -189,7 +446,7 @@
       },
       {
         "department": "01 Sales & Growth",
-        "last_skill_load": "2026-11-26T13:11:01.378071+00:00",
+        "last_skill_load": "2026-11-27T00:36:10.866852+00:00",
         "role": "Business Verification Agent",
         "skill_file": "01-Agency-Department/departments/01-sales-growth/skills/business-verification-agent.md",
         "status": "EXISTING",
@@ -243,7 +500,7 @@
       },
       {
         "department": "01 Sales & Growth",
-        "last_skill_load": "2026-11-26T13:11:03.890072+00:00",
+        "last_skill_load": "2026-11-27T00:36:13.683245+00:00",
         "role": "ReplyHandler",
         "skill_file": "01-Agency-Department/engine/skills/reply-triager.md",
         "status": "EXISTING",
@@ -261,7 +518,7 @@
       },
       {
         "department": "01 Sales & Growth",
-        "last_skill_load": "2026-11-26T13:11:03.024388+00:00",
+        "last_skill_load": "2026-11-27T00:36:12.751439+00:00",
         "role": "ObjectionSimulator",
         "skill_file": "01-Agency-Department/engine/skills/objection-simulator.md",
         "status": "EXISTING",
@@ -270,7 +527,7 @@
       },
       {
         "department": "01 Sales & Growth",
-        "last_skill_load": "2026-11-26T13:09:51.850016+00:00",
+        "last_skill_load": "2026-11-27T00:34:55.023934+00:00",
         "role": "SalesCloser",
         "skill_file": "01-Agency-Department/sections/sell/skills/sales-closer.md",
         "status": "EXISTING",
@@ -297,7 +554,7 @@
       },
       {
         "department": "02 Marketing",
-        "last_skill_load": "2026-11-26T13:11:02.663044+00:00",
+        "last_skill_load": "2026-11-27T00:36:12.351456+00:00",
         "role": "Content Strategy Agent",
         "skill_file": "01-Agency-Department/engine/skills/content-planner.md",
         "status": "EXISTING",
@@ -315,7 +572,7 @@
       },
       {
         "department": "02 Marketing",
-        "last_skill_load": "2026-11-26T13:08:39.676404+00:00",
+        "last_skill_load": "2026-11-27T00:33:37.496657+00:00",
         "role": "Ad Campaign Agent",
         "skill_file": "01-Agency-Department/departments/02-marketing/skills/ad-campaign-agent.md",
         "status": "EXISTING",
@@ -324,7 +581,7 @@
       },
       {
         "department": "02 Marketing",
-        "last_skill_load": "2026-11-26T13:11:02.538583+00:00",
+        "last_skill_load": "2026-11-27T00:36:12.220356+00:00",
         "role": "Copywriting Agent",
         "skill_file": "01-Agency-Department/engine/skills/caption-writer.md",
         "status": "EXISTING",
@@ -360,7 +617,7 @@
       },
       {
         "department": "02 Marketing",
-        "last_skill_load": "2026-11-26T13:11:03.513252+00:00",
+        "last_skill_load": "2026-11-27T00:36:13.298417+00:00",
         "role": "PublishPrep",
         "skill_file": "01-Agency-Department/engine/skills/publish-prep.md",
         "status": "EXISTING",
@@ -378,7 +635,7 @@
       },
       {
         "department": "03 AI Engineering",
-        "last_skill_load": "2026-11-26T13:11:03.642418+00:00",
+        "last_skill_load": "2026-11-27T00:36:13.429506+00:00",
         "role": "Voice Agent Builder",
         "skill_file": "01-Agency-Department/engine/skills/receptionist-builder.md",
         "status": "EXISTING",
@@ -387,7 +644,7 @@
       },
       {
         "department": "03 AI Engineering",
-        "last_skill_load": "2026-11-26T13:09:51.083971+00:00",
+        "last_skill_load": "2026-11-27T00:34:54.280253+00:00",
         "role": "Conversation Designer",
         "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/conversation-designer.md",
         "status": "EXISTING",
@@ -423,7 +680,7 @@
       },
       {
         "department": "03 AI Engineering",
-        "last_skill_load": "2026-11-26T13:08:39.890216+00:00",
+        "last_skill_load": "2026-11-27T00:33:37.743189+00:00",
         "role": "Calendar Integration Agent",
         "skill_file": "01-Agency-Department/departments/03-ai-engineering/skills/calendar-integration-agent.md",
         "status": "EXISTING",
@@ -468,7 +725,7 @@
       },
       {
         "department": "04 Client Operations",
-        "last_skill_load": "2026-11-26T13:10:26.782717+00:00",
+        "last_skill_load": "2026-11-27T00:35:32.773114+00:00",
         "role": "Business Requirement Analyst",
         "skill_file": "01-Agency-Department/sections/receive/skills/client-intake-receiver.md",
         "status": "EXISTING",
@@ -486,7 +743,7 @@
       },
       {
         "department": "04 Client Operations",
-        "last_skill_load": "2026-11-26T13:08:40.102932+00:00",
+        "last_skill_load": "2026-11-27T00:33:37.976127+00:00",
         "role": "Call Monitoring Agent",
         "skill_file": "01-Agency-Department/departments/04-client-operations/skills/call_monitoring.md",
         "status": "EXISTING",
@@ -531,7 +788,7 @@
       },
       {
         "department": "04 Client Operations",
-        "last_skill_load": "2026-11-26T13:11:02.783568+00:00",
+        "last_skill_load": "2026-11-27T00:36:12.486449+00:00",
         "role": "InboxTriager",
         "skill_file": "01-Agency-Department/engine/skills/inbox-triager.md",
         "status": "EXISTING",
@@ -540,7 +797,7 @@
       },
       {
         "department": "05 Research & Strategy",
-        "last_skill_load": "2026-11-26T13:09:51.335068+00:00",
+        "last_skill_load": "2026-11-27T00:34:54.523678+00:00",
         "role": "Competitor Research Agent",
         "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/competitor-research-agent.md",
         "status": "EXISTING",
@@ -594,7 +851,7 @@
       },
       {
         "department": "05 Research & Strategy",
-        "last_skill_load": "2026-11-26T13:08:40.313499+00:00",
+        "last_skill_load": "2026-11-27T00:33:38.220323+00:00",
         "role": "Business Intelligence Agent",
         "skill_file": "01-Agency-Department/departments/05-research-strategy/skills/business-intelligence-agent.md",
         "status": "EXISTING",
@@ -621,7 +878,7 @@
       },
       {
         "department": "06 Finance & Admin",
-        "last_skill_load": "2026-11-26T13:11:04.129449+00:00",
+        "last_skill_load": "2026-11-27T00:36:13.935678+00:00",
         "role": "Invoice Management Agent",
         "skill_file": "01-Agency-Department/sections/ops/skills/billing-invoice-agent.md",
         "status": "EXISTING",
@@ -639,7 +896,7 @@
       },
       {
         "department": "06 Finance & Admin",
-        "last_skill_load": "2026-11-26T13:11:04.009626+00:00",
+        "last_skill_load": "2026-11-27T00:36:13.809648+00:00",
         "role": "Financial Reporting Agent",
         "skill_file": "01-Agency-Department/engine/skills/report-compiler.md",
         "status": "EXISTING",
@@ -657,7 +914,7 @@
       },
       {
         "department": "06 Finance & Admin",
-        "last_skill_load": "2026-11-26T13:08:40.530567+00:00",
+        "last_skill_load": "2026-11-27T00:33:38.438125+00:00",
         "role": "Compliance Calendar Agent",
         "skill_file": "01-Agency-Department/departments/06-finance-admin/skills/compliance-calendar-agent.md",
         "status": "EXISTING",
@@ -711,7 +968,7 @@
       },
       {
         "department": "07 Quality & Security",
-        "last_skill_load": "2026-11-26T13:08:40.740643+00:00",
+        "last_skill_load": "2026-11-27T00:33:38.648342+00:00",
         "role": "Access Control Agent",
         "skill_file": "01-Agency-Department/departments/07-quality-security/skills/access-control-agent.md",
         "status": "EXISTING",
@@ -720,7 +977,7 @@
       },
       {
         "department": "07 Quality & Security",
-        "last_skill_load": "2026-11-26T13:09:51.588081+00:00",
+        "last_skill_load": "2026-11-27T00:34:54.780592+00:00",
         "role": "Backup & Recovery Agent",
         "skill_file": "01-Agency-Department/departments/07-quality-security/skills/backup-recovery-agent.md",
         "status": "EXISTING",
@@ -738,7 +995,7 @@
       },
       {
         "department": "08 Product & Innovation",
-        "last_skill_load": "2026-11-26T13:09:51.713408+00:00",
+        "last_skill_load": "2026-11-27T00:34:54.902643+00:00",
         "role": "New AI Product Research Agent",
         "skill_file": "01-Agency-Department/departments/08-product-innovation/skills/new-ai-product-research-agent.md",
         "status": "EXISTING",
@@ -756,7 +1013,7 @@
       },
       {
         "department": "08 Product & Innovation",
-        "last_skill_load": "2026-11-26T13:08:40.951090+00:00",
+        "last_skill_load": "2026-11-27T00:33:38.869828+00:00",
         "role": "Automation R&D Agent",
         "skill_file": "01-Agency-Department/departments/08-product-innovation/skills/automation-rd-agent.md",
         "status": "EXISTING",
@@ -804,6 +1061,46 @@
     "failed-legacy": 0,
     "other": 0,
     "queued": 0,
+    "total": 1
+  },
+  "task_queue": {
+    "by_status": {
+      "blocked": 0,
+      "cancelled": 0,
+      "dead_letter": 0,
+      "done": 1,
+      "duplicate": 0,
+      "failed-legacy": 0,
+      "other": 0,
+      "queued": 0,
+      "total": 1
+    },
+    "drain": {
+      "command": "python scripts/run_office.py --drain-queue --max 2",
+      "method": "manual CLI",
+      "runner": "none attached",
+      "source": "CLAUDE.md + store/schedules.json note"
+    },
+    "queue_watch": {
+      "interval_minutes": 10,
+      "last_run_at": null,
+      "name": "taskboard-queue-watch",
+      "note": "Phase 3 built 2026-11-21; no runner attached yet — bridge adoption needs Boss/parent word, not automatic.",
+      "runs": 0,
+      "status": "paused"
+    },
+    "records": [
+      {
+        "business": "agency",
+        "completed_at": "2026-11-20T11:14:14.032705+00:00",
+        "id": "6e3b269f4533",
+        "queued_at": "2026-11-20T11:05:02.606945+00:00",
+        "result": "VERIFIED LIVE 2026-11-20 17:14 Dhaka (11:14 UTC): the Talvenor Demo booking page at https://calendar.app.google/WLoxBfnLGTdjK3LB8 loads successfully with no error and no sign-in required. Page title 'Talvenor Demo', host MsredC, 15-minute appointments, heading 'Select an appointment time'. Available slots visible: Fri Nov 20, 2026 3:15pm-5:45pm; Sat Nov 21 from 2:00am; Sun Nov 22-Thu Nov 26 2:00pm-5:45pm each day (times shown in GMT). Calendar shows available dates Nov 20-30 and Dec 1-12. No booking was made. Link is live and safe to keep using in outreach and content.",
+        "status": "done",
+        "title": "verify the Talvenor booking link https://calendar.app.google/WLoxBfnLGTdjK3LB8 is live",
+        "type": "research"
+      }
+    ],
     "total": 1
   },
   "tasks_count": 1,
