@@ -1666,3 +1666,72 @@ BLOCKED — untouched.
   12, 13, 14, 16) and F7/F8 (8, 9) — each needs its own Founder
   ask. Taskboard auto-start in run_local.bat and CEO report
   regeneration stay UNDECIDED from batch 1.
+
+## FOUNDER OS F2 batch 3 — Founder Command Center, third live modules (2026-11-27)
+
+- Founder approved batch 3 ("Batch 3 shuru koro", 2026-11-27
+  10:52 Dhaka). Batch 3 builds Command Center modules 2, 3, 4, 12,
+  13, 14, 16 only — 17 live modules total; only 8 and 9 stay greyed
+  for F7/F8. Nothing pushed to GitHub, no ZIP.
+  2. Unified AI Chat — SHELL, not a live chat: connection state
+      only (brain mock, not connected, send disabled with the
+      reason, no transcript). No fake replies, no typing
+      simulation, no invented conversation.
+  3. Voice Command — SHELL, the mic is off: the real voice loop's
+      state (file present, engines, gate phrases from the loop
+      itself, Bengali prompts regressed), live-in-browser no. No
+      fake transcription.
+  4. Personality Switcher — DISPLAY ONLY: 3 real profiles (Mira,
+      Main CEO Bot, Chief of Staff Agency), each citing its repo
+      source; switching changes the displayed persona in module 2
+      only — the underlying brain does not switch.
+  12. Live Execution Monitor — records, not a live stream: task
+      totals, skill-execution log (103,992 lines, 0 errors, first
+      2026-11-24, last 2026-11-27), 3 dev-brain calls, bridge state
+      unknown, stream none (no event bus until F4).
+  13. Knowledge & Memory — live structure, content withheld by
+      design: 3 entries, 13 boxes, entry metadata only; the 3
+      verbatim quotes are counted, never shown. store/memory.json
+      read-only, never modified.
+  14. Library — live list: 45 documents that really exist (docs 1,
+      top-level 10, 00-CEO-Core 12, unified-business-os 22) with
+      path, size, and date; CEO reports counted (6, listed in
+      module 15); decks live outside the repo and are not listed.
+  16. Integration Center — live states, honestly labelled: the ONLY
+      "connected" service is the n8n Cloud MCP (verified
+      2026-11-25: 75 tools, 0 workflows, 41 read-only, 34 write
+      blocked, REST blocked on free trial); both n8n workflows NOT
+      LIVE; Meta unreachable from this VM; Vapi unknown.
+- **Data contract (additive only):** seven new status.json keys
+  published by `scripts/sync_status.py` — `chat`, `voice_command`,
+  `personas`, `execution`, `memory`, `library`, `integrations`.
+  New source file `00-CEO-Core/personas.json` (3 profiles). The
+  page still reads only status.json + ceo-report.json (plus the
+  taskboard API when it runs); no card reads a store file directly.
+  The literal "[object Object]" appears in no data file.
+- **Fixes found during verification (all in this batch):** the
+  Phase 6 scope guard false-positived on a library mtime whose
+  microseconds contained the guarded digit sequence — library
+  mtimes are now second-precision (and the fix comment names no
+  digit sequence); the execution check is now snapshot-consistent
+  (the skill log grows continuously, so an exact-tail recount
+  races — published recent records must be a contiguous run of
+  real log records); the render harness assertions are now
+  data-driven instead of hardcoding skill names that leave the
+  recent-8 window.
+- **Checks:** `scripts/check_command_center.py` 61/61 PASS;
+  `scripts/render_check_command_center.js` 28/28 PASS (live page
+  and preview); `tests/test_command_center.py` 28/28 passed. Full
+  suite 878/884 (6 failures, the same pre-existing
+  voice-environment gaps as the batch 2 baseline — see the F2
+  batch 3 completion report); full pytest 258 passed / 2 skipped /
+  1 xfailed, 0 failed. Live render verified by serving (HTTP 200s
+  on 8765 + 8766, CORS, node --check clean). `store/leads.json`,
+  `store/memory.json`, `voice/loop.py`, `dashboard-3d.html`, and
+  `run_local.bat` untouched. Nothing sends, publishes, spends, or
+  deploys.
+- **PENDING (not done in batch 3):** F7/F8 modules (8, 9) — each
+  needs its own Founder ask. Push to GitHub and a new ZIP stay
+  UNDECIDED (STOP after batch 3). Taskboard auto-start in
+  run_local.bat and CEO report regeneration stay UNDECIDED from
+  batch 1. The Bengali voice decision stays pending from F1.
